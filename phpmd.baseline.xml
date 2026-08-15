@@ -170,12 +170,6 @@
   <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php" method="validateResources"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php" method="validateTime"/>
   <violation rule="PHPMD\Rule\Design\ExitExpression" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php" method="addShortcut"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php" method="editShortcut"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php" method="deleteShortcut"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Http/Controllers/Game/FleetshortcutsController.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
   <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="runAction"/>
