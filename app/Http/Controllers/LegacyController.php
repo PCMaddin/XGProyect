@@ -40,6 +40,8 @@ class LegacyController extends BaseController
         'supplies' => Game\SuppliesController::class,
         'technologydetails' => Game\TechnologydetailsController::class,
         'technologytree' => Game\TechnologytreeController::class,
+        'traderOverview' => Game\TraderOverviewController::class,
+        'traderResources' => Game\TraderResourcesController::class,
     ];
 
     public function __invoke(Request $request): BaseResponse
