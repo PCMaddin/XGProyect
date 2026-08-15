@@ -31,6 +31,7 @@ class LegacyController extends BaseController
         'playerprofile' => Game\PlayerprofileController::class,
         'preferences' => Game\PreferencesController::class,
         'research' => Game\ResearchController::class,
+        'search' => Game\SearchController::class,
         'supplies' => Game\SuppliesController::class,
         'technologydetails' => Game\TechnologydetailsController::class,
         'technologytree' => Game\TechnologytreeController::class,
