@@ -1999,42 +1999,6 @@ parameters:
 			path: legacy/app/Http/Controllers/Game/PlanetlayerController.php
 
 		-
-			message: '#^Method Xgp\\App\\Http\\Controllers\\Game\\PremiumController\:\:buildOfficiersList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
-			message: '#^Method Xgp\\App\\Http\\Controllers\\Game\\PremiumController\:\:setOfficier\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
-			message: '#^Parameter \#1 \$objectId of method Xgp\\App\\Core\\Objects\:\:getObjects\(\) expects int\|null, int\<601, 605\>\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
-			message: '#^Parameter \#1 \$officier of method Xgp\\App\\Http\\Controllers\\Game\\PremiumController\:\:getOfficierPrice\(\) expects int, int\<601, 605\>\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
-			message: '#^Parameter \#1 \$officier of method Xgp\\App\\Http\\Controllers\\Game\\PremiumController\:\:isOfficierAccesible\(\) expects int, int\<601, 605\>\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
-			message: '#^Property Xgp\\App\\Http\\Controllers\\Game\\PremiumController\:\:\$user type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PremiumController.php
-
-		-
 			message: '#^Binary operation "/" between mixed and 10 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1

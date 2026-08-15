@@ -31,6 +31,7 @@ class LegacyController extends BaseController
         'notices' => Game\NoticesController::class,
         'playerprofile' => Game\PlayerprofileController::class,
         'preferences' => Game\PreferencesController::class,
+        'premium' => Game\PremiumController::class,
         'research' => Game\ResearchController::class,
         'search' => Game\SearchController::class,
         'shortcuts' => Game\FleetshortcutsController::class,
