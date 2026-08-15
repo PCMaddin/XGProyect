@@ -22,6 +22,7 @@ class LegacyController extends BaseController
         'banned' => Game\BannedController::class,
         'changelog' => Game\ChangelogController::class,
         'changenick' => Game\ChangenickController::class,
+        'chat' => Game\ChatController::class,
         'combatreport' => Game\CombatreportController::class,
         'empire' => Game\EmpireController::class,
         'facilities' => Game\FacilitiesController::class,
