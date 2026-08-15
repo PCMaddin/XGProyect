@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Legacy\App\Http\Controllers\Game;
+namespace Tests\Unit\App\Http\Controllers\Game;
 
+use App\Http\Controllers\Game\HighscoreController;
 use App\Services\FormatService;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
-use Xgp\App\Http\Controllers\Game\HighscoreController;
+use Tests\TestCase;
 
 #[CoversClass(HighscoreController::class)]
 class HighscoreControllerTest extends TestCase
@@ -46,12 +46,24 @@ class HighscoreControllerTest extends TestCase
         ], $this->rankingType($controller, 4));
     }
 
+    public function testRankingTypeFallsBackToTotalForUnknownCategory(): void
+    {
+        $controller = new HighscoreController(new FormatService());
+
+        $this->assertSame([
+            'order' => 'total_points',
+            'points' => 'total_points',
+            'rank' => 'total_rank',
+            'oldrank' => 'total_old_rank',
+        ], $this->rankingType($controller, 99));
+    }
+
     /**
      * @return array<string, string>
      */
     private function rankingType(HighscoreController $controller, int $type): array
     {
-        $method = new ReflectionMethod(HighscoreController::class, 'ranking_type');
+        $method = new ReflectionMethod(HighscoreController::class, 'rankingType');
 
         /** @var array<string, string> $result */
         $result = $method->invoke($controller, $type);

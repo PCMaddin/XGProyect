@@ -25,6 +25,7 @@ class LegacyController extends BaseController
         'combatreport' => Game\CombatreportController::class,
         'empire' => Game\EmpireController::class,
         'facilities' => Game\FacilitiesController::class,
+        'highscore' => Game\HighscoreController::class,
         'logout' => Game\LogoutController::class,
         'notices' => Game\NoticesController::class,
         'playerprofile' => Game\PlayerprofileController::class,
