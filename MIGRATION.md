@@ -9,9 +9,12 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 15 migriert | 25 verbleibend |
+| Game-Controller | 24 migriert | 14 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.337 PHPStan- + 682 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.236 PHPStan- + 625 PHPMD-Einträge in Baselines unterdrückt |
+
+> **Stand nach Welle 1:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden
+> beim Migrieren von 8 Modulen 101 PHPStan- und 57 PHPMD-Einträge abgebaut.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -34,21 +37,31 @@ Legacy-Layer weiter mit.
 
 ---
 
-## Welle 1 — Blattmodule / Quick-Wins  🟢 niedriges Risiko
+## Welle 1 — Blattmodule / Quick-Wins  ✅ ABGESCHLOSSEN
 
-Selbständige Module mit wenig Abhängigkeiten. Ziel: Blaupause & Momentum. Der
-Trader-Bug (siehe unten) wird hier miterledigt.
+Selbständige Module mit wenig Abhängigkeiten. Ziel: Blaupause & Momentum.
 
-| Modul | Zeilen | Kernabhängigkeit | Notiz |
-|---|---|---|---|
-| Trader + TraderOverview + TraderResources + TraderLayer | 27–263 | `Formulas` | **Fixt den Audit-Bug**; großteils toter Code → viel entfällt |
-| Defenses | 29 | eigene Lib | winzig, idealer Start |
-| Chat | 119 | — | isoliert |
-| Fleetshortcuts | 255 | — | isoliert |
-| Search | 270 | `Formulas` | Galaxie-Suche, read-only |
-| Highscore | 283 | `StatisticsLibrary` | read-only |
-| Premium | 164 | `Premium`-Lib | teils in `app/Models/Premium` vorhanden |
-| Planetlayer / Resourcesettings | 184 / 378 | `Formulas`, `DevelopmentsLib` | Planeten-Einstellungen |
+| Modul | Status | Notiz |
+|---|---|---|
+| Highscore | ✅ migriert | read-only Blaupause |
+| Search | ✅ migriert | Suchtyp-Whitelist gehärtet |
+| Chat | ✅ migriert | Notice-Bug + null-TypeError behoben |
+| Fleetshortcuts | ✅ migriert | JSON-Injection, `mode=a`-Crash, getById-TypeError behoben |
+| Premium | ✅ migriert | DM-Kauf parametrisiert |
+| Planetlayer | ✅ migriert | Flotten-Lookup + Zerstör-Query parametrisiert |
+| Resourcesettings | ✅ migriert | Produktions-Mathematik erhalten, POST parametrisiert |
+| Trader + TraderOverview + TraderResources + TraderLayer | ✅ migriert/entfernt | 2 Live-Seiten migriert (ResourceMarket-Crash gefixt); `trader` + `traderLayer` als toter Code entfernt (Audit-Bug) |
+| Defenses | ⏭️ verschoben nach Welle 4 | `extends ShipyardController` → an Shipyard gekoppelt, kein Blattmodul |
+
+**Blaupause (pro Modul, bewährt):** neuer typisierter Controller (`Request` statt
+`$_POST`, `view()` statt `Template`, gebundene SQL-Parameter) → Eintrag in
+`LegacyController::PROMOTED_PAGES` → Legacy-Datei löschen → Unit-Test nach
+`tests/Unit/App/...` → zugehörige PHPStan/PHPMD-Baseline-Einträge entfernen.
+
+**Wichtige Umgebungs-Erkenntnisse:** Tabellenkonstanten (`USERS`, `PLANETS`…) sind im
+promoteten Pfad verfügbar (Laravel lädt `config/legacy/constants.php` bei jedem
+Request); `DPATH` dagegen **nicht** — Bildpfade über `asset()` auflösen. Array-Über-
+setzungen (`planet_type_short`, `officier.officiers`) über `trans()` statt `__()`.
 
 ## Welle 2 — Geteilter Berechnungs-Layer  🟡 Enabler, keine UI
 
