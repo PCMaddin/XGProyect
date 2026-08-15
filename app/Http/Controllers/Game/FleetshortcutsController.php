@@ -220,7 +220,7 @@ class FleetshortcutsController extends BaseController
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<array-key, mixed>  $row
      */
     private function int(array $row, string $key): int
     {
@@ -230,7 +230,7 @@ class FleetshortcutsController extends BaseController
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<array-key, mixed>  $row
      */
     private function str(array $row, string $key): string
     {

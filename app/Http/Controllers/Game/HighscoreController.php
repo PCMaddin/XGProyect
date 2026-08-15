@@ -149,7 +149,7 @@ class HighscoreController extends BaseController
     private function buildAllianceRanking(array $mapping, int $range): array
     {
         $countRow = DB::selectOne($this->prepareSql('SELECT COUNT(`alliance_id`) AS `count` FROM `' . ALLIANCE . '`;'));
-        $maxAllys = $countRow !== null ? $this->toInt((array) $countRow, 'count') : 0;
+        $maxAllys = is_object($countRow) ? $this->toInt(get_object_vars($countRow), 'count') : 0;
 
         $rangeOptions = $this->buildRangeList($maxAllys, $range);
         $header = view('highscore.alliance_header')->render();
@@ -305,7 +305,7 @@ class HighscoreController extends BaseController
     private function fetchRows(string $sql): array
     {
         return array_map(
-            fn (object $row): array => (array) $row,
+            fn (object $row): array => get_object_vars($row),
             DB::select($this->prepareSql($sql))
         );
     }

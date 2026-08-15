@@ -92,7 +92,7 @@ class ChatController extends BaseController
             [$receiverId]
         );
 
-        return $row !== null ? (array) $row : null;
+        return is_object($row) ? get_object_vars($row) : null;
     }
 
     /**
