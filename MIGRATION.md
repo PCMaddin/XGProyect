@@ -9,12 +9,14 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 24 migriert | 14 verbleibend |
+| Game-Controller | 27 migriert | 11 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.236 PHPStan- + 625 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.139 PHPStan- + 568 PHPMD-Einträge in Baselines unterdrückt |
 
-> **Stand nach Welle 1:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden
-> beim Migrieren von 8 Modulen 101 PHPStan- und 57 PHPMD-Einträge abgebaut.
+> **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
+> von 12 Modulen (Welle 1 komplett + Buddies, Messages, Alliance) 198 PHPStan- und
+> 114 PHPMD-Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration
+> lokal mit PHPStan Level 9 und der PHPUnit-Suite verifiziert.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -74,12 +76,12 @@ typisierte Services nach `app/Services/Game/Formulas/` portieren (dort liegen sc
 
 ## Welle 3 — Sozial & Kommunikation  🟡 mittel
 
-| Modul | Zeilen | Notiz |
+| Modul | Status | Notiz |
 |---|---|---|
-| Messages | 529 | `Messenger`-Lib |
-| Buddies | 400 | schon sauber (int-casts/binding) → gute Vorlage |
-| Federation | 428 | ACS, hängt an Fleet-Logik → evtl. nach Welle 4 |
-| Alliance | 1482 | größter Controller — **aufteilen** in mehrere Controller/Services |
+| Buddies | ✅ migriert | Magic-Dispatch entfernt, Null-User-Bug behoben |
+| Messages | ✅ migriert | SQL-Injection in Bulk-Delete behoben |
+| Alliance | ✅ migriert | in 4 Etappen (public → writes → admin → Finale); 4 SQL-Injections + Template-Typo + Transfer-Key behoben |
+| Federation | ⏭️ nach Welle 4 | ACS, hängt an der Fleet-Logik |
 
 ## Welle 4 — Gameplay-Kern  🔴 hohes Risiko, zusammen & mit Tests
 

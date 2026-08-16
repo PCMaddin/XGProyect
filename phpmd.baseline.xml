@@ -81,47 +81,6 @@
   <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Helpers/ArraysHelper.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Helpers/ArraysHelper.php"/>
   <violation rule="PHPMD\Rule\CleanCode\DuplicatedArrayKey" file="legacy/app/Helpers/StringsHelper.php"/>
-  <violation rule="PHPMD\Rule\Design\LongClass" file="legacy/app/Http/Controllers/Game/AllianceController.php"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Http/Controllers/Game/AllianceController.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/AllianceController.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getDefaultSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getDefaultPublicSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getDefaultAwaitingApprovalSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getDefaultIsMemberSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAinfoSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getSearchSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getMakeSection"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Http/Controllers/Game/AllianceController.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getApplySection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getMemberslistSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getCircularSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getExitSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminAllySection"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminAllySection"/>
-  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="legacy/app/Http/Controllers/Game/AllianceController.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminExitSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminMembersSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminNameSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRequestsSection"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRequestsSection"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRequestsSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRightsSection"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRightsSection"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRightsSection"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminRightsSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminTagSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getAdminTransferSection"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildTagBlock"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildNameBlock"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildMembersBlock"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildRankBlock"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildRequestsBlock"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildCircularBlock"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="getUserRank"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildAdminMembersRankBlock"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="returnAllianceMembersSort"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/AllianceController.php" method="buildAdminMembersActionBlock"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Http/Controllers/Game/FederationController.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/FederationController.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Http/Controllers/Game/FederationController.php"/>
