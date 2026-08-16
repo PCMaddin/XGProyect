@@ -1363,30 +1363,6 @@ parameters:
 			path: legacy/app/Http/Controllers/Game/OverviewController.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
-			path: legacy/app/Http/Controllers/Game/PhalanxController.php
-
-		-
-			message: '#^Property Xgp\\App\\Http\\Controllers\\Game\\PhalanxController\:\:\$planet type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PhalanxController.php
-
-		-
-			message: '#^Property Xgp\\App\\Http\\Controllers\\Game\\PhalanxController\:\:\$user type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PhalanxController.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between array\<mixed, mixed\>\|null and false will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: legacy/app/Http/Controllers/Game/PhalanxController.php
-
-		-
 			message: '#^Binary operation "\*" between int and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
