@@ -147,17 +147,6 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/MovementController.php" method="buildToolTipBlock"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/MovementController.php" method="buildShipsBlock"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/MovementController.php" method="execFleetReturn"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/OverviewController.php" method="getCurrentWork"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/OverviewController.php" method="getFleetMovements"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/OverviewController.php" method="getFleetMovements"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Http/Controllers/Game/OverviewController.php" method="getFleetMovements"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Http/Controllers/Game/OverviewController.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Http/Controllers/Game/ShipyardController.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Http/Controllers/Game/ShipyardController.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/ShipyardController.php"/>
