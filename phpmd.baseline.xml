@@ -121,27 +121,6 @@
   <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php" method="validateResources"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php" method="validateTime"/>
   <violation rule="PHPMD\Rule\Design\ExitExpression" file="legacy/app/Http/Controllers/Game/Fleet4Controller.php"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="runAction"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="buildPage"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="buildPage"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\Design\ExitExpression" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Http/Controllers/Game/GalaxyController.php"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="validatePosition"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="validatePosition"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="validatePosition"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendMissiles"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendMissiles"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendMissiles"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendMissiles"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendFleet"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendFleet"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendFleet"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Http/Controllers/Game/GalaxyController.php" method="sendFleet"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Http/Controllers/Game/MovementController.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/MovementController.php" method="buildTitleBlock"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Http/Controllers/Game/MovementController.php" method="buildToolTipBlock"/>

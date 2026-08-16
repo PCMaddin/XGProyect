@@ -9,14 +9,15 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 27 migriert | 11 verbleibend |
+| Game-Controller | 31 migriert | 7 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.139 PHPStan- + 568 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.085 PHPStan- + 521 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
-> von 12 Modulen (Welle 1 komplett + Buddies, Messages, Alliance) 198 PHPStan- und
-> 114 PHPMD-Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration
-> lokal mit PHPStan Level 9 und der PHPUnit-Suite verifiziert.
+> der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
+> Phalanx, Shipyard, Defenses, Galaxy) 252 PHPStan- und 161 PHPMD-Einträge abgebaut.
+> Ab der Verfügbarkeit der Tools ist jede Migration lokal mit PHPStan Level 9 und der
+> PHPUnit-Suite verifiziert.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -53,7 +54,7 @@ Selbständige Module mit wenig Abhängigkeiten. Ziel: Blaupause & Momentum.
 | Planetlayer | ✅ migriert | Flotten-Lookup + Zerstör-Query parametrisiert |
 | Resourcesettings | ✅ migriert | Produktions-Mathematik erhalten, POST parametrisiert |
 | Trader + TraderOverview + TraderResources + TraderLayer | ✅ migriert/entfernt | 2 Live-Seiten migriert (ResourceMarket-Crash gefixt); `trader` + `traderLayer` als toter Code entfernt (Audit-Bug) |
-| Defenses | ⏭️ verschoben nach Welle 4 | `extends ShipyardController` → an Shipyard gekoppelt, kein Blattmodul |
+| Defenses | ✅ migriert | `extends ShipyardController`, zusammen mit Shipyard in Welle 4 portiert |
 
 **Blaupause (pro Modul, bewährt):** neuer typisierter Controller (`Request` statt
 `$_POST`, `view()` statt `Template`, gebundene SQL-Parameter) → Eintrag in
@@ -90,8 +91,8 @@ Nicht einzeln migrierbar.
 
 | Cluster | Module | Zeilen | Engine darunter |
 |---|---|---|---|
-| Übersicht/Werft | Overview (446), Shipyard (562) | 1008 | `UpdatesLibrary` (925), `DevelopmentsLib` |
-| Galaxie/Phalanx | Galaxy (846), Phalanx (230), Movement (303) | 1379 | `GalaxyLib` (721), `FleetsLib` |
+| Übersicht/Werft | Overview ✅, Shipyard ✅ | — | migriert; `UpdatesLibrary` (925) noch legacy |
+| Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement (303) | 303 | Galaxy in 2 Etappen migriert (Anzeige + Flotten-/Raketenversand); Movement offen |
 | Flotten | Fleet1–4 (328/393/581/826) | 2128 | `Missions` (Attack/Spy/Destroy/Expedition), `BattleEngine` |
 
 → Hier steckt die über Jahre erprobte Spiellogik (Timing, Balancing, Kampfrunden).
