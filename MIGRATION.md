@@ -9,15 +9,15 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 32 migriert | 6 verbleibend |
+| Game-Controller | 33 migriert | 5 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.073 PHPStan- + 516 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.055 PHPStan- + 510 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
 > der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
-> Phalanx, Shipyard, Defenses, Galaxy, Movement) 264 PHPStan- und 166 PHPMD-Einträge
-> abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit PHPStan Level 9
-> und der PHPUnit-Suite verifiziert.
+> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1) 282 PHPStan- und 172 PHPMD-
+> Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit
+> PHPStan Level 9 und der PHPUnit-Suite verifiziert.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -84,20 +84,44 @@ typisierte Services nach `app/Services/Game/Formulas/` portieren (dort liegen sc
 | Alliance | ✅ migriert | in 4 Etappen (public → writes → admin → Finale); 4 SQL-Injections + Template-Typo + Transfer-Key behoben |
 | Federation | ⏭️ nach Welle 4 | ACS, hängt an der Fleet-Logik |
 
-## Welle 4 — Gameplay-Kern  🔴 hohes Risiko, zusammen & mit Tests
+## Welle 4 — Gameplay-Kern
 
-Der interdependente Kern: Flotten senden → ankommen → kämpfen/spionieren/kolonisieren.
-Nicht einzeln migrierbar.
+### Analyse-Befund: Controller vs. Engine sind entkoppelt
 
-| Cluster | Module | Zeilen | Engine darunter |
-|---|---|---|---|
-| Übersicht/Werft | Overview ✅, Shipyard ✅ | — | migriert; `UpdatesLibrary` (925) noch legacy |
-| Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | — | Galaxy in 2 Etappen migriert; Movement (Flottenbewegungen + Rückruf) portiert, ACS-Release parametrisiert |
-| Flotten | Fleet1–4 (328/393/581/826) | 2128 | `Missions` (Attack/Spy/Destroy/Expedition), `BattleEngine` |
+Die ursprüngliche Annahme *„erst Engine, dann Controller"* stimmt für die
+restlichen Controller **nicht**. Die Fleet-Controller importieren nur den
+Missions-**Enumerator** (Konstanten), nicht die Ausführungs-Engine:
 
-→ Hier steckt die über Jahre erprobte Spiellogik (Timing, Balancing, Kampfrunden).
-**Erst Engine (Missions + BattleEngine) als Service, dann Controller**, mit
-Charakterisierungs-Tests vorher.
+- **Fleet1–4** sind der **Sende-Assistent** (Schiffe wählen → Ziel → Mission →
+  Commit). Fleet4 macht nur `INSERT INTO FLEETS` + `UPDATE PLANETS/SHIPS` —
+  dasselbe Muster wie das bereits migrierte Galaxy-`sendFleet`. **Kein**
+  `BattleEngine`/`Attack`/`Spy`-Aufruf.
+- **Federation** ist reine ACS-Verwaltung (Mitglieder, `ACS_MEMBERS`).
+- Die **Kampf-/Missions-Engine** (`Missions` ~4.451 Z. + `BattleEngine` ~952 Z.
+  + `MissionControlLib`) wird ausschließlich vom **Tick** ausgelöst
+  (`UpdatesLibrary::updateFleets` → `arrivingFleets`), nicht von den Controllern.
+
+→ Die 5 Rest-Controller sind als **Leaf-Migrationen** portierbar, ohne die
+Engine anzufassen. Die Engine bleibt als Backend-Service bestehen und ist eine
+**eigene, spätere** Refactoring-Welle ohne Zeitdruck.
+
+### ⚙️ Tick-Lücke geschlossen
+
+Promoted Seiten umgehen den Legacy-Bootstrap (`Common`) und liefen daher nie
+durch `Common::setUpdates()` → den `UpdatesLibrary`-Tick (Flottenankunft,
+Statistik, Cleanup). `LegacyController` ruft den Tick jetzt vor jeder
+promoted-Dispatch selbst auf (der Legacy-Fallthrough führt `Common` weiter
+selbst aus → kein Doppellauf).
+
+| Cluster | Module | Status |
+|---|---|---|
+| Übersicht/Werft | Overview ✅, Shipyard ✅, Defenses ✅ | migriert |
+| Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | migriert |
+| Flotten-Assistent | Fleet1 ✅, Fleet2–4 (393/581/826) | Fleet1 portiert; Fleet4 = Commit-Schritt (`die`-Codes, wie Galaxy) |
+| ACS | Federation (428) | offen, SQL-Injections zu härten |
+
+Reihenfolge: Fleet2 → Fleet3 → **Fleet4** (kritisch) → Federation. Danach ist
+`legacy/app/Http/Controllers/Game/` leer.
 
 ---
 
