@@ -2,14 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Http\Controllers\Game;
+namespace App\Http\Controllers\Game;
 
 use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
 
+/**
+ * Defences and missiles construction. Reuses the shipyard build logic with the
+ * defence item set.
+ */
 class DefensesController extends ShipyardController
 {
     protected string $page = 'defenses';
+
     protected string $langFile = 'defenses';
+
+    /** @var array<int, int> */
     protected array $allowedStructures = [
         Defenses::defense_rocket_launcher,
         Defenses::defense_light_laser,
@@ -22,6 +29,8 @@ class DefensesController extends ShipyardController
         Defenses::defense_anti_ballistic_missile,
         Defenses::defense_interplanetary_missile,
     ];
+
+    /** @var array<int, int> */
     protected array $missiles = [
         Defenses::defense_anti_ballistic_missile => 0,
         Defenses::defense_interplanetary_missile => 0,
