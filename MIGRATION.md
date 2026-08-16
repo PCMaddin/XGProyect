@@ -9,13 +9,13 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 34 migriert | 4 verbleibend |
+| Game-Controller | 35 migriert | 3 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.041 PHPStan- + 507 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.012 PHPStan- + 499 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
 > der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
-> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1, Fleet2) 296 PHPStan- und 175
+> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1–3) 325 PHPStan- und 183
 > PHPMD-Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit
 > PHPStan Level 9 und der PHPUnit-Suite verifiziert.
 
@@ -117,11 +117,16 @@ selbst aus → kein Doppellauf).
 |---|---|---|
 | Übersicht/Werft | Overview ✅, Shipyard ✅, Defenses ✅ | migriert |
 | Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | migriert |
-| Flotten-Assistent | Fleet1 ✅, Fleet2 ✅, Fleet3–4 (581/826) | Fleet1+2 portiert; Fleet4 = Commit-Schritt (`die`-Codes, wie Galaxy) |
+| Flotten-Assistent | Fleet1 ✅, Fleet2 ✅, Fleet3 ✅, Fleet4 (826) | Fleet1–3 portiert; Fleet4 = Commit-Schritt (`die`-Codes, wie Galaxy) |
 | ACS | Federation (428) | offen, SQL-Injections zu härten |
 
-Reihenfolge: **Fleet3** → **Fleet4** (kritisch) → Federation. Danach ist
+Reihenfolge: **Fleet4** (kritisch) → Federation. Danach ist
 `legacy/app/Http/Controllers/Game/` leer.
+
+Hinweis: Fleet3 nutzt `HttpResponseException(redirect(...))`, um aus tief
+verschachtelten Helfern (Session-Ships fehlen, keine erlaubte Mission,
+ungültiges Ziel) sauber nach fleet1 zurückzuspringen — der Legacy-Code machte
+das per `header()+exit`, was in Laravel die Session-Speicherung umgangen hätte.
 
 ---
 
