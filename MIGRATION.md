@@ -9,14 +9,14 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 33 migriert | 5 verbleibend |
+| Game-Controller | 34 migriert | 4 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.055 PHPStan- + 510 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.041 PHPStan- + 507 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
 > der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
-> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1) 282 PHPStan- und 172 PHPMD-
-> Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit
+> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1, Fleet2) 296 PHPStan- und 175
+> PHPMD-Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit
 > PHPStan Level 9 und der PHPUnit-Suite verifiziert.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
@@ -117,10 +117,10 @@ selbst aus → kein Doppellauf).
 |---|---|---|
 | Übersicht/Werft | Overview ✅, Shipyard ✅, Defenses ✅ | migriert |
 | Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | migriert |
-| Flotten-Assistent | Fleet1 ✅, Fleet2–4 (393/581/826) | Fleet1 portiert; Fleet4 = Commit-Schritt (`die`-Codes, wie Galaxy) |
+| Flotten-Assistent | Fleet1 ✅, Fleet2 ✅, Fleet3–4 (581/826) | Fleet1+2 portiert; Fleet4 = Commit-Schritt (`die`-Codes, wie Galaxy) |
 | ACS | Federation (428) | offen, SQL-Injections zu härten |
 
-Reihenfolge: Fleet2 → Fleet3 → **Fleet4** (kritisch) → Federation. Danach ist
+Reihenfolge: **Fleet3** → **Fleet4** (kritisch) → Federation. Danach ist
 `legacy/app/Http/Controllers/Game/` leer.
 
 ---

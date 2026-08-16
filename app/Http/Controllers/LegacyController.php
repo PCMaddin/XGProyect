@@ -32,6 +32,7 @@ class LegacyController extends BaseController
         'empire' => Game\EmpireController::class,
         'facilities' => Game\FacilitiesController::class,
         'fleet1' => Game\Fleet1Controller::class,
+        'fleet2' => Game\Fleet2Controller::class,
         'galaxy' => Game\GalaxyController::class,
         'highscore' => Game\HighscoreController::class,
         'logout' => Game\LogoutController::class,
