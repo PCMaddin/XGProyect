@@ -9,15 +9,15 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 31 migriert | 7 verbleibend |
+| Game-Controller | 32 migriert | 6 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 1.085 PHPStan- + 521 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 1.073 PHPStan- + 516 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
 > der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
-> Phalanx, Shipyard, Defenses, Galaxy) 252 PHPStan- und 161 PHPMD-Einträge abgebaut.
-> Ab der Verfügbarkeit der Tools ist jede Migration lokal mit PHPStan Level 9 und der
-> PHPUnit-Suite verifiziert.
+> Phalanx, Shipyard, Defenses, Galaxy, Movement) 264 PHPStan- und 166 PHPMD-Einträge
+> abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit PHPStan Level 9
+> und der PHPUnit-Suite verifiziert.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -92,7 +92,7 @@ Nicht einzeln migrierbar.
 | Cluster | Module | Zeilen | Engine darunter |
 |---|---|---|---|
 | Übersicht/Werft | Overview ✅, Shipyard ✅ | — | migriert; `UpdatesLibrary` (925) noch legacy |
-| Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement (303) | 303 | Galaxy in 2 Etappen migriert (Anzeige + Flotten-/Raketenversand); Movement offen |
+| Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | — | Galaxy in 2 Etappen migriert; Movement (Flottenbewegungen + Rückruf) portiert, ACS-Release parametrisiert |
 | Flotten | Fleet1–4 (328/393/581/826) | 2128 | `Missions` (Attack/Spy/Destroy/Expedition), `BattleEngine` |
 
 → Hier steckt die über Jahre erprobte Spiellogik (Timing, Balancing, Kampfrunden).
