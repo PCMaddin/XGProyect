@@ -6,6 +6,8 @@ namespace Tests\Unit\App\Http\Controllers\Game;
 
 use App\Http\Controllers\Game\AllianceController;
 use App\Services\FormatService;
+use App\Services\SettingsService;
+use App\Services\TimingService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionClass;
@@ -64,7 +66,7 @@ class AllianceControllerTest extends TestCase
      */
     private function controllerWithUser(array $user): AllianceController
     {
-        $controller = new AllianceController(new FormatService());
+        $controller = new AllianceController(new FormatService(), new TimingService(new SettingsService()));
 
         $property = (new ReflectionClass($controller))->getProperty('user');
         $property->setValue($controller, $user);
