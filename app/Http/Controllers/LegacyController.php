@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Exceptions\LegacyView;
+use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
+use Xgp\App\Libraries\UpdatesLibrary;
 
 class LegacyController extends BaseController
 {
@@ -61,6 +63,8 @@ class LegacyController extends BaseController
             $page = $request->query('page');
 
             if (is_string($page) && isset(self::PROMOTED_PAGES[$page])) {
+                $this->runLegacyUpdates();
+
                 $result = app()->call(self::PROMOTED_PAGES[$page]);
 
                 return $result instanceof BaseResponse ? $result : new Response($result);
@@ -84,5 +88,27 @@ class LegacyController extends BaseController
         }
 
         return new Response($output);
+    }
+
+    /**
+     * Run the per-request game updates that the legacy bootstrap (Common) runs
+     * in setUpdates(). Promoted pages bypass that bootstrap, so without this the
+     * fleet-arrival tick (and statistics/cleanup) would never fire on a session
+     * that only visits native pages. The legacy fallthrough path still runs
+     * Common itself, so this only covers the promoted branch (no double run).
+     */
+    private function runLegacyUpdates(): void
+    {
+        $settings = app(SettingsService::class);
+
+        if (!defined('SHIP_DEBRIS_FACTOR')) {
+            define('SHIP_DEBRIS_FACTOR', $settings->getInt('fleet_cdr') / 100);
+        }
+
+        if (!defined('DEFENSE_DEBRIS_FACTOR')) {
+            define('DEFENSE_DEBRIS_FACTOR', $settings->getInt('defs_cdr') / 100);
+        }
+
+        app(UpdatesLibrary::class);
     }
 }
