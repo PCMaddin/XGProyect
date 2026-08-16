@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
+use Xgp\App\Libraries\GalaxyLib;
 
 #[CoversClass(GalaxyController::class)]
 class GalaxyControllerTest extends TestCase
@@ -42,5 +43,47 @@ class GalaxyControllerTest extends TestCase
 
         $this->assertSame($expectedGalaxy, $result['galaxy']);
         $this->assertSame($expectedSystem, $result['system']);
+    }
+
+    /**
+     * @return iterable<string, array{0: int, 1: int}>
+     */
+    public static function planetTypeProvider(): iterable
+    {
+        yield 'debris resolves to planet' => [GalaxyLib::DEBRIS_TYPE, GalaxyLib::PLANET_TYPE];
+        yield 'planet stays a planet' => [GalaxyLib::PLANET_TYPE, GalaxyLib::PLANET_TYPE];
+        yield 'moon stays a moon' => [GalaxyLib::MOON_TYPE, GalaxyLib::MOON_TYPE];
+    }
+
+    #[DataProvider('planetTypeProvider')]
+    public function testTargetLookupPlanetTypeMapsDebrisOntoPlanets(int $planetType, int $expected): void
+    {
+        $controller = app(GalaxyController::class);
+        $method = new ReflectionMethod(GalaxyController::class, 'targetLookupPlanetType');
+
+        $this->assertSame($expected, $method->invoke($controller, $planetType));
+    }
+
+    /**
+     * @return iterable<string, array{0: string, 1: bool}>
+     */
+    public static function missileTargetProvider(): iterable
+    {
+        yield 'all keyword is valid' => ['all', true];
+        yield 'lowest defence slot' => ['0', true];
+        yield 'highest defence slot' => ['8', true];
+        yield 'out of range' => ['9', false];
+        yield 'negative' => ['-1', false];
+        yield 'garbage' => ['xyz', false];
+        yield 'empty' => ['', false];
+    }
+
+    #[DataProvider('missileTargetProvider')]
+    public function testIsValidMissileTargetAcceptsSlotsAndAll(string $target, bool $expected): void
+    {
+        $controller = app(GalaxyController::class);
+        $method = new ReflectionMethod(GalaxyController::class, 'isValidMissileTarget');
+
+        $this->assertSame($expected, $method->invoke($controller, $target));
     }
 }
