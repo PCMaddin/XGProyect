@@ -14,7 +14,9 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
+use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use Xgp\App\Libraries\Alliance\Alliances;
+use Xgp\App\Libraries\Alliance\Ranks;
 use Xgp\App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
 use Xgp\App\Libraries\Functions;
@@ -30,10 +32,15 @@ use Xgp\App\Libraries\Users;
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  * @SuppressWarnings("PHPMD.TooManyMethods")
+ * @SuppressWarnings("PHPMD.ExcessiveClassLength")
  */
 class AllianceController extends BaseController
 {
     use PreparesLegacySql;
+
+    private const DEFAULT_RANKS = ['founder' => 0, 'newcomer' => 1];
+
+    private const ALLIANCE_ASSET = 'assets/upload/skins/xgproyect/alliance/';
 
     /** @var array<string, mixed> */
     private array $user = [];
@@ -70,8 +77,594 @@ class AllianceController extends BaseController
             'exit' => $this->exitSection($request),
             'memberslist' => $this->memberslistSection($request),
             'circular' => $this->circularSection($request),
+            'admin' => $this->adminSection($request),
             default => $this->defaultSection($request),
         };
+    }
+
+    private function adminSection(Request $request): View | RedirectResponse
+    {
+        $sections = [
+            'ally' => AllianceRanks::ADMINISTRATION,
+            'exit' => AllianceRanks::DELETE,
+            'members' => AllianceRanks::ADMINISTRATION,
+            'name' => AllianceRanks::ADMINISTRATION,
+            'requests' => AllianceRanks::APPLICATION_MANAGEMENT,
+            'rights' => AllianceRanks::RIGHT_HAND,
+            'tag' => AllianceRanks::ADMINISTRATION,
+            'transfer' => AllianceRanks::ADMINISTRATION,
+        ];
+
+        $edit = is_string($raw = $request->query('edit')) ? $raw : '';
+
+        if (!isset($sections[$edit]) || !$this->alliance->hasAccess($sections[$edit])) {
+            return redirect('game.php?page=alliance');
+        }
+
+        return match ($edit) {
+            'ally' => $this->adminAllySection($request),
+            'exit' => $this->adminExitSection($request),
+            'members' => $this->adminMembersSection($request),
+            'name' => $this->adminNameSection($request),
+            'requests' => $this->adminRequestsSection($request),
+            'rights' => $this->adminRightsSection($request),
+            'tag' => $this->adminTagSection($request),
+            default => $this->adminTransferSection($request),
+        };
+    }
+
+    private function adminAllySection(Request $request): View | RedirectResponse
+    {
+        if ($request->has('options')) {
+            return $this->saveAllianceSettings($request);
+        }
+
+        if ($request->isMethod('post') && $request->has('t')) {
+            return $this->saveAllianceText($request);
+        }
+
+        $current = $this->alliance->getCurrentAlliance();
+        $ranks = $this->alliance->getCurrentAllianceRankObject();
+        $tab = min(max($request->integer('t', 1), 1), 3);
+
+        $requestType = [
+            1 => (string) __('game/alliance.al_outside_text'),
+            2 => (string) __('game/alliance.al_inside_text'),
+            3 => (string) __('game/alliance.al_request_text'),
+        ];
+        $text = [
+            1 => $current->getAllianceDescription(),
+            2 => $current->getAllianceText(),
+            3 => $current->getAllianceRequest(),
+        ];
+
+        return view('alliance.admin.view', [
+            't' => $tab,
+            'request_type' => $requestType[$tab],
+            'text' => $text[$tab],
+            'alliance_web' => $current->getAllianceWeb(),
+            'alliance_image' => $current->getAllianceImage(),
+            'alliance_request_notallow_0' => $current->getAllianceRequestNotAllow() === SwitchInt::off ? 'selected' : '',
+            'alliance_request_notallow_1' => $current->getAllianceRequestNotAllow() === SwitchInt::on ? 'selected' : '',
+            'alliance_owner_range' => $this->rankName($ranks, self::DEFAULT_RANKS['founder']),
+            'alliance_newcomer_range' => $this->rankName($ranks, self::DEFAULT_RANKS['newcomer']),
+        ]);
+    }
+
+    private function saveAllianceSettings(Request $request): RedirectResponse
+    {
+        DB::update(
+            $this->prepareSql(
+                'UPDATE `' . ALLIANCE . '`
+                    SET `alliance_image` = ?, `alliance_web` = ?, `alliance_request_notallow` = ?
+                WHERE `alliance_id` = ?;'
+            ),
+            [
+                $this->validUrl($request->input('image')),
+                $this->validUrl($request->input('web')),
+                min(max($request->integer('request_notallow', 1), 0), 1),
+                $this->allianceId($request),
+            ]
+        );
+
+        $ranks = $this->alliance->getCurrentAllianceRankObject();
+
+        if ($request->has('owner_range')) {
+            $ranks->editRankNameById(self::DEFAULT_RANKS['founder'], $this->asString($request->input('owner_range')));
+        }
+
+        if ($request->has('newcomer_range')) {
+            $ranks->editRankNameById(self::DEFAULT_RANKS['newcomer'], $this->asString($request->input('newcomer_range')));
+        }
+
+        DB::update(
+            $this->prepareSql('UPDATE `' . ALLIANCE . '` SET `alliance_ranks` = ? WHERE `alliance_id` = ?;'),
+            [$ranks->getAllRanksAsJsonString(), $this->allianceId($request)]
+        );
+
+        return redirect('game.php?page=alliance&mode=admin&edit=ally');
+    }
+
+    private function saveAllianceText(Request $request): RedirectResponse
+    {
+        $tab = min(max($request->integer('t', 1), 1), 3);
+        $field = match ($tab) {
+            2 => 'alliance_text',
+            3 => 'alliance_request',
+            default => 'alliance_description',
+        };
+
+        // The column is chosen from a fixed whitelist; the text is bound.
+        DB::update(
+            $this->prepareSql('UPDATE `' . ALLIANCE . '` SET `' . $field . '` = ? WHERE `alliance_id` = ?;'),
+            [$this->asString($request->input('text')), $this->allianceId($request)]
+        );
+
+        return redirect('game.php?page=alliance&mode=admin&edit=ally&t=' . $tab);
+    }
+
+    private function adminExitSection(Request $request): RedirectResponse
+    {
+        $allianceId = $this->allianceId($request);
+
+        DB::transaction(function () use ($allianceId): void {
+            DB::update(
+                $this->prepareSql('UPDATE `' . USERS . '` SET `ally_id` = 0, `ally_rank_id` = 0 WHERE `ally_id` = ?;'),
+                [$allianceId]
+            );
+            DB::delete(
+                $this->prepareSql('DELETE FROM `' . ALLIANCE . '` WHERE `alliance_id` = ? LIMIT 1;'),
+                [$allianceId]
+            );
+            DB::delete(
+                $this->prepareSql('DELETE FROM `' . ALLIANCE_STATISTICS . '` WHERE `alliance_statistic_alliance_id` = ? LIMIT 1;'),
+                [$allianceId]
+            );
+        });
+
+        return redirect('game.php?page=alliance');
+    }
+
+    private function adminMembersSection(Request $request): View
+    {
+        $this->handleMemberKick($request);
+        $this->handleMemberRankChange($request);
+
+        $sortOrder = $request->integer('sort2');
+        $requestedRank = $request->integer('rank');
+
+        $members = array_map(
+            fn (object $row): array => get_object_vars($row),
+            DB::select(
+                $this->prepareSql(
+                    'SELECT u.`id`, u.`onlinetime`, u.`name`, u.`galaxy`, u.`system`, u.`planet`,
+                        u.`ally_register_time`, u.`ally_rank_id`, s.`user_statistic_total_points`
+                    FROM `' . USERS . '` AS u
+                    INNER JOIN `' . USERS_STATISTICS . '` AS s ON u.`id` = s.`user_statistic_user_id`
+                    WHERE u.`ally_id` = ?' . $this->membersSort($request->integer('sort1'), $sortOrder) . ';'
+                ),
+                [$this->userInt('ally_id')]
+            )
+        );
+
+        $list = [];
+        $position = 0;
+
+        foreach ($members as $member) {
+            $position++;
+            $memberId = $this->asInt($member['id'] ?? 0);
+            $list[] = [
+                'position' => $position,
+                'name' => $this->asString($member['name'] ?? ''),
+                'id' => $memberId,
+                'write_message' => (string) __('game/global.write_message'),
+                'ally_range' => $this->adminMemberRankBlock($memberId, $this->asInt($member['ally_rank_id'] ?? 0), $requestedRank),
+                'points' => $this->formatService->prettyNumber($this->asInt($member['user_statistic_total_points'] ?? 0)),
+                'galaxy' => $this->asInt($member['galaxy'] ?? 0),
+                'system' => $this->asInt($member['system'] ?? 0),
+                'coords' => $this->formatService->prettyCoords(
+                    $this->asInt($member['galaxy'] ?? 0),
+                    $this->asInt($member['system'] ?? 0),
+                    $this->asInt($member['planet'] ?? 0)
+                ),
+                'ally_register_time' => $this->timingService->formatExtendedDate($this->asInt($member['ally_register_time'] ?? 0)),
+                'online_time' => $this->timingService->formatDaysElapsed($this->asInt($member['onlinetime'] ?? 0), time()),
+                'actions' => $this->adminMemberActionBlock($memberId, $this->asString($member['name'] ?? ''), $requestedRank),
+            ];
+        }
+
+        $orderRules = [1 => 2, 2 => 1];
+
+        return view('alliance.admin.members', [
+            'total' => $position,
+            's' => $orderRules[$sortOrder] ?? 1,
+            'list_of_members' => $list,
+        ]);
+    }
+
+    private function handleMemberKick(Request $request): void
+    {
+        if (!$request->has('kick') || !$this->alliance->hasAccess(AllianceRanks::KICK)) {
+            return;
+        }
+
+        $kick = $request->integer('kick');
+
+        if ($kick === $this->alliance->getCurrentAlliance()->getAllianceOwner()) {
+            return;
+        }
+
+        DB::update(
+            $this->prepareSql(
+                'UPDATE `' . USERS . '` SET `ally_id` = 0, `ally_rank_id` = 0 WHERE `id` = ? AND `ally_id` = ?;'
+            ),
+            [$kick, $this->allianceId($request)]
+        );
+    }
+
+    private function handleMemberRankChange(Request $request): void
+    {
+        if (!$request->has('newrang') || !$request->has('id')) {
+            return;
+        }
+
+        $memberId = $request->integer('id');
+
+        if ($memberId === $this->alliance->getCurrentAlliance()->getAllianceOwner()) {
+            return;
+        }
+
+        $newRank = $request->integer('newrang');
+
+        DB::update(
+            $this->prepareSql('UPDATE `' . USERS . '` SET `ally_rank_id` = ? WHERE `id` = ?;'),
+            [$newRank, $memberId]
+        );
+    }
+
+    private function adminNameSection(Request $request): View | RedirectResponse
+    {
+        if ($request->isMethod('post') && $request->has('nametag')) {
+            $name = $this->asString($request->input('nametag'));
+            $editUrl = 'game.php?page=alliance&mode=admin&edit=name';
+
+            if (strlen($name) < 3 || strlen($name) > 30) {
+                Functions::message((string) __('game/alliance.al_name_required'), $editUrl, 3);
+            }
+
+            if ($this->allianceNameExists($name) !== null) {
+                Functions::message(strtr((string) __('game/alliance.al_name_already_exists'), ['%s' => $name]), $editUrl, 3);
+            }
+
+            // The alliance name is bound; the legacy code interpolated it.
+            DB::update(
+                $this->prepareSql('UPDATE `' . ALLIANCE . '` SET `alliance_name` = ? WHERE `alliance_id` = ?;'),
+                [$name, $this->allianceId($request)]
+            );
+
+            return redirect('game.php?page=alliance&mode=admin&edit=ally');
+        }
+
+        return view('alliance.admin.edit', [
+            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceName()]),
+            'title' => (string) __('game/alliance.al_new_name'),
+        ]);
+    }
+
+    private function adminTagSection(Request $request): View | RedirectResponse
+    {
+        if ($request->isMethod('post') && $request->has('nametag')) {
+            $tag = $this->asString($request->input('nametag'));
+            $editUrl = 'game.php?page=alliance&mode=admin&edit=tag';
+
+            if (strlen($tag) < 3 || strlen($tag) > 8) {
+                Functions::message((string) __('game/alliance.al_tag_required'), $editUrl, 3);
+            }
+
+            if ($this->allianceTagExists($tag) !== null) {
+                Functions::message(strtr((string) __('game/alliance.al_tag_already_exists'), ['%s' => $tag]), $editUrl, 3);
+            }
+
+            // The alliance tag is bound; the legacy code interpolated it.
+            DB::update(
+                $this->prepareSql('UPDATE `' . ALLIANCE . '` SET `alliance_tag` = ? WHERE `alliance_id` = ?;'),
+                [$tag, $this->allianceId($request)]
+            );
+
+            return redirect('game.php?page=alliance&mode=admin&edit=ally');
+        }
+
+        return view('alliance.admin.edit', [
+            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceTag()]),
+            'title' => (string) __('game/alliance.al_new_tag'),
+        ]);
+    }
+
+    private function adminRequestsSection(Request $request): View | RedirectResponse
+    {
+        $show = $request->integer('show');
+
+        if ($show !== 0 && ($request->has('accept') || $request->has('cancel'))) {
+            return $this->resolveRequest($request, $show, $request->has('accept'));
+        }
+
+        $requests = $this->rows(
+            'SELECT `id`, `name`, `ally_request_text`, `ally_register_time`
+            FROM `' . USERS . '` WHERE `ally_request` = ?;',
+            [$this->allianceId($request)]
+        );
+
+        $requestsList = [];
+
+        foreach ($requests as $requestRow) {
+            $id = $this->asInt($requestRow['id'] ?? 0);
+            $requestsList[$id] = [
+                'id' => $id,
+                'username' => $this->asString($requestRow['name'] ?? ''),
+                'time' => $this->timingService->formatExtendedDate($this->asInt($requestRow['ally_register_time'] ?? 0)),
+                'ally_request_text' => nl2br($this->asString($requestRow['ally_request_text'] ?? '')),
+            ];
+        }
+
+        $requestForm = [];
+
+        if (isset($requestsList[$show])) {
+            $requestForm = [
+                'id' => $requestsList[$show]['id'],
+                'request_from' => strtr((string) __('game/alliance.al_request_from'), ['%s' => $requestsList[$show]['username']]),
+                'request_text' => $requestsList[$show]['ally_request_text'],
+            ];
+        }
+
+        return view('alliance.admin.applications', array_merge($requestForm, [
+            'pending_message' => strtr((string) __('game/alliance.al_no_request_pending'), ['%n' => count($requests)]),
+            'requestsList' => $requestsList,
+            'noRequests' => $requests === [],
+            'showForm' => $requestForm !== [],
+        ]));
+    }
+
+    private function resolveRequest(Request $request, int $show, bool $accept): RedirectResponse
+    {
+        $text = $this->asString($request->input('text'));
+        $current = $this->alliance->getCurrentAlliance();
+        $allyId = $accept ? $this->allianceId($request) : 0;
+
+        DB::update(
+            $this->prepareSql(
+                'UPDATE `' . USERS . "` SET `ally_request_text` = '', `ally_request` = 0, `ally_id` = ? WHERE `id` = ?;"
+            ),
+            [$allyId, $show]
+        );
+
+        $verb = $accept ? 'al_has_accepted' : 'al_has_declined';
+        $titleKey = $accept ? 'al_you_was_acceted' : 'al_you_was_declined';
+
+        Functions::sendMessage(
+            $show,
+            $this->userInt('id'),
+            0,
+            3,
+            $current->getAllianceTag(),
+            __('game/alliance.' . $titleKey) . $current->getAllianceName(),
+            __('game/alliance.al_hi_the_alliance') . $current->getAllianceName() . __('game/alliance.' . $verb) . $text
+        );
+
+        return redirect('game.php?page=alliance&mode=admin&edit=requests');
+    }
+
+    private function adminRightsSection(Request $request): View
+    {
+        $ranks = $this->alliance->getCurrentAllianceRankObject();
+
+        if ($request->has('newrangname')) {
+            $ranks->addNew($this->asString($request->input('newrangname')));
+            $this->persistRanks($ranks, $request);
+        }
+
+        $ids = $request->input('id');
+
+        if (is_array($ids)) {
+            foreach ($ids as $id) {
+                $ranks->editRankById($this->asInt($id), $this->collectRankRights($request, $this->asInt($id)));
+            }
+            $this->persistRanks($ranks, $request);
+        }
+
+        if ($request->has('d')) {
+            $ranks->deleteRankById($request->integer('d'));
+            $this->persistRanks($ranks, $request);
+        }
+
+        return view('alliance.admin.rights', [
+            'list_of_ranks' => $this->buildRanksMatrix($ranks),
+        ]);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function collectRankRights(Request $request, int $id): array
+    {
+        $can = fn (int $right): int => $request->has('u' . $id . 'r' . $right) ? SwitchInt::on : SwitchInt::off;
+
+        return [
+            AllianceRanks::DELETE => ($can(1) === SwitchInt::on && $this->alliance->isOwner()) ? SwitchInt::on : SwitchInt::off,
+            AllianceRanks::KICK => $can(2),
+            AllianceRanks::APPLICATIONS => $can(3),
+            AllianceRanks::VIEW_MEMBER_LIST => $can(4),
+            AllianceRanks::APPLICATION_MANAGEMENT => $can(5),
+            AllianceRanks::ADMINISTRATION => $can(6),
+            AllianceRanks::ONLINE_STATUS => $can(7),
+            AllianceRanks::SEND_CIRCULAR => $can(8),
+            AllianceRanks::RIGHT_HAND => $can(9),
+        ];
+    }
+
+    private function persistRanks(Ranks $ranks, Request $request): void
+    {
+        DB::update(
+            $this->prepareSql('UPDATE `' . ALLIANCE . '` SET `alliance_ranks` = ? WHERE `alliance_id` = ?;'),
+            [$ranks->getAllRanksAsJsonString(), $this->allianceId($request)]
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildRanksMatrix(Ranks $ranks): array
+    {
+        $list = [];
+
+        foreach ($ranks->getAllRanksAsArray() as $rankId => $details) {
+            if (!is_array($details)) {
+                continue;
+            }
+
+            $rankId = $this->asInt($rankId);
+            $rights = is_array($details['rights'] ?? null) ? $details['rights'] : [];
+            $locked = $rankId === self::DEFAULT_RANKS['founder'] || $rankId === self::DEFAULT_RANKS['newcomer'];
+            $disabled = $locked ? ' disabled="disabled"' : '';
+
+            $rightHand = '<b>-</b>';
+
+            if ($this->alliance->isOwner()) {
+                $rightHand = '<input type="checkbox" name="u' . $rankId . 'r1"'
+                    . $this->rightChecked($rights, AllianceRanks::DELETE) . $disabled . '>';
+            }
+
+            $list[] = [
+                'rank_id' => $rankId,
+                'rank_delete' => $locked ? '' : '<a href="game.php?page=alliance&mode=admin&edit=rights&d=' . $rankId
+                    . '"><img src="' . asset(self::ALLIANCE_ASSET . 'abort.gif') . '" border="0" alt="' . __('game/alliance.al_rank_delete') . '"/></a>',
+                'rank_name' => $this->asString($details['rank'] ?? ''),
+                'r1' => $rightHand,
+                'checked_r2' => $this->rightChecked($rights, AllianceRanks::KICK),
+                'checked_r3' => $this->rightChecked($rights, AllianceRanks::APPLICATIONS),
+                'checked_r4' => $this->rightChecked($rights, AllianceRanks::VIEW_MEMBER_LIST),
+                'checked_r5' => $this->rightChecked($rights, AllianceRanks::APPLICATION_MANAGEMENT),
+                'checked_r6' => $this->rightChecked($rights, AllianceRanks::ADMINISTRATION),
+                'checked_r7' => $this->rightChecked($rights, AllianceRanks::ONLINE_STATUS),
+                'checked_r8' => $this->rightChecked($rights, AllianceRanks::SEND_CIRCULAR),
+                'checked_r9' => $this->rightChecked($rights, AllianceRanks::RIGHT_HAND),
+                'edit_check' => $disabled,
+            ];
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $rights
+     */
+    private function rightChecked(array $rights, int $right): string
+    {
+        return ($rights[$right] ?? 0) === SwitchInt::on ? ' checked="checked"' : '';
+    }
+
+    private function adminTransferSection(Request $request): View | RedirectResponse
+    {
+        $newLeader = $request->integer('newleader');
+
+        if ($newLeader !== 0) {
+            DB::update(
+                $this->prepareSql(
+                    'UPDATE `' . USERS . '` AS u1, `' . ALLIANCE . '` AS a, `' . USERS . '` AS u2
+                        SET u1.`ally_rank_id` = 1, a.`alliance_owner` = ?, u2.`ally_rank_id` = 0
+                    WHERE u1.`id` = ? AND a.`alliance_id` = ? AND u2.`id` = ?;'
+                ),
+                [$newLeader, $this->userInt('id'), $this->userInt('ally_id'), $newLeader]
+            );
+
+            return redirect('game.php?page=alliance');
+        }
+
+        $ranks = $this->alliance->getCurrentAllianceRankObject();
+        $members = [];
+
+        foreach ($this->rows('SELECT `id`, `name`, `ally_rank_id` FROM `' . USERS . '` WHERE `ally_id` = ?;', [$this->allianceId($request)]) as $member) {
+            $rankId = $this->asInt($member['ally_rank_id'] ?? 0);
+
+            if ($rankId === 0) {
+                continue;
+            }
+
+            $rank = $ranks->getRankById($rankId);
+            $rights = is_array($rank['rights'] ?? null) ? $rank['rights'] : [];
+
+            if (($rights[AllianceRanks::RIGHT_HAND] ?? 0) === SwitchInt::on) {
+                $members[] = [
+                    'id' => $this->asInt($member['id'] ?? 0),
+                    'name' => $this->asString($member['name'] ?? ''),
+                    'user_rank' => $this->rankName($ranks, $rankId),
+                ];
+            }
+        }
+
+        return view('alliance.admin.transfer', ['members' => $members]);
+    }
+
+    private function adminMemberRankBlock(int $memberId, int $memberRankId, int $requestedRank): string
+    {
+        if ($requestedRank !== $memberId) {
+            return $this->userRank($memberId, $memberRankId);
+        }
+
+        $options = [];
+
+        foreach ($this->alliance->getCurrentAllianceRankObject()->getAllRanksAsArray() as $id => $rank) {
+            if (!is_array($rank)) {
+                continue;
+            }
+
+            $options[] = [
+                'id' => $this->asInt($id),
+                'rank' => $this->asString($rank['rank'] ?? ''),
+                'selected' => $memberRankId === $this->asInt($id) ? ' selected=selected' : '',
+            ];
+        }
+
+        return view('alliance.admin.members_edit', ['id' => $memberId, 'options' => $options])->render();
+    }
+
+    private function adminMemberActionBlock(int $memberId, string $memberName, int $requestedRank): string
+    {
+        if ($this->alliance->getCurrentAlliance()->getAllianceOwner() === $memberId || $requestedRank === $memberId) {
+            return '-';
+        }
+
+        $kick = '';
+        $changeRank = '';
+
+        if ($this->alliance->hasAccess(AllianceRanks::KICK)) {
+            $kick = $this->formatService->link(
+                'game.php?page=alliance&mode=admin&edit=members&kick=' . $memberId,
+                Functions::setImage(asset(self::ALLIANCE_ASSET . 'abort.gif')),
+                '',
+                'onclick="javascript:return confirm(\'' . strtr((string) __('game/alliance.al_confirm_remove_member'), ['%s' => $memberName]) . '\');"'
+            );
+        }
+
+        if ($this->alliance->hasAccess(AllianceRanks::ADMINISTRATION)) {
+            $changeRank = $this->formatService->link(
+                'game.php?page=alliance&mode=admin&edit=members&rank=' . $memberId,
+                Functions::setImage(asset(self::ALLIANCE_ASSET . 'key.gif'))
+            );
+        }
+
+        return $kick === '' && $changeRank === '' ? '-' : $kick . $changeRank;
+    }
+
+    private function rankName(Ranks $ranks, int $rankId): string
+    {
+        $rank = $ranks->getRankById($rankId);
+
+        return isset($rank['rank']) && is_scalar($rank['rank']) ? (string) $rank['rank'] : '';
+    }
+
+    private function validUrl(mixed $value): string
+    {
+        return is_string($value) && filter_var($value, FILTER_VALIDATE_URL) !== false ? $value : '';
     }
 
     private function setUpAlliances(Request $request): Alliances
