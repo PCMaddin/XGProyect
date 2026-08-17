@@ -9,15 +9,20 @@
 
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
-| Game-Controller | 36 migriert | 2 verbleibend |
+| Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 987 PHPStan- + 480 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 977 PHPStan- + 476 PHPMD-Einträge in Baselines unterdrückt |
 
-> **Stand:** ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden beim Migrieren
-> der bisherigen Module (Welle 1 komplett + Buddies, Messages, Alliance, Overview,
-> Phalanx, Shipyard, Defenses, Galaxy, Movement, Fleet1–4) 350 PHPStan- und 202
-> PHPMD-Einträge abgebaut. Ab der Verfügbarkeit der Tools ist jede Migration lokal mit
-> PHPStan Level 9 und der PHPUnit-Suite verifiziert.
+> **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
+> laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
+> Wellen 360 PHPStan- und 206 PHPMD-Einträge abgebaut. Jede Migration ist lokal mit
+> PHPStan Level 9, PHPMD und der PHPUnit-Suite (447 Tests) verifiziert.
+>
+> **Verbleibende Legacy-Bibliotheken** (kein Controller mehr, nur noch Backend):
+> die Missions-/Kampf-Engine (`Missions`, `BattleEngine`, `MissionControlLib`) und
+> Update-/Objekt-Bibliotheken (`UpdatesLibrary`, `Objects`, `Fleets`, `Users` …),
+> die vom Tick und den nativen Controllern genutzt werden. Das ist die nächste,
+> entkoppelte Refactoring-Welle ohne Zeitdruck.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
@@ -118,9 +123,10 @@ selbst aus → kein Doppellauf).
 | Übersicht/Werft | Overview ✅, Shipyard ✅, Defenses ✅ | migriert |
 | Galaxie/Phalanx | Galaxy ✅, Phalanx ✅, Movement ✅ | migriert |
 | Flotten-Assistent | Fleet1 ✅, Fleet2 ✅, Fleet3 ✅, Fleet4 ✅ | komplett — Commit-Schritt parametrisiert, 10 Validatoren portiert |
-| ACS | Federation (428) | **letztes Modul**, SQL-Injections zu härten |
+| ACS | Federation ✅ | komplett — SQL-Injection in `searchUser` behoben, alle Queries parametrisiert |
 
-Reihenfolge: **Federation** → danach ist `legacy/app/Http/Controllers/Game/` leer.
+✅ **Welle 4 abgeschlossen.** `legacy/app/Http/Controllers/Game/` ist leer — die
+gesamte Controller-Schicht ist migriert.
 
 Hinweis: Fleet3 nutzt `HttpResponseException(redirect(...))`, um aus tief
 verschachtelten Helfern (Session-Ships fehlen, keine erlaubte Mission,

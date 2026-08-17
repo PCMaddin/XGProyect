@@ -31,6 +31,7 @@ class LegacyController extends BaseController
         'defenses' => Game\DefensesController::class,
         'empire' => Game\EmpireController::class,
         'facilities' => Game\FacilitiesController::class,
+        'federationlayer' => Game\FederationController::class,
         'fleet1' => Game\Fleet1Controller::class,
         'fleet2' => Game\Fleet2Controller::class,
         'fleet3' => Game\Fleet3Controller::class,
