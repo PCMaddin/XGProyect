@@ -17,7 +17,7 @@ use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use Xgp\App\Libraries\Alliance\Alliances;
 use Xgp\App\Libraries\Alliance\Ranks;
-use Xgp\App\Libraries\BBCodeLib;
+use App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
@@ -60,7 +60,7 @@ class AllianceController extends BaseController
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Alliance));
 
         $this->user = Users::getInstance()->getUserData();
-        $this->bbcode = new BBCodeLib();
+        $this->bbcode = app(BBCodeLib::class);
         $this->alliance = $this->setUpAlliances($request);
 
         $section = $this->currentSection($request);

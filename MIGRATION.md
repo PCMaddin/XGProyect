@@ -10,8 +10,9 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
+| Bibliotheken | 1 migriert (BBCodeLib) | Welle 5 läuft |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 977 PHPStan- + 476 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 954 PHPStan- + 460 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
 > laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
@@ -132,6 +133,23 @@ Hinweis: Fleet3 nutzt `HttpResponseException(redirect(...))`, um aus tief
 verschachtelten Helfern (Session-Ships fehlen, keine erlaubte Mission,
 ungültiges Ziel) sauber nach fleet1 zurückzuspringen — der Legacy-Code machte
 das per `header()+exit`, was in Laravel die Session-Speicherung umgangen hätte.
+
+## Welle 5 — Leaf-Bibliotheken 🟢 laufend
+
+Nachdem alle Controller nativ sind, werden die verbleibenden Legacy-Bibliotheken
+(`legacy/app/Libraries/`) einzeln zu typisierten `app/`-Klassen migriert. Ein
+Kandidat ist ein **echtes Blatt**, wenn keine andere Legacy-Datei ihn referenziert
+(auch nicht per Namespace-Kurzreferenz oder `use … as`-Alias) — nur dann ist die
+Löschung sauber.
+
+| Bibliothek | Status | Notiz |
+|---|---|---|
+| BBCodeLib (167 Z.) | ✅ migriert | **`eval()`-Dispatch entfernt** → typisierte Closures pro Tag; XSS-Schemata weiter geblockt; 39 Baseline-Einträge abgebaut |
+
+Reihenfolge nach Sauberkeit (Blatt-Kandidaten mit den wenigsten Legacy-Referenzen
+zuerst). Nicht sauber lösbar, solange die Engine lebt: `Formulas`, `PlanetLib`,
+`StatisticsLibrary`, `NoobsProtectionLib`, `DevelopmentsLib` (Alias-Aufruf in
+`UpdatesLibrary`) — diese hängen an der Missions-Engine bzw. am Tick.
 
 ---
 
