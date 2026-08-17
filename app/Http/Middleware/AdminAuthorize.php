@@ -9,7 +9,7 @@ use App\Services\SettingsService;
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
-use Xgp\App\Libraries\Adm\Permissions;
+use App\Libraries\Adm\Permissions;
 
 class AdminAuthorize
 {
