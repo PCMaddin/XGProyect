@@ -23,8 +23,8 @@ use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Game\Fleets;
 use Xgp\App\Libraries\NoobsProtectionLib;
-use Xgp\App\Libraries\Premium\Premium;
-use Xgp\App\Libraries\Research\Researches;
+use App\Libraries\Premium\Premium;
+use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
 
 /**
@@ -127,8 +127,8 @@ class Fleet4Controller extends BaseController
         ) : [];
 
         $this->fleets = new Fleets($rows, $userId);
-        $this->research = new Researches([$this->user], $userId);
-        $this->premium = new Premium([$this->user], $userId);
+        $this->research = new Researches([$this->user]);
+        $this->premium = new Premium([$this->user]);
 
         return $this->buildPage($request);
     }

@@ -17,8 +17,8 @@ use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Game\Fleets;
-use Xgp\App\Libraries\Premium\Premium;
-use Xgp\App\Libraries\Research\Researches;
+use App\Libraries\Premium\Premium;
+use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
 
 /**
@@ -81,8 +81,8 @@ class Fleet1Controller extends BaseController
         ) : [];
 
         $this->fleets = new Fleets($rows, $userId);
-        $this->research = new Researches([$this->user], $userId);
-        $this->premium = new Premium([$this->user], $userId);
+        $this->research = new Researches([$this->user]);
+        $this->premium = new Premium([$this->user]);
     }
 
     private function buildPage(Request $request): View

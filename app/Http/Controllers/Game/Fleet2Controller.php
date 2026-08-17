@@ -17,8 +17,8 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Premium\Premium;
-use Xgp\App\Libraries\Research\Researches;
+use App\Libraries\Premium\Premium;
+use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
 use App\Libraries\Users\Shortcuts;
 
@@ -69,8 +69,8 @@ class Fleet2Controller extends BaseController
         $this->planet = Users::getInstance()->getPlanetData();
         $this->objects = new Objects();
 
-        $this->research = new Researches([$this->user], $this->userInt('id'));
-        $this->premium = new Premium([$this->user], $this->userInt('id'));
+        $this->research = new Researches([$this->user]);
+        $this->premium = new Premium([$this->user]);
 
         return $this->buildPage($request);
     }
