@@ -10,9 +10,9 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | 3 migriert (BBCodeLib, Shortcuts, AcsFleets) | Welle 5 läuft |
+| Bibliotheken | 4 migriert (BBCodeLib, Shortcuts, AcsFleets, Buddy) | Welle 5 läuft |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 940 PHPStan- + 448 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 933 PHPStan- + 445 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
 > laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
@@ -147,6 +147,7 @@ Löschung sauber.
 | BBCodeLib (167 Z.) | ✅ migriert | **`eval()`-Dispatch entfernt** → typisierte Closures pro Tag; XSS-Schemata weiter geblockt; 39 Baseline-Einträge abgebaut |
 | Users\Shortcuts (122 Z.) | ✅ migriert | **`die()` bei JSON-/Validierungsfehlern entfernt** (graceful); `getById()`-Typbug (`0` statt `array`) behoben; Einträge auf feste Shape normalisiert → Aufrufer typsicher; 16 Baseline-Einträge abgebaut |
 | Game\AcsFleets (61 Z.) | ✅ migriert | toter `getUserId`/User-ID-Param entfernt; `getFirstAcs()` gibt bei leerer Menge eine leere Entity statt Index-out-of-bounds; 10 Baseline-Einträge abgebaut |
+| Buddies\Buddy (131 Z.) | ✅ migriert | Anfragen-Aufteilung (bestätigt / gesendet / empfangen) auf `array_filter` mit typisierten Closures; 10 Baseline-Einträge abgebaut |
 
 Reihenfolge nach Sauberkeit (Blatt-Kandidaten mit den wenigsten Legacy-Referenzen
 zuerst). Nicht sauber lösbar, solange die Engine lebt: `Formulas`, `PlanetLib`,

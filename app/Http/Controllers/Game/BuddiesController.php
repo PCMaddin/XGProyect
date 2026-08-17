@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\BuddyEntity;
 use Xgp\App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
-use Xgp\App\Libraries\Buddies\Buddy;
+use App\Libraries\Buddies\Buddy;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 

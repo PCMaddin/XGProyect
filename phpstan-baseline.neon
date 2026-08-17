@@ -3007,48 +3007,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/Utils/Number.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:__construct\(\) has parameter \$buddies with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:createNewBuddyEntity\(\) has parameter \$buddy with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:getBuddies\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:getReceivedRequests\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:getSentRequests\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Buddies\\Buddy\:\:setUp\(\) has parameter \$buddies with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Buddies\\Buddy\:\:\$_buddies type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Buddies/Buddy.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\Buildings\\Building\:\:__construct\(\) has parameter \$objects with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
