@@ -10,9 +10,9 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | 5 migriert + 2 tote gelöscht | Welle 5 läuft |
+| Bibliotheken | 5 migriert + 5 tote gelöscht | Welle 5 läuft |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 920 PHPStan- + 438 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 891 PHPStan- + 429 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
 > laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
@@ -150,7 +150,7 @@ Löschung sauber.
 | Buddies\Buddy (131 Z.) | ✅ migriert | Anfragen-Aufteilung (bestätigt / gesendet / empfangen) auf `array_filter` mit typisierten Closures; 10 Baseline-Einträge abgebaut |
 | Adm\Permissions (27 Z.) | ✅ migriert | **`die()` bei JSON-Fehler entfernt** → leere Deny-all-Matrix; typsicherer Nested-Lookup; 3 Baseline-Einträge abgebaut |
 | Users\Notes, Game\Preferences | 🗑️ gelöscht (tot) | 0 Referenzen; durch Eloquent-Modelle `App\Models\Notes`/`Preferences` ersetzt; latente Bugs (null statt Entity, `[0]` auf leerer Menge) mit-entfernt |
-| Buildings/ (Building, Queue, QueueElements) | ⏸️ zurückgestellt | in Produktion durch `BuildingQueueService` ersetzt (unwired), aber `QueueTest` liefert 11 Tests — erst native Service-Coverage nachziehen, dann retiren |
+| Buildings/ (Building, Queue, QueueElements) + QueueTest | 🗑️ gelöscht (tot) | String-basierte Alt-Bau-Queue, in Produktion durch `BuildingQueue`-Modell + `BuildingQueueService` ersetzt (0 Referenzen). `QueueTest` testete nur die tote String-Logik; die moderne Sequenzierung deckt bereits `QueueSequenceServiceTest` ab — kein Verlust an Live-Coverage. 29 Baseline-Einträge abgebaut |
 
 Reihenfolge nach Sauberkeit (Blatt-Kandidaten mit den wenigsten Legacy-Referenzen
 zuerst). Nicht sauber lösbar, solange die Engine lebt: `Formulas`, `PlanetLib`,
