@@ -5653,54 +5653,6 @@ parameters:
 			path: legacy/app/Libraries/Users/Notes.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:addNew\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:deleteById\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:editById\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:getAllAsArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:getById\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Shortcuts\:\:getShortcuts\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Users\\Shortcuts\:\:\$shortcuts \(array\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Users\\Shortcuts\:\:\$shortcuts type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Shortcuts.php
-
-		-
 			message: '#^Binary operation "\." between mixed and \(array\<string\>\|string\) results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1

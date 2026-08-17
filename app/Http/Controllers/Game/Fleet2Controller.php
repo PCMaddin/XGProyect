@@ -20,7 +20,7 @@ use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Premium\Premium;
 use Xgp\App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
-use Xgp\App\Libraries\Users\Shortcuts;
+use App\Libraries\Users\Shortcuts;
 
 /**
  * Fleet wizard step 2: pick the target coordinates (and speed) for the ships
@@ -205,14 +205,10 @@ class Fleet2Controller extends BaseController
         $rows = [];
 
         foreach ($shortcuts as $shortcut) {
-            if (!is_array($shortcut) || $shortcut === []) {
-                continue;
-            }
-
             $rows[] = [
                 'value' => $this->coord($shortcut, 'g') . ';' . $this->coord($shortcut, 's') . ';' . $this->coord($shortcut, 'p') . ';' . $this->coord($shortcut, 'pt'),
                 'selected' => '',
-                'title' => $this->asString($shortcut['name'] ?? '') . ' ' . $this->formatService->prettyCoords(
+                'title' => $this->asString($shortcut['name']) . ' ' . $this->formatService->prettyCoords(
                     $this->coord($shortcut, 'g'),
                     $this->coord($shortcut, 's'),
                     $this->coord($shortcut, 'p')

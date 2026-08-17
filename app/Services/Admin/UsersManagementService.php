@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use Xgp\App\Libraries\PlanetLib;
-use Xgp\App\Libraries\Users\Shortcuts;
+use App\Libraries\Users\Shortcuts;
 
 class UsersManagementService
 {
@@ -132,7 +132,7 @@ class UsersManagementService
             $result = [];
 
             foreach ($shortcuts->getAllAsArray() as $value) {
-                $type = match ((int) ($value['pt'] ?? 0)) {
+                $type = match ($value['pt']) {
                     1 => (string) __('admin/users.us_planet_shortcut'),
                     2 => (string) __('admin/users.us_debris_shortcut'),
                     3 => (string) __('admin/users.us_moon_shortcut'),

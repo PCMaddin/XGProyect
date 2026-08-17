@@ -10,9 +10,9 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | 1 migriert (BBCodeLib) | Welle 5 läuft |
+| Bibliotheken | 2 migriert (BBCodeLib, Shortcuts) | Welle 5 läuft |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 954 PHPStan- + 460 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 946 PHPStan- + 452 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
 > laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
@@ -145,6 +145,7 @@ Löschung sauber.
 | Bibliothek | Status | Notiz |
 |---|---|---|
 | BBCodeLib (167 Z.) | ✅ migriert | **`eval()`-Dispatch entfernt** → typisierte Closures pro Tag; XSS-Schemata weiter geblockt; 39 Baseline-Einträge abgebaut |
+| Users\Shortcuts (122 Z.) | ✅ migriert | **`die()` bei JSON-/Validierungsfehlern entfernt** (graceful); `getById()`-Typbug (`0` statt `array`) behoben; Einträge auf feste Shape normalisiert → Aufrufer typsicher; 16 Baseline-Einträge abgebaut |
 
 Reihenfolge nach Sauberkeit (Blatt-Kandidaten mit den wenigsten Legacy-Referenzen
 zuerst). Nicht sauber lösbar, solange die Engine lebt: `Formulas`, `PlanetLib`,

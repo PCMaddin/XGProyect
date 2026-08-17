@@ -452,12 +452,4 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Users/Notes.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Users/Notes.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Notes.php" method="getNoteById"/>
-  <violation rule="PHPMD\Rule\Design\ExitExpression" file="legacy/app/Libraries/Users/Shortcuts.php"/>
-  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="legacy/app/Libraries/Users/Shortcuts.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/Users/Shortcuts.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Users/Shortcuts.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Shortcuts.php" method="editById"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Shortcuts.php" method="deleteById"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Shortcuts.php" method="getById"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Shortcuts.php" method="validateShortcutId"/>
 </phpmd-baseline>

@@ -15,7 +15,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
-use Xgp\App\Libraries\Users\Shortcuts;
+use App\Libraries\Users\Shortcuts;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")
@@ -121,11 +121,10 @@ class FleetshortcutsController extends BaseController
         $action = $request->has('a') ? $request->integer('a') : null;
         $shortcuts = $this->shortcuts->getAllAsArray();
 
-        if ($action === null || !array_key_exists($action, $shortcuts) || !is_array($shortcuts[$action])) {
+        if ($action === null || !array_key_exists($action, $shortcuts)) {
             return redirect(self::REDIRECT_TARGET);
         }
 
-        /** @var array<string, mixed> $shortcut */
         $shortcut = $shortcuts[$action];
 
         return view('fleet.shortcuts.edit', [
@@ -156,10 +155,6 @@ class FleetshortcutsController extends BaseController
         $setRow = true;
 
         foreach ($this->shortcuts->getAllAsArray() as $id => $shortcut) {
-            if (!is_array($shortcut)) {
-                continue;
-            }
-
             $list[] = [
                 'row_start' => $setRow ? '<tr height="20">' : '',
                 'shortcut_id' => $id,
