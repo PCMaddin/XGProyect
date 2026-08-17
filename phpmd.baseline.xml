@@ -265,9 +265,6 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="getOwnFleetById"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="getOwnValidFleetById"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="validateIndex"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Game/Preferences.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Preferences.php" method="__construct"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Game/Preferences.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/ResourceMarket.php" method="calculateBasePriceToRefill"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Game/ResourceMarket.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/ResourceMarket.php" method="calculateRefillStoragePrice"/>
@@ -442,7 +439,4 @@
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/Users.php"/>
   <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/Users.php" method="setUserData"/>
   <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/Users.php" method="setPlanet"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Users/Notes.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Users/Notes.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Users/Notes.php" method="getNoteById"/>
 </phpmd-baseline>

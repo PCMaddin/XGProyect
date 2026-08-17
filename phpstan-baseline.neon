@@ -3781,36 +3781,6 @@ parameters:
 			path: legacy/app/Libraries/Game/Fleets.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Game\\Preferences\:\:__construct\(\) has parameter \$preferences with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Game/Preferences.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Game\\Preferences\:\:createNewPreferencesEntity\(\) has parameter \$preference with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Game/Preferences.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Game\\Preferences\:\:getPreferences\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Game/Preferences.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Game\\Preferences\:\:setUp\(\) has parameter \$preferences with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Game/Preferences.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Game\\Preferences\:\:\$preferences type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Game/Preferences.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\Game\\ResourceMarket\:\:__construct\(\) has parameter \$planet with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -5537,42 +5507,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: legacy/app/Libraries/Users.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Notes\:\:__construct\(\) has parameter \$notes with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Notes\:\:createNewNotesEntity\(\) has parameter \$note with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Notes\:\:getNoteById\(\) should return Xgp\\App\\Core\\Entity\\NotesEntity but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Notes\:\:getNotes\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Users\\Notes\:\:setUp\(\) has parameter \$notes with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Users\\Notes\:\:\$notes type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Users/Notes.php
 
 		-
 			message: '#^Binary operation "\." between mixed and \(array\<string\>\|string\) results in an error\.$#'
