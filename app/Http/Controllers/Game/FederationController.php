@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Game\AcsFleets;
+use App\Libraries\Game\AcsFleets;
 use Xgp\App\Libraries\Game\Fleets;
 use Xgp\App\Libraries\Users;
 
@@ -250,7 +250,7 @@ class FederationController extends BaseController
             $groupId = $this->createGroup($ownFleet);
         }
 
-        return new AcsFleets([$this->getAcsDataByGroupId($groupId)], $this->userInt('id'));
+        return new AcsFleets([$this->getAcsDataByGroupId($groupId)]);
     }
 
     private function createGroup(FleetEntity $ownFleet): int
