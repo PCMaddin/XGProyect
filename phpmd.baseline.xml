@@ -255,9 +255,6 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="getOwnFleetById"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="getOwnValidFleetById"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/Fleets.php" method="validateIndex"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/ResourceMarket.php" method="calculateBasePriceToRefill"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Game/ResourceMarket.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Game/ResourceMarket.php" method="calculateRefillStoragePrice"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Messenger/MessagesOptions.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Messenger/MessagesOptions.php" method="setMessageText"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Messenger/MessagesOptions.php"/>

@@ -13,7 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Game\ResourceMarket;
+use App\Libraries\Game\ResourceMarket;
 use Xgp\App\Libraries\Users;
 
 /**
