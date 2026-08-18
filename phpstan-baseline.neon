@@ -493,36 +493,6 @@ parameters:
 			path: legacy/app/Helpers/StringsHelper.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Alliance\\Alliances\:\:__construct\(\) has parameter \$alliances with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Alliance/Alliances.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Alliance\\Alliances\:\:createNewAllianceEntity\(\) has parameter \$alliance with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Alliance/Alliances.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Alliance\\Alliances\:\:getAlliances\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Alliance/Alliances.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Alliance\\Alliances\:\:setUp\(\) has parameter \$alliances with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Alliance/Alliances.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Alliance\\Alliances\:\:\$_alliances type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Alliance/Alliances.php
-
-		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1

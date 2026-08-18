@@ -10,9 +10,9 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | 8 migriert + 5 tote gelöscht | Welle 5 läuft |
+| Bibliotheken | 9 migriert + 5 tote gelöscht | Welle 5 läuft |
 | Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 868 PHPStan- + 418 PHPMD-Einträge in Baselines unterdrückt |
+| Analyse-Schuld | — | 863 PHPStan- + 414 PHPMD-Einträge in Baselines unterdrückt |
 
 > **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
 > laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
@@ -152,6 +152,7 @@ Löschung sauber.
 | Premium\Premium (63 Z.) | ✅ migriert | Entity-Wrapper wie AcsFleets/Buddy; toter User-ID-Param entfernt (5 Aufrufer angepasst); `getCurrentPremium()` leer-sicher; 6 Baseline-Einträge |
 | Research\Researches (59 Z.) | ✅ migriert | dito; toter User-ID-Param entfernt; `getCurrentResearch()` leer-sicher; 6 Baseline-Einträge |
 | Game\ResourceMarket (192 Z.) | ✅ migriert | **dynamische Methoden-Dispatch** (`{'getPlanetAmountOf'.ucfirst($r)}()`) durch typisierte `match`-Helfer ersetzt → 11 Baseline-Einträge weg; tote `UserEntity` entfernt; Division-durch-0-Guard; 5 Charakterisierungs-Tests (Preis-Mathematik gegen Hand-Rechnung verifiziert) |
+| Alliance\Alliances (98 Z.) | ✅ migriert | letzter isolierter Leaf; `checkRank`-Nested-Access typsicher; `getCurrentAlliance()` leer-sicher; hält bewusst die Legacy-`Ranks`-Referenz (die auch `Users` nutzt); 5 Tests (Owner/Access/Rank-0/Filter) |
 | Users\Notes, Game\Preferences | 🗑️ gelöscht (tot) | 0 Referenzen; durch Eloquent-Modelle `App\Models\Notes`/`Preferences` ersetzt; latente Bugs (null statt Entity, `[0]` auf leerer Menge) mit-entfernt |
 | Buildings/ (Building, Queue, QueueElements) + QueueTest | 🗑️ gelöscht (tot) | String-basierte Alt-Bau-Queue, in Produktion durch `BuildingQueue`-Modell + `BuildingQueueService` ersetzt (0 Referenzen). `QueueTest` testete nur die tote String-Logik; die moderne Sequenzierung deckt bereits `QueueSequenceServiceTest` ab — kein Verlust an Live-Coverage. 29 Baseline-Einträge abgebaut |
 | _Nachtrag:_ `BuildingQueueService` | ✅ getestet | Der dokumentierte Test-Gap ist geschlossen: neue **DB-Test-Infrastruktur** (In-Memory-SQLite + Install-Migrationen via `DatabaseTestCase`) + 6 Charakterisierungs-Tests (add/Charge, Positions-Increment, Queue-Cap, cancelFirst/Refund, getQueueData) |

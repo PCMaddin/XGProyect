@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
-use Xgp\App\Libraries\Alliance\Alliances;
+use App\Libraries\Alliance\Alliances;
 use Xgp\App\Libraries\Alliance\Ranks;
 use App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
