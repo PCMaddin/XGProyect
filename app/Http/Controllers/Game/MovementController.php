@@ -20,7 +20,7 @@ use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Game\Fleets;
+use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;

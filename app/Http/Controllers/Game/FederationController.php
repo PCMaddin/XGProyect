@@ -15,7 +15,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
 use Xgp\App\Libraries\Functions;
 use App\Libraries\Game\AcsFleets;
-use Xgp\App\Libraries\Game\Fleets;
+use App\Libraries\Game\Fleets;
 use Xgp\App\Libraries\Users;
 
 /**

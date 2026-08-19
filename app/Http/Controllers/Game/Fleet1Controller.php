@@ -16,7 +16,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Game\Fleets;
+use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
