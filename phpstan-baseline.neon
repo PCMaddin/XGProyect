@@ -4777,42 +4777,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Transport.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:__construct\(\) has parameter \$planet_data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:createNewShipsEntity\(\) has parameter \$ships with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:getCurrentShips\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:getShips\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:setUp\(\) has parameter \$ships with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Planet\\Ships\:\:\$_ships type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Planet/Ships.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\PlanetLib\:\:setNewMoon\(\) should return string but returns false\.$#'
 			identifier: return.type
 			count: 1
