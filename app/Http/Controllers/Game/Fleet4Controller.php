@@ -22,7 +22,7 @@ use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Game\Fleets;
-use Xgp\App\Libraries\NoobsProtectionLib;
+use App\Libraries\NoobsProtectionLib;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;

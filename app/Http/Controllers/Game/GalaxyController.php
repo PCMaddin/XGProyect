@@ -20,7 +20,7 @@ use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Formulas;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\GalaxyLib;
-use Xgp\App\Libraries\NoobsProtectionLib;
+use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Libraries\Users;
 
 /**

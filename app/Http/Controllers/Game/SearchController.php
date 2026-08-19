@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\NoobsProtectionLib;
+use App\Libraries\NoobsProtectionLib;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

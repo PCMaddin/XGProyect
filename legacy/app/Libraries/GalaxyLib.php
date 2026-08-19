@@ -6,6 +6,7 @@ namespace Xgp\App\Libraries;
 
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
+use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;

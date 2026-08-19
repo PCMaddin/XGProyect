@@ -17,7 +17,7 @@ use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\DevelopmentsLib;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\NoobsProtectionLib;
+use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Libraries\UpdatesLibrary;
 use Xgp\App\Libraries\Users;
 

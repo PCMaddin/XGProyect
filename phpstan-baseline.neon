@@ -4831,36 +4831,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Transport.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\NoobsProtectionLib\:\:returnPoints\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/NoobsProtectionLib.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\NoobsProtectionLib\:\:\$allowed_level has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/NoobsProtectionLib.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\NoobsProtectionLib\:\:\$protection has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/NoobsProtectionLib.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\NoobsProtectionLib\:\:\$protectionmulti has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/NoobsProtectionLib.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\NoobsProtectionLib\:\:\$protectiontime has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/NoobsProtectionLib.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\Planet\\Ships\:\:__construct\(\) has parameter \$planet_data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
