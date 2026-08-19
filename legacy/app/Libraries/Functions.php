@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
 use Xgp\App\Core\Template;
 use Xgp\App\Helpers\StringsHelper;
-use Xgp\App\Libraries\Messenger\MessagesFormat;
-use Xgp\App\Libraries\Messenger\MessagesOptions;
-use Xgp\App\Libraries\Messenger\Messenger;
+use App\Libraries\Messenger\MessagesFormat;
+use App\Libraries\Messenger\MessagesOptions;
+use App\Libraries\Messenger\Messenger;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")
