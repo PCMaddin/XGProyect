@@ -11,7 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 
 /**
  * Handles the creation and (in the future) the behaviour of bot accounts.

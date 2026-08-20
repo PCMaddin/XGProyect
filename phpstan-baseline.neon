@@ -4453,24 +4453,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Transport.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\PlanetLib\:\:setNewMoon\(\) should return string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/PlanetLib.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\PlanetLib\:\:setNewMoon\(\) should return string but returns true\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/PlanetLib.php
-
-		-
-			message: '#^Offset ''id_moon'' might not exist on array\<mixed, mixed\>\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: legacy/app/Libraries/PlanetLib.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\SecurePageLib\:\:validate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

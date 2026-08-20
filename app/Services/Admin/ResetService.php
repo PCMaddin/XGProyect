@@ -7,7 +7,7 @@ namespace App\Services\Admin;
 use App\Models\User;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

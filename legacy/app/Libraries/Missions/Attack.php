@@ -18,7 +18,7 @@ use Xgp\App\Libraries\BattleEngine\Utils\DebugManager;
 use Xgp\App\Libraries\BattleEngine\Utils\LangManager;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 use Xgp\App\Libraries\UpdatesLibrary;
 
 class Attack extends Missions
@@ -405,7 +405,7 @@ class Attack extends Missions
 
         // create the moon
         $_creator = new PlanetLib();
-        $_creator->setNewMoon($galaxy, $system, $planet, $targetUserId);
+        $_creator->setNewMoon((int) $galaxy, (int) $system, (int) $planet, (int) $targetUserId);
     }
 
     /**

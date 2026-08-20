@@ -9,7 +9,7 @@ use App\Services\SettingsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 use App\Libraries\Users\Shortcuts;
 
 class UsersManagementService

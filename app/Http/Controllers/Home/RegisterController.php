@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Mail;
 use Throwable;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 
 class RegisterController extends BaseController
 {

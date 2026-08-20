@@ -7,7 +7,7 @@ namespace Xgp\App\Libraries\Missions;
 use App\Services\Game\Formulas\FleetsService;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 use Xgp\App\Libraries\StatisticsLibrary;
 
 /**
@@ -106,7 +106,7 @@ class Colonize extends Missions
     {
         $creator = new PlanetLib();
 
-        return $creator->setNewPlanet($fleet_row['fleet_end_galaxy'], $fleet_row['fleet_end_system'], $fleet_row['fleet_end_planet'], $fleet_row['fleet_owner']);
+        return $creator->setNewPlanet((int) $fleet_row['fleet_end_galaxy'], (int) $fleet_row['fleet_end_system'], (int) $fleet_row['fleet_end_planet'], (int) $fleet_row['fleet_owner']);
     }
 
     private function buildNewFleet(string $fleetArray): bool
