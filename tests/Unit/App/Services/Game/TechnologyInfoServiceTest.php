@@ -8,6 +8,7 @@ use App\Core\GameObjects\GameObjectRegistry;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\FleetsService;
+use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
 use App\Services\Game\TechnologyInfoService;
@@ -116,6 +117,7 @@ class TechnologyInfoServiceTest extends TestCase
             officerService: $this->createStub(OfficerService::class),
             developmentsService: $this->createStub(DevelopmentsService::class),
             fleetsService: $this->createStub(FleetsService::class),
+            formulasService: $this->createStub(FormulasService::class),
             settings: $this->createStub(SettingsService::class),
         );
     }

@@ -3127,7 +3127,7 @@ parameters:
 			path: legacy/app/Libraries/DevelopmentsLib.php
 
 		-
-			message: '#^Parameter \#3 \$level of static method Xgp\\App\\Libraries\\Formulas\:\:getDevelopmentCost\(\) expects int, bool\|int given\.$#'
+			message: '#^Parameter \#3 \$level of static method App\\Libraries\\Formulas\:\:getDevelopmentCost\(\) expects int, bool\|int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: legacy/app/Libraries/DevelopmentsLib.php
@@ -3251,54 +3251,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: legacy/app/Libraries/FleetsLib.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getDeathStarsDestructionChance\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getMoonDestructionChance\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getPlanetSize\(\) has parameter \$main with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getPlanetSize\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getTearDownBaseCost\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:getTearDownCost\(\) should return int but returns float\|int\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Formulas\:\:setPlanetTemp\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Formulas.php
-
-		-
-			message: '#^Offset 0\|1 might not exist on array\{\}\|array\{''dschjungel'', ''normaltemp''\}\|array\{''eis'', ''wasser''\}\|array\{''gas'', ''eis''\}\|array\{''normaltemp'', ''gas''\|''trocken''\}\|array\{''trocken'', ''wuesten''\}\|array\{''wasser'', ''dschjungel''\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: legacy/app/Libraries/Formulas.php
 
 		-
 			message: '#^Method Xgp\\App\\Libraries\\Functions\:\:getLanguagesList\(\) return type has no value type specified in iterable type array\.$#'

@@ -6,8 +6,10 @@ namespace Tests\Unit\App\Http\Controllers\Game;
 
 use App\Http\Controllers\Game\ResourcesettingsController;
 use App\Services\FormatService;
+use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
+use App\Services\SettingsService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
@@ -47,6 +49,7 @@ class ResourcesettingsControllerTest extends TestCase
             new ProductionService(),
             new FormatService(),
             new OfficerService(),
+            new FormulasService(new SettingsService()),
         );
 
         return (new ReflectionMethod(ResourcesettingsController::class, $method))->invoke($controller, ...$args);

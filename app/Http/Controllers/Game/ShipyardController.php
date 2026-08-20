@@ -18,7 +18,7 @@ use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\DevelopmentsLib;
-use Xgp\App\Libraries\Formulas;
+use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
@@ -77,6 +77,7 @@ class ShipyardController extends BaseController
     public function __construct(
         private FormatService $formatService,
         private DevelopmentsService $developmentsService,
+        private FormulasService $formulasService,
     ) {
     }
 
@@ -196,7 +197,7 @@ class ShipyardController extends BaseController
         $description = $this->descriptionText($this->objectName($itemId));
 
         if ($itemId === Defenses::defense_interplanetary_missile) {
-            return strtr($description, ['%s' => (string) Formulas::missileRange($this->userInt('research_impulse_drive'))]);
+            return strtr($description, ['%s' => (string) $this->formulasService->missileRange($this->userInt('research_impulse_drive'))]);
         }
 
         return $description;

@@ -151,7 +151,9 @@ class PlanetlayerController extends BaseController
                     $userId,
                 ]
             );
-        } else {
+        }
+
+        if ($this->int($this->planet, 'moon_id') === 0) {
             DB::update(
                 $this->prepareSql(
                     'UPDATE `' . PLANETS . '` AS p, `' . USERS . '` AS u SET

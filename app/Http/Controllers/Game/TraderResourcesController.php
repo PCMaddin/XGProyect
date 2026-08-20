@@ -167,10 +167,11 @@ class TraderResourcesController extends BaseController
         foreach (self::PERCENTAGES as $percentage) {
             $price = $this->priceToFill($resource, $percentage);
 
-            if (!$this->storageFillable($resource, $percentage) || $price === 0.0) {
-                $priceLabel = $this->formatService->colorRed('-');
-                $button = '';
-            } else {
+            $fillable = $this->storageFillable($resource, $percentage) && $price !== 0.0;
+            $priceLabel = $this->formatService->colorRed('-');
+            $button = '';
+
+            if ($fillable) {
                 $priceLabel = $this->formatService->customColor(
                     $this->formatService->prettyNumber((int) $price),
                     '#2cbef2'

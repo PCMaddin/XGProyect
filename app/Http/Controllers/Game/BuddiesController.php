@@ -22,6 +22,7 @@ use Xgp\App\Libraries\Users;
  * Buddy list and buddy requests (send / accept / decline / cancel).
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class BuddiesController extends BaseController
 {

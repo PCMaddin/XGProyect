@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Objects;
 use Xgp\App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Formulas;
+use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\GalaxyLib;
 use App\Libraries\NoobsProtectionLib;
@@ -60,6 +60,7 @@ class GalaxyController extends BaseController
         private FormatService $formatService,
         private FleetsService $fleetsService,
         private OfficerService $officerService,
+        private FormulasService $formulasService,
         private SettingsService $settingsService,
     ) {
     }
@@ -302,7 +303,7 @@ class GalaxyController extends BaseController
 
         $currentMissiles = $this->planetInt('defense_interplanetary_missile');
         $distance = abs($system - $this->planetInt('planet_system'));
-        $range = Formulas::missileRange($this->userInt('research_impulse_drive'));
+        $range = $this->formulasService->missileRange($this->userInt('research_impulse_drive'));
 
         $targetUser = $this->fetchTargetUser($galaxy, $system, $planet, 1);
 

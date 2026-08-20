@@ -21,7 +21,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Helpers\StringsHelper;
-use Xgp\App\Libraries\Formulas;
+use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
@@ -60,6 +60,7 @@ class TechnologyInfoService
         private OfficerService $officerService,
         private DevelopmentsService $developmentsService,
         private FleetsService $fleetsService,
+        private FormulasService $formulasService,
         private SettingsService $settings,
     ) {
     }
@@ -690,7 +691,7 @@ class TechnologyInfoService
 
         $techBonus = '';
         $ionTechnologyLevel = (int) ($this->user[$this->resource[Research::research_ionic_technology]] ?? 0);
-        $ionTechnologyPercentage = Formulas::getIonTechnologyBonus($ionTechnologyLevel) * 100;
+        $ionTechnologyPercentage = $this->formulasService->getIonTechnologyBonus($ionTechnologyLevel) * 100;
 
         if ($ionTechnologyPercentage > 0) {
             $techBonus = StringsHelper::parseReplacements(

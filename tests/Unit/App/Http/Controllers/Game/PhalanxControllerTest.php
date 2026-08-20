@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Http\Controllers\Game;
 
 use App\Http\Controllers\Game\PhalanxController;
+use App\Services\Game\Formulas\FormulasService;
+use App\Services\SettingsService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
@@ -50,7 +52,7 @@ class PhalanxControllerTest extends TestCase
 
     private function invoke(string $method, mixed ...$args): mixed
     {
-        $controller = new PhalanxController();
+        $controller = new PhalanxController(new FormulasService(new SettingsService()));
 
         return (new ReflectionMethod(PhalanxController::class, $method))->invoke($controller, ...$args);
     }

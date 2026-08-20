@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries;
 
+use App\Libraries\Formulas;
+
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -141,15 +143,14 @@ class PlanetLib
                 'planet_b_hangar_id' => '',
             ];
 
-            $insert_query = 'INSERT INTO `' . PLANETS . '` SET ';
+            $columns = array_keys($data);
+            $columnList = '`' . implode('`, `', $columns) . '`';
+            $placeholders = implode(', ', array_fill(0, count($columns), '?'));
 
-            foreach ($data as $column => $value) {
-                $insert_query .= '`' . $column . "` = '" . $value . "', ";
-            }
-
-            $insert_query = substr_replace($insert_query, '', -2) . ';';
-
-            DB::statement($this->prepareSql($insert_query));
+            DB::insert(
+                $this->prepareSql('INSERT INTO `' . PLANETS . '` (' . $columnList . ') VALUES (' . $placeholders . ');'),
+                array_values($data)
+            );
 
             $planet_id = (int) DB::getPdo()->lastInsertId();
 

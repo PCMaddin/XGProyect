@@ -11,9 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Formulas;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
@@ -32,6 +32,10 @@ class PhalanxController extends BaseController
     /** @var array<string, mixed> */
     private array $planet = [];
 
+    public function __construct(private FormulasService $formulasService)
+    {
+    }
+
     public function __invoke(Request $request): View | RedirectResponse
     {
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Galaxy));
@@ -44,7 +48,7 @@ class PhalanxController extends BaseController
 
     private function buildPage(Request $request): View | RedirectResponse
     {
-        $range = Formulas::phalanxRange($this->planetInt('building_phalanx'));
+        $range = $this->formulasService->phalanxRange($this->planetInt('building_phalanx'));
         $lowerSystem = max($this->planetInt('planet_system') - $range, 1);
         $upperSystem = min($this->planetInt('planet_system') + $range, MAX_SYSTEM_IN_GALAXY);
 

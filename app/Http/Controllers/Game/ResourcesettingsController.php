@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\Formulas;
+use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
@@ -60,6 +60,7 @@ class ResourcesettingsController extends BaseController
         private ProductionService $productionService,
         private FormatService $formatService,
         private OfficerService $officerService,
+        private FormulasService $formulasService,
     ) {
     }
 
@@ -109,6 +110,60 @@ class ResourcesettingsController extends BaseController
         $engineerBoost = 1.0 + ($this->officerService->isOfficerActive($this->userInt('premium_officier_engineer'), time()) ? ENGINEER_ENERGY : 0);
         $plasmaLevel = $this->userInt('research_plasma_technology');
 
+        $production = $this->accumulateProduction($multiplier, $buildTemp, $energyTech, $geologeBoost, $engineerBoost, $plasmaLevel, $postPercent);
+        $productionLevel = $this->prodLevel($production['energyUsed'], $production['energyMax']);
+
+        return array_merge(
+            [
+                'Production_of_resources_in_the_planet' => str_replace(
+                    '%s',
+                    $this->planetStr('planet_name'),
+                    (string) __('game/resources.rs_production_on_planet')
+                ),
+                'resource_row' => $production['resourceRow'],
+                'metal_basic_income' => $basicIncome['metal'],
+                'crystal_basic_income' => $basicIncome['crystal'],
+                'deuterium_basic_income' => $basicIncome['deuterium'],
+                'energy_basic_income' => $basicIncome['energy'],
+                'plasma_level' => $plasmaLevel,
+                'plasma_metal' => $this->coloredNumber($production['plasmaBoost']['metal']),
+                'plasma_crystal' => $this->coloredNumber($production['plasmaBoost']['crystal']),
+                'plasma_deuterium' => $this->coloredNumber($production['plasmaBoost']['deuterium']),
+                'planet_metal_max' => $this->resourceColor($this->planetInt('planet_metal'), $storageMetalMax),
+                'planet_crystal_max' => $this->resourceColor($this->planetInt('planet_crystal'), $storageCrystalMax),
+                'planet_deuterium_max' => $this->resourceColor($this->planetInt('planet_deuterium'), $storageDeuteriumMax),
+            ],
+            $this->totals(
+                $production['metalPerHour'],
+                $production['crystalPerHour'],
+                $production['deuteriumPerHour'],
+                $production['energyMax'],
+                $production['energyUsed'],
+                $productionLevel,
+                $basicIncome
+            ),
+        );
+    }
+
+    /**
+     * Accumulates the per-building production grid into the totals the view needs.
+     *
+     * @return array{
+     *     metalPerHour: float, crystalPerHour: float, deuteriumPerHour: float,
+     *     energyMax: float, energyUsed: float,
+     *     plasmaBoost: array{metal: float, crystal: float, deuterium: float},
+     *     resourceRow: string
+     * }
+     */
+    private function accumulateProduction(
+        int $multiplier,
+        int $buildTemp,
+        int $energyTech,
+        float $geologeBoost,
+        float $engineerBoost,
+        int $plasmaLevel,
+        int $postPercent,
+    ): array {
         $metalPerHour = 0.0;
         $crystalPerHour = 0.0;
         $deuteriumPerHour = 0.0;
@@ -132,33 +187,21 @@ class ResourcesettingsController extends BaseController
             $deuteriumProd = $this->runFormula($prodId, 'deuterium', $level, $factor, $buildTemp, $energyTech);
             $energyProd = $this->runFormula($prodId, 'energy', $level, $factor, $buildTemp, $energyTech);
 
-            $rowMetal = $this->productionService->productionAmount($metalProd, $geologeBoost, $multiplier);
-            $rowCrystal = $this->productionService->productionAmount($crystalProd, $geologeBoost, $multiplier);
-            $rowDeuterium = $this->productionService->productionAmount($deuteriumProd, $geologeBoost, $multiplier);
-
-            $plasmaMetal = $this->productionService->productionAmount($metalProd, Formulas::getPlasmaTechnologyBonus($plasmaLevel, 'metal'), $multiplier);
-            $plasmaCrystal = $this->productionService->productionAmount($crystalProd, Formulas::getPlasmaTechnologyBonus($plasmaLevel, 'crystal'), $multiplier);
-            $plasmaDeuterium = $this->productionService->productionAmount($deuteriumProd, Formulas::getPlasmaTechnologyBonus($plasmaLevel, 'deuterium'), $multiplier);
-
-            $rowMetal += $plasmaMetal;
-            $rowCrystal += $plasmaCrystal;
-            $rowDeuterium += $plasmaDeuterium;
+            $plasmaMetal = $this->productionService->productionAmount($metalProd, $this->formulasService->getPlasmaTechnologyBonus($plasmaLevel, 'metal'), $multiplier);
+            $plasmaCrystal = $this->productionService->productionAmount($crystalProd, $this->formulasService->getPlasmaTechnologyBonus($plasmaLevel, 'crystal'), $multiplier);
+            $plasmaDeuterium = $this->productionService->productionAmount($deuteriumProd, $this->formulasService->getPlasmaTechnologyBonus($plasmaLevel, 'deuterium'), $multiplier);
 
             $plasmaBoost['metal'] += $plasmaMetal;
             $plasmaBoost['crystal'] += $plasmaCrystal;
             $plasmaBoost['deuterium'] += $plasmaDeuterium;
 
+            $metalPerHour += $this->productionService->productionAmount($metalProd, $geologeBoost, $multiplier) + $plasmaMetal;
+            $crystalPerHour += $this->productionService->productionAmount($crystalProd, $geologeBoost, $multiplier) + $plasmaCrystal;
+            $deuteriumPerHour += $this->productionService->productionAmount($deuteriumProd, $geologeBoost, $multiplier) + $plasmaDeuterium;
+
             $energy = $this->productionService->productionAmount($energyProd, $prodId >= 4 ? $engineerBoost : 1.0, 0, true);
-
-            if ($energy > 0) {
-                $energyMax += $energy;
-            } else {
-                $energyUsed += $energy;
-            }
-
-            $metalPerHour += $rowMetal;
-            $crystalPerHour += $rowCrystal;
-            $deuteriumPerHour += $rowDeuterium;
+            $energyMax += $energy > 0 ? $energy : 0.0;
+            $energyUsed += $energy > 0 ? 0.0 : $energy;
 
             $resourceRow .= $this->renderRow($prodId, $name, $factor, $postPercent, [
                 'metal' => $metalProd,
@@ -168,30 +211,15 @@ class ResourcesettingsController extends BaseController
             ]);
         }
 
-        $productionLevel = $this->prodLevel($energyUsed, $energyMax);
-
-        return array_merge(
-            [
-                'Production_of_resources_in_the_planet' => str_replace(
-                    '%s',
-                    $this->planetStr('planet_name'),
-                    (string) __('game/resources.rs_production_on_planet')
-                ),
-                'resource_row' => $resourceRow,
-                'metal_basic_income' => $basicIncome['metal'],
-                'crystal_basic_income' => $basicIncome['crystal'],
-                'deuterium_basic_income' => $basicIncome['deuterium'],
-                'energy_basic_income' => $basicIncome['energy'],
-                'plasma_level' => $plasmaLevel,
-                'plasma_metal' => $this->coloredNumber($plasmaBoost['metal']),
-                'plasma_crystal' => $this->coloredNumber($plasmaBoost['crystal']),
-                'plasma_deuterium' => $this->coloredNumber($plasmaBoost['deuterium']),
-                'planet_metal_max' => $this->resourceColor($this->planetInt('planet_metal'), $storageMetalMax),
-                'planet_crystal_max' => $this->resourceColor($this->planetInt('planet_crystal'), $storageCrystalMax),
-                'planet_deuterium_max' => $this->resourceColor($this->planetInt('planet_deuterium'), $storageDeuteriumMax),
-            ],
-            $this->totals($metalPerHour, $crystalPerHour, $deuteriumPerHour, $energyMax, $energyUsed, $productionLevel, $basicIncome),
-        );
+        return [
+            'metalPerHour' => $metalPerHour,
+            'crystalPerHour' => $crystalPerHour,
+            'deuteriumPerHour' => $deuteriumPerHour,
+            'energyMax' => $energyMax,
+            'energyUsed' => $energyUsed,
+            'plasmaBoost' => $plasmaBoost,
+            'resourceRow' => $resourceRow,
+        ];
     }
 
     /**
@@ -360,12 +388,14 @@ class ResourcesettingsController extends BaseController
 
     private function prodLevel(float $energyUsed, float $energyMax): int
     {
+        $level = 100;
+
         if ($energyMax > 0 && abs($energyUsed) > $energyMax) {
             $level = (int) floor($energyMax / ($energyUsed * -1) * 100);
-        } elseif ($energyMax === 0.0 && $energyUsed !== 0.0) {
+        }
+
+        if ($energyMax === 0.0 && $energyUsed !== 0.0) {
             $level = 0;
-        } else {
-            $level = 100;
         }
 
         return min($level, 100);

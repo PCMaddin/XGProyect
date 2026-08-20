@@ -82,13 +82,7 @@ class FleetshortcutsController extends BaseController
             && $this->inRange($type, 1, 3);
 
         if ($valid) {
-            if ($mode === 'edit' && $action !== null) {
-                $this->shortcuts->editById($action, $name, $galaxy, $system, $planet, $type);
-            } elseif ($mode === 'delete' && $action !== null) {
-                $this->shortcuts->deleteById($action);
-            } else {
-                $this->shortcuts->addNew($name, $galaxy, $system, $planet, $type);
-            }
+            $this->applyMode($mode, $action, $name, $galaxy, $system, $planet, $type);
 
             // Persist the shortcut collection with a bound parameter. The legacy
             // code concatenated the JSON string straight into the query, which
@@ -100,6 +94,23 @@ class FleetshortcutsController extends BaseController
         }
 
         return redirect(self::REDIRECT_TARGET);
+    }
+
+    private function applyMode(string $mode, ?int $action, string $name, int $galaxy, int $system, int $planet, int $type): void
+    {
+        if ($mode === 'edit' && $action !== null) {
+            $this->shortcuts->editById($action, $name, $galaxy, $system, $planet, $type);
+
+            return;
+        }
+
+        if ($mode === 'delete' && $action !== null) {
+            $this->shortcuts->deleteById($action);
+
+            return;
+        }
+
+        $this->shortcuts->addNew($name, $galaxy, $system, $planet, $type);
     }
 
     private function addForm(): View
