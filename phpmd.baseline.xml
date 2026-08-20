@@ -163,25 +163,6 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="__construct"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Combatreport/Report.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="getReportOwnersAsArrayByReportId"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="maxFields"/>
-  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="developmentPrice"/>
-  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="isDevelopmentPayable"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="formatedDevelopmentPrice"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="developmentTime"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="tearDownTime"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="isDevelopmentAllowed"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="currentBuilding"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/DevelopmentsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="setLevelFormat"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="isLabWorking"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="isShipyardWorking"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/DevelopmentsLib.php" method="areFieldsAvailable"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/FleetsLib.php"/>
   <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="legacy/app/Libraries/FleetsLib.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/FleetsLib.php"/>

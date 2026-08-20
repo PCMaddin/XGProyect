@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\DevelopmentsLib;
+use App\Libraries\DevelopmentsLib;
 use Xgp\App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;

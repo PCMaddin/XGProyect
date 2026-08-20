@@ -22,7 +22,7 @@ use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\DevelopmentsLib as Developments;
+use App\Libraries\DevelopmentsLib as Developments;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

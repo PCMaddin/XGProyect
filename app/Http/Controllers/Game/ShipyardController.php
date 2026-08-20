@@ -17,7 +17,7 @@ use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\DevelopmentsLib;
+use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
