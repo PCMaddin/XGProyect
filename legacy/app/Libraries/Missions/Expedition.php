@@ -10,7 +10,7 @@ use App\Models\UsersStatistics;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 
 /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use App\Services\Game\Formulas\FleetsService;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use App\Libraries\PlanetLib;
 use Xgp\App\Libraries\StatisticsLibrary;

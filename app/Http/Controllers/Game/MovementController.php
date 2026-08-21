@@ -18,7 +18,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
 use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
@@ -213,10 +213,6 @@ class MovementController extends BaseController
         $tooltips = [];
 
         foreach ($ships as $ship => $amount) {
-            if (!is_numeric($ship)) {
-                continue;
-            }
-
             $name = is_array($objects) && isset($objects[$ship]) && is_scalar($objects[$ship])
                 ? (string) $objects[$ship]
                 : '';

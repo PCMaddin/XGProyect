@@ -16,7 +16,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\GalaxyLib;

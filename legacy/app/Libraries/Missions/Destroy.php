@@ -17,7 +17,7 @@ use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
 use Xgp\App\Libraries\BattleEngine\Models\Ship;
 use Xgp\App\Libraries\BattleEngine\Utils\DebugManager;
 use Xgp\App\Libraries\BattleEngine\Utils\LangManager;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use App\Libraries\Formulas;
 use Xgp\App\Libraries\Functions;
 use Xgp\App\Libraries\UpdatesLibrary;

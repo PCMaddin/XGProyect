@@ -163,26 +163,6 @@
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="__construct"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Combatreport/Report.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="getReportOwnersAsArrayByReportId"/>
-  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Design\TooManyPublicMethods" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/FleetsLib.php" method="fleetMaxSpeed"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/FleetsLib.php" method="fleetMaxSpeed"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="fleetConsumption"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="fleetResourcesPopup"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/FleetsLib.php" method="fleetShipsPopup"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="fleetShipsPopup"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/FleetsLib.php" method="flyingFleetsTable"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Libraries/FleetsLib.php" method="flyingFleetsTable"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/FleetsLib.php" method="flyingFleetsTable"/>
-  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Libraries/FleetsLib.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="flyingFleetsTable"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="isFleetReturning"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/FleetsLib.php" method="getMaxStorage"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/Functions.php"/>
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/Functions.php"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Libraries/Functions.php"/>

@@ -7,7 +7,7 @@ namespace Xgp\App\Libraries\Missions;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\FleetsLib;
+use App\Libraries\FleetsLib;
 use Xgp\App\Libraries\StatisticsLibrary;
 use Xgp\App\Libraries\UpdatesLibrary;
 
