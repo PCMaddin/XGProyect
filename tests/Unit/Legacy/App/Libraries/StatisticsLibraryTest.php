@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Libraries\StatisticsLibrary;
 
 /** @SuppressWarnings("PHPMD.StaticAccess") */
 #[CoversClass(StatisticsLibrary::class)]

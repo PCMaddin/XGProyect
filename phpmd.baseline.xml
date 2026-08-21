@@ -274,17 +274,6 @@
   <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/SecurePageLib.php" method="__construct"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/SecurePageLib.php"/>
   <violation rule="PHPMD\Rule\Naming\ShortVariable" file="legacy/app/Libraries/SecurePageLib.php"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/StatisticsLibrary.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/StatisticsLibrary.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/StatisticsLibrary.php" method="rebuildPoints"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/StatisticsLibrary.php"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeUserRank"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeUserRank"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeUserRank"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeAllyRank"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeAllyRank"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/StatisticsLibrary.php" method="makeAllyRank"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Libraries/StatisticsLibrary.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/UpdatesLibrary.php"/>
   <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="legacy/app/Libraries/UpdatesLibrary.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateBuildingsQueue"/>

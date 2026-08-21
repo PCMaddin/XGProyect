@@ -121,12 +121,6 @@ parameters:
 			path: app/Services/Game/BuildingQueueService.php
 
 		-
-			message: '#^Parameter \#1 \$element of static method Xgp\\App\\Libraries\\StatisticsLibrary\:\:calculatePoints\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/Game/BuildingQueueService.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>\(Expression\)" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 10
@@ -3259,12 +3253,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Colonize.php
 
 		-
-			message: '#^Parameter \#1 \$element of static method Xgp\\App\\Libraries\\StatisticsLibrary\:\:calculatePoints\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 2
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\Missions\\Deploy\:\:deployMission\(\) has parameter \$fleet with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4169,18 +4157,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: legacy/app/Libraries/SecurePageLib.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\StatisticsLibrary\:\:makeStats\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/StatisticsLibrary.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\StatisticsLibrary\:\:\$time has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/StatisticsLibrary.php
 
 		-
 			message: '#^Binary operation "\*" between int\<1, max\> and float\|string results in an error\.$#'

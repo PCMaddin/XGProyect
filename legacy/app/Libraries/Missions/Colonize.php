@@ -8,7 +8,7 @@ use App\Services\Game\Formulas\FleetsService;
 use App\Libraries\FleetsLib;
 use Xgp\App\Libraries\Functions;
 use App\Libraries\PlanetLib;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Libraries\StatisticsLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

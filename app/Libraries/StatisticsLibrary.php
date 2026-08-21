@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Libraries;
+namespace App\Libraries;
 
 use App\Core\GameObjects\GameObjectInterface;
 use App\Core\GameObjects\GameObjectRegistry;
@@ -11,7 +11,12 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 
 /**
+ * Rebuilds the per-user and per-alliance statistics points and ranks. The two
+ * ranking routines are large, sequential batch queries; their complexity is
+ * intrinsic and suppressed rather than split.
+ *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class StatisticsLibrary
 {
@@ -32,37 +37,18 @@ class StatisticsLibrary
 
     private static ?GameObjectRegistry $registry = null;
 
-    private $time;
+    private int $time = 0;
     private ?int $pointDivisor = null;
 
-    /**
-     * calculatePoints
-     *
-     * @param string $element Element
-     * @param int    $level   Level
-     * @param string $type    Type
-     *
-     * @return int
-     */
-    public static function calculatePoints($element, $level, $type = '')
+    public static function calculatePoints(int | string $element, int | string $level, string $type = ''): int
     {
-        switch ($type) {
-            case 'tech':
-                $current_level = $level;
-
-                break;
-
-            case '':
-            default:
-                $current_level = ($level - 1 < 0) ? 0 : $level - 1;
-
-                break;
-        }
+        $level = (int) $level;
+        $currentLevel = $type === 'tech' ? $level : max($level - 1, 0);
 
         $price = self::registry()->get((int) $element)->getPrice();
-        $resources_total = $price->getMetal() + $price->getCrystal() + $price->getDeuterium();
-        $level_mult = pow($price->getFactor(), $current_level);
-        $points = ($resources_total * $level_mult) / app(SettingsService::class)->getInt('stat_points');
+        $resourcesTotal = $price->getMetal() + $price->getCrystal() + $price->getDeuterium();
+        $levelMultiplier = pow($price->getFactor(), $currentLevel);
+        $points = ($resourcesTotal * $levelMultiplier) / max(1, app(SettingsService::class)->getInt('stat_points'));
 
         return (int) $points;
     }
@@ -77,25 +63,21 @@ class StatisticsLibrary
     }
 
     /**
-     * Rebuild the user points for the current planet and specific structure type.
-     *
-     * @param int    $userId   The user ID
-     * @param int    $planet_id The planet ID
-     * @param string $what      The structure type (buildings|defenses|research|ships)
-     *
-     * @return boolean
+     * Rebuild the user points for a specific structure type. The planet id is
+     * accepted for call-site compatibility but not used — points are always
+     * recomputed for the whole user.
      */
-    public function rebuildPoints($userId, $planet_id, $what)
+    public function rebuildPoints(int $userId, int $planetId, string $what): bool
     {
-        unset($planet_id);
+        unset($planetId);
 
         if (!isset(self::USER_POINT_COLUMNS[$what])) {
             return false;
         }
 
         DB::table('users_statistics')->updateOrInsert(
-            ['user_statistic_user_id' => (int) $userId],
-            $this->calculateSingleCategoryPointColumns((int) $userId, $what)
+            ['user_statistic_user_id' => $userId],
+            $this->calculateSingleCategoryPointColumns($userId, $what)
         );
 
         return true;
@@ -234,16 +216,26 @@ class StatisticsLibrary
         return $this->pointDivisor;
     }
 
-    public function makeStats()
+    /**
+     * @return array{
+     *     initial_memory: array{0: float, 1: float},
+     *     stats_time: int,
+     *     totaltime: float,
+     *     memory_peak: array{0: float, 1: float},
+     *     end_memory: array{0: float, 1: float}
+     * }
+     */
+    public function makeStats(): array
     {
         $this->time = time();
         $starttime = microtime(true);
 
+        $result = [];
         $result['initial_memory'] = [round(memory_get_usage() / 1024, 1), round(memory_get_usage(true) / 1024, 1)];
 
         $this->rebuildAllPoints();
-        self::makeUserRank();
-        self::makeAllyRank();
+        $this->makeUserRank();
+        $this->makeAllyRank();
 
         $endtime = microtime(true);
 
@@ -255,6 +247,13 @@ class StatisticsLibrary
         return $result;
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.CamelCaseVariableName")
+     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
+     */
     private function makeUserRank(): void
     {
         // GET ALL DATA FROM THE USERS TO UPDATE
@@ -330,6 +329,7 @@ class StatisticsLibrary
         arsort($total['points']);
 
         // ALL RANKS SHOULD START ON 1
+        $rank = [];
         $rank['tech'] = 1;
         $rank['buil'] = 1;
         $rank['defe'] = 1;
@@ -455,6 +455,13 @@ class StatisticsLibrary
         unset($all_stats_data, $build, $defs, $ships, $military, $tech, $rank, $update_query, $values);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.CamelCaseVariableName")
+     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
+     */
     private function makeAllyRank(): void
     {
         // GET ALL DATA FROM THE USERS TO UPDATE
@@ -527,6 +534,7 @@ class StatisticsLibrary
         arsort($total['points']);
 
         // ALL RANKS SHOULD START ON 1
+        $rank = [];
         $rank['tech'] = 1;
         $rank['buil'] = 1;
         $rank['defe'] = 1;
@@ -604,7 +612,6 @@ class StatisticsLibrary
 
         // SET VARIABLES
         $values = '';
-        $update = '';
 
         // TOTAL POINTS
         // UPDATE QUERY DYNAMIC BLOCK

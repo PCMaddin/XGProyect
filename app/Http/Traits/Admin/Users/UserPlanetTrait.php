@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Libraries\StatisticsLibrary;
 
 /**
  * Shared helpers used by UserPlanetController, UserMoonController and UsersController.

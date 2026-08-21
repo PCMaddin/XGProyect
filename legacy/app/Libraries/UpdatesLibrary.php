@@ -24,6 +24,7 @@ use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib as Developments;
 use App\Libraries\MissionControlLib;
+use App\Libraries\StatisticsLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

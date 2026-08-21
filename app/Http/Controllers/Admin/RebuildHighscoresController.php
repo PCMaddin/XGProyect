@@ -9,7 +9,7 @@ use App\Services\SettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\View\View;
-use Xgp\App\Libraries\StatisticsLibrary as Statistics;
+use App\Libraries\StatisticsLibrary as Statistics;
 
 class RebuildHighscoresController extends BaseController
 {

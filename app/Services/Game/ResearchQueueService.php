@@ -14,7 +14,7 @@ use App\Services\Game\Formulas\DevelopmentsService;
 use Illuminate\Support\Collection;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Libraries\StatisticsLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
