@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
-use Xgp\App\Libraries\GalaxyLib;
+use App\Libraries\GalaxyLib;
 
 #[CoversClass(GalaxyController::class)]
 class GalaxyControllerTest extends TestCase

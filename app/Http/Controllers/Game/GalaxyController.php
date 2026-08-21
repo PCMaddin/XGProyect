@@ -19,7 +19,7 @@ use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\GalaxyLib;
+use App\Libraries\GalaxyLib;
 use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Libraries\Users;
 

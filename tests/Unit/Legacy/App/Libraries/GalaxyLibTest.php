@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Legacy\App\Libraries;
 
+use App\Libraries\GalaxyLib;
+use App\Services\FormatService;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use Tests\TestCase;
-use Xgp\App\Libraries\GalaxyLib;
 
 class GalaxyLibTest extends TestCase
 {
@@ -25,7 +26,7 @@ class GalaxyLibTest extends TestCase
     {
         $galaxyLib = $this->makeGalaxyLib();
 
-        $this->setPrivateProperty($galaxyLib, 'row_data', [
+        $this->setPrivateProperty($galaxyLib, 'rowData', [
             'id' => 2,
             'authlevel' => 0,
             'preference_vacation_mode' => 0,
@@ -60,25 +61,51 @@ class GalaxyLibTest extends TestCase
         );
     }
 
+    public function testAttackLinkUsesTheEncodedSeparatorStyle(): void
+    {
+        $galaxyLib = $this->makeGalaxyLib();
+        $method = new ReflectionMethod(GalaxyLib::class, 'attackLink');
+
+        $html = $method->invoke($galaxyLib, GalaxyLib::PLANET_TYPE);
+        $this->assertIsString($html);
+
+        // attack keeps the legacy &amp; separators and target_mission=1
+        $this->assertStringContainsString('page=fleet1&galaxy=1&amp;system=2&amp;planet=3&amp;planettype=1&amp;target_mission=1', $html);
+    }
+
+    public function testTransportLinkUsesPlainSeparators(): void
+    {
+        $galaxyLib = $this->makeGalaxyLib();
+        $method = new ReflectionMethod(GalaxyLib::class, 'transportLink');
+
+        $html = $method->invoke($galaxyLib, GalaxyLib::PLANET_TYPE);
+        $this->assertIsString($html);
+
+        // transport uses plain & separators and target_mission=3
+        $this->assertStringContainsString('page=fleet1&galaxy=1&system=2&planet=3&planettype=1&target_mission=3', $html);
+        $this->assertStringNotContainsString('&amp;', $html);
+    }
+
     private function makeGalaxyLib(): GalaxyLib
     {
         $reflectionClass = new ReflectionClass(GalaxyLib::class);
         $galaxyLib = $reflectionClass->newInstanceWithoutConstructor();
 
-        $this->setPrivateProperty($galaxyLib, 'current_user', [
+        $this->setPrivateProperty($galaxyLib, 'user', [
             'id' => 1,
             'ally_id' => 0,
             'current_planet' => 10,
             'preference_spy_probes' => 4,
             'research_impulse_drive' => 0,
         ]);
-        $this->setPrivateProperty($galaxyLib, 'current_planet', [
+        $this->setPrivateProperty($galaxyLib, 'currentPlanet', [
             'defense_interplanetary_missile' => 0,
             'planet_galaxy' => 1,
         ]);
         $this->setPrivateProperty($galaxyLib, 'galaxy', 1);
         $this->setPrivateProperty($galaxyLib, 'system', 2);
         $this->setPrivateProperty($galaxyLib, 'planet', 3);
+        $this->setPrivateProperty($galaxyLib, 'formatService', app(FormatService::class));
 
         return $galaxyLib;
     }
