@@ -21,7 +21,7 @@ use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
 use App\Libraries\GalaxyLib;
 use App\Libraries\NoobsProtectionLib;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Galaxy view together with the fleet and missile dispatch actions triggered

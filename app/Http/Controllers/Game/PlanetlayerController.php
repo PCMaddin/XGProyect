@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Planet detail layer: rename or abandon the current planet/moon.

@@ -20,7 +20,7 @@ use Xgp\App\Libraries\Alliance\Ranks;
 use App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Alliance page (public browsing and member front). The write actions

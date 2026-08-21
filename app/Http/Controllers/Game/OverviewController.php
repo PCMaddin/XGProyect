@@ -19,7 +19,7 @@ use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Libraries\UpdatesLibrary;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Overview: the game's landing page (planet summary, fleet movements,

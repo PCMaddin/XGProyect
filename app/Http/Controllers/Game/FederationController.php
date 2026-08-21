@@ -16,7 +16,7 @@ use Xgp\App\Core\Entity\FleetEntity;
 use App\Libraries\Functions;
 use App\Libraries\Game\AcsFleets;
 use App\Libraries\Game\Fleets;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * ACS (federation) management: create the attack group for a fleet and

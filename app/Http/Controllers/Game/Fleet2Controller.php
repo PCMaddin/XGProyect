@@ -19,7 +19,7 @@ use Xgp\App\Core\Objects;
 use App\Libraries\Functions;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 use App\Libraries\Users\Shortcuts;
 
 /**

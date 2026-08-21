@@ -23,7 +23,7 @@ use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Fleet movements overview: list the player's fleets in flight and let them

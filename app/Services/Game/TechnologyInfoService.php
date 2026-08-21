@@ -23,7 +23,7 @@ use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Helpers\StringsHelper;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")

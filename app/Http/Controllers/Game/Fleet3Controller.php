@@ -19,7 +19,7 @@ use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use App\Libraries\Functions;
 use App\Libraries\Research\Researches;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Fleet wizard step 3: pick the mission for the selected ships and target.

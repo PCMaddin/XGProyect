@@ -19,7 +19,7 @@ use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Resource settings: production overview and per-mine production percentages.

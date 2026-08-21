@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")

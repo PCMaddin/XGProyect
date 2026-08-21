@@ -16,7 +16,7 @@ use Xgp\App\Core\Entity\BuddyEntity;
 use Xgp\App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 use App\Libraries\Buddies\Buddy;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Buddy list and buddy requests (send / accept / decline / cancel).

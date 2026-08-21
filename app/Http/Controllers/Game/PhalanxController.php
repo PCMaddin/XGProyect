@@ -15,7 +15,7 @@ use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Sensor phalanx: scan the fleet movements around a target planet.

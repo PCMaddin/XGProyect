@@ -19,7 +19,7 @@ use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Fleet wizard step 1: pick the ships to send. Posts the selection forward to

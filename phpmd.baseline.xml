@@ -288,7 +288,4 @@
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/UpdatesLibrary.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateHangarQueue"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateHangarQueue"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/Users.php"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/Users.php" method="setUserData"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/Users.php" method="setPlanet"/>
 </phpmd-baseline>

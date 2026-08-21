@@ -25,7 +25,7 @@ use App\Libraries\Game\Fleets;
 use App\Libraries\NoobsProtectionLib;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Fleet wizard step 4: the commit step. Validates the whole request built up by

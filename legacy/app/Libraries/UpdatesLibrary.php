@@ -27,6 +27,7 @@ use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib as Developments;
 use App\Libraries\MissionControlLib;
 use App\Libraries\StatisticsLibrary;
+use App\Libraries\Users;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

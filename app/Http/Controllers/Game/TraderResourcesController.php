@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use App\Libraries\Functions;
 use App\Libraries\Game\ResourceMarket;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Resource market: refill the planet's resource storages with dark matter.

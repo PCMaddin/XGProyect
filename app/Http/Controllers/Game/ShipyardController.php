@@ -20,7 +20,7 @@ use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Shipyard: build ships (and, via the Defenses subclass, defences/missiles).

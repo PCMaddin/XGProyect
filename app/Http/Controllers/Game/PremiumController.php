@@ -17,7 +17,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\OfficiersEnumerator as OE;
 use Xgp\App\Core\Objects;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users;
+use App\Libraries\Users;
 
 /**
  * Premium officers overview and purchase with dark matter.

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use App\Libraries\Functions;
-use Xgp\App\Libraries\Users as UsersLibrary;
+use App\Libraries\Users as UsersLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
