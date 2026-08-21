@@ -12,7 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class CombatreportController extends BaseController
 {

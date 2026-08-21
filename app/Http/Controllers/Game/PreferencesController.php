@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Xgp\App\Core\Enumerators\PreferencesEnumerator as PrefEnum;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

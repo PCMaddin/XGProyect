@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class AnnouncementController extends BaseController
 {

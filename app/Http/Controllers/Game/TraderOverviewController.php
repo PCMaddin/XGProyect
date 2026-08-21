@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Game;
 use App\Enums\Module;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 /**
  * Trader landing page. The resource market is reached from here.

@@ -18,7 +18,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
 use App\Services\Game\Formulas\FormulasService;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

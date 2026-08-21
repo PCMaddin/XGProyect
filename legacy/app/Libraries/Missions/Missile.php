@@ -6,7 +6,7 @@ namespace Xgp\App\Libraries\Missions;
 
 use App\Services\FormatService;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class Missile extends Missions
 {

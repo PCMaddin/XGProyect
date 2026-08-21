@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

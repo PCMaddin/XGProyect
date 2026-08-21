@@ -9,7 +9,7 @@ use App\Services\Admin\ServerSettingsService;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class ServerController extends AdminSettingsController
 {

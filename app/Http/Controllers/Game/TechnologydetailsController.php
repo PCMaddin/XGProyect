@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

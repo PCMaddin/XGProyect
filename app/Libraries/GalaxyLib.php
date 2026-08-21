@@ -14,7 +14,6 @@ use Xgp\App\Core\Objects;
 use Xgp\App\Core\Template;
 use Xgp\App\Helpers\StringsHelper;
 use Xgp\App\Helpers\UrlHelper;
-use Xgp\App\Libraries\Functions;
 
 /**
  * Renders a single galaxy-view row (planet / moon / debris / player columns and

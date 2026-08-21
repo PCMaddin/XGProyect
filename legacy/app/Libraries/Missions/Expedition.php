@@ -11,7 +11,7 @@ use App\Services\FormatService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

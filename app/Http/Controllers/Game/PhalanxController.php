@@ -14,7 +14,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use App\Services\Game\Formulas\FormulasService;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

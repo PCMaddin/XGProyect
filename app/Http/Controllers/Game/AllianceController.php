@@ -19,7 +19,7 @@ use App\Libraries\Alliance\Alliances;
 use Xgp\App\Libraries\Alliance\Ranks;
 use App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

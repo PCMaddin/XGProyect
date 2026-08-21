@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Install;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\App;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class SetLocaleController extends BaseController
 {

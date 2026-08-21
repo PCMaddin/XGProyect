@@ -11,7 +11,6 @@ use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
 use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
 use Xgp\App\Core\Template;
-use Xgp\App\Libraries\Functions;
 
 /**
  * Presentation helpers for in-flight fleets (event rows, hover popups, coord

@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class ChangelogController extends BaseController
 {

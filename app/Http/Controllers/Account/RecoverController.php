@@ -13,7 +13,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class RecoverController extends BaseController
 {

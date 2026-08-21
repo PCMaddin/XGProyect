@@ -6,7 +6,7 @@ namespace Xgp\App\Libraries\Missions;
 
 use App\Services\Game\Formulas\FleetsService;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\PlanetLib;
 use App\Libraries\StatisticsLibrary;
 

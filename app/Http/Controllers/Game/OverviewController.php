@@ -16,7 +16,7 @@ use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
 use Xgp\App\Libraries\UpdatesLibrary;
 use Xgp\App\Libraries\Users;

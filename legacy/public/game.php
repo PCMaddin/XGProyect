@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Xgp\App\Core\Common;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 define('XGP_ROOT', base_path('legacy') . DIRECTORY_SEPARATOR);
 

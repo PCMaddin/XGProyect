@@ -7,7 +7,7 @@ namespace Xgp\App\Libraries\Missions;
 use App\Services\FormatService;
 use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib as Fleets;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class Deploy extends Missions
 {

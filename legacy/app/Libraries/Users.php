@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries;
 
+use App\Libraries\Functions;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;

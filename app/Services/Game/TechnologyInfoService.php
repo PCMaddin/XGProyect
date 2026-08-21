@@ -22,7 +22,7 @@ use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Helpers\StringsHelper;
 use App\Services\Game\Formulas\FormulasService;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**

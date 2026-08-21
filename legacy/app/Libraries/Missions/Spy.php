@@ -9,7 +9,7 @@ use App\Services\Game\Formulas\OfficerService;
 use Xgp\App\Core\Enumerators\MissionsEnumerator;
 use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class Spy extends Missions
 {

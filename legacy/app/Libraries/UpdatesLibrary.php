@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries;
 
+use App\Libraries\Functions;
+
 use App\Libraries\Formulas;
 
 use App\Models\Planets;

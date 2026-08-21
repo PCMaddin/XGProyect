@@ -13,7 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\Game\AcsFleets;
 use App\Libraries\Game\Fleets;
 use Xgp\App\Libraries\Users;

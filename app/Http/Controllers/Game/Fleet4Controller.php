@@ -20,7 +20,7 @@ use Xgp\App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\NoobsProtectionLib;
 use App\Libraries\Premium\Premium;

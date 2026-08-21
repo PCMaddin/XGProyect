@@ -2,48 +2,47 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Libraries;
+namespace App\Libraries;
 
 use App\Enums\Module;
+use App\Libraries\Messenger\MessagesFormat;
+use App\Libraries\Messenger\MessagesOptions;
+use App\Libraries\Messenger\Messenger;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
 use Xgp\App\Core\Template;
 use Xgp\App\Helpers\StringsHelper;
-use App\Libraries\Messenger\MessagesFormat;
-use App\Libraries\Messenger\MessagesOptions;
-use App\Libraries\Messenger\Messenger;
 
 /**
+ * Grab-bag of static helpers shared by the native controllers and the
+ * remaining legacy code. The `exit` calls and boolean flags are legacy
+ * request-flow control kept for behavioural parity.
+ *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
+ * @SuppressWarnings("PHPMD.ExitExpression")
  */
 abstract class Functions
 {
     public static function chronoApplet(string $type, string $ref, int $value, bool $init): string
     {
-        if ($init == true) {
-            $template = 'scripts.chrono_applet_init';
-        } else {
-            $template = 'scripts.chrono_applet';
-        }
+        $template = $init ? 'scripts.chrono_applet_init' : 'scripts.chrono_applet';
 
-        $parse['type'] = $type;
-        $parse['ref'] = $ref;
-        $parse['value'] = $value;
-
-        return Template::render(
-            $template,
-            $parse
-        );
+        return Template::render($template, [
+            'type' => $type,
+            'ref' => $ref,
+            'value' => $value,
+        ]);
     }
 
     public static function validEmail(string $address): bool
     {
-        return (!preg_match(
+        return preg_match(
             "/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix",
             $address
-        )) ? false : true;
+        ) === 1;
     }
 
     public static function fleetSpeedFactor(): int
@@ -51,17 +50,12 @@ abstract class Functions
         return (int) (app(SettingsService::class)->getInt('fleet_speed') / 2500);
     }
 
-    public static function message(string $mes, ?string $dest = null, int $time = 3, bool $topnav = true, bool $menu = true, $center = true): void
+    public static function message(string $mes, ?string $dest = null, int $time = 3, bool $topnav = true, bool $menu = true, bool $center = true): void
     {
         $middle = [
-            'middle1' => '',
-            'middle2' => '',
+            'middle1' => $center ? '<div id="content">' : '',
+            'middle2' => $center ? '</div>' : '',
         ];
-
-        if ($center) {
-            $middle['middle1'] = '<div id="content">';
-            $middle['middle2'] = '</div>';
-        }
 
         Template::legacyView(
             'message.view',
@@ -85,16 +79,15 @@ abstract class Functions
 
     public static function isModuleAccesible(Module $module): int
     {
-        $modules = app(SettingsService::class)->getString('modules');
-        $modules = explode(';', $modules);
+        $modules = explode(';', app(SettingsService::class)->getString('modules'));
 
-        return (int) $modules[$module->value];
+        return (int) ($modules[$module->value] ?? 0);
     }
 
     public static function moduleMessage(int $accessLevel): void
     {
-        if ($accessLevel == 0) {
-            self::message(__('game/global.module_not_accesible'), '', 0, true);
+        if ($accessLevel === 0) {
+            self::message((string) __('game/global.module_not_accesible'), '', 0, true);
             exit;
         }
     }
@@ -105,30 +98,7 @@ abstract class Functions
         $options->setTo($to);
         $options->setSender($sender);
         $options->setTime($time);
-
-        switch ($type) {
-            case 0:
-                $type = MessagesEnumerator::ESPIO;
-                break;
-            case 1:
-                $type = MessagesEnumerator::COMBAT;
-                break;
-            case 2:
-                $type = MessagesEnumerator::EXP;
-                break;
-            case 3:
-                $type = MessagesEnumerator::ALLY;
-                break;
-            case 4:
-                $type = MessagesEnumerator::USER;
-                break;
-            default:
-            case 5:
-                $type = MessagesEnumerator::GENERAL;
-                break;
-        }
-
-        $options->setType($type);
+        $options->setType(self::messageType($type));
         $options->setFrom($from);
         $options->setSubject($subject);
 
@@ -138,18 +108,29 @@ abstract class Functions
 
         $options->setMessageText($message);
 
-        $messenger = new Messenger();
-        $messenger->sendMessage($options);
+        (new Messenger())->sendMessage($options);
+    }
+
+    private static function messageType(int $type): int
+    {
+        return match ($type) {
+            0 => MessagesEnumerator::ESPIO,
+            1 => MessagesEnumerator::COMBAT,
+            2 => MessagesEnumerator::EXP,
+            3 => MessagesEnumerator::ALLY,
+            4 => MessagesEnumerator::USER,
+            default => MessagesEnumerator::GENERAL,
+        };
     }
 
     public static function getDefaultVacationTime(): int
     {
-        return (time() + (3600 * 24 * VACATION_TIME_FORCED));
+        return time() + (3600 * 24 * VACATION_TIME_FORCED);
     }
 
     public static function setImage(string $path, string $title = 'img', string $attributes = ''): string
     {
-        if (!empty($attributes)) {
+        if ($attributes !== '') {
             $attributes = ' ' . $attributes;
         }
 
@@ -167,16 +148,13 @@ abstract class Functions
 
     public static function setLanguage(string $locale = ''): void
     {
-        if (empty($locale)) {
-            if (session()->has('locale')) {
-                $locale = session('locale');
-            } else {
-                $locale = app(SettingsService::class)->getString('lang');
-            }
+        if ($locale === '') {
+            $stored = session('locale');
+            $locale = is_string($stored) ? $stored : app(SettingsService::class)->getString('lang');
         }
 
         // force english
-        if (!in_array($locale, self::getLanguagesList())) {
+        if (!in_array($locale, self::getLanguagesList(), true)) {
             $locale = 'en';
         }
 
@@ -190,18 +168,16 @@ abstract class Functions
         $options = '';
 
         foreach (self::getLanguagesList() as $lang) {
-            $options .= '<option ';
-
-            if ($currentLang == $lang) {
-                $options .= 'selected = selected';
-            }
-
-            $options .= ' value="' . $lang . '">' . $lang . '</option>';
+            $selected = $currentLang === $lang ? 'selected = selected' : '';
+            $options .= '<option ' . $selected . ' value="' . $lang . '">' . $lang . '</option>';
         }
 
         return $options;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getLanguagesList(): array
     {
         $disk = Storage::build([
@@ -236,11 +212,15 @@ abstract class Functions
         return StringsHelper::randomString(16);
     }
 
+    /**
+     * @param array<string, mixed> $current
+     * @param array<string, mixed> $target
+     */
     public static function isCurrentPlanet(array $current, array $target): bool
     {
-        return ($current['planet_galaxy'] == $target['planet_galaxy'] &&
-            $current['planet_system'] == $target['planet_system'] &&
-            $current['planet_planet'] == $target['planet_planet'] &&
-            $current['planet_type'] == $target['planet_type']);
+        return ($current['planet_galaxy'] ?? null) == ($target['planet_galaxy'] ?? null)
+            && ($current['planet_system'] ?? null) == ($target['planet_system'] ?? null)
+            && ($current['planet_planet'] ?? null) == ($target['planet_planet'] ?? null)
+            && ($current['planet_type'] ?? null) == ($target['planet_type'] ?? null);
     }
 }

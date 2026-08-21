@@ -7,7 +7,7 @@ namespace Xgp\App\Libraries\Missions;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
 use App\Libraries\FleetsLib;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class Recycle extends Missions
 {

@@ -3025,36 +3025,6 @@ parameters:
 			path: legacy/app/Libraries/Combatreport/Report.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Functions\:\:getLanguagesList\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Functions.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Functions\:\:isCurrentPlanet\(\) has parameter \$current with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Functions.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Functions\:\:isCurrentPlanet\(\) has parameter \$target with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Functions.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Functions\:\:message\(\) has parameter \$center with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Functions.php
-
-		-
-			message: '#^Parameter \#1 \$locale of static method Illuminate\\Support\\Facades\\App\:\:setLocale\(\) expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Libraries/Functions.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\Missions\\Acs\:\:acsMission\(\) has parameter \$fleet with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

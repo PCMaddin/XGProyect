@@ -17,7 +17,7 @@ use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\Research\Researches;
 use Xgp\App\Libraries\Users;
 

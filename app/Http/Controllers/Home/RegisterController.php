@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use App\Libraries\PlanetLib;
 
 class RegisterController extends BaseController

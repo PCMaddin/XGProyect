@@ -19,7 +19,7 @@ use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 use Xgp\App\Libraries\Users;
 
 /**
