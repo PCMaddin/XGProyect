@@ -271,9 +271,6 @@
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/Missions/Transport.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Missions/Transport.php" method="sendDeliveryMessageToReceiver"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Missions/Transport.php" method="sendReturnMessage"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Libraries/SecurePageLib.php" method="__construct"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/SecurePageLib.php"/>
-  <violation rule="PHPMD\Rule\Naming\ShortVariable" file="legacy/app/Libraries/SecurePageLib.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/UpdatesLibrary.php"/>
   <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="legacy/app/Libraries/UpdatesLibrary.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateBuildingsQueue"/>

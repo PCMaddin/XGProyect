@@ -12,7 +12,7 @@ use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use Xgp\App\Helpers\StringsHelper;
 use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\SecurePageLib;
+use App\Libraries\SecurePageLib;
 use Xgp\App\Libraries\UpdatesLibrary;
 
 // require some stuff

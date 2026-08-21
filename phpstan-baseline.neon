@@ -4141,24 +4141,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Transport.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\SecurePageLib\:\:validate\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/SecurePageLib.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\SecurePageLib\:\:validate\(\) has parameter \$value with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/SecurePageLib.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\SecurePageLib\:\:\$instance has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/SecurePageLib.php
-
-		-
 			message: '#^Binary operation "\*" between int\<1, max\> and float\|string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
