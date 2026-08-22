@@ -220,9 +220,9 @@ class Fire
      * Fire::getNormalPower()
      * Return the total fire shotted from attacker ShipType to all defenders without RF
      *
-     * @return int
+     * @return int|float
      */
-    private function getNormalPower()
+    private function getNormalPower(): int | float
     {
         return $this->attackerShipType->getCount() * $this->attackerShipType->getPower();
     }

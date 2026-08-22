@@ -39,36 +39,31 @@ use Xgp\App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
  */
 class ShipType extends Type
 {
-    private $originalPower;
-    private $originalShield;
-    private $singleShield;
-    private $singleLife;
-    private $singlePower;
-    private $fullShield;
-    private $fullLife;
-    private $fullPower;
-    protected $currentShield;
-    protected $currentLife;
-    private $weapons_tech = 0;
-    private $shields_tech = 0;
-    private $armour_tech = 0;
-    private $rf;
-    protected $lastShots;
-    protected $lastShipHit;
-    private $cost;
+    private int | float $originalPower;
+    private int | float $originalShield;
+    private int | float $singleShield;
+    private float $singleLife = 0;
+    private int | float $singlePower;
+    private int | float $fullShield = 0;
+    private int | float $fullLife = 0;
+    private int | float $fullPower = 0;
+    protected int | float $currentShield = 0;
+    protected int | float $currentLife = 0;
+    private int $weapons_tech = 0;
+    private int $shields_tech = 0;
+    private int $armour_tech = 0;
+    /** @var array<int, int> */
+    private array $rf;
+    protected int | float $lastShots = 0;
+    protected int | float $lastShipHit = 0;
+    /** @var array<int, int> */
+    private array $cost;
 
     /**
-     * @param int $id
-     * @param int $count
-     * @param array $rf
-     * @param int $shield
-     * @param array $cost
-     * @param int $power
-     * @param int $weapons_tech
-     * @param int $shields_tech
-     * @param int $armour_tech
+     * @param array<int, int> $rf
+     * @param array<int, int> $cost
      */
-    public function __construct($id, $count, $rf, $shield, array $cost, $power, $weapons_tech = null, $shields_tech = null, $armour_tech = null)
+    public function __construct(int $id, int | float $count, array $rf, int | float $shield, array $cost, int | float $power, ?int $weapons_tech = null, ?int $shields_tech = null, ?int $armour_tech = null)
     {
         parent::__construct($id, 0);
 
@@ -94,16 +89,13 @@ class ShipType extends Type
      * ShipType::setWeaponsTech()
      * Set new weapon techs level.
      *
-     * @param int $level
-     *
-     * @return void
+     * @param int|null $level
      */
-    public function setWeaponsTech($level)
+    public function setWeaponsTech(?int $level): void
     {
         if (!is_numeric($level)) {
             return;
         }
-        $level = intval($level);
         $diff = $level - $this->weapons_tech;
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
@@ -118,16 +110,13 @@ class ShipType extends Type
      * ShipType::setShieldsTech()
      * Set new shield techs level.
      *
-     * @param int $level
-     *
-     * @return void
+     * @param int|null $level
      */
-    public function setShieldsTech($level)
+    public function setShieldsTech(?int $level): void
     {
         if (!is_numeric($level)) {
             return;
         }
-        $level = intval($level);
         $diff = $level - $this->shields_tech;
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
@@ -143,16 +132,13 @@ class ShipType extends Type
      * ShipType::setArmourTech()
      * Set new armour techs level
      *
-     * @param int $level
-     *
-     * @return void
+     * @param int|null $level
      */
-    public function setArmourTech($level)
+    public function setArmourTech(?int $level): void
     {
         if (!is_numeric($level)) {
             return;
         }
-        $level = intval($level);
         $diff = $level - $this->armour_tech;
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
@@ -168,13 +154,11 @@ class ShipType extends Type
      * ShipType::increment()
      * Increment the amount of ships of this type.
      *
-     * @param int $number : the amount of ships to add.
-     * @param mixed $newLife : the life of new ships added, default = full health
-     * @param mixed $newShield : the shield of new ships added, default = full shield
-     *
-     * @return void
+     * @param int|float $number : the amount of ships to add.
+     * @param int|float|null $newLife : the life of new ships added, default = full health
+     * @param int|float|null $newShield : the shield of new ships added, default = full shield
      */
-    public function increment($number, $newLife = null, $newShield = null)
+    public function increment($number, $newLife = null, $newShield = null): void
     {
         parent::increment($number);
         if ($newLife == null) {
@@ -195,13 +179,11 @@ class ShipType extends Type
      * ShipType::decrement()
      * Decrement the amount of ships of this type.
      *
-     * @param int $number : the amount of ships to be removed.
-     * @param mixed $remainLife : the life of removed ships, default = full health
-     * @param mixed $remainShield : the shield of removed ships, default = full shield
-     *
-     * @return void
+     * @param int|float $number : the amount of ships to be removed.
+     * @param int|float|null $remainLife : the life of removed ships, default = full health
+     * @param int|float|null $remainShield : the shield of removed ships, default = full shield
      */
-    public function decrement($number, $remainLife = null, $remainShield = null)
+    public function decrement($number, $remainLife = null, $remainShield = null): void
     {
         parent::decrement($number);
         if ($remainLife == null) {
@@ -222,13 +204,11 @@ class ShipType extends Type
      * ShipType::setCount()
      * Set the amount of ships of this type.
      *
-     * @param int $number : the amount of ships.
-     * @param mixed $life : the life of ships, default = full health
-     * @param mixed $shield : the life of ships, default = full health
-     *
-     * @return void
+     * @param int|float $number : the amount of ships.
+     * @param int|float|null $life : the life of ships, default = full health
+     * @param int|float|null $shield : the life of ships, default = full health
      */
-    public function setCount($number, $life = null, $shield = null)
+    public function setCount($number, $life = null, $shield = null): void
     {
         parent::setCount($number);
         $diff = $number - $this->getCount();
@@ -243,9 +223,9 @@ class ShipType extends Type
      * ShipType::getCost()
      * Get the array of cost to build this type of ship.
      *
-     * @return array
+     * @return array<int, int>
      */
-    public function getCost()
+    public function getCost(): array
     {
         return $this->cost;
     }
@@ -253,10 +233,8 @@ class ShipType extends Type
     /**
      * ShipType::getWeaponsTech()
      * Get the level of current weapon tech.
-     *
-     * @return int
      */
-    public function getWeaponsTech()
+    public function getWeaponsTech(): int
     {
         return $this->weapons_tech;
     }
@@ -264,10 +242,8 @@ class ShipType extends Type
     /**
      * ShipType::getShieldsTech()
      * Get the level of current shield tech.
-     *
-     * @return int
      */
-    public function getShieldsTech()
+    public function getShieldsTech(): int
     {
         return $this->shields_tech;
     }
@@ -275,10 +251,8 @@ class ShipType extends Type
     /**
      * ShipType::getArmourTech()
      * Get the level of current armour tech.
-     *
-     * @return int
      */
-    public function getArmourTech()
+    public function getArmourTech(): int
     {
         return $this->armour_tech;
     }
@@ -286,12 +260,8 @@ class ShipType extends Type
     /**
      * ShipType::getRfTo()
      * Get the propability of this shipType to shot again given shipType
-     *
-     * @param ShipType $other
-     *
-     * @return int
      */
-    public function getRfTo(ShipType $other)
+    public function getRfTo(ShipType $other): int
     {
         return (isset($this->rf[$other->getId()])) ? $this->rf[$other->getId()] : 0;
     }
@@ -300,9 +270,9 @@ class ShipType extends Type
      * ShipType::getRF()
      * Get an array of rapid fire
      *
-     * @return array
+     * @return array<int, int>
      */
-    public function getRF()
+    public function getRF(): array
     {
         return $this->rf;
     }
@@ -310,10 +280,8 @@ class ShipType extends Type
     /**
      * ShipType::getShield()
      * Get the shield value of a single ship of this type.
-     *
-     * @return int
      */
-    public function getShield()
+    public function getShield(): int | float
     {
         return $this->singleShield;
     }
@@ -321,10 +289,8 @@ class ShipType extends Type
     /**
      * ShipType::getShieldCellValue()
      * Get the shield cell value of a single ship of this type.
-     *
-     * @return int
      */
-    public function getShieldCellValue()
+    public function getShieldCellValue(): int | float
     {
         if ($this->isShieldDisabled()) {
             return 0;
@@ -335,10 +301,8 @@ class ShipType extends Type
     /**
      * ShipType::getHull()
      * Get the hull value of a single ship of this type.
-     *
-     * @return int
      */
-    public function getHull()
+    public function getHull(): int | float
     {
         return $this->singleLife;
     }
@@ -346,10 +310,8 @@ class ShipType extends Type
     /**
      * ShipType::getPower()
      * Get the power value of a single ship of this type.
-     *
-     * @return int
      */
-    public function getPower()
+    public function getPower(): int | float
     {
         return $this->singlePower;
     }
@@ -357,10 +319,8 @@ class ShipType extends Type
     /**
      * ShipType::getCurrentShield()
      * Get the current shield value of a all ships of this type.
-     *
-     * @return int
      */
-    public function getCurrentShield()
+    public function getCurrentShield(): int | float
     {
         return $this->currentShield;
     }
@@ -368,10 +328,8 @@ class ShipType extends Type
     /**
      * ShipType::getCurrentLife()
      * Get the current hull value of a all ships of this type.
-     *
-     * @return int
      */
-    public function getCurrentLife()
+    public function getCurrentLife(): int | float
     {
         return $this->currentLife;
     }
@@ -379,10 +337,8 @@ class ShipType extends Type
     /**
      * ShipType::getCurrentPower()
      * Get the current attack power value of a all ships of this type.
-     *
-     * @return int
      */
-    public function getCurrentPower()
+    public function getCurrentPower(): int | float
     {
         return $this->fullPower;
     }
@@ -390,16 +346,11 @@ class ShipType extends Type
     /**
      * ShipType::inflictDamage()
      * Inflict damage to all ships of this type.
-     *
-     * @param int $damage
-     * @param int $shotsToThisShipType
-     *
-     * @return void
      */
-    public function inflictDamage($damage, $shotsToThisShipType)
+    public function inflictDamage(int | float $damage, int | float $shotsToThisShipType): ?PhysicShot
     {
         if ($shotsToThisShipType == 0) {
-            return;
+            return null;
         }
         if ($shotsToThisShipType < 0) {
             throw new Exception('Negative amount of shotsToThisShipType!');
@@ -411,7 +362,7 @@ class ShipType extends Type
         log_var('currentLife before', $this->currentLife);
 
         $this->lastShots += $shotsToThisShipType;
-        $ps = new PhysicShot($this, $damage, $shotsToThisShipType);
+        $ps = new PhysicShot($this, $damage, (int) $shotsToThisShipType);
         $ps->start();
         log_var('$ps->getAssorbedDamage()', $ps->getAssorbedDamage());
         $this->currentShield -= $ps->getAssorbedDamage();
@@ -445,16 +396,14 @@ class ShipType extends Type
     /**
      * ShipType::cleanShips()
      * Start the task of explosion system.
-     *
-     * @return ShipsCleaner
      */
-    public function cleanShips()
+    public function cleanShips(): ShipsCleaner
     {
         log_var('lastShipHit after', $this->lastShipHit);
         log_var('lastShots after', $this->lastShots);
         log_var('currentLife before', $this->currentLife);
 
-        $sc = new ShipsCleaner($this, $this->lastShipHit, $this->lastShots);
+        $sc = new ShipsCleaner($this, (int) $this->lastShipHit, (int) $this->lastShots);
         $sc->start();
         $this->decrement($sc->getExplodedShips(), $sc->getRemainLife(), 0);
         $this->lastShipHit = 0;
@@ -466,20 +415,16 @@ class ShipType extends Type
     /**
      * ShipType::repairShields()
      * Repair all shields.
-     *
-     * @return void
      */
-    public function repairShields()
+    public function repairShields(): void
     {
         $this->currentShield = $this->fullShield;
     }
 
     /**
      * ShipType::__toString()
-     *
-     * @return null
      */
-    public function __toString()
+    public function __toString(): string
     {
         $return = parent::__toString();
         //$return .= "hull:" . $this->hull . "<br>Shield:" . $this->shield . "<br>CurrentLife:" . $this->currentLife . "<br>CurrentShield:" . $this->currentShield;
@@ -489,10 +434,8 @@ class ShipType extends Type
     /**
      * ShipType::isShieldDisabled()
      * Return true if the current shield of each ships are almost zero.
-     *
-     * @return boolean
      */
-    public function isShieldDisabled()
+    public function isShieldDisabled(): bool
     {
         return $this->currentShield / $this->getCount() < 0.01;
     }

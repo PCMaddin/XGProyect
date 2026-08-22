@@ -175,8 +175,37 @@ Reihenfolge nach Sauberkeit (Blatt-Kandidaten mit den wenigsten Legacy-Referenze
 zuerst). Für Libs, die die noch lebende Engine mitbenutzt (`Formulas`,
 `NoobsProtectionLib`), gilt das **Fassaden-Muster**: die Logik zieht nativ um, eine
 dünne `App\Libraries\…`-Brücke bedient die Engine weiter, bis auch diese migriert
-ist. Noch offen an der Missions-Engine bzw. am Tick: `PlanetLib`,
-`UpdatesLibrary`, `Users`, `Functions` sowie die Missions-/BattleEngine.
+ist.
+
+---
+
+## Welle 6 — Missions-/BattleEngine (OPBE) 🟡 laufend
+
+Die vendorte GPL-Kampf-Engine (OPBE, Jstar 2013) und die Missions-Handler sind
+tief verkettet (Vererbung, gegenseitige Referenzen) und **ungetestet**. Auf
+Wunsch: **„Alles sauber typisieren"** — die gesamte Engine auf Level-9-clean
+bringen (Baseline → ~0), **in-place** im bestehenden `Xgp\App\…\BattleEngine`-
+Namespace (die Massen-Umbenennung nach `App\` erst am Ende, wenn alles typsicher
+ist). Vorgehen **bottom-up**: erst die Blatt-Utilities, dann die Datenobjekte,
+dann die Sammlungen, dann Core/Missions.
+
+**Merkposten (engine-spezifisch):** Die Docblocks deklarieren durchweg `@return int`
+/ `@param int`, obwohl die Engine intern mit `float` rechnet (Wahrscheinlichkeiten,
+Schaden, Schilde). Wo ein Zähl-/Kontrakt-Typ (`PhysicShot`-Schüsse,
+`ShipsCleaner`) echt `int` verlangt, wird an der Methodengrenze mit `(int)`
+**eingehegt** statt die Kaskade weiterzureichen; wo der Wert real `float` ist,
+wird der falsche `@return int` korrigiert.
+
+| Baustein | Status | Notiz |
+|---|---|---|
+| Utils (Number, Gauss, Events, GeometricDistribution, Math) + Models (Defense, Ship) | ✅ getippt | Blatt-Schicht: `int|float`-Rechenwerte, `getRepairProb(): float`, Gauss/Verteilungen `float`, `Math::divide/multiple(): Number`, `heaviside/rest` mit `(int)$x % (int)$y`; redundante `is_callable`-/`is_numeric`-Guards weg |
+| Models\Type + Models\ShipType | ✅ getippt | die Datenobjekte, die die Sammlungen halten. `Type`: `int $id` / `int|float $count`, typisierte Accessors, `__toString(): string` (`ob_get_clean()`-`string|false` gecastet), `cloneMe(): self`. `ShipType extends Type` (26 Einträge): alle 15 Properties getippt (Akkumulatoren `full*`/`current*` mit `= 0`-Default, da `increment()` sie **im Konstruktor vor der Zuweisung** per `+=` nutzt), `singleLife` als reines `float` (PHPStan: nie `int`), Tech-Setter `?int` (Null-Pfad echt erreichbar → `is_numeric` nicht mehr „always true"), `inflictDamage(): ?PhysicShot`, Schuss-Zähler an `PhysicShot`/`ShipsCleaner` mit `(int)` eingehegt. Cascade in `Fire::getNormalPower()` (Leistung ist real `float`) mit-korrigiert. 41 Baseline-Einträge abgebaut |
+
+Noch offen: die `IterableUtil`-Sammlungen (`Fleet`, `Player`, `PlayerGroup`,
+`FireManager`, `HomeFleet` — müssen zusammen getippt werden), `Core`
+(`BattleReport`, `Round`, `Battle`), `CombatObject` (`Fire` Rest, `PhysicShot`,
+`ShipsCleaner`), die restlichen `Utils` (`DebugManager`, `Functions`,
+`LangManager`) sowie die Missions-Handler (`Attack`, `Destroy`, `Spy`, …).
 
 ---
 
