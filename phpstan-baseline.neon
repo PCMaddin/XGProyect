@@ -601,30 +601,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/CombatObject/Fire.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\FireManager\:\:add\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/FireManager.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\FireManager\:\:getAttackerTotalFire\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/FireManager.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\FireManager\:\:getAttackerTotalShots\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/FireManager.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\FireManager\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/FireManager.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -1223,924 +1199,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: legacy/app/Libraries/BattleEngine/Core/Round.php
-
-		-
-			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 2
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Cannot call method getId\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Cannot call method getPower\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Cannot call method getShotsFiredByAllToDefenderType\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$armour_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$galaxy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$planet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$shields_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$shipTypes with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$system with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__construct\(\) has parameter \$weapons_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:__toString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:addShipType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:cleanShips\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:cloneMe\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:decrement\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:decrement\(\) has parameter \$count with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:decrement\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:existShipType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:existShipType\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getArmourTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getGalaxy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getOrderedIterator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getPlanet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getShieldsTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getShipType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getShipType\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getSystem\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getTotalCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getTypeCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getTypeCount\(\) has parameter \$type with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:getWeaponsTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:inflictDamage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:isEmpty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:mergeFleet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:repairShields\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setCoords\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setCoords\(\) has parameter \$galaxy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setCoords\(\) has parameter \$planet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setCoords\(\) has parameter \$system with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setName\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setTech\(\) has parameter \$armour with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setTech\(\) has parameter \$shields with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:setTech\(\) has parameter \$weapons with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Parameter \#1 \$shipType of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:addShipType\(\) expects Xgp\\App\\Libraries\\BattleEngine\\Models\\ShipType, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$armour_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$count has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$galaxy has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$name has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$planet has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$shields_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$system has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:\$weapons_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
-
-		-
-			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Cannot call method cloneMe\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Cannot call method getId\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$armour_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$fleets with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$galaxy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$planet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$shields_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$system with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__construct\(\) has parameter \$weapons_tech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:__toString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:addDefense\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:addFleet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:cleanShips\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:cloneMe\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:decrement\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:decrement\(\) has parameter \$count with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:decrement\(\) has parameter \$idFleet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:decrement\(\) has parameter \$idShipType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:existFleet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:existFleet\(\) has parameter \$idFleet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getArmourTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getEquivalentFleetContent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getFleet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getFleet\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getGalaxy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getOrderedItereator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getPlanet\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getShieldsTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getSystem\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getTotalCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:getWeaponsTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:inflictDamage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:isEmpty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:mergePlayerFleets\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:repairShields\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setCoords\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setCoords\(\) has parameter \$galaxy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setCoords\(\) has parameter \$planet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setCoords\(\) has parameter \$system with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setName\(\) has parameter \$name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) has parameter \$armour with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) has parameter \$shields with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) has parameter \$weapons with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$armour_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$galaxy has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$name has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$planet has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$shields_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$system has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:\$weapons_tech has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Player.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:__construct\(\) has parameter \$players with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:__toString\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:addPlayer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:cleanShips\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:cloneMe\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has parameter \$defenceTech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has parameter \$fleets with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has parameter \$militaryTech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:createPlayerIfNotExist\(\) has parameter \$shieldTech with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) has parameter \$count with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) has parameter \$idFleet with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) has parameter \$idPlayer with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) has parameter \$idShipType with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:existPlayer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:existPlayer\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getEquivalentFleetContent\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getPlayer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getPlayer\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getTotalCount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:inflictDamage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:isEmpty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:repairShields\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:\$battleResult has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:\$id has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:\$id_count has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
 
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
@@ -3535,7 +2593,193 @@ parameters:
 			path: legacy/app/Libraries/Missions/Destroy.php
 
 		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Utils\\IterableUtil\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
+			message: '#^Parameter \#1 \$idPlayer of method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:decrement\(\) expects int, mixed given\.$#'
+			identifier: argument.type
 			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/IterableUtil.php
+			path: legacy/app/Libraries/BattleEngine/Core/BattleReport.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 2
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Parameter \#1 \$shipType of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Fleet\:\:addShipType\(\) expects Xgp\\App\\Libraries\\BattleEngine\\Models\\ShipType, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Cannot call method getId\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Cannot call method getShotsFiredByAllToDefenderType\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Cannot call method getPower\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Fleet.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Player.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Player.php
+
+		-
+			message: '#^Cannot call method cloneMe\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Player.php
+
+		-
+			message: '#^Cannot call method getId\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Models/Player.php
+
+		-
+			message: '#^Parameter \#1 \$weapons of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#2 \$shields of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#3 \$armour of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#1 \$name of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setName\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Cannot call method addDefense\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Cannot call method addFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:existPlayer\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getPlayer\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Cannot call method existFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Cannot call method getFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Attack.php
+
+		-
+			message: '#^Parameter \#1 \$weapons of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#2 \$shields of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#3 \$armour of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setTech\(\) expects int\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#1 \$name of method Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\:\:setName\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Cannot call method addDefense\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Cannot call method addFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:existPlayer\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Xgp\\App\\Libraries\\BattleEngine\\Models\\PlayerGroup\:\:getPlayer\(\) expects int, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Cannot call method existFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Cannot call method getFleet\(\) on Xgp\\App\\Libraries\\BattleEngine\\Models\\Player\|false\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Parameter \#2 \$death_stars of method Xgp\\App\\Libraries\\Missions\\Destroy\:\:updateMoon\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: legacy/app/Libraries/Missions/Destroy.php

@@ -36,10 +36,15 @@ use ReturnTypeWillChange;
  *
  * @link https://github.com/jstar88/opbe
  */
-/** @implements Iterator<mixed, mixed> */
+/**
+ * @template TValue
+ *
+ * @implements Iterator<mixed, mixed>
+ */
 class IterableUtil implements Iterator
 {
-    protected $array = [];
+    /** @var array<int, TValue> */
+    protected array $array = [];
 
     /* Iterator functions */
     #[ReturnTypeWillChange]

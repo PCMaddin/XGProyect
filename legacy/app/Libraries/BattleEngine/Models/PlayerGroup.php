@@ -37,14 +37,19 @@ use Exception;
  *
  * @link https://github.com/jstar88/opbe
  */
+/**
+ * @extends IterableUtil<Player>
+ */
 class PlayerGroup extends IterableUtil
 {
-    protected $array = [];
-    public $battleResult;
-    private static $id_count = 0;
-    private $id;
+    public ?int $battleResult = null;
+    private static int $id_count = 0;
+    private int $id;
 
-    public function __construct($players = [])
+    /**
+     * @param Player[] $players
+     */
+    public function __construct(array $players = [])
     {
         $this->id = ++self::$id_count;
         foreach ($players as $player) {
@@ -52,12 +57,12 @@ class PlayerGroup extends IterableUtil
         }
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function decrement($idPlayer, $idFleet, $idShipType, $count)
+    public function decrement(int $idPlayer, int $idFleet, int $idShipType, int | float $count): void
     {
         if (!$this->existPlayer($idPlayer)) {
             throw new Exception('Player with id : ' . $idPlayer . ' not exist');
@@ -68,22 +73,25 @@ class PlayerGroup extends IterableUtil
         }
     }
 
-    public function getPlayer($id)
+    public function getPlayer(int $id): Player | false
     {
         return isset($this->array[$id]) ? $this->array[$id] : false;
     }
 
-    public function existPlayer($id)
+    public function existPlayer(int $id): bool
     {
         return isset($this->array[$id]);
     }
 
-    public function addPlayer(Player $player)
+    public function addPlayer(Player $player): void
     {
         $this->array[$player->getId()] = $player->cloneMe(); //avoid collateral effects: when the object or array is an argument && it's saved in a structure
     }
 
-    public function createPlayerIfNotExist($id, $fleets, $militaryTech, $shieldTech, $defenceTech)
+    /**
+     * @param Fleet[] $fleets
+     */
+    public function createPlayerIfNotExist(int $id, array $fleets, ?int $militaryTech, ?int $shieldTech, ?int $defenceTech): Player | false
     {
         if (!$this->existPlayer($id)) {
             $this->addPlayer(new Player($id, $fleets, $militaryTech, $shieldTech, $defenceTech));
@@ -91,7 +99,7 @@ class PlayerGroup extends IterableUtil
         return $this->getPlayer($id);
     }
 
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         foreach ($this->array as $id => $player) {
             if (!$player->isEmpty()) {
@@ -101,16 +109,19 @@ class PlayerGroup extends IterableUtil
         return true;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         ob_start();
         $_playerGroup = $this;
         $_st = '';
         require OPBEPATH . 'Views/playerGroup.html';
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
 
-    public function inflictDamage(FireManager $fire)
+    /**
+     * @return array<int, mixed>
+     */
+    public function inflictDamage(FireManager $fire): array
     {
         $physicShots = [];
         foreach ($this->array as $idPlayer => $player) {
@@ -121,7 +132,10 @@ class PlayerGroup extends IterableUtil
         return $physicShots;
     }
 
-    public function cleanShips()
+    /**
+     * @return array<int, mixed>
+     */
+    public function cleanShips(): array
     {
         $shipsCleaners = [];
         foreach ($this->array as $idPlayer => $player) {
@@ -135,14 +149,14 @@ class PlayerGroup extends IterableUtil
         return $shipsCleaners;
     }
 
-    public function repairShields()
+    public function repairShields(): void
     {
         foreach ($this->array as $idPlayer => $player) {
             $player->repairShields();
         }
     }
 
-    public function getEquivalentFleetContent()
+    public function getEquivalentFleetContent(): Fleet
     {
         $merged = new Fleet(-1);
         foreach ($this->array as $idPlayer => $player) { // cloning don't have any sense because we don't touch the array,maybe php bug :(
@@ -151,7 +165,7 @@ class PlayerGroup extends IterableUtil
         return $merged;
     }
 
-    public function getTotalCount()
+    public function getTotalCount(): int | float
     {
         $amount = 0;
         foreach ($this->array as $idPlayer => $player) {
@@ -174,7 +188,7 @@ class PlayerGroup extends IterableUtil
       }
      */
 
-    public function cloneMe()
+    public function cloneMe(): self
     {
         $players = array_values($this->array);
         $tmp = new PlayerGroup($players);

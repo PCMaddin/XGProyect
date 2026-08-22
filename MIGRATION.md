@@ -200,12 +200,15 @@ wird der falsche `@return int` korrigiert.
 |---|---|---|
 | Utils (Number, Gauss, Events, GeometricDistribution, Math) + Models (Defense, Ship) | ✅ getippt | Blatt-Schicht: `int|float`-Rechenwerte, `getRepairProb(): float`, Gauss/Verteilungen `float`, `Math::divide/multiple(): Number`, `heaviside/rest` mit `(int)$x % (int)$y`; redundante `is_callable`-/`is_numeric`-Guards weg |
 | Models\Type + Models\ShipType | ✅ getippt | die Datenobjekte, die die Sammlungen halten. `Type`: `int $id` / `int|float $count`, typisierte Accessors, `__toString(): string` (`ob_get_clean()`-`string|false` gecastet), `cloneMe(): self`. `ShipType extends Type` (26 Einträge): alle 15 Properties getippt (Akkumulatoren `full*`/`current*` mit `= 0`-Default, da `increment()` sie **im Konstruktor vor der Zuweisung** per `+=` nutzt), `singleLife` als reines `float` (PHPStan: nie `int`), Tech-Setter `?int` (Null-Pfad echt erreichbar → `is_numeric` nicht mehr „always true"), `inflictDamage(): ?PhysicShot`, Schuss-Zähler an `PhysicShot`/`ShipsCleaner` mit `(int)` eingehegt. Cascade in `Fire::getNormalPower()` (Leistung ist real `float`) mit-korrigiert. 41 Baseline-Einträge abgebaut |
+| CombatObject\PhysicShot + ShipsCleaner | ✅ getippt | die beiden Blätter, die `ShipType` direkt konstruiert. `PhysicShot`: Properties getippt (`$fighters: ShipType`, Schadens-Akkumulatoren `float`), **tote Property `$cellDestroyed`** (nur geschrieben, nie gelesen) entfernt, `getPureDamage()` real `int|float`, `getHitShips()` per `(int)` ein Zähler, `clamp()` von `mixed` auf `int|float`. `ShipsCleaner`: `$exploded: int`/`$remainLife: float`. Konstantengetriebene „always true"-Hinweise bleiben baselined. 11 Einträge abgebaut |
+| CombatObject\Fire (Rest) | ✅ getippt | Properties `$shots`/`$power` als `int|float`, alle `getShotsFiredBy*` geben `Number` zurück (`bool $real`), `getAttackerTotalFire/Shots()` von falschem `@return int` korrigiert, `__toString(): string`, `cloneMe(): self`. 15 Einträge abgebaut; drei `mixed`-Kaskaden aus `Fleet::getIterator()` bleiben bewusst baselined bis der Sammlungscluster den `getIterator()`-Rückgabetyp schärft |
+| IterableUtil-Sammlungscluster (Fleet, Player, PlayerGroup, FireManager, HomeFleet) | ✅ getippt | **das Kernstück** — mussten zusammen getippt werden. `IterableUtil` wird **generisch** (`@template TValue`, `@var array<int, TValue> $array`); die Subklassen binden das Element via `@extends IterableUtil<ShipType|Fleet|Player|Fire>` → alle `$this->array`-Element-Zugriffe werden typsicher **ohne** Per-Methoden-Casts. Alle Properties/Methoden/Params getippt (id/tech/coords als `int`/`?int`, `count` als `int|float`, `__toString(): string`). **Bug gefixt:** `Fleet::cloneMe()` übergab `$this->galaxy` an der `$name`-Position → Flotten-Name ging verloren und alle Koordinaten waren um eins verschoben (nur Report-Anzeige betroffen, nicht die Kampf-Mathematik). `PlayerGroup::$battleResult` als `?int` (BATTLE_WIN/LOSE/DRAW). 158 Einträge abgebaut. Bewusst weiter baselined: die wenigen `getIterator()`-`mixed`-Ableitungen (bis `Core`/`Fire` getippt sind) und die Aufrufer-Kaskaden im noch untypisierten Missions-/Core-Layer (mixed DB-Zeilen an die jetzt typisierten Methoden) — lösen sich beim Typisieren jener Dateien auf |
 
-Noch offen: die `IterableUtil`-Sammlungen (`Fleet`, `Player`, `PlayerGroup`,
-`FireManager`, `HomeFleet` — müssen zusammen getippt werden), `Core`
-(`BattleReport`, `Round`, `Battle`), `CombatObject` (`Fire` Rest, `PhysicShot`,
-`ShipsCleaner`), die restlichen `Utils` (`DebugManager`, `Functions`,
-`LangManager`) sowie die Missions-Handler (`Attack`, `Destroy`, `Spy`, …).
+Noch offen: `Core` (`BattleReport`, `Round`, `Battle`) — deren Typisierung
+schärft dann auch `IterableUtil::getIterator()` auf `array<int, TValue>` und
+räumt die restlichen `getIterator()`-`mixed`-Kaskaden ab; die restlichen `Utils`
+(`DebugManager`, `Functions`, `LangManager`) sowie die Missions-Handler
+(`Attack`, `Destroy`, `Spy`, …).
 
 ---
 

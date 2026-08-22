@@ -35,16 +35,17 @@ use Xgp\App\Libraries\BattleEngine\Utils\IterableUtil;
  *
  * @link https://github.com/jstar88/opbe
  */
+/**
+ * @extends IterableUtil<Fire>
+ */
 class FireManager extends IterableUtil
 {
-    protected $array = [];
-
-    public function add(Fire $fire)
+    public function add(Fire $fire): void
     {
         $this->array[] = $fire;
     }
 
-    public function getAttackerTotalShots()
+    public function getAttackerTotalShots(): int | float
     {
         $tmp = 0;
         foreach ($this->array as $id => $fire) {
@@ -53,7 +54,7 @@ class FireManager extends IterableUtil
         return $tmp;
     }
 
-    public function getAttackerTotalFire()
+    public function getAttackerTotalFire(): int | float
     {
         $tmp = 0;
         foreach ($this->array as $id => $fire) {
