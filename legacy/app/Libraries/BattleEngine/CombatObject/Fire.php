@@ -58,8 +58,8 @@ class Fire
       private $shots = null;
       private $power = null;
      */
-    private $shots = 0;
-    private $power = 0;
+    private int | float $shots = 0;
+    private int | float $power = 0;
 
     public function __construct(ShipType $attackerShipType, Fleet $defenderFleet)
     {
@@ -69,12 +69,12 @@ class Fire
         $this->calculateTotal();
     }
 
-    public function getPower()
+    public function getPower(): int | float
     {
         return $this->attackerShipType->getPower();
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->attackerShipType->getId();
     }
@@ -84,9 +84,9 @@ class Fire
      * Fire::getAttackerTotalFire()
      * Return the total fire
      *
-     * @return int
+     * @return int|float
      */
-    public function getAttackerTotalFire()
+    public function getAttackerTotalFire(): int | float
     {
         return $this->power;
     }
@@ -95,9 +95,9 @@ class Fire
      * Fire::getAttackerTotalShots()
      * Return the total shots
      *
-     * @return int
+     * @return int|float
      */
-    public function getAttackerTotalShots()
+    public function getAttackerTotalShots(): int | float
     {
         return $this->shots;
     }
@@ -229,35 +229,35 @@ class Fire
 
     //------- INCOMING FIRE------------
 
-    public function getShotsFiredByAttackerTypeToDefenderType(ShipType $shipType_A, ShipType $shipType_D, $real = false)
+    public function getShotsFiredByAttackerTypeToDefenderType(ShipType $shipType_A, ShipType $shipType_D, bool $real = false): Number
     {
         $first = $this->getShotsFiredByAttackerToOne($shipType_A);
         $second = new Number($shipType_D->getCount());
         return Math::multiple($first, $second, $real);
     }
 
-    public function getShotsFiredByAttackerToOne(ShipType $shipType_A, $real = false)
+    public function getShotsFiredByAttackerToOne(ShipType $shipType_A, bool $real = false): Number
     {
         $num = $this->getShotsFiredByAttackerToAll($shipType_A);
         $denum = new Number($this->defenderFleet->getTotalCount());
         return Math::divide($num, $denum, $real);
     }
 
-    public function getShotsFiredByAllToDefenderType(ShipType $shipType_D, $real = false)
+    public function getShotsFiredByAllToDefenderType(ShipType $shipType_D, bool $real = false): Number
     {
         $first = $this->getShotsFiredByAllToOne();
         $second = new Number($shipType_D->getCount());
         return Math::multiple($first, $second, $real);
     }
 
-    public function getShotsFiredByAttackerToAll(ShipType $shipType_A, $real = false)
+    public function getShotsFiredByAttackerToAll(ShipType $shipType_A, bool $real = false): Number
     {
         $num = new Number($this->getAttackerTotalShots() * $shipType_A->getCount());
         $denum = new Number($this->attackerShipType->getCount());
         return Math::divide($num, $denum, $real);
     }
 
-    public function getShotsFiredByAllToOne($real = false)
+    public function getShotsFiredByAllToOne(bool $real = false): Number
     {
         $num = new Number($this->getAttackerTotalShots());
         $denum = new Number($this->defenderFleet->getTotalCount());
@@ -267,7 +267,7 @@ class Fire
     /**
      * Rappresentation of this object
      */
-    public function __toString()
+    public function __toString(): string
     {
         //global $resource;
         //        $shots = $this->getAttackerTotalShots();
@@ -293,7 +293,7 @@ class Fire
         return $this->getAttackerTotalFire() . '';
     }
 
-    public function cloneMe()
+    public function cloneMe(): self
     {
         return new Fire($this->attackerShipType, $this->defenderFleet);
     }
