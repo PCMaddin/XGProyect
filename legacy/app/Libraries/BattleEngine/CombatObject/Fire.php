@@ -186,11 +186,11 @@ class Fire
      *
      * @param ShipType $shipType_A
      *
-     * @return int
+     * @return float
      */
     private function getProbabilityToShotAgainForAttackerShipOfType(ShipType $shipType_A)
     {
-        $p = 0;
+        $p = 0.0;
         foreach ($this->defenderFleet->getIterator() as $idFleet => $shipType_D) {
             $RF = $shipType_A->getRfTo($shipType_D);
             $probabilityToShotAgain = 1 - GeometricDistribution::getProbabilityFromMean($RF);

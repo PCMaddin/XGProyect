@@ -39,22 +39,23 @@ use RecursiveIteratorIterator;
  */
 abstract class Math
 {
-    public static function divide(Number $num, Number $denum, $real = false)
+    public static function divide(Number $num, Number $denum, bool $real = false): Number
     {
-        if ($real) {
-            if ($denum->result == 0) {
-                throw new Exception('denum is zero');
-            }
-            $shots = (int) floor($num->result / $denum->result);
-            $rest = Math::rest($num->result, $denum->result);
-            return new Number($shots, $rest);
-        } else {
-            $shots = $num->result / $denum->result;
-            return new Number($shots);
+        if (!$real) {
+            return new Number($num->result / $denum->result);
         }
+
+        if ($denum->result == 0) {
+            throw new Exception('denum is zero');
+        }
+
+        $shots = (int) floor($num->result / $denum->result);
+        $rest = Math::rest($num->result, $denum->result);
+
+        return new Number($shots, $rest);
     }
 
-    public static function multiple(Number $first, Number $second, $real = false)
+    public static function multiple(Number $first, Number $second, bool $real = false): Number
     {
         $result = $first->result * $second->result;
         if ($real) {
@@ -64,7 +65,7 @@ abstract class Math
         return new Number($result);
     }
 
-    public static function heaviside($x, $y)
+    public static function heaviside(int | float $x, int | float $y): int
     {
         if ($x >= $y) {
             return 1;
@@ -72,7 +73,7 @@ abstract class Math
         return 0;
     }
 
-    public static function rest($dividendo, $divisore, $real = true)
+    public static function rest(int | float $dividendo, int | float $divisore, bool $real = true): int | float
     {
         while ($divisore < 1) {
             $divisore *= 10;
@@ -80,28 +81,28 @@ abstract class Math
         }
         if (!$real) {
             $decimal = (int) $dividendo - $dividendo;
-            return $divisore % $dividendo + $decimal;
+            return (int) $divisore % (int) $dividendo + $decimal;
         }
-        return $dividendo % $divisore;
+        return (int) $dividendo % (int) $divisore;
     }
 
-    public static function tryEvent($probability, $callback, $callbackParam)
+    public static function tryEvent(int | float $probability, callable $callback, mixed $callbackParam): mixed
     {
-        if (!is_callable($callback)) {
-            throw new Exception();
-        }
         if (mt_rand(0, 99) < $probability) {
             return call_user_func($callback, $callbackParam);
         }
         return false;
     }
 
-    public static function recursive_sum($array)
+    /**
+     * @param array<int|string, mixed> $array
+     */
+    public static function recursive_sum(array $array): int | float
     {
         $sum = 0;
         $array_obj = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
-        foreach ($array_obj as $key => $value) {
-            $sum += $value;
+        foreach ($array_obj as $value) {
+            $sum += is_numeric($value) ? $value : 0;
         }
         return $sum;
     }

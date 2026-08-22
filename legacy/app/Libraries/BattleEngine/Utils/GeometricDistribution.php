@@ -38,11 +38,9 @@ abstract class GeometricDistribution
     /**
      * GeometricDistribution::getProbabilityFromMean()
      *
-     * @param int $m: the mean
      *
-     * @return int
      */
-    public static function getProbabilityFromMean($m)
+    public static function getProbabilityFromMean(float $m): float
     {
         if ($m <= 1) {
             return 1;
@@ -53,11 +51,9 @@ abstract class GeometricDistribution
     /**
      * GeometricDistribution::getMeanFromProbability()
      *
-     * @param int $p: the probability
      *
-     * @return int
      */
-    public static function getMeanFromProbability($p)
+    public static function getMeanFromProbability(float $p): float
     {
         if ($p == 0) {
             return INF;
@@ -68,11 +64,9 @@ abstract class GeometricDistribution
     /**
      * GeometricDistribution::getVarianceFromProbability()
      *
-     * @param int $p: the probability
      *
-     * @return int
      */
-    public static function getVarianceFromProbability($p)
+    public static function getVarianceFromProbability(float $p): float
     {
         if ($p == 0) {
             return INF;
@@ -83,11 +77,9 @@ abstract class GeometricDistribution
     /**
      * GeometricDistribution::getStandardDeviationFromProbability()
      *
-     * @param int $p: the probability
      *
-     * @return int
      */
-    public static function getStandardDeviationFromProbability($p)
+    public static function getStandardDeviationFromProbability(float $p): float
     {
         return sqrt(self::getVarianceFromProbability($p));
     }
