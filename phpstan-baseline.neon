@@ -721,60 +721,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:__construct\(\) has parameter \$damage with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$assorbedDamage has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$bouncedDamage has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$cellDestroyed has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$cellDestroyed is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$count has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$damage has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$fighters has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\PhysicShot\:\:\$hullDamage has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/PhysicShot.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -783,18 +729,6 @@ parameters:
 		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/ShipsCleaner.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\ShipsCleaner\:\:\$exploded has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/ShipsCleaner.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\ShipsCleaner\:\:\$remainLife has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: legacy/app/Libraries/BattleEngine/CombatObject/ShipsCleaner.php
 

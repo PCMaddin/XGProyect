@@ -38,15 +38,14 @@ use Xgp\App\Libraries\BattleEngine\Models\ShipType;
  */
 class PhysicShot
 {
-    private $fighters;
-    private $damage;
-    private $count;
-    private $assorbedDamage = 0;
-    private $bouncedDamage = 0;
-    private $hullDamage = 0;
-    private $cellDestroyed = 0;
+    private ShipType $fighters;
+    private int | float $damage;
+    private int $count;
+    private float $assorbedDamage = 0;
+    private float $bouncedDamage = 0;
+    private float $hullDamage = 0;
 
-    public function __construct(ShipType $shipType, $damage, int $count)
+    public function __construct(ShipType $shipType, int | float $damage, int $count)
     {
         log_var('damage', $damage);
         log_var('count', $count);
@@ -88,9 +87,9 @@ class PhysicShot
     /**
      * Return the total amount of damage from enemy
      *
-     * @return int
+     * @return int|float
      */
-    public function getPureDamage()
+    public function getPureDamage(): int | float
     {
         return $this->damage * $this->count;
     }
@@ -100,7 +99,7 @@ class PhysicShot
      */
     public function getHitShips(): int
     {
-        return min($this->count, $this->fighters->getCount());
+        return (int) min($this->count, $this->fighters->getCount());
     }
 
     /**
@@ -158,7 +157,7 @@ class PhysicShot
     /**
      * Return $a if greater than $b, zero otherwise
      */
-    private function clamp(mixed $a, mixed $b): mixed
+    private function clamp(int | float $a, int | float $b): int | float
     {
         if ($a > $b) {
             return $a;

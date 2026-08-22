@@ -41,8 +41,8 @@ class ShipsCleaner
     private ShipType $fighters;
     private int $lastShipHit;
     private int $lastShots;
-    private $exploded;
-    private $remainLife;
+    private int $exploded = 0;
+    private float $remainLife = 0;
 
     public function __construct(ShipType $shipType, int $lastShipHit, int $lastShots)
     {
