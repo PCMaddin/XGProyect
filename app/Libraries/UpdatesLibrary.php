@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Libraries;
+namespace App\Libraries;
 
 use App\Libraries\Functions;
 
@@ -30,14 +30,23 @@ use App\Libraries\StatisticsLibrary;
 use App\Libraries\Users;
 
 /**
+ * The tick: on construction it runs cleanup, backups, fleet missions and the
+ * statistics rebuild; its static entry points refresh a planet's resources and
+ * queues. The batch resource maths is intrinsically long and reads the untyped
+ * game state through the {@see num()} coercion helper.
+ *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.UnusedLocalVariable")
+ * @SuppressWarnings("PHPMD.CamelCaseVariableName")
+ * @SuppressWarnings("PHPMD.CamelCaseParameterName")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class UpdatesLibrary
 {
     use PreparesLegacySql;
 
-    public function __construct(private ProductionService $productionService)
+    public function __construct()
     {
         // Other stuff
         $this->cleanUp();
@@ -127,14 +136,10 @@ class UpdatesLibrary
     }
 
     /**
-     * updateBuildingsQueue
-     *
-     * @param array $current_planet Current planet
-     * @param array $current_user   Current user
-     *
-     * @return void
+     * @param array<string, mixed> $current_planet Current planet (by reference for sync-back)
+     * @param array<string, mixed> $current_user   Current user (by reference for sync-back)
      */
-    public static function updateBuildingsQueue(&$current_planet, &$current_user): void
+    public static function updateBuildingsQueue(array &$current_planet, array &$current_user): void
     {
         /** @var Planets|null $planet */
         $planet = Planets::with(['buildings'])->where('planet_id', $current_planet['planet_id'])->first();
@@ -167,17 +172,19 @@ class UpdatesLibrary
 
         if ($queue->isEmpty()) {
             $current_planet['planet_b_building_id'] = '0';
-        } else {
-            $current_planet['planet_b_building_id'] = $queue->map(
-                fn ($item) => implode(',', [
-                    $item->building_id,
-                    $item->target_level,
-                    $item->duration,
-                    $item->end_time,
-                    $item->mode,
-                ])
-            )->join(';');
+
+            return;
         }
+
+        $current_planet['planet_b_building_id'] = $queue->map(
+            fn ($item) => implode(',', [
+                $item->building_id,
+                $item->target_level,
+                $item->duration,
+                $item->end_time,
+                $item->mode,
+            ])
+        )->join(';');
     }
 
     /**
@@ -190,7 +197,7 @@ class UpdatesLibrary
      */
     public static function updateResearchQueue(array &$current_planet, array &$current_user): void
     {
-        $userId = (int) ($current_user['id'] ?? 0);
+        $userId = self::numInt($current_user['id'] ?? 0);
 
         if ($userId === 0) {
             return;
@@ -215,7 +222,7 @@ class UpdatesLibrary
         // Sync planet tech cache fields back if this planet was involved
         if (isset($current_planet['planet_id'])) {
             /** @var Planets|null $planet */
-            $planet = Planets::find((int) $current_planet['planet_id']);
+            $planet = Planets::find(self::numInt($current_planet['planet_id']));
 
             if ($planet !== null) {
                 $current_planet['planet_b_tech_id'] = $planet->planet_b_tech_id;
@@ -261,312 +268,17 @@ class UpdatesLibrary
         return strtr($sql, ['{xgp_prefix}' => DB::getTablePrefix()]);
     }
 
-    private static function checkBuildingQueue(&$current_planet, &$current_user): bool
-    {
-        $resource = Objects::getInstance()->getObjects();
-        $ret_value = false;
-        $queue_array = [];
-
-        if (!empty($current_planet['planet_b_building_id'])) {
-            $current_queue = $current_planet['planet_b_building_id'];
-
-            if ($current_queue != 0) {
-                $queue_array = explode(';', $current_queue);
-            }
-
-            $build_array = explode(',', $queue_array[0]);
-            $element = $build_array[0];
-            $build_end_time = floor((int) $build_array[3]);
-            $build_mode = $build_array[4];
-
-            array_shift($queue_array);
-
-            $for_destroy = ($build_mode == 'destroy') ? true : false;
-
-            if ($build_end_time <= time()) {
-                $current = (int) $current_planet['planet_field_current'];
-                $max = (int) $current_planet['planet_field_max'];
-
-                if ($element == Buildings::BUILDING_MONDBASIS) {
-                    $current += 1;
-                    $max += FIELDS_BY_MOONBASIS_LEVEL;
-                    $current_planet[$resource[$element]]++;
-                } else {
-                    if ($for_destroy == false) {
-                        $current += 1;
-                        $current_planet[$resource[$element]]++;
-                    } else {
-                        $current -= 1;
-                        $current_planet[$resource[$element]]--;
-                    }
-                }
-
-                $new_queue = (count($queue_array) == 0) ? 0 : join(';', $queue_array);
-
-                $current_planet['planet_b_building'] = 0;
-                $current_planet['planet_b_building_id'] = $new_queue;
-                $current_planet['planet_field_current'] = $current;
-                $current_planet['planet_field_max'] = $max;
-                $current_planet['building_points'] = StatisticsLibrary::calculatePoints(
-                    $element,
-                    $current_planet[$resource[$element]]
-                );
-
-                DB::statement(
-                    self::sql(
-                        'UPDATE ' . PLANETS . ' AS p
-                        INNER JOIN ' . USERS_STATISTICS . ' AS s ON s.user_statistic_user_id = p.planet_user_id
-                        INNER JOIN ' . BUILDINGS . ' AS b ON b.building_planet_id = p.`planet_id` SET
-                        `' . $resource[$element] . "` = '" . $current_planet[$resource[$element]] . "',
-                        `user_statistic_buildings_points` = `user_statistic_buildings_points` + '" .
-                        $current_planet['building_points'] . "',
-                        `planet_b_building` = '" . $current_planet['planet_b_building'] . "',
-                        `planet_b_building_id` = '" . $current_planet['planet_b_building_id'] . "',
-                        `planet_field_current` = '" . $current_planet['planet_field_current'] . "',
-                        `planet_field_max` = '" . $current_planet['planet_field_max'] . "'
-                        WHERE `planet_id` = '" . $current_planet['planet_id'] . "';"
-                    )
-                );
-
-                $ret_value = true;
-            } else {
-                $ret_value = false;
-            }
-        } else {
-            $current_planet['planet_b_building'] = 0;
-            $current_planet['planet_b_building_id'] = 0;
-
-            DB::statement(
-                self::sql(
-                    'UPDATE ' . PLANETS . " SET
-                    `planet_b_building` = '" . $current_planet['planet_b_building'] . "',
-                    `planet_b_building_id` = '" . $current_planet['planet_b_building_id'] . "'
-                    WHERE `planet_id` = '" . $current_planet['planet_id'] . "';"
-                )
-            );
-
-            $ret_value = false;
-        }
-
-        return $ret_value;
-    }
-
     /**
-     * Set the next element in the queue to be the first
+     * @param array<string, mixed> $current_user   Current user (by reference)
+     * @param array<string, mixed> $current_planet Current planet (by reference)
      *
-     * @param array $current_planet
-     * @param array $current_user
-     *
-     * @return void
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.ElseExpression")
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
-    public static function setFirstElement(&$current_planet, $current_user): void
-    {
-        $resource = Objects::getInstance()->getObjects();
-        $devService = app(DevelopmentsService::class);
-
-        if ($current_planet['planet_b_building'] == 0) {
-            $current_queue = $current_planet['planet_b_building_id'];
-            $build_end_time = '0';
-            $new_queue = '0';
-
-            if ($current_queue != 0) {
-                $queue_array = explode(';', $current_queue);
-                $loop = true;
-
-                while ($loop) {
-                    $list_id_array = explode(',', $queue_array[0]);
-                    $element = (int) $list_id_array[0];
-                    $level = (int) $list_id_array[1];
-                    $build_time = $list_id_array[2];
-                    $build_end_time = $list_id_array[3];
-                    $build_mode = $list_id_array[4];
-                    $no_more_level = false;
-
-                    $for_destroy = ($build_mode == 'destroy') ? true : false;
-
-                    $ionTechLevel = $for_destroy ? (int) ($current_user[$resource[Research::research_ionic_technology]] ?? 0) : 0;
-
-                    $is_payable = $devService->isDevelopmentPayable(
-                        $current_planet,
-                        $element,
-                        (int) ($current_planet[$resource[$element]] ?? 0),
-                        true,
-                        $for_destroy,
-                        $ionTechLevel
-                    );
-
-                    if ($for_destroy) {
-                        if ($current_planet[$resource[$element]] == 0) {
-                            $is_payable = false;
-                            $no_more_level = true;
-                        }
-                    }
-
-                    if ($is_payable) {
-                        $price = $devService->developmentPrice(
-                            $element,
-                            (int) ($current_planet[$resource[$element]] ?? 0),
-                            true,
-                            $for_destroy,
-                            $ionTechLevel
-                        );
-                        $recalculated_queue = [];
-
-                        $current_planet['planet_metal'] -= $price['metal'] ?? 0;
-                        $current_planet['planet_crystal'] -= $price['crystal'] ?? 0;
-                        $current_planet['planet_deuterium'] -= $price['deuterium'] ?? 0;
-
-                        $prevData = 0;
-
-                        // if we upgrade robots or nanobots we must recalculate everything
-                        foreach ($queue_array as $queue_item => $data) {
-                            $element_data = explode(',', $data);
-                            $previous_time = $element_data[2];
-                            $element_data[2] = $devService->developmentTime(
-                                (int) $element_data[0],
-                                (int) ($current_planet[$resource[(int) $element_data[0]]] ?? 0),
-                                (int) $current_planet[$resource[Buildings::BUILDING_ROBOT_FACTORY]],
-                                (int) $current_planet[$resource[Buildings::BUILDING_NANO_FACTORY]],
-                                0,
-                                0,
-                                false
-                            );
-                            if ($for_destroy) {
-                                $element_data[2] = $devService->tearDownTime(
-                                    (int) $element_data[0],
-                                    (int) ($current_planet[$resource[(int) $element_data[0]]] ?? 0),
-                                    (int) $current_planet[$resource[Buildings::BUILDING_ROBOT_FACTORY]],
-                                    (int) $current_planet[$resource[Buildings::BUILDING_NANO_FACTORY]]
-                                );
-                            }
-
-                            if ($prevData == 0) {
-                                // remove the previous building time and add the new building time
-                                $element_data[3] = $element_data[3] - $previous_time + $element_data[2];
-
-                                // for planet_b_building, set the first queue element completion time
-                                $build_end_time = $element_data[3];
-                            } else {
-                                $element_data[3] = $prevData + $element_data[2];
-                            }
-
-                            $prevData = $element_data[3];
-
-                            $recalculated_queue[$queue_item] = join(',', $element_data);
-                        }
-
-                        $new_queue = join(';', $recalculated_queue);
-
-                        if ($new_queue == '') {
-                            $new_queue = '0';
-                        }
-
-                        $loop = false;
-                    } else {
-                        $element_name = __('game/constructions.' . $resource[$element]);
-
-                        if ($no_more_level == true) {
-                            $message = '';
-                        } else {
-                            $price = Developments::developmentPrice(
-                                $current_user,
-                                $current_planet,
-                                (int) $element,
-                                true,
-                                $for_destroy
-                            );
-
-                            $insufficient = [];
-
-                            if (($price['metal'] ?? 0) > $current_planet['planet_metal']) {
-                                $insufficient[] = __('game/global.metal');
-                            }
-
-                            if (($price['crystal'] ?? 0) > $current_planet['planet_crystal']) {
-                                $insufficient[] = __('game/global.crystal');
-                            }
-
-                            if (($price['deuterium'] ?? 0) > $current_planet['planet_deuterium']) {
-                                $insufficient[] = __('game/global.deuterium');
-                            }
-
-                            $message = sprintf(
-                                __('game/buildings.bd_building_queue_not_enough_resources'),
-                                __('game/buildings.bd_building_queue_' . $build_mode . '_order'),
-                                $element_name,
-                                $level,
-                                app(FormatService::class)->link(
-                                    'game.php?page=galaxy&mode=3&galaxy=' . $current_planet['planet_galaxy'] . '&system=' . $current_planet['planet_system'],
-                                    $current_planet['planet_name'] . ' ' . app(FormatService::class)->prettyCoords(
-                                        (int) $current_planet['planet_galaxy'],
-                                        (int) $current_planet['planet_system'],
-                                        (int) $current_planet['planet_planet']
-                                    )
-                                ),
-                                join(', ', $insufficient)
-                            );
-                        }
-
-                        if ($message != '') {
-                            Functions::sendMessage(
-                                $current_user['id'],
-                                0,
-                                0,
-                                5,
-                                __('game/buildings.bd_building_queue_not_enough_resources_from'),
-                                __('game/buildings.bd_building_queue_not_enough_resources_subject'),
-                                $message,
-                                true
-                            );
-                        }
-
-                        array_shift($queue_array);
-
-                        foreach ($queue_array as $num => $info) {
-                            $fix_ele = explode(',', $info);
-                            $fix_ele[3] = $fix_ele[3] - $build_time; // build end time
-                            $queue_array[$num] = join(',', $fix_ele);
-                        }
-
-                        $actual_count = count($queue_array);
-
-                        if ($actual_count == 0) {
-                            $build_end_time = '0';
-                            $new_queue = '0';
-                            $loop = false;
-                        }
-                    }
-                }
-            }
-
-            $current_planet['planet_b_building'] = $build_end_time;
-            $current_planet['planet_b_building_id'] = $new_queue;
-
-            DB::statement(
-                self::sql(
-                    'UPDATE `' . PLANETS . "` SET
-                        `planet_metal` = '" . $current_planet['planet_metal'] . "',
-                        `planet_crystal` = '" . $current_planet['planet_crystal'] . "',
-                        `planet_deuterium` = '" . $current_planet['planet_deuterium'] . "',
-                        `planet_b_building` = '" . $current_planet['planet_b_building'] . "',
-                        `planet_b_building_id` = '" . $current_planet['planet_b_building_id'] . "'
-                    WHERE `planet_id` = '" . $current_planet['planet_id'] . "';"
-                )
-            );
-        }
-    }
-
-    /**
-     * Update the planet resources
-     *
-     * @param array   $current_user   Current user
-     * @param array   $current_planet Current planet
-     * @param int     $UpdateTime     Update time
-     * @param boolean $Simul          Simulation
-     *
-     * @return void
-     */
-    public static function updatePlanetResources(&$current_user, &$current_planet, $UpdateTime, $Simul = false)
+    public static function updatePlanetResources(array &$current_user, array &$current_planet, int $UpdateTime, bool $Simul = false): void
     {
         $resource = Objects::getInstance()->getObjects();
         $ProdGrid = Objects::getInstance()->getProduction();
@@ -585,22 +297,21 @@ class UpdatesLibrary
             $game_deuterium_basic_income = 0;
         }
 
-        $current_planet['planet_metal_max'] = $productionService->maxStorable((int) $current_planet[$resource[22]]);
-        $current_planet['planet_crystal_max'] = $productionService->maxStorable((int) $current_planet[$resource[23]]);
-        $current_planet['planet_deuterium_max'] = $productionService->maxStorable((int) $current_planet[$resource[24]]);
+        $current_planet['planet_metal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[22]]));
+        $current_planet['planet_crystal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[23]]));
+        $current_planet['planet_deuterium_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[24]]));
 
-        $MaxMetalStorage = $current_planet['planet_metal_max'];
-        $MaxCristalStorage = $current_planet['planet_crystal_max'];
-        $MaxDeuteriumStorage = $current_planet['planet_deuterium_max'];
+        $MaxMetalStorage = self::num($current_planet['planet_metal_max']);
+        $MaxCristalStorage = self::num($current_planet['planet_crystal_max']);
+        $MaxDeuteriumStorage = self::num($current_planet['planet_deuterium_max']);
 
         $Caps = [];
         $BuildTemp = $current_planet['planet_temp_max'];
         $sub_query = '';
-        $parse['production_level'] = 100;
 
         $post_percent = $productionService->maxProductionPercentage(
-            (int) $current_planet['planet_energy_max'],
-            (int) $current_planet['planet_energy_used']
+            self::numInt($current_planet['planet_energy_max']),
+            self::numInt($current_planet['planet_energy_used'])
         );
 
         $Caps['planet_metal_perhour'] = 0;
@@ -616,11 +327,11 @@ class UpdatesLibrary
 
             // BOOST
             $geologe_boost = 1 + (1 * ($officerService->isOfficerActive(
-                (int) $current_user['premium_officier_geologist'],
+                self::numInt($current_user['premium_officier_geologist']),
                 time()
             ) ? GEOLOGUE : 0));
             $engineer_boost = 1 + (1 * ($officerService->isOfficerActive(
-                (int) $current_user['premium_officier_engineer'],
+                self::numInt($current_user['premium_officier_engineer']),
                 time()
             ) ? ENGINEER_ENERGY : 0));
 
@@ -631,9 +342,9 @@ class UpdatesLibrary
             $energy_prod = ($formula['formule']['energy'])($BuildLevel, $BuildLevelFactor, $BuildTemp, $BuildEnergy);
 
             // PLASMA BOOST
-            $metalBoost = Formulas::getPlasmaTechnologyBonus((int) $current_user['research_plasma_technology'], 'metal');
-            $crystalBoost = Formulas::getPlasmaTechnologyBonus((int) $current_user['research_plasma_technology'], 'crystal');
-            $deuteriumBoost = Formulas::getPlasmaTechnologyBonus((int) $current_user['research_plasma_technology'], 'deuterium');
+            $metalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'metal');
+            $crystalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'crystal');
+            $deuteriumBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'deuterium');
 
             // PRODUCTION BOOST WITH OFFICERS
             $Caps['planet_metal_perhour'] += $productionService->currentProduction(
@@ -705,7 +416,7 @@ class UpdatesLibrary
             $current_planet['planet_energy_max'] = $Caps['planet_energy_max'];
         }
 
-        $ProductionTime = ($UpdateTime - $current_planet['planet_last_update']);
+        $ProductionTime = $UpdateTime - self::numInt($current_planet['planet_last_update']);
         $current_planet['planet_last_update'] = $UpdateTime;
 
         if ($current_planet['planet_energy_max'] == 0) {
@@ -734,7 +445,7 @@ class UpdatesLibrary
             ) * (0.01 * $production_level);
 
             $MetalBaseProduc = (($ProductionTime * ($game_metal_basic_income / 3600)));
-            $MetalTheorical = $current_planet['planet_metal'] + $MetalProduction + $MetalBaseProduc;
+            $MetalTheorical = self::num($current_planet['planet_metal']) + $MetalProduction + $MetalBaseProduc;
 
             if ($MetalTheorical <= $MaxMetalStorage) {
                 $current_planet['planet_metal'] = $MetalTheorical;
@@ -749,7 +460,7 @@ class UpdatesLibrary
             ) * (0.01 * $production_level);
 
             $CristalBaseProduc = (($ProductionTime * ($game_crystal_basic_income / 3600)));
-            $CristalTheorical = $current_planet['planet_crystal'] + $CristalProduction + $CristalBaseProduc;
+            $CristalTheorical = self::num($current_planet['planet_crystal']) + $CristalProduction + $CristalBaseProduc;
 
             if ($CristalTheorical <= $MaxCristalStorage) {
                 $current_planet['planet_crystal'] = $CristalTheorical;
@@ -764,7 +475,7 @@ class UpdatesLibrary
             ) * (0.01 * $production_level);
 
             $DeuteriumBaseProduc = (($ProductionTime * ($game_deuterium_basic_income / 3600)));
-            $DeuteriumTheorical = $current_planet['planet_deuterium'] +
+            $DeuteriumTheorical = self::num($current_planet['planet_deuterium']) +
                 $DeuteriumProduction + $DeuteriumBaseProduc;
 
             if ($DeuteriumTheorical <= $MaxDeuteriumStorage) {
@@ -808,7 +519,7 @@ class UpdatesLibrary
                         }
 
                         if ($resource[$element] != '') {
-                            $sub_query .= '`' . $resource[$element] . "` = '" . $current_planet[$resource[$element]] . "', ";
+                            $sub_query .= '`' . self::str($resource[$element]) . "` = '" . self::str($current_planet[$resource[$element]]) . "', ";
                         }
                     }
                 }
@@ -831,102 +542,136 @@ class UpdatesLibrary
                     INNER JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
                     INNER JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id`
                     INNER JOIN ' . RESEARCH . " AS r ON r.research_user_id = p.planet_user_id SET
-                        `planet_metal` = '" . $data['planet']['planet_metal'] . "',
-                        `planet_crystal` = '" . $data['planet']['planet_crystal'] . "',
-                        `planet_deuterium` = '" . $data['planet']['planet_deuterium'] . "',
-                        `planet_last_update` = '" . $data['planet']['planet_last_update'] . "',
-                        `planet_b_hangar_id` = '" . $data['planet']['planet_b_hangar_id'] . "',
-                        `planet_metal_perhour` = '" . $data['planet']['planet_metal_perhour'] . "',
-                        `planet_crystal_perhour` = '" . $data['planet']['planet_crystal_perhour'] . "',
-                        `planet_deuterium_perhour` = '" . $data['planet']['planet_deuterium_perhour'] . "',
-                        `planet_energy_used` = '" . $data['planet']['planet_energy_used'] . "',
-                        `planet_energy_max` = '" . $data['planet']['planet_energy_max'] . "',
+                        `planet_metal` = '" . self::str($data['planet']['planet_metal']) . "',
+                        `planet_crystal` = '" . self::str($data['planet']['planet_crystal']) . "',
+                        `planet_deuterium` = '" . self::str($data['planet']['planet_deuterium']) . "',
+                        `planet_last_update` = '" . self::str($data['planet']['planet_last_update']) . "',
+                        `planet_b_hangar_id` = '" . self::str($data['planet']['planet_b_hangar_id']) . "',
+                        `planet_metal_perhour` = '" . self::str($data['planet']['planet_metal_perhour']) . "',
+                        `planet_crystal_perhour` = '" . self::str($data['planet']['planet_crystal_perhour']) . "',
+                        `planet_deuterium_perhour` = '" . self::str($data['planet']['planet_deuterium_perhour']) . "',
+                        `planet_energy_used` = '" . self::str($data['planet']['planet_energy_used']) . "',
+                        `planet_energy_max` = '" . self::str($data['planet']['planet_energy_max']) . "',
                         `user_statistic_ships_points` = `user_statistic_ships_points` + '" . $data['ship_points'] . "',
                         `user_statistic_defenses_points` = `user_statistic_defenses_points`  + '" . $data['defense_points'] . "',
                         `user_statistic_military_points` = `user_statistic_military_points` + '" . ($data['ship_points'] + $data['defense_points']) . "',
                         {$data['sub_query']}
                         {$data['tech_query']}
-                        `planet_b_hangar` = '" . $data['planet']['planet_b_hangar'] . "'
-                    WHERE `planet_id` = '" . $data['planet']['planet_id'] . "';"
+                        `planet_b_hangar` = '" . self::str($data['planet']['planet_b_hangar']) . "'
+                    WHERE `planet_id` = '" . self::str($data['planet']['planet_id']) . "';"
                 )
             );
         }
     }
 
     /**
-     * Update the hangar queue, ships and defenses that were on queue
+     * Update the hangar queue, ships and defenses that were on queue.
+     *
+     * @param array<string, mixed> $current_user
+     * @param array<string, mixed> $current_planet
+     *
+     * @return array<int|string, int>
+     *
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.ElseExpression")
      */
     private static function updateHangarQueue(array $current_user, array &$current_planet, int $ProductionTime): array
     {
         $resource = Objects::getInstance()->getObjects();
 
-        if ($current_planet['planet_b_hangar_id'] != '') {
+        if (self::str($current_planet['planet_b_hangar_id']) !== '') {
             $Builded = [];
             $BuildArray = [];
-            $BuildQueue = explode(';', $current_planet['planet_b_hangar_id']);
+            $BuildQueue = explode(';', self::str($current_planet['planet_b_hangar_id']));
 
-            $current_planet['planet_b_hangar'] += $ProductionTime;
+            // Work on a local numeric copy of the hangar timer and queue string,
+            // then sync both back once (the by-ref array holds mixed values).
+            $hangar = self::num($current_planet['planet_b_hangar']) + $ProductionTime;
 
             foreach ($BuildQueue as $Node => $Array) {
-                if ($Array != '') {
-                    $Item = explode(',', $Array);
+                if ($Array === '') {
+                    continue;
+                }
 
-                    if (isset($Item[0]) && $Item[0] != 0) {
-                        $AcumTime = Developments::developmentTime(
-                            $current_user,
-                            $current_planet,
-                            (int) $Item[0]
-                        );
-                        $BuildArray[$Node] = [$Item[0], $Item[1], $AcumTime];
-                    }
+                $Item = explode(',', $Array);
+
+                if ($Item[0] != 0) {
+                    $AcumTime = Developments::developmentTime(
+                        $current_user,
+                        $current_planet,
+                        self::numInt($Item[0])
+                    );
+                    $BuildArray[$Node] = [$Item[0], $Item[1] ?? 0, $AcumTime];
                 }
             }
 
-            $current_planet['planet_b_hangar_id'] = '';
+            $hangarId = '';
             $UnFinished = false;
 
-            foreach ($BuildArray as $Node => $Item) {
-                $Element = $Item[0];
-                $Count = $Item[1];
-                $BuildTime = $Item[2];
+            foreach ($BuildArray as $Item) {
+                $Element = self::str($Item[0]);
+                $Count = self::num($Item[1]);
+                $BuildTime = self::num($Item[2]);
+                $resourceKey = self::str($resource[$Element] ?? '');
                 $Builded[$Element] = 0;
 
-                if (!$UnFinished and $BuildTime > 0) {
-                    $AllTime = $BuildTime * $Count;
-
-                    if ($current_planet['planet_b_hangar'] >= $BuildTime) {
-                        $Done = min($Count, floor((float) $current_planet['planet_b_hangar'] / $BuildTime));
+                if (!$UnFinished && $BuildTime > 0) {
+                    if ($hangar >= $BuildTime) {
+                        $Done = min($Count, floor($hangar / $BuildTime));
 
                         if ($Count > $Done) {
-                            $current_planet['planet_b_hangar'] -= $BuildTime * $Done;
-
+                            $hangar -= $BuildTime * $Done;
                             $UnFinished = true;
                             $Count -= $Done;
                         } else {
-                            $current_planet['planet_b_hangar'] -= $AllTime;
+                            $hangar -= $BuildTime * $Count;
                             $Count = 0;
                         }
 
-                        $Builded[$Element] += $Done;
-                        $current_planet[$resource[$Element]] += $Done;
+                        $Builded[$Element] += (int) $Done;
+                        $current_planet[$resourceKey] = self::num($current_planet[$resourceKey] ?? 0) + $Done;
                     } else {
                         $UnFinished = true;
                     }
                 } elseif (!$UnFinished) {
-                    $Builded[$Element] += $Count;
-                    $current_planet[$resource[$Element]] += $Count;
+                    $Builded[$Element] += (int) $Count;
+                    $current_planet[$resourceKey] = self::num($current_planet[$resourceKey] ?? 0) + $Count;
                     $Count = 0;
                 }
 
                 if ($Count != 0) {
-                    $current_planet['planet_b_hangar_id'] .= $Element . ',' . $Count . ';';
+                    $hangarId .= $Element . ',' . $Count . ';';
                 }
             }
+
+            $current_planet['planet_b_hangar'] = $hangar;
+            $current_planet['planet_b_hangar_id'] = $hangarId;
         } else {
             $Builded = [];
             $current_planet['planet_b_hangar'] = 0;
         }
 
         return $Builded;
+    }
+
+    /**
+     * Coerces an untyped game-state value to a float exactly as the legacy
+     * string arithmetic did implicitly, but without the type errors/notices.
+     */
+    private static function num(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private static function numInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private static function str(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 }

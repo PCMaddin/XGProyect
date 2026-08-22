@@ -13,7 +13,7 @@ use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\Functions;
 use App\Libraries\SecurePageLib;
-use Xgp\App\Libraries\UpdatesLibrary;
+use App\Libraries\UpdatesLibrary;
 
 // require some stuff
 require_once XGP_ROOT . 'config' . DIRECTORY_SEPARATOR . 'constants.php';

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
-use Xgp\App\Libraries\UpdatesLibrary;
+use App\Libraries\UpdatesLibrary;
 
 class LegacyController extends BaseController
 {

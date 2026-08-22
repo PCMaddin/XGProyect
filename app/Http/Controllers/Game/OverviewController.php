@@ -18,7 +18,7 @@ use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
-use Xgp\App\Libraries\UpdatesLibrary;
+use App\Libraries\UpdatesLibrary;
 use App\Libraries\Users;
 
 /**

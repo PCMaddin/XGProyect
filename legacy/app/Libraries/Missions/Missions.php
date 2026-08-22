@@ -9,7 +9,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
-use Xgp\App\Libraries\UpdatesLibrary;
+use App\Libraries\UpdatesLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

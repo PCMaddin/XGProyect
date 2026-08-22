@@ -267,25 +267,4 @@
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Libraries/Missions/Transport.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Missions/Transport.php" method="sendDeliveryMessageToReceiver"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Missions/Transport.php" method="sendReturnMessage"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateBuildingsQueue"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateResearchQueue"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Libraries/UpdatesLibrary.php" method="checkBuildingQueue"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="checkBuildingQueue"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="setFirstElement"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Libraries/UpdatesLibrary.php" method="setFirstElement"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="setFirstElement"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="setFirstElement"/>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="updatePlanetResources"/>
-  <violation rule="PHPMD\Rule\Design\LongMethod" file="legacy/app/Libraries/UpdatesLibrary.php" method="updatePlanetResources"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="updatePlanetResources"/>
-  <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updatePlanetResources"/>
-  <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/UpdatesLibrary.php"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateHangarQueue"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/UpdatesLibrary.php" method="updateHangarQueue"/>
 </phpmd-baseline>

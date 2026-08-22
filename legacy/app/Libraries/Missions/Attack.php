@@ -19,7 +19,7 @@ use Xgp\App\Libraries\BattleEngine\Utils\LangManager;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\PlanetLib;
-use Xgp\App\Libraries\UpdatesLibrary;
+use App\Libraries\UpdatesLibrary;
 
 class Attack extends Missions
 {
