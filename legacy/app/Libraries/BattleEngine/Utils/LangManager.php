@@ -6,15 +6,15 @@ namespace Xgp\App\Libraries\BattleEngine\Utils;
 
 class LangManager
 {
-    private $impl;
-    private static $instance;
+    private ?Lang $impl = null;
+    private static ?LangManager $instance = null;
 
-    public function setImplementation(Lang $implementation)
+    public function setImplementation(Lang $implementation): void
     {
         $this->impl = $implementation;
     }
 
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (empty(self::$instance)) {
             self::$instance = new LangManager();
@@ -22,18 +22,22 @@ class LangManager
         return self::$instance;
     }
 
-    public function __call($name, $arguments)
+    /**
+     * @param array<int, mixed> $arguments
+     */
+    public function __call(string $name, array $arguments): mixed
     {
-        if (empty($this->impl)) {
+        $callback = [$this->impl, $name];
+        if (empty($this->impl) || !is_callable($callback)) {
             if (empty($arguments)) {
                 return $name;
             }
             return $arguments[0];
         }
-        return call_user_func_array([$this->impl, $name], $arguments);
+        return call_user_func_array($callback, $arguments);
     }
 
-    public function implementationExist()
+    public function implementationExist(): bool
     {
         return !empty($this->impl);
     }

@@ -206,9 +206,13 @@ wird der falsche `@return int` korrigiert.
 
 | Core (Battle, Round, BattleReport) + `getIterator()`-Flip | ✅ getippt | die Verbraucher des Sammlungs-Kerns. `Battle`/`Round` mit typisierten Properties/Rückgaben; `setBattleResult(?int)`. `BattleReport` (59 Einträge) vollständig: die verschachtelte Verlust-Struktur als präzise Shape `array<int, array<int, array<string, array<int, array{0: int|float, 1: int|float}>>>>` → die Debris-Iteration ist typsicher. Danach **`IterableUtil::getIterator(): array<int, TValue>`** geschärft — das löst die letzten `getIterator()`-`mixed`-Kaskaden in Fire/Round/Fleet/Player **und** die Schleifen im (noch untypisierten) Missions-Layer auf. **Bugs gefixt:** zwei doppelte `getIterator()`-Aufrufe (`getAttackersTech`/`getDefendersTech` riefen die Methode auf dem bereits entpackten Array auf → Fatal), `getPlayer()`-nach-`existPlayer()` auf `Player\|false` sauber ge-null-checkt statt doppelt abgefragt. Tote Properties `$attackersLostUnits`/`$defendersLostUnits` entfernt. **Basis-`ShipType::getRepairProb(): float`** ergänzt (Ship/Defense überschreiben), damit der polymorphe Aufruf auf der `ShipType`-getippten Sammlung gültig ist. Netto ~90 PHPStan-Einträge abgebaut. Verbleibend baselined: konstantengetriebene Logik-Hinweise + die Missions-internen Kaskaden (bis die Handler getippt sind) |
 
-Noch offen: die restlichen `Utils` (`DebugManager`, `Functions`, `LangManager`)
-sowie die Missions-Handler (`Attack`, `Destroy`, `Spy`, …) — Letztere lösen
-beim Typisieren die verbliebenen temporären Aufrufer-Baseline-Einträge auf.
+| Utils (DebugManager, Functions, LangManager) | ✅ getippt | die letzten Engine-Blätter. `DebugManager`: Error-/Exception-Handler typisiert (`myErrorHandler(int,string,string,int): bool`, `save(mixed): void`), tote Properties entfernt, `var_export(…, true)` (Bug: fehlender 2. Parameter gab `null`), `@SuppressWarnings(Superglobals)`. `Functions` (globale `log_var`/`log_comment`): `mixed`-sicher über `print_r(…, true)`. `LangManager`: Singleton + `__call` typisiert, der dynamische `[$impl, $name]`-Callable per `is_callable`-Guard abgesichert. 32 Einträge abgebaut |
+
+Damit ist die **BattleEngine (OPBE) vollständig Level-9-sauber typisiert** — es
+bleiben nur konstantengetriebene Logik-Hinweise und ein paar genuin
+`mixed`-Aggregate baselined. Noch offen: die Missions-Handler (`Attack`,
+`Destroy`, `Spy`, …) — deren Typisierung löst die verbliebenen temporären
+Aufrufer-Baseline-Einträge auf.
 
 ---
 

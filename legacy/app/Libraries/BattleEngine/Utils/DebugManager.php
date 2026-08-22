@@ -32,13 +32,12 @@ namespace Xgp\App\Libraries\BattleEngine\Utils;
  * @version 6-3-2015
  *
  * @link https://github.com/jstar88/opbe
+ *
+ * @SuppressWarnings("PHPMD.Superglobals")
  */
 class DebugManager
 {
-    private $errorHandler;
-    private $exceptionHandler;
-
-    public static function intercept($toIntercept, $newFunction)
+    public static function intercept(callable $toIntercept, callable $newFunction): \Closure
     {
         return function () use ($toIntercept, $newFunction) {
             $newFunction();
@@ -50,12 +49,8 @@ class DebugManager
     /**
      * DebugManager::runDebugged()
      * Return a new function that will run the function given as argument under debug
-     *
-     * @param callable $func
-     *
-     * @return callable
      */
-    public static function runDebugged($func, $errorHandler = null, $exceptionHandler = null)
+    public static function runDebugged(callable $func, ?callable $errorHandler = null, ?callable $exceptionHandler = null): \Closure
     {
         if ($errorHandler == null) {
             $errorHandler = [DebugManager::class, 'myErrorHandler'];
@@ -80,13 +75,8 @@ class DebugManager
     /**
      * DebugManager::myErrorHandler()
      * default error handler function
-     *
-     * @param mixed $errno
-     * @param mixed $errstr
-     * @param mixed $errfile
-     * @param mixed $errline
      */
-    public static function myErrorHandler($errno, $errstr, $errfile, $errline)
+    public static function myErrorHandler(int $errno, string $errstr, string $errfile, int $errline): bool
     {
         $error = '';
         switch ($errno) {
@@ -119,17 +109,20 @@ class DebugManager
      *
      * @param mixed $other
      */
-    public static function save($other)
+    public static function save(mixed $other): void
     {
         date_default_timezone_set(TIMEZONE);
         $time = date('l jS \of F Y h:i:s A');
-        $post = '$_POST =' . var_export($_POST);
-        $get = '$_GET =' . var_export($_GET);
-        $output = ob_get_clean();
+        $post = '$_POST =' . var_export($_POST, true);
+        $get = '$_GET =' . var_export($_GET, true);
+        $output = (string) ob_get_clean();
+        $otherStr = (is_object($other) && method_exists($other, '__toString')) || is_scalar($other)
+            ? (string) $other
+            : print_r($other, true);
         if (!file_exists(OPBEPATH . 'errors')) {
             mkdir(OPBEPATH . 'errors', 0777, true);
         }
-        file_put_contents(OPBEPATH . 'errors' . DIRECTORY_SEPARATOR . date('d-m-y__H-i-s') . '.html', $time . PHP_EOL . $other . PHP_EOL . $post . PHP_EOL . $get . PHP_EOL . $output);
+        file_put_contents(OPBEPATH . 'errors' . DIRECTORY_SEPARATOR . date('d-m-y__H-i-s') . '.html', $time . PHP_EOL . $otherStr . PHP_EOL . $post . PHP_EOL . $get . PHP_EOL . $output);
         die('An error occurred, we will resolve it soon as possible');
     }
 }
