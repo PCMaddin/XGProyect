@@ -37,10 +37,10 @@ use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
  */
 class Battle
 {
-    private $attackers;
-    private $defenders;
-    private $report;
-    private $battleStarted;
+    private PlayerGroup $attackers;
+    private PlayerGroup $defenders;
+    private BattleReport $report;
+    private bool $battleStarted;
 
     public function __construct(PlayerGroup $attackers, PlayerGroup $defenders)
     {
@@ -52,10 +52,8 @@ class Battle
 
     /**
      * Battle::startBattle()
-     *
-     * @return null
      */
-    public function startBattle($debug = false)
+    public function startBattle(bool $debug = false): ?bool
     {
         if (!$debug) {
             ob_start();
@@ -76,7 +74,7 @@ class Battle
                 if (!$debug) {
                     ob_get_clean();
                 }
-                return;
+                return null;
             }
             //initialize the round
             $round = new Round($this->attackers, $this->defenders, $i);
@@ -113,7 +111,7 @@ class Battle
         }
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->report->__toString();
     }

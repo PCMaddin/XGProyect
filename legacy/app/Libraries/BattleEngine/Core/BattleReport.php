@@ -117,12 +117,10 @@ class BattleReport
     /**
      * Set the result of a battle
      *
-     * @param int $att (BATTLE_WIN ,BATTLE_LOSE, BATTLE_DRAW)
-     * @param int $def (BATTLE_WIN ,BATTLE_LOSE, BATTLE_DRAW)
-     *
-     * @return void
+     * @param int|null $att (BATTLE_WIN ,BATTLE_LOSE, BATTLE_DRAW)
+     * @param int|null $def (BATTLE_WIN ,BATTLE_LOSE, BATTLE_DRAW)
      */
-    public function setBattleResult(int $att, int $def)
+    public function setBattleResult(?int $att, ?int $def): void
     {
         $this->getRound('END')->getAfterBattleAttackers()->battleResult = $att;
         $this->getRound('END')->getAfterBattleDefenders()->battleResult = $def;
