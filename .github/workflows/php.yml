@@ -103,3 +103,25 @@ jobs:
 
       - name: Run PHPMD
         run: vendor/bin/phpmd app/,legacy/ github phpmd.xml --baseline-file phpmd.baseline.xml
+
+  composer-audit:
+    name: Composer Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, opcache, zip
+          coverage: none
+
+      - name: Ensure lockfile exists
+        run: test -f composer.lock
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Audit dependencies for known vulnerabilities
+        run: composer audit --locked

@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # PHP dependencies
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      # Collapse the routine minor/patch bumps into a single PR to cut noise;
+      # majors still come as individual PRs so they can be reviewed on their own.
+      php-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+
+  # GitHub Actions used by the workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "github-actions"
