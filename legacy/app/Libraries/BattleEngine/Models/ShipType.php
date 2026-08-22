@@ -36,6 +36,8 @@ use Xgp\App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
  * @version 6-3-1015
  *
  * @link https://github.com/jstar88/opbe
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class ShipType extends Type
 {
@@ -438,6 +440,15 @@ class ShipType extends Type
     public function isShieldDisabled(): bool
     {
         return $this->currentShield / $this->getCount() < 0.01;
+    }
+
+    /**
+     * ShipType::getRepairProb()
+     * Base repair probability; overridden by Ship and Defense.
+     */
+    public function getRepairProb(): float
+    {
+        return 0;
     }
 
     public function cloneMe(): ShipType

@@ -78,7 +78,10 @@ class IterableUtil implements Iterator
     }
     /* other functions */
 
-    public function getIterator(): mixed
+    /**
+     * @return array<int, TValue>
+     */
+    public function getIterator(): array
     {
         return $this->array;
     }

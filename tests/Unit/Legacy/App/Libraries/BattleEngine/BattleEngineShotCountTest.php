@@ -61,7 +61,7 @@ class BattleEngineShotCountTest extends TestCase
         $report = $battle->getReport();
         $reportContent = (string) $report;
 
-        $this->assertIsInt($report->getMoonProb());
+        $this->assertGreaterThanOrEqual(0, $report->getMoonProb());
         $this->assertStringContainsString('Rocket Launcher', $reportContent);
         $this->assertStringNotContainsString('game/ships.defense_rocket_launcher', $reportContent);
         $this->assertStringNotContainsString('Repaired Defense:<br>', $reportContent);
