@@ -35,11 +35,14 @@ namespace Xgp\App\Libraries\BattleEngine\Utils;
  */
 abstract class Events
 {
-    public static function event_moon($moonProb)
+    /**
+     * @return array{size: int, fields: float}
+     */
+    public static function event_moon(int | float $moonProb): array
     {
         $SizeMin = MOON_MIN_START_SIZE + ($moonProb * MOON_MIN_FACTOR);
         $SizeMax = MOON_MAX_START_SIZE + ($moonProb * MOON_MAX_FACTOR);
-        $size = rand($SizeMin, $SizeMax);
+        $size = rand((int) $SizeMin, (int) $SizeMax);
         $fields = floor(pow($size / 1000, 2));
         return ['size' => $size, 'fields' => $fields];
     }

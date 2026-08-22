@@ -673,18 +673,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/CombatObject/Fire.php
 
 		-
-			message: '#^Parameter \#3 \$min of static method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Gauss\:\:getNextMsBetween\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/Fire.php
-
-		-
-			message: '#^Parameter \#4 \$max of static method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Gauss\:\:getNextMsBetween\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/CombatObject/Fire.php
-
-		-
 			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\CombatObject\\Fire\:\:\$power has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -1391,12 +1379,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: legacy/app/Libraries/BattleEngine/Core/Round.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Defense\:\:getRepairProb\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Defense.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -2317,12 +2299,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/Models/PlayerGroup.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Models\\Ship\:\:getRepairProb\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Models/Ship.php
-
-		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 3
@@ -2671,18 +2647,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/Utils/DebugManager.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Events\:\:event_moon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Events.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Events\:\:event_moon\(\) has parameter \$moonProb with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Events.php
-
-		-
 			message: '#^Function log_comment\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2719,12 +2683,6 @@ parameters:
 			path: legacy/app/Libraries/BattleEngine/Utils/Functions.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Gauss\:\:getNext\(\) should return int but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Gauss.php
-
-		-
 			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\GeometricDistribution\:\:getMeanFromProbability\(\) should return int but returns float\.$#'
 			identifier: return.type
 			count: 1
@@ -2759,18 +2717,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: legacy/app/Libraries/BattleEngine/Utils/GeometricDistribution.php
-
-		-
-			message: '#^Class Xgp\\App\\Libraries\\BattleEngine\\Utils\\IterableUtil implements generic interface Iterator but does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/IterableUtil.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Utils\\IterableUtil\:\:\$array has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/IterableUtil.php
 
 		-
 			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\LangManager\:\:__call\(\) has no return type specified\.$#'
@@ -2933,30 +2879,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: legacy/app/Libraries/BattleEngine/Utils/Math.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Number\:\:__construct\(\) has parameter \$rest with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Number.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\BattleEngine\\Utils\\Number\:\:__construct\(\) has parameter \$result with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Number.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Utils\\Number\:\:\$rest has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Number.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Utils\\Number\:\:\$result has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: legacy/app/Libraries/BattleEngine/Utils/Number.php
 
 		-
 			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:__construct\(\) has parameter \$reports with no value type specified in iterable type array\.$#'
@@ -4157,3 +4079,9 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: legacy/app/Libraries/Missions/Destroy.php
+
+		-
+			message: '#^Property Xgp\\App\\Libraries\\BattleEngine\\Utils\\IterableUtil\:\:\$array has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: legacy/app/Libraries/BattleEngine/Utils/IterableUtil.php

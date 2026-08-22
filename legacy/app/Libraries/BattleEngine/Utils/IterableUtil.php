@@ -36,6 +36,7 @@ use ReturnTypeWillChange;
  *
  * @link https://github.com/jstar88/opbe
  */
+/** @implements Iterator<mixed, mixed> */
 class IterableUtil implements Iterator
 {
     protected $array = [];
@@ -54,7 +55,7 @@ class IterableUtil implements Iterator
     }
 
     #[ReturnTypeWillChange]
-    public function key()
+    public function key(): mixed
     {
         return key($this->array);
     }

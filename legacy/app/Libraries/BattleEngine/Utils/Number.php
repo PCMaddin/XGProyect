@@ -35,16 +35,16 @@ namespace Xgp\App\Libraries\BattleEngine\Utils;
  */
 class Number
 {
-    public $rest;
-    public $result;
+    public int | float $rest;
+    public int | float $result;
 
-    public function __construct($result, $rest = 0)
+    public function __construct(int | float $result, int | float $rest = 0)
     {
         $this->rest = $rest;
         $this->result = $result;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return "result=$this->result;rest=$this->rest;";
     }

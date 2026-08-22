@@ -41,27 +41,21 @@ class Gauss
      * Random::getNext()
      * Return an random normal number
      *
-     * @return int
      */
-    public static function getNext()
+    public static function getNext(): float
     {
         $x = (float) mt_rand() / (float) mt_getrandmax();
         $y = (float) mt_rand() / (float) mt_getrandmax();
-        $u = sqrt(-2 * log($x)) * cos(2 * pi() * $y);
-        $v = sqrt(-2 * log($x)) * sin(2 * pi() * $y);
-        return $u;
+        return sqrt(-2 * log($x)) * cos(2 * pi() * $y);
     }
 
     /**
      * Random::getNextMs()
      * Generates a random number from the normal distribution with specific mean and standard deviation
      *
-     * @param int $m: mean
-     * @param int $s: standard deviation
      *
-     * @return int
      */
-    public static function getNextMs($m, $s)
+    public static function getNextMs(float $m, float $s): float
     {
         return self::getNext() * $s + $m;
     }
@@ -71,14 +65,9 @@ class Gauss
      * Generates a random number from the normal distribution with specific mean and standard deviation.
      * The number must be between min and max.
      *
-     * @param int $m: mean
-     * @param int $s: standard deviation
-     * @param int $min: the minimum
-     * @param int $max: the maximum
      *
-     * @return int
      */
-    public static function getNextMsBetween($m, $s, $min, $max)
+    public static function getNextMsBetween(float $m, float $s, float $min, float $max): float | int
     {
         $i = 0;
         if ($min > $m || $max < $m) {

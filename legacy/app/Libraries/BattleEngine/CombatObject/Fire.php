@@ -175,9 +175,9 @@ class Fire
             log_var('$max', $max);
             log_var('$min', $min);
             log_var('$mean', $meanShots);
-            return Gauss::getNextMsBetween($meanShots, GeometricDistribution::getStandardDeviationFromProbability(1 - $p), $min, $max);
+            return (int) Gauss::getNextMsBetween($meanShots, GeometricDistribution::getStandardDeviationFromProbability(1 - $p), $min, $max);
         }
-        return $meanShots;
+        return (int) $meanShots;
     }
 
     /**

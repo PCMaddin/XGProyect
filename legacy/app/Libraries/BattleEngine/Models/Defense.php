@@ -35,7 +35,7 @@ namespace Xgp\App\Libraries\BattleEngine\Models;
  */
 class Defense extends ShipType
 {
-    public function getRepairProb()
+    public function getRepairProb(): float
     {
         return DEFENSE_REPAIR_PROB;
     }
