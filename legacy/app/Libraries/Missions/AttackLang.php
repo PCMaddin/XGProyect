@@ -8,9 +8,13 @@ use Xgp\App\Libraries\BattleEngine\Utils\Lang;
 
 class AttackLang implements Lang
 {
-    private $objects;
+    /** @var array<int, string> */
+    private array $objects;
 
-    public function __construct($objects)
+    /**
+     * @param array<int, string> $objects object names by object id
+     */
+    public function __construct(array $objects)
     {
         $this->objects = $objects;
     }

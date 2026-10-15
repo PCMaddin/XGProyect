@@ -9,6 +9,9 @@ use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib as Fleets;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Transport extends Missions
 {
     public function __construct(private FormatService $formatService)
@@ -19,24 +22,22 @@ class Transport extends Missions
     /**
      * Transport mission - deliver resources between planets
      *
-     * @param array $fleet
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
      */
     public function transportMission(array $fleet): void
     {
         // get required data
-        $trading_planets = $this->getTradingPlanetsData($fleet);
+        $tradingPlanets = $this->getTradingPlanetsData($fleet);
 
         // do mission
         if (parent::canStartMission($fleet)) {
             // messages
-            $this->sendDeliveryMessageToOwner($fleet, $trading_planets);
-            $this->sendDeliveryMessageToReceiver($fleet, $trading_planets);
+            $this->sendDeliveryMessageToOwner($fleet, $tradingPlanets);
+            $this->sendDeliveryMessageToReceiver($fleet, $tradingPlanets);
 
             // transfer the fleet resources to the planet
             parent::storeResources($fleet, false);
-            $this->updateReturningFleetResources((int) $fleet['fleet_id']);
+            $this->updateReturningFleetResources(self::int($fleet['fleet_id']));
 
             // we need to remove the resources in case we are continuing with the
             // canCompleteMission instead of just ending here
@@ -48,20 +49,20 @@ class Transport extends Missions
         // complete mission
         if (parent::canCompleteMission($fleet)) {
             // message
-            $this->sendReturnMessage($fleet, $trading_planets);
+            $this->sendReturnMessage($fleet, $tradingPlanets);
 
             // transfer the ships to the planet
             parent::restoreFleet($fleet);
-            parent::removeFleet($fleet['fleet_id']);
+            parent::removeFleet(self::int($fleet['fleet_id']));
         }
     }
 
     /**
      * Get data for the planets that are trading resources
      *
-     * @param array $fleet
+     * @param array<string, mixed> $fleet
      *
-     * @return array
+     * @return array<string, mixed>
      */
     private function getTradingPlanetsData(array $fleet): array
     {
@@ -86,29 +87,27 @@ class Transport extends Missions
     /**
      * Send a delivery message to the fleet owner
      *
-     * @param array $fleet
-     * @param array $trading_planets
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
+     * @param array<string, mixed> $tradingPlanets
      */
-    private function sendDeliveryMessageToOwner(array $fleet, array $trading_planets): void
+    private function sendDeliveryMessageToOwner(array $fleet, array $tradingPlanets): void
     {
         // send message
         Functions::sendMessage(
-            $trading_planets['start_id'],
+            self::int($tradingPlanets['start_id']),
             0,
-            $fleet['fleet_start_time'],
+            self::int($fleet['fleet_start_time']),
             5,
             __('game/missions.mi_fleet_command'),
             __('game/transport.tra_reaching'),
             StringsHelper::parseReplacements(__('game/transport.tra_delivered_resources'), [
-                $trading_planets['start_name'],
+                self::str($tradingPlanets['start_name']),
                 Fleets::startLink($fleet, ''),
-                $trading_planets['target_name'],
+                self::str($tradingPlanets['target_name']),
                 Fleets::targetLink($fleet, ''),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_metal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_crystal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_deuterium']),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
             ])
         );
     }
@@ -116,37 +115,35 @@ class Transport extends Missions
     /**
      * Send a delivery message to the receiver, only if the target planet is not a planet from the same user
      *
-     * @param array $fleet
-     * @param array $trading_planets
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
+     * @param array<string, mixed> $tradingPlanets
      */
-    private function sendDeliveryMessageToReceiver(array $fleet, array $trading_planets): void
+    private function sendDeliveryMessageToReceiver(array $fleet, array $tradingPlanets): void
     {
-        if ($trading_planets['start_id'] != $trading_planets['target_id']) {
+        if ($tradingPlanets['start_id'] != $tradingPlanets['target_id']) {
             // send message
             Functions::sendMessage(
-                $trading_planets['target_id'],
+                self::int($tradingPlanets['target_id']),
                 0,
-                $fleet['fleet_start_time'],
+                self::int($fleet['fleet_start_time']),
                 5,
                 __('game/transport.tra_incoming_from'),
                 __('game/transport.tra_incoming_title'),
                 StringsHelper::parseReplacements(__('game/transport.tra_incoming_delivery'), [
-                    $trading_planets['start_user_name'],
-                    $trading_planets['start_name'],
+                    self::str($tradingPlanets['start_user_name']),
+                    self::str($tradingPlanets['start_name']),
                     Fleets::startLink($fleet, ''),
-                    $trading_planets['target_name'],
+                    self::str($tradingPlanets['target_name']),
                     Fleets::targetLink($fleet, ''),
-                    $this->formatService->prettyNumber((int) $fleet['fleet_resource_metal']),
-                    $this->formatService->prettyNumber((int) $fleet['fleet_resource_crystal']),
-                    $this->formatService->prettyNumber((int) $fleet['fleet_resource_deuterium']),
-                    $this->formatService->prettyNumber((int) $trading_planets['target_metal']),
-                    $this->formatService->prettyNumber((int) $trading_planets['target_crystal']),
-                    $this->formatService->prettyNumber((int) $trading_planets['target_deuterium']),
-                    $this->formatService->prettyNumber($trading_planets['target_metal'] + $fleet['fleet_resource_metal']),
-                    $this->formatService->prettyNumber($trading_planets['target_crystal'] + $fleet['fleet_resource_crystal']),
-                    $this->formatService->prettyNumber($trading_planets['target_deuterium'] + $fleet['fleet_resource_deuterium']),
+                    $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
+                    $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
+                    $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
+                    $this->formatService->prettyNumber(self::int($tradingPlanets['target_metal'])),
+                    $this->formatService->prettyNumber(self::int($tradingPlanets['target_crystal'])),
+                    $this->formatService->prettyNumber(self::int($tradingPlanets['target_deuterium'])),
+                    $this->formatService->prettyNumber(self::num($tradingPlanets['target_metal']) + self::num($fleet['fleet_resource_metal'])),
+                    $this->formatService->prettyNumber(self::num($tradingPlanets['target_crystal']) + self::num($fleet['fleet_resource_crystal'])),
+                    $this->formatService->prettyNumber(self::num($tradingPlanets['target_deuterium']) + self::num($fleet['fleet_resource_deuterium'])),
                 ])
             );
         }
@@ -155,39 +152,37 @@ class Transport extends Missions
     /**
      * Send a message informing that the fleet is back
      *
-     * @param array $fleet
-     * @param array $trading_planets
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
+     * @param array<string, mixed> $tradingPlanets
      */
-    private function sendReturnMessage(array $fleet, array $trading_planets): void
+    private function sendReturnMessage(array $fleet, array $tradingPlanets): void
     {
         $text = __('game/missions.mi_fleet_back_without_resources');
         $replacements = [
-            $trading_planets['target_name'],
+            $tradingPlanets['target_name'],
             Fleets::targetLink($fleet, ''),
-            $trading_planets['start_name'],
+            $tradingPlanets['start_name'],
             Fleets::startLink($fleet, ''),
         ];
 
         if (Fleets::hasResources($fleet)) {
             $text = __('game/missions.mi_fleet_back_with_resources');
             $replacements = [
-                $fleet['planet_end_name'],
+                self::str($fleet['planet_end_name']),
                 Fleets::targetLink($fleet, ''),
-                $fleet['planet_start_name'],
+                self::str($fleet['planet_start_name']),
                 Fleets::startLink($fleet, ''),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_metal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_crystal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_deuterium']),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
             ];
         }
 
         // send message
         Functions::sendMessage(
-            $trading_planets['start_id'],
+            self::int($tradingPlanets['start_id']),
             0,
-            $fleet['fleet_end_time'],
+            self::int($fleet['fleet_end_time']),
             5,
             __('game/missions.mi_fleet_command'),
             __('game/missions.mi_fleet_back_title'),

@@ -59,13 +59,14 @@ trait BindsLegacyQueries
      */
     private static function bindings(array $bindings): array
     {
-        return array_map(self::sqlValue(...), $bindings);
+        return array_map(self::str(...), $bindings);
     }
 
     /**
-     * The string PHP's interpolation produces for a scalar/null value.
+     * The string PHP's interpolation produces for a scalar/null value
+     * (used for SQL bindings as well as message text).
      */
-    protected static function sqlValue(mixed $value): string
+    protected static function str(mixed $value): string
     {
         return is_scalar($value) || $value === null ? (string) $value : '';
     }

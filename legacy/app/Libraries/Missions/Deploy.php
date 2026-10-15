@@ -9,6 +9,9 @@ use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib as Fleets;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Deploy extends Missions
 {
     public function __construct(private FormatService $formatService)
@@ -19,14 +22,12 @@ class Deploy extends Missions
     /**
      * Deploy mission - move fleets from one planet to another
      *
-     * @param array $fleet
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
      */
     public function deployMission(array $fleet): void
     {
         // by default we send ships to the target
-        $start_planet = false;
+        $startPlanet = false;
 
         // do mission
         if (parent::canStartMission($fleet)) {
@@ -35,31 +36,29 @@ class Deploy extends Missions
         } elseif (parent::canCompleteMission($fleet)) {
             // in this case, complete mission = cancel mission,
             // since deployment can only go one way, except if the fleet it's returned
-            $start_planet = true;
+            $startPlanet = true;
 
             // message
             $this->sendReturnMessage($fleet);
         }
 
         // transfer the ships to the planet
-        parent::restoreFleet($fleet, $start_planet);
-        parent::removeFleet($fleet['fleet_id']);
+        parent::restoreFleet($fleet, $startPlanet);
+        parent::removeFleet(self::int($fleet['fleet_id']));
     }
 
     /**
      * Send a deploymeny message to the fleet owner
      *
-     * @param array $fleet
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
      */
     private function sendDeploymentMessage(array $fleet): void
     {
         // send message
         Functions::sendMessage(
-            $fleet['fleet_owner'],
+            self::int($fleet['fleet_owner']),
             0,
-            $fleet['fleet_start_time'],
+            self::int($fleet['fleet_start_time']),
             5,
             __('game/missions.mi_fleet_command'),
             __('game/deploy.dep_report_title'),
@@ -68,9 +67,9 @@ class Deploy extends Missions
                 Fleets::startLink($fleet, ''),
                 $fleet['planet_end_name'],
                 Fleets::targetLink($fleet, ''),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_metal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_crystal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_deuterium']),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
             ])
         );
     }
@@ -78,9 +77,7 @@ class Deploy extends Missions
     /**
      * Send a message informing that the fleet is back
      *
-     * @param array $fleet
-     *
-     * @return void
+     * @param array<string, mixed> $fleet
      */
     private function sendReturnMessage(array $fleet): void
     {
@@ -99,17 +96,17 @@ class Deploy extends Missions
                 Fleets::targetLink($fleet, ''),
                 $fleet['planet_start_name'],
                 Fleets::startLink($fleet, ''),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_metal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_crystal']),
-                $this->formatService->prettyNumber((int) $fleet['fleet_resource_deuterium']),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
+                $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
             ];
         }
 
         // send message
         Functions::sendMessage(
-            $fleet['fleet_owner'],
+            self::int($fleet['fleet_owner']),
             0,
-            $fleet['fleet_end_time'],
+            self::int($fleet['fleet_end_time']),
             5,
             __('game/missions.mi_fleet_command'),
             __('game/deploy.dep_report_title'),

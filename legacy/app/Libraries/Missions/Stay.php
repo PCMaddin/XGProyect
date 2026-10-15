@@ -7,6 +7,9 @@ namespace Xgp\App\Libraries\Missions;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Stay extends Missions
 {
     public function __construct()
@@ -15,125 +18,104 @@ class Stay extends Missions
     }
 
     /**
-     * stayMission
+     * Stay (hold) mission: park a fleet at a friendly planet.
      *
-     * @param array $fleet_row Fleet row
-     *
-     * @return void
+     * @param array<string, mixed> $fleetRow
      */
-    public function stayMission($fleet_row)
+    public function stayMission(array $fleetRow): void
     {
-        $friendly_planet = $this->getFriendlyPlanetData([
+        $friendlyPlanet = $this->getFriendlyPlanetData([
             'coords' => [
                 'start' => [
-                    'galaxy' => $fleet_row['fleet_start_galaxy'],
-                    'system' => $fleet_row['fleet_start_system'],
-                    'planet' => $fleet_row['fleet_start_planet'],
-                    'type' => $fleet_row['fleet_start_type'],
+                    'galaxy' => $fleetRow['fleet_start_galaxy'],
+                    'system' => $fleetRow['fleet_start_system'],
+                    'planet' => $fleetRow['fleet_start_planet'],
+                    'type' => $fleetRow['fleet_start_type'],
                 ],
                 'end' => [
-                    'galaxy' => $fleet_row['fleet_end_galaxy'],
-                    'system' => $fleet_row['fleet_end_system'],
-                    'planet' => $fleet_row['fleet_end_planet'],
-                    'type' => $fleet_row['fleet_end_type'],
+                    'galaxy' => $fleetRow['fleet_end_galaxy'],
+                    'system' => $fleetRow['fleet_end_system'],
+                    'planet' => $fleetRow['fleet_end_planet'],
+                    'type' => $fleetRow['fleet_end_type'],
                 ],
             ],
         ]);
 
         // SOME REQUIRED VALUES
-        $start_name = $friendly_planet['start_name'];
-        $start_owner_id = $friendly_planet['start_id'];
-        $target_name = $friendly_planet['target_name'];
-        $target_owner_id = $friendly_planet['target_id'];
+        $startName = self::str($friendlyPlanet['start_name']);
+        $startOwnerId = self::int($friendlyPlanet['start_id']);
+        $targetName = self::str($friendlyPlanet['target_name']);
+        $targetOwnerId = self::int($friendlyPlanet['target_id']);
+        $metal = self::str($fleetRow['fleet_resource_metal']);
+        $crystal = self::str($fleetRow['fleet_resource_crystal']);
+        $deuterium = self::str($fleetRow['fleet_resource_deuterium']);
 
         // DIFFERENT TYPES OF MESSAGES
-        $message[1] = sprintf(
+        $ownerMessage = sprintf(
             __('game/stay.stay_mess_owner'),
-            $target_name,
-            FleetsLib::targetLink($fleet_row, ''),
-            $fleet_row['fleet_resource_metal'],
-            $fleet_row['fleet_resource_crystal'],
-            $fleet_row['fleet_resource_deuterium']
+            $targetName,
+            FleetsLib::targetLink($fleetRow, ''),
+            $metal,
+            $crystal,
+            $deuterium
         );
 
-        $message[2] = sprintf(
+        // the translation expects: origin planet, origin link, metal, crystal, deuterium
+        // (the target name/link used to be passed too and shifted the amounts out of place)
+        $userMessage = sprintf(
             __('game/stay.stay_mess_user'),
-            $start_name,
-            FleetsLib::startLink($fleet_row, ''),
-            $target_name,
-            FleetsLib::targetLink($fleet_row, ''),
-            $fleet_row['fleet_resource_metal'],
-            $fleet_row['fleet_resource_crystal'],
-            $fleet_row['fleet_resource_deuterium']
+            $startName,
+            FleetsLib::startLink($fleetRow, ''),
+            $metal,
+            $crystal,
+            $deuterium
         );
 
-        $message[3] = sprintf(
+        $backMessage = sprintf(
             __('game/missions.mi_fleet_back_without_resources'),
-            $target_name,
-            FleetsLib::targetLink($fleet_row, ''),
-            $start_name,
-            FleetsLib::startLink($fleet_row, '')
+            $targetName,
+            FleetsLib::targetLink($fleetRow, ''),
+            $startName,
+            FleetsLib::startLink($fleetRow, '')
         );
 
-        if ($fleet_row['fleet_mess'] == 0) {
-            if ($fleet_row['fleet_start_time'] <= time()) {
+        if ($fleetRow['fleet_mess'] == 0) {
+            if ($fleetRow['fleet_start_time'] <= time()) {
                 $this->stayMessage(
-                    $start_owner_id,
-                    $message[1],
-                    $fleet_row['fleet_start_time'],
+                    $startOwnerId,
+                    $ownerMessage,
+                    self::int($fleetRow['fleet_start_time']),
                     __('game/stay.stay_report_title')
                 );
 
                 $this->stayMessage(
-                    $target_owner_id,
-                    $message[2],
-                    $fleet_row['fleet_start_time'],
+                    $targetOwnerId,
+                    $userMessage,
+                    self::int($fleetRow['fleet_start_time']),
                     __('game/stay.stay_report_title')
                 );
 
-                $this->startStay($fleet_row['fleet_id']);
+                $this->updateFleetStatusToStayById($fleetRow['fleet_id']);
             }
 
-            if ($fleet_row['fleet_end_stay'] <= time()) {
-                parent::returnFleet($fleet_row['fleet_id']);
+            if ($fleetRow['fleet_end_stay'] <= time()) {
+                parent::returnFleet(self::int($fleetRow['fleet_id']));
             }
-        } elseif ($fleet_row['fleet_end_time'] < time()) {
+        } elseif ($fleetRow['fleet_end_time'] < time()) {
             $this->stayMessage(
-                $start_owner_id,
-                $message[3],
-                $fleet_row['fleet_end_time'],
+                $startOwnerId,
+                $backMessage,
+                self::int($fleetRow['fleet_end_time']),
                 __('game/missions.mi_fleet_back_title')
             );
 
-            parent::restoreFleet($fleet_row, true);
-            parent::removeFleet($fleet_row['fleet_id']);
+            parent::restoreFleet($fleetRow, true);
+            parent::removeFleet(self::int($fleetRow['fleet_id']));
         }
     }
 
-    /**
-     * startStay
-     *
-     * @param int $fleet_id Fleed ID
-     *
-     * @return void
-     */
-    private function startStay($fleet_id)
+    private function stayMessage(int $owner, string $message, int $time, string $statusMessage): void
     {
-        $this->updateFleetStatusToStayById($fleet_id);
-    }
-
-    /**
-     * stayMessage
-     *
-     * @param int    $owner          Owner
-     * @param string $message        Message
-     * @param int    $time           Time
-     * @param string $status_message Status message
-     *
-     * @return void
-     */
-    private function stayMessage($owner, $message, $time, $status_message)
-    {
-        Functions::sendMessage($owner, 0, $time, 5, __('game/missions.mi_fleet_command'), $status_message, $message);
+        Functions::sendMessage($owner, 0, $time, 5, __('game/missions.mi_fleet_command'), $statusMessage, $message);
     }
 }

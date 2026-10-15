@@ -68,7 +68,7 @@ class Missions
 
         $this->makeUpdate($coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']);
 
-        $ships = FleetsLib::getFleetShipsArray(self::sqlValue($fleetRow['fleet_array']));
+        $ships = FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array']));
         $shipsFields = '';
 
         foreach ($ships as $id => $amount) {
@@ -192,7 +192,7 @@ class Missions
         $this->statement(
             'UPDATE ' . PLANETS . ' AS p
                     INNER JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id` SET
-                        ' . self::sqlValue($data['ships']) . '
+                        ' . self::str($data['ships']) . '
                         `planet_metal` = `planet_metal` + ?,
                         `planet_crystal` = `planet_crystal` + ?,
                         `planet_deuterium` = `planet_deuterium` + ?
@@ -470,7 +470,7 @@ class Missions
     {
         $this->statement(
             'UPDATE `' . PLANETS . '`, `' . SHIPS . '`, `' . DEFENSES . '`  SET
-                    ' . self::sqlValue($data['ships']) . '
+                    ' . self::str($data['ships']) . '
                     `planet_metal` = `planet_metal` -  ?,
                     `planet_crystal` = `planet_crystal` -  ?,
                     `planet_deuterium` = `planet_deuterium` -  ?
@@ -789,7 +789,7 @@ class Missions
     {
         $this->statement(
             'UPDATE ' . DEFENSES . ' SET
-                    ' . self::sqlValue($data['destroyed_query']) . '
+                    ' . self::str($data['destroyed_query']) . '
                     `defense_anti-ballistic_missile` = ?
                     WHERE defense_planet_id = ?;',
             [$data['amount'], self::int($data['planet_id'])]
