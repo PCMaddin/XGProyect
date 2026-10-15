@@ -8,6 +8,9 @@ use App\Services\FormatService;
 use Xgp\App\Core\Objects;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Missile extends Missions
 {
     public function __construct(private FormatService $formatService)
@@ -16,146 +19,203 @@ class Missile extends Missions
     }
 
     /**
-     * missileMission
+     * Interplanetary missile attack on the defenses of the target planet.
      *
-     * @param array $fleet_row Fleet row
-     *
-     * @return void
+     * @param array<string, mixed> $fleetRow
      */
-    public function missileMission($fleet_row)
+    public function missileMission(array $fleetRow): void
     {
-        // do mission
-        if (parent::canStartMission($fleet_row)) {
-            $attacker_data = $this->getMissileAttackerDataByCoords([
-                'coords' => [
-                    'galaxy' => $fleet_row['fleet_start_galaxy'],
-                    'system' => $fleet_row['fleet_start_system'],
-                    'planet' => $fleet_row['fleet_start_planet'],
-                    'type' => $fleet_row['fleet_start_type'],
-                ],
-            ]);
-
-            $target_data = $this->getMissileTargetDataByCoords([
-                'coords' => [
-                    'galaxy' => $fleet_row['fleet_end_galaxy'],
-                    'system' => $fleet_row['fleet_end_system'],
-                    'planet' => $fleet_row['fleet_end_planet'],
-                    'type' => $fleet_row['fleet_end_type'],
-                ],
-            ]);
-
-            $message = '';
-            $single = '';
-            if ($fleet_row['fleet_amount'] == 1) {
-                $single = '_single';
-            }
-
-            if ($target_data['defense_anti-ballistic_missile'] >= $fleet_row['fleet_amount']) {
-                $message = __('game/missile.mis_all_destroyed') . '<br>';
-                $amount = $fleet_row['fleet_amount'];
-            } else {
-                $destroyed_query = '';
-                $result = [];
-                $amount = 0;
-
-                if ($target_data['defense_anti-ballistic_missile'] > 0) {
-                    $result[502] = $target_data['defense_anti-ballistic_missile'];
-                    $message = $target_data['defense_anti-ballistic_missile'] .
-                    __('game/missile.mis_some_destroyed') . ' <br>';
-                }
-
-                $attack = floor(
-                    ($fleet_row['fleet_amount'] - $target_data['defense_anti-ballistic_missile']) * ($this->combat_caps[503]['attack'] * (1 + ($attacker_data['research_weapons_technology'] / 10)))
-                );
-                $attack_order = $this->setAttackOrder($fleet_row['fleet_target_obj']);
-
-                // PROCESS THE MISSILE ATTACK
-                for ($t = 0; $t < count($attack_order); $t++) {
-                    $n = $attack_order[$t];
-
-                    if ($target_data[$this->resource[$n]]) {
-                        $defense = (($this->pricelist[$n]['metal'] + $this->pricelist[$n]['crystal']) / 10) * (1 + ($target_data['research_shielding_technology'] / 10));
-
-                        if ($attack >= ($defense * $target_data[$this->resource[$n]])) {
-                            $destroyed = $target_data[$this->resource[$n]];
-                        } else {
-                            $destroyed = floor($attack / $defense);
-                        }
-
-                        $attack -= $destroyed * $defense;
-
-                        if ($destroyed != 0) {
-                            $result[$n] = $destroyed;
-                            $destroyed_query .= '`' . $this->resource[$n] . '` = `' . $this->resource[$n] . '` - ' . $destroyed . ',';
-                        }
-                    }
-                }
-
-                if ($destroyed_query != '') {
-                    $this->updatePlanetDefenses([
-                        'destroyed_query' => $destroyed_query,
-                        'amount' => $amount,
-                        'planet_id' => $target_data['planet_id'],
-                    ]);
-                }
-            }
-
-            $search = ['%1%', '%2%', '%3%'];
-            $replace = [
-                $fleet_row['fleet_amount'],
-                $attacker_data['planet_name'] . ' ' . $this->formatService->prettyCoords(
-                    (int) $fleet_row['fleet_start_galaxy'],
-                    (int) $fleet_row['fleet_start_system'],
-                    (int) $fleet_row['fleet_start_planet']
-                ),
-                $target_data['planet_name'] . ' ' . $this->formatService->prettyCoords(
-                    (int) $fleet_row['fleet_end_galaxy'],
-                    (int) $fleet_row['fleet_end_system'],
-                    (int) $fleet_row['fleet_end_planet']
-                ),
-            ];
-
-            if (isset($result) && count($result) > 0) {
-                foreach (Objects::getInstance()->getObjectsList('defense') as $defense_id) {
-                    $message .= $this->formatService->prettyNumber((int) $target_data[$this->resource[$defense_id]]) . ' ' . __('game/defenses.' . $this->resource[$defense_id]);
-                    if (isset($result[$defense_id])) {
-                        $message .= ' (-' . $this->formatService->prettyNumber((int) $result[$defense_id]) . ')';
-                    }
-                    $message .= '<br>';
-                }
-            }
-
-            if (empty($message)) {
-                $message = __('game/missile.mis_planet_without_defenses');
-            }
-
-            // send messages
-            // attacker
-            Functions::sendMessage(
-                $fleet_row['fleet_owner'],
-                0,
-                $fleet_row['fleet_end_time'],
-                5,
-                __('game/missions.mi_fleet_command'),
-                __('game/missile.mis_attack'),
-                str_replace($search, $replace, __('game/missile.mis_result_own' . $single)) . $message
-            );
-
-            // enemy
-            Functions::sendMessage(
-                $target_data['planet_user_id'],
-                0,
-                $fleet_row['fleet_end_time'],
-                5,
-                __('game/missions.mi_fleet_command'),
-                __('game/missile.mis_attack'),
-                str_replace($search, $replace, __('game/missile.mis_result' . $single)) . $message
-            );
-
-            parent::removeFleet($fleet_row['fleet_id']);
+        if (!parent::canStartMission($fleetRow)) {
+            return;
         }
+
+        $attackerData = $this->getMissileAttackerDataByCoords([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_start_galaxy'],
+                'system' => $fleetRow['fleet_start_system'],
+                'planet' => $fleetRow['fleet_start_planet'],
+                'type' => $fleetRow['fleet_start_type'],
+            ],
+        ]);
+
+        $targetData = $this->getMissileTargetDataByCoords([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+                'type' => $fleetRow['fleet_end_type'],
+            ],
+        ]);
+
+        $missiles = self::int($fleetRow['fleet_amount']);
+        $antiBallistic = self::int($targetData['defense_anti-ballistic_missile']);
+
+        // note: when every missile is intercepted, the anti-ballistic missiles are
+        // not consumed (unchanged legacy behaviour)
+        [$message, $result] = $antiBallistic >= $missiles
+            ? [self::text(__('game/missile.mis_all_destroyed')) . '<br>', []]
+            : $this->penetrateDefenses($fleetRow, $attackerData, $targetData, $missiles, $antiBallistic);
+
+        if (count($result) > 0) {
+            $message .= $this->defenseReport($targetData, $result);
+        }
+
+        if (empty($message)) {
+            $message = self::text(__('game/missile.mis_planet_without_defenses'));
+        }
+
+        $this->sendResults($fleetRow, $attackerData, $targetData, $message);
+
+        parent::removeFleet(self::int($fleetRow['fleet_id']));
     }
 
+    /**
+     * More missiles than anti-ballistic missiles: the interceptors are used up and
+     * the remaining missiles damage the defenses.
+     *
+     * @param array<string, mixed> $fleetRow
+     * @param array<string, mixed> $attackerData
+     * @param array<string, mixed> $targetData
+     *
+     * @return array{0: string, 1: array<int, mixed>}
+     */
+    private function penetrateDefenses(array $fleetRow, array $attackerData, array $targetData, int $missiles, int $antiBallistic): array
+    {
+        $message = '';
+        $result = [];
+
+        if ($antiBallistic > 0) {
+            $result[502] = $antiBallistic;
+            $message = $antiBallistic . self::text(__('game/missile.mis_some_destroyed')) . ' <br>';
+        }
+
+        $attack = floor(
+            ($missiles - $antiBallistic) * (self::num($this->combat_caps[503]['attack']) * (1 + (self::num($attackerData['research_weapons_technology']) / 10)))
+        );
+        $impact = $this->impactDefenses($attack, $this->setAttackOrder(self::int($fleetRow['fleet_target_obj'])), $targetData);
+        $result += $impact['destroyed'];
+
+        if ($impact['query'] != '') {
+            $this->updatePlanetDefenses([
+                'destroyed_query' => $impact['query'],
+                'amount' => 0,
+                'planet_id' => $targetData['planet_id'],
+            ]);
+        }
+
+        return [$message, $result];
+    }
+
+    /**
+     * Spend the missiles' attack power on the target defenses in attack order.
+     *
+     * @param list<int>            $attackOrder
+     * @param array<string, mixed> $targetData
+     *
+     * @return array{destroyed: array<int, mixed>, query: string}
+     */
+    private function impactDefenses(float $attack, array $attackOrder, array $targetData): array
+    {
+        $destroyedUnits = [];
+        $query = '';
+        $shielding = 1 + (self::num($targetData['research_shielding_technology']) / 10);
+
+        foreach ($attackOrder as $defenseId) {
+            $column = $this->resource[$defenseId];
+            $available = $targetData[$column];
+
+            if (!$available) {
+                continue;
+            }
+
+            $defense = ((self::num($this->pricelist[$defenseId]['metal']) + self::num($this->pricelist[$defenseId]['crystal'])) / 10) * $shielding;
+            $destroyed = $attack >= ($defense * self::num($available)) ? $available : floor($attack / $defense);
+            $attack -= self::num($destroyed) * $defense;
+
+            if ($destroyed != 0) {
+                $destroyedUnits[$defenseId] = $destroyed;
+                $query .= '`' . $column . '` = `' . $column . '` - ' . self::str($destroyed) . ',';
+            }
+        }
+
+        return ['destroyed' => $destroyedUnits, 'query' => $query];
+    }
+
+    /**
+     * Remaining defenses of the target, with the losses of this attack.
+     *
+     * @param array<string, mixed> $targetData
+     * @param array<int, mixed>    $result
+     */
+    private function defenseReport(array $targetData, array $result): string
+    {
+        $report = '';
+        $defenses = Objects::getInstance()->getObjectsList('defense');
+
+        foreach (is_array($defenses) ? $defenses : [] as $defense) {
+            $defenseId = self::int($defense);
+            $column = $this->resource[$defenseId];
+            $report .= $this->formatService->prettyNumber(self::int($targetData[$column])) . ' ' . self::text(__('game/defenses.' . $column));
+
+            if (isset($result[$defenseId])) {
+                $report .= ' (-' . $this->formatService->prettyNumber(self::int($result[$defenseId])) . ')';
+            }
+
+            $report .= '<br>';
+        }
+
+        return $report;
+    }
+
+    /**
+     * @param array<string, mixed> $fleetRow
+     * @param array<string, mixed> $attackerData
+     * @param array<string, mixed> $targetData
+     */
+    private function sendResults(array $fleetRow, array $attackerData, array $targetData, string $message): void
+    {
+        $single = $fleetRow['fleet_amount'] == 1 ? '_single' : '';
+        $search = ['%1%', '%2%', '%3%'];
+        $replace = [
+            self::str($fleetRow['fleet_amount']),
+            self::str($attackerData['planet_name']) . ' ' . $this->formatService->prettyCoords(
+                self::int($fleetRow['fleet_start_galaxy']),
+                self::int($fleetRow['fleet_start_system']),
+                self::int($fleetRow['fleet_start_planet'])
+            ),
+            self::str($targetData['planet_name']) . ' ' . $this->formatService->prettyCoords(
+                self::int($fleetRow['fleet_end_galaxy']),
+                self::int($fleetRow['fleet_end_system']),
+                self::int($fleetRow['fleet_end_planet'])
+            ),
+        ];
+
+        // attacker
+        Functions::sendMessage(
+            self::int($fleetRow['fleet_owner']),
+            0,
+            self::int($fleetRow['fleet_end_time']),
+            5,
+            __('game/missions.mi_fleet_command'),
+            __('game/missile.mis_attack'),
+            str_replace($search, $replace, self::text(__('game/missile.mis_result_own' . $single))) . $message
+        );
+
+        // enemy
+        Functions::sendMessage(
+            self::int($targetData['planet_user_id']),
+            0,
+            self::int($fleetRow['fleet_end_time']),
+            5,
+            __('game/missions.mi_fleet_command'),
+            __('game/missile.mis_attack'),
+            str_replace($search, $replace, self::text(__('game/missile.mis_result' . $single))) . $message
+        );
+    }
+
+    /**
+     * @return list<int>
+     */
     private function setAttackOrder(int $primaryObjective): array
     {
         $objectives = [
@@ -171,5 +231,13 @@ class Missile extends Missions
         ];
 
         return $objectives[$primaryObjective];
+    }
+
+    /**
+     * A translation as string (translations of whole groups come back as arrays).
+     */
+    private static function text(mixed $translation): string
+    {
+        return is_string($translation) ? $translation : '';
     }
 }
