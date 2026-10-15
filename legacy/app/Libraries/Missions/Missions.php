@@ -5,30 +5,48 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use Xgp\App\Core\Concerns\BindsLegacyQueries;
 use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
 use App\Libraries\UpdatesLibrary;
 
 /**
+ * Base class of the mission handlers: shared fleet helpers and the raw SQL
+ * used by the handlers.
+ *
+ * Values coming from database rows are untyped (mixed) at this legacy
+ * boundary, so the query helpers bind every value as a parameter, rendered
+ * exactly as the former string interpolation did. The SQL semantics are
+ * unchanged, but the driver escapes the values instead of splicing them into
+ * the query text.
+ *
+ * @phpstan-type Coords3 array{galaxy: mixed, system: mixed, planet: mixed}
+ * @phpstan-type Coords4 array{galaxy: mixed, system: mixed, planet: mixed, type: mixed}
+ * @phpstan-type Resources array{metal: mixed, crystal: mixed, deuterium: mixed}
+ * @phpstan-type Row array<string, mixed>
+ *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.TooManyMethods")
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class Missions
 {
-    use PreparesLegacySql;
+    use BindsLegacyQueries;
 
-    protected $resource;
-    protected $pricelist;
-    protected $combat_caps;
+    /** @var array<int, string> */
+    protected array $resource;
+    /** @var array<int, array<string, mixed>> */
+    protected array $pricelist;
+    /** @var array<int, array<string, mixed>> */
+    protected array $combat_caps;
 
     public function __construct()
     {
-        $this->resource = Objects::getInstance()->getObjects();
-        $this->pricelist = Objects::getInstance()->getPrice();
-        $this->combat_caps = Objects::getInstance()->getCombatSpecs();
+        $this->resource = self::nameMap(Objects::getInstance()->getObjects());
+        $this->pricelist = self::specMap(Objects::getInstance()->getPrice());
+        $this->combat_caps = self::specMap(Objects::getInstance()->getCombatSpecs());
     }
 
     protected function removeFleet(int $fleetId): void
@@ -41,69 +59,50 @@ class Missions
         $this->updateFleetStatusToReturnById($fleetId);
     }
 
+    /**
+     * @param Row $fleetRow
+     */
     protected function restoreFleet(array $fleetRow, bool $start = true): void
     {
-        if ($start) {
-            $galaxy = $fleetRow['fleet_start_galaxy'];
-            $system = $fleetRow['fleet_start_system'];
-            $planet = $fleetRow['fleet_start_planet'];
-            $type = $fleetRow['fleet_start_type'];
-        } else {
-            $galaxy = $fleetRow['fleet_end_galaxy'];
-            $system = $fleetRow['fleet_end_system'];
-            $planet = $fleetRow['fleet_end_planet'];
-            $type = $fleetRow['fleet_end_type'];
-        }
+        $coords = self::fleetCoords($fleetRow, $start);
 
-        $this->makeUpdate($galaxy, $system, $planet, $type);
+        $this->makeUpdate($coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']);
 
-        $ships = FleetsLib::getFleetShipsArray($fleetRow['fleet_array']);
-        $ships_fields = '';
+        $ships = FleetsLib::getFleetShipsArray(self::sqlValue($fleetRow['fleet_array']));
+        $shipsFields = '';
 
         foreach ($ships as $id => $amount) {
-            $ships_fields .= '`' . $this->resource[$id] . '` = `' .
+            $shipsFields .= '`' . $this->resource[$id] . '` = `' .
             $this->resource[$id] . "` + '" . $amount . "', ";
         }
 
-        $fuel_return = 0;
+        $fuelReturn = 0;
 
         if ($fleetRow['fleet_mission'] == 4 && !$start) {
-            $fuel_return = $fleetRow['fleet_fuel'] / 2;
+            $fuelReturn = self::num($fleetRow['fleet_fuel']) / 2;
         }
 
         $updateArray = [
             'resources' => [
                 'metal' => $fleetRow['fleet_resource_metal'],
                 'crystal' => $fleetRow['fleet_resource_crystal'],
-                'deuterium' => ($fleetRow['fleet_resource_deuterium'] + $fuel_return),
+                'deuterium' => (self::num($fleetRow['fleet_resource_deuterium']) + $fuelReturn),
             ],
-            'ships' => $ships_fields,
-            'coords' => [
-                'galaxy' => $galaxy,
-                'system' => $system,
-                'planet' => $planet,
-                'type' => $type,
-            ],
+            'ships' => $shipsFields,
+            'coords' => $coords,
         ];
 
         $this->updatePlanetsShipsByCoords($updateArray);
     }
 
-    protected function storeResources(array $fleetRow, $start = false): void
+    /**
+     * @param Row $fleetRow
+     */
+    protected function storeResources(array $fleetRow, bool $start = false): void
     {
-        if ($start) {
-            $galaxy = $fleetRow['fleet_start_galaxy'];
-            $system = $fleetRow['fleet_start_system'];
-            $planet = $fleetRow['fleet_start_planet'];
-            $type = $fleetRow['fleet_start_type'];
-        } else {
-            $galaxy = $fleetRow['fleet_end_galaxy'];
-            $system = $fleetRow['fleet_end_system'];
-            $planet = $fleetRow['fleet_end_planet'];
-            $type = $fleetRow['fleet_end_type'];
-        }
+        $coords = self::fleetCoords($fleetRow, $start);
 
-        $this->makeUpdate($galaxy, $system, $planet, $type);
+        $this->makeUpdate($coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']);
 
         $updateArray = [
             'resources' => [
@@ -111,12 +110,7 @@ class Missions
                 'crystal' => $fleetRow['fleet_resource_crystal'],
                 'deuterium' => $fleetRow['fleet_resource_deuterium'],
             ],
-            'coords' => [
-                'galaxy' => $galaxy,
-                'system' => $system,
-                'planet' => $planet,
-                'type' => $type,
-            ],
+            'coords' => $coords,
         ];
 
         $this->updatePlanetResourcesByCoords($updateArray);
@@ -124,7 +118,7 @@ class Missions
 
     protected function makeUpdate(int $galaxy, int $system, int $planet, int $type): void
     {
-        $target_planet = $this->getAllPlanetDataByCoords([
+        $targetPlanet = $this->getAllPlanetDataByCoords([
             'coords' => [
                 'galaxy' => $galaxy,
                 'system' => $system,
@@ -133,18 +127,24 @@ class Missions
             ],
         ]);
 
-        $target_user = $this->getAllUserDataByUserId(
-            $target_planet['planet_user_id']
+        $targetUser = $this->getAllUserDataByUserId(
+            self::int($targetPlanet['planet_user_id'] ?? 0)
         );
 
-        UpdatesLibrary::updatePlanetResources($target_user, $target_planet, time());
+        UpdatesLibrary::updatePlanetResources($targetUser, $targetPlanet, time());
     }
 
+    /**
+     * @param Row $fleet
+     */
     protected function canStartMission(array $fleet): bool
     {
         return ($fleet['fleet_mess'] == 0 && $fleet['fleet_start_time'] <= time() && $fleet['fleet_end_stay'] <= time());
     }
 
+    /**
+     * @param Row $fleet
+     */
     protected function canCompleteMission(array $fleet): bool
     {
         return ($fleet['fleet_end_time'] <= time());
@@ -152,292 +152,305 @@ class Missions
 
     protected function deleteFleetById(int $fleedId): void
     {
-        if ((int) $fleedId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'DELETE FROM `' . FLEETS . "` WHERE `fleet_id` = '" . $fleedId . "'"
-                )
+        if ($fleedId > 0) {
+            $this->statement(
+                'DELETE FROM `' . FLEETS . '` WHERE `fleet_id` = ?',
+                [$fleedId]
             );
         }
     }
 
     protected function updateFleetStatusToReturnById(int $fleedId): void
     {
-        if ((int) $fleedId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . FLEETS . " SET
+        if ($fleedId > 0) {
+            $this->statement(
+                'UPDATE ' . FLEETS . " SET
                         `fleet_mess` = '1'
-                    WHERE `fleet_id` = '" . $fleedId . "'"
-                )
+                    WHERE `fleet_id` = ?",
+                [$fleedId]
             );
         }
     }
 
-    protected function updateFleetStatusToStayById($fleedId): void
+    protected function updateFleetStatusToStayById(mixed $fleedId): void
     {
-        if ((int) $fleedId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . FLEETS . " SET
+        if (self::int($fleedId) > 0) {
+            $this->statement(
+                'UPDATE ' . FLEETS . " SET
                         `fleet_mess` = '2'
-                    WHERE `fleet_id` = '" . $fleedId . "'"
-                )
+                    WHERE `fleet_id` = ?",
+                [$fleedId]
             );
         }
     }
 
-    protected function updatePlanetsShipsByCoords(array $data = []): void
+    /**
+     * @param array{resources: Resources, ships: mixed, coords: Coords4} $data
+     */
+    protected function updatePlanetsShipsByCoords(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . PLANETS . ' AS p
-                    INNER JOIN ' . SHIPS . " AS s ON s.ship_planet_id = p.`planet_id` SET
-                        {$data['ships']}
-                        `planet_metal` = `planet_metal` + '" . $data['resources']['metal'] . "',
-                        `planet_crystal` = `planet_crystal` + '" . $data['resources']['crystal'] . "',
-                        `planet_deuterium` = `planet_deuterium` + '" . $data['resources']['deuterium'] . "'
-                    WHERE `planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . $data['coords']['planet'] . "' AND
-                        `planet_type` = '" . $data['coords']['type'] . "'"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE ' . PLANETS . ' AS p
+                    INNER JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id` SET
+                        ' . self::sqlValue($data['ships']) . '
+                        `planet_metal` = `planet_metal` + ?,
+                        `planet_crystal` = `planet_crystal` + ?,
+                        `planet_deuterium` = `planet_deuterium` + ?
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
+                        `planet_type` = ?',
+            [
+                ...self::resources($data['resources']),
+                ...self::coords4($data['coords']),
+            ]
+        );
     }
 
-    protected function updatePlanetResourcesByCoords(array $data = []): void
+    /**
+     * @param array{resources: Resources, coords: Coords4} $data
+     */
+    protected function updatePlanetResourcesByCoords(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . PLANETS . " SET
-                        `planet_metal` = `planet_metal` + '" . $data['resources']['metal'] . "',
-                        `planet_crystal` = `planet_crystal` + '" . $data['resources']['crystal'] . "',
-                        `planet_deuterium` = `planet_deuterium` + '" . $data['resources']['deuterium'] . "'
-                    WHERE `planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . $data['coords']['planet'] . "' AND
-                        `planet_type` = '" . $data['coords']['type'] . "'
-                    LIMIT 1;"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE ' . PLANETS . ' SET
+                        `planet_metal` = `planet_metal` + ?,
+                        `planet_crystal` = `planet_crystal` + ?,
+                        `planet_deuterium` = `planet_deuterium` + ?
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
+                        `planet_type` = ?
+                    LIMIT 1;',
+            [
+                ...self::resources($data['resources']),
+                ...self::coords4($data['coords']),
+            ]
+        );
     }
 
-    protected function getAllPlanetDataByCoords(array $data = []): array
+    /**
+     * @param array{coords: Coords4} $data
+     *
+     * @return Row
+     */
+    protected function getAllPlanetDataByCoords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT *
+        return $this->selectRow(
+            'SELECT *
                     FROM `' . PLANETS . '` AS p
                     LEFT JOIN `' . BUILDINGS . '` AS b ON b.building_planet_id = p.`planet_id`
                     LEFT JOIN `' . DEFENSES . '` AS d ON d.defense_planet_id = p.`planet_id`
-                    LEFT JOIN `' . SHIPS . "` AS s ON s.ship_planet_id = p.`planet_id`
-                    WHERE `planet_galaxy` = '" . (int) $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . (int) $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . (int) $data['coords']['planet'] . "' AND
-                        `planet_type` = '" . (int) $data['coords']['type'] . "'
-                    LIMIT 1;"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    LEFT JOIN `' . SHIPS . '` AS s ON s.ship_planet_id = p.`planet_id`
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
+                        `planet_type` = ?
+                    LIMIT 1;',
+            array_map(self::int(...), self::coords4($data['coords']))
+        );
     }
 
+    /**
+     * @return Row
+     */
     protected function getAllUserDataByUserId(int $userId): array
     {
-        if ($userId > 0) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT u.*,
+        if ($userId <= 0) {
+            return [];
+        }
+
+        return $this->selectRow(
+            'SELECT u.*,
                         r.*,
                         pr.*,
                         pref.preference_vacation_mode
                     FROM `' . USERS . '` AS u
                     INNER JOIN `' . RESEARCH . '` AS r ON r.research_user_id = u.id
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.premium_user_id = u.id
-                    INNER JOIN `' . PREFERENCES . "` AS pref ON pref.preference_user_id = u.id
-                    WHERE u.`id` = '" . $userId . "'
-                    LIMIT 1;"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    INNER JOIN `' . PREFERENCES . '` AS pref ON pref.preference_user_id = u.id
+                    WHERE u.`id` = ?
+                    LIMIT 1;',
+            [$userId]
+        );
     }
 
-    protected function deleteAcsFleetById($fleetGroupId): void
+    protected function deleteAcsFleetById(mixed $fleetGroupId): void
     {
-        if ((int) $fleetGroupId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'DELETE FROM `' . ACS . "`
-                    WHERE `acs_id` = '" . $fleetGroupId . "'"
-                )
+        if (self::int($fleetGroupId) > 0) {
+            $this->statement(
+                'DELETE FROM `' . ACS . '`
+                    WHERE `acs_id` = ?',
+                [$fleetGroupId]
             );
         }
     }
 
-    protected function updateAcsFleetStatusByGroupId($fleetGroupId): void
+    protected function updateAcsFleetStatusByGroupId(mixed $fleetGroupId): void
     {
-        if ((int) $fleetGroupId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . FLEETS . "` SET
+        if (self::int($fleetGroupId) > 0) {
+            $this->statement(
+                'UPDATE `' . FLEETS . "` SET
                         `fleet_mess` = '1'
-                    WHERE `fleet_group` = '" . $fleetGroupId . "'"
-                )
+                    WHERE `fleet_group` = ?",
+                [$fleetGroupId]
             );
         }
     }
 
+    /**
+     * @return list<Row>|null
+     */
     protected function getAllAcsFleetsByGroupId(int $fleetGroupId): ?array
     {
-        if ((int) $fleetGroupId > 0) {
-            return array_map(
-                fn ($row) => (array) $row,
-                DB::select(
-                    $this->prepareSql(
-                        'SELECT
+        if ($fleetGroupId <= 0) {
+            return null;
+        }
+
+        return $this->selectRows(
+            'SELECT
                             f.*,
                             r.`research_hyperspace_technology`
                         FROM `' . FLEETS . '` f
-                        LEFT JOIN `' . RESEARCH . "` r
+                        LEFT JOIN `' . RESEARCH . '` r
                             ON r.`research_user_id` = f.`fleet_owner`
-                        WHERE f.`fleet_group` = '" . $fleetGroupId . "';"
-                    )
-                )
-            );
-        }
-
-        return null;
+                        WHERE f.`fleet_group` = ?;',
+            [$fleetGroupId]
+        );
     }
 
-    protected function getAllFleetsByEndCoordsAndTimes(array $data = []): array
+    /**
+     * @param array{coords: Coords4, time: mixed} $data
+     *
+     * @return list<Row>
+     */
+    protected function getAllFleetsByEndCoordsAndTimes(array $data): array
     {
-        if (is_array($data)) {
-            return array_map(
-                fn ($row) => (array) $row,
-                DB::select(
-                    $this->prepareSql(
-                        'SELECT *
-                        FROM `' . FLEETS . "`
-                        WHERE `fleet_end_galaxy` = '" . (int) $data['coords']['galaxy'] . "' AND
-                            `fleet_end_system` = '" . (int) $data['coords']['system'] . "' AND
-                            `fleet_end_planet` = '" . (int) $data['coords']['planet'] . "' AND
-                            `fleet_end_type` = '" . (int) $data['coords']['type'] . "' AND
-                            `fleet_start_time` < '" . $data['time'] . "' AND
-                            `fleet_end_stay` >= '" . $data['time'] . "';"
-                    )
-                )
-            );
-        }
-
-        return [];
+        return $this->selectRows(
+            'SELECT *
+                        FROM `' . FLEETS . '`
+                        WHERE `fleet_end_galaxy` = ? AND
+                            `fleet_end_system` = ? AND
+                            `fleet_end_planet` = ? AND
+                            `fleet_end_type` = ? AND
+                            `fleet_start_time` < ? AND
+                            `fleet_end_stay` >= ?;',
+            [
+                ...array_map(self::int(...), self::coords4($data['coords'])),
+                $data['time'],
+                $data['time'],
+            ]
+        );
     }
 
-    protected function updatePlanetDebrisByCoords(array $data = []): void
+    /**
+     * @param array{time: mixed, debris: array{metal: mixed, crystal: mixed}, coords: Coords3} $data
+     */
+    protected function updatePlanetDebrisByCoords(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . PLANETS . " SET
-                        `planet_invisible_start_time` = '" . $data['time'] . "',
-                        `planet_debris_metal` = `planet_debris_metal` + '" . $data['debris']['metal'] . "',
-                        `planet_debris_crystal` = `planet_debris_crystal` + '" . $data['debris']['crystal'] . "'
-                    WHERE `planet_galaxy` = '" . (int) $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . (int) $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . (int) $data['coords']['planet'] . "' AND
+        $this->statement(
+            'UPDATE ' . PLANETS . ' SET
+                        `planet_invisible_start_time` = ?,
+                        `planet_debris_metal` = `planet_debris_metal` + ?,
+                        `planet_debris_crystal` = `planet_debris_crystal` + ?
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
                         `planet_type` = 1
-                    LIMIT 1;"
-                )
-            );
-        }
+                    LIMIT 1;',
+            [
+                $data['time'],
+                $data['debris']['metal'],
+                $data['debris']['crystal'],
+                ...array_map(self::int(...), self::coords3($data['coords'])),
+            ]
+        );
     }
 
+    /**
+     * @return Row
+     */
     protected function getTechnologiesByUserId(int $userId): array
     {
-        if ($userId > 0) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT u.name,
+        if ($userId <= 0) {
+            return [];
+        }
+
+        return $this->selectRow(
+            'SELECT u.name,
                         r.research_weapons_technology,
                         r.research_shielding_technology,
                         r.research_armour_technology,
                         r.research_hyperspace_technology
                     FROM ' . USERS . ' AS u
-                    INNER JOIN `' . RESEARCH . "` AS r
+                    INNER JOIN `' . RESEARCH . '` AS r
                         ON r.research_user_id = u.id
-                    WHERE u.id = '" . $userId . "';"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE u.id = ?;',
+            [$userId]
+        );
     }
 
-    protected function getMoonIdByCoords(array $data = []): array
+    /**
+     * @param array{coords: Coords3} $data
+     *
+     * @return Row
+     */
+    protected function getMoonIdByCoords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT `planet_id`
+        return $this->selectRow(
+            'SELECT `planet_id`
                     FROM `' . PLANETS . "`
-                    WHERE `planet_galaxy` = '" . $data['coords']['galaxy'] . "'
-                        AND `planet_system` = '" . $data['coords']['system'] . "'
-                        AND `planet_planet` = '" . $data['coords']['planet'] . "'
-                        AND `planet_type` = '3';"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE `planet_galaxy` = ?
+                        AND `planet_system` = ?
+                        AND `planet_planet` = ?
+                        AND `planet_type` = '3';",
+            self::coords3($data['coords'])
+        );
     }
 
-    protected function insertReport(array $data = []): void
+    /**
+     * @param array{owners: mixed, rid: mixed, content: mixed, destroyed: mixed, time: mixed} $data
+     */
+    protected function insertReport(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'INSERT INTO `' . REPORTS . "` SET
-                    `report_owners` = '" . $data['owners'] . "',
-                    `report_rid` = '" . $data['rid'] . "',
-                    `report_content` = '" . $data['content'] . "',
-                    `report_destroyed` = '" . $data['destroyed'] . "',
-                    `report_time` = '" . $data['time'] . "'"
-                )
-            );
-        }
+        $this->statement(
+            'INSERT INTO `' . REPORTS . '` SET
+                    `report_owners` = ?,
+                    `report_rid` = ?,
+                    `report_content` = ?,
+                    `report_destroyed` = ?,
+                    `report_time` = ?',
+            [
+                $data['owners'],
+                $data['rid'],
+                $data['content'],
+                $data['destroyed'],
+                $data['time'],
+            ]
+        );
     }
 
-    protected function updateReturningFleetData(array $data = []): void
+    /**
+     * @param array{ships: mixed, amount: mixed, stolen: Resources, fleet_id: mixed} $data
+     */
+    protected function updateReturningFleetData(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . FLEETS . "` SET
-                    `fleet_array` = '" . $data['ships'] . "',
-                    `fleet_amount` = '" . $data['amount'] . "',
+        $this->statement(
+            'UPDATE `' . FLEETS . "` SET
+                    `fleet_array` = ?,
+                    `fleet_amount` = ?,
                     `fleet_mess` = '1',
-                    `fleet_resource_metal` = `fleet_resource_metal` + '" . $data['stolen']['metal'] . "' ,
-                    `fleet_resource_crystal` = `fleet_resource_crystal` + '" . $data['stolen']['crystal'] . "' ,
-                    `fleet_resource_deuterium` = `fleet_resource_deuterium` + '" . $data['stolen']['deuterium'] . "'
-                    WHERE `fleet_id` = '" . $data['fleet_id'] . "';"
-                )
-            );
-        }
+                    `fleet_resource_metal` = `fleet_resource_metal` + ? ,
+                    `fleet_resource_crystal` = `fleet_resource_crystal` + ? ,
+                    `fleet_resource_deuterium` = `fleet_resource_deuterium` + ?
+                    WHERE `fleet_id` = ?;",
+            [
+                $data['ships'],
+                $data['amount'],
+                ...self::resources($data['stolen']),
+                $data['fleet_id'],
+            ]
+        );
     }
 
     protected function deleteMultipleFleetsByIds(string $idString): void
@@ -450,59 +463,69 @@ class Missions
         );
     }
 
-    protected function updatePlanetLossesById(array $data = []): void
+    /**
+     * @param array{ships: mixed, stolen: Resources, planet_id: mixed} $data
+     */
+    protected function updatePlanetLossesById(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . '`, `' . SHIPS . '`, `' . DEFENSES . '`  SET
-                    ' . $data['ships'] . '
-                    `planet_metal` = `planet_metal` -  ' . $data['stolen']['metal'] . ',
-                    `planet_crystal` = `planet_crystal` -  ' . $data['stolen']['crystal'] . ',
-                    `planet_deuterium` = `planet_deuterium` -  ' . $data['stolen']['deuterium'] . "
-                    WHERE `planet_id` = '" . $data['planet_id'] . "' AND
-                        `ship_planet_id` = '" . $data['planet_id'] . "' AND
-                        `defense_planet_id` = '" . $data['planet_id'] . "'"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE `' . PLANETS . '`, `' . SHIPS . '`, `' . DEFENSES . '`  SET
+                    ' . self::sqlValue($data['ships']) . '
+                    `planet_metal` = `planet_metal` -  ?,
+                    `planet_crystal` = `planet_crystal` -  ?,
+                    `planet_deuterium` = `planet_deuterium` -  ?
+                    WHERE `planet_id` = ? AND
+                        `ship_planet_id` = ? AND
+                        `defense_planet_id` = ?',
+            [
+                ...self::resources($data['stolen']),
+                $data['planet_id'],
+                $data['planet_id'],
+                $data['planet_id'],
+            ]
+        );
     }
 
-    protected function getPlanetAndUserCountsCounts(array $data = []): array
+    /**
+     * @param array{id: mixed, coords: Coords3} $data
+     *
+     * @return Row
+     */
+    protected function getPlanetAndUserCountsCounts(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT
+        return $this->selectRow(
+            'SELECT
                         (SELECT COUNT(*)
                             FROM ' . PLANETS . " AS pc1
-                            WHERE pc1.`planet_user_id` = '" . $data['id'] . "' AND
+                            WHERE pc1.`planet_user_id` = ? AND
                                             pc1.`planet_type` = '1' AND
                                             pc1.`planet_destroyed` = '0') AS planet_count,
                         (SELECT COUNT(*)
                             FROM " . PLANETS . " AS pc2
-                            WHERE pc2.`planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                                            pc2.`planet_system` = '" . $data['coords']['system'] . "' AND
-                                            pc2.`planet_planet` = '" . $data['coords']['planet'] . "' AND
+                            WHERE pc2.`planet_galaxy` = ? AND
+                                            pc2.`planet_system` = ? AND
+                                            pc2.`planet_planet` = ? AND
                                             pc2.`planet_type` = '1') AS galaxy_count,
                         (SELECT `research_astrophysics`
-                            FROM " . RESEARCH . "
-                            WHERE `research_user_id` = '" . $data['id'] . "') AS astro_level"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                            FROM " . RESEARCH . '
+                            WHERE `research_user_id` = ?) AS astro_level',
+            [
+                $data['id'],
+                ...self::coords3($data['coords']),
+                $data['id'],
+            ]
+        );
     }
 
-    protected function getFriendlyPlanetData(array $data = []): array
+    /**
+     * @param array{coords: array{start: Coords4, end: Coords4}} $data
+     *
+     * @return Row
+     */
+    protected function getFriendlyPlanetData(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT
+        return $this->selectRow(
+            'SELECT
                         pc1.`planet_user_id` AS `start_id`,
                         pc1.`planet_name` AS `start_name`,
                         pc2.`planet_user_id` AS `target_id`,
@@ -512,311 +535,326 @@ class Missions
                         pc2.`planet_deuterium` AS `target_deuterium`,
                         u.`name` AS `start_user_name`
                     FROM `' . PLANETS . '` AS pc1 JOIN `' . PLANETS . '` AS pc2
-                    LEFT JOIN `' . USERS . "` AS u
+                    LEFT JOIN `' . USERS . '` AS u
                         ON u.`id` = pc1.`planet_user_id`
-                    WHERE pc1.planet_galaxy = '" . $data['coords']['start']['galaxy'] . "' AND
-                        pc1.`planet_system` = '" . $data['coords']['start']['system'] . "' AND
-                        pc1.`planet_planet` = '" . $data['coords']['start']['planet'] . "' AND
-                        pc1.`planet_type` = '" . $data['coords']['start']['type'] . "' AND
-                        pc2.`planet_galaxy` = '" . $data['coords']['end']['galaxy'] . "' AND
-                        pc2.`planet_system` = '" . $data['coords']['end']['system'] . "' AND
-                        pc2.`planet_planet` = '" . $data['coords']['end']['planet'] . "' AND
-                        pc2.`planet_type` = '" . $data['coords']['end']['type'] . "'"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE pc1.planet_galaxy = ? AND
+                        pc1.`planet_system` = ? AND
+                        pc1.`planet_planet` = ? AND
+                        pc1.`planet_type` = ? AND
+                        pc2.`planet_galaxy` = ? AND
+                        pc2.`planet_system` = ? AND
+                        pc2.`planet_planet` = ? AND
+                        pc2.`planet_type` = ?',
+            [
+                ...self::coords4($data['coords']['start']),
+                ...self::coords4($data['coords']['end']),
+            ]
+        );
     }
 
+    /**
+     * @param array<int, int|float> $lost lost unit counts by unit id
+     */
     protected function updateLostShipsAndDefensePoints(int $playerId, array $lost): void
     {
         $shipPoints = 0;
         $defensePoints = 0;
 
         foreach ($lost as $unit => $lostCount) {
+            $points = StatisticsLibrary::calculatePoints($unit, 1) * $lostCount;
+
             if ($unit >= 401) {
-                $defensePoints += StatisticsLibrary::calculatePoints($unit, 1) * $lostCount;
-            } else {
-                $shipPoints += StatisticsLibrary::calculatePoints($unit, 1) * $lostCount;
+                $defensePoints += $points;
+                continue;
             }
+
+            $shipPoints += $points;
         }
 
-        DB::statement(
-            $this->prepareSql(
-                'UPDATE `' . USERS_STATISTICS . "` AS us SET
-                    us.`user_statistic_ships_points` = us.`user_statistic_ships_points` - '" . $shipPoints . "' ,
-                    us.`user_statistic_defenses_points` = us.`user_statistic_defenses_points` - '" . $defensePoints . "',
-                    us.`user_statistic_military_points` = us.`user_statistic_military_points` - '" . ($shipPoints + $defensePoints) . "'
-                WHERE us.`user_statistic_user_id` = '" . $playerId . "'"
-            )
+        $this->statement(
+            'UPDATE `' . USERS_STATISTICS . '` AS us SET
+                    us.`user_statistic_ships_points` = us.`user_statistic_ships_points` - ? ,
+                    us.`user_statistic_defenses_points` = us.`user_statistic_defenses_points` - ?,
+                    us.`user_statistic_military_points` = us.`user_statistic_military_points` - ?
+                WHERE us.`user_statistic_user_id` = ?',
+            [$shipPoints, $defensePoints, ($shipPoints + $defensePoints), $playerId]
         );
     }
 
-    protected function updateColonizationStatistics(array $data = []): void
+    /**
+     * @param array{points: mixed, coords: Coords4} $data
+     */
+    protected function updateColonizationStatistics(array $data): void
     {
-        if (is_array($data)) {
-            $pointsValue = $data['points'] ?? 0;
-            $points = is_numeric($pointsValue) ? (int) $pointsValue : 0;
+        $points = self::int($data['points']);
 
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . USERS_STATISTICS . ' AS us SET
+        $this->statement(
+            'UPDATE ' . USERS_STATISTICS . ' AS us SET
                     us.`user_statistic_ships_points` = us.`user_statistic_ships_points` - ' . $points . ',
                     us.`user_statistic_military_points` = us.`user_statistic_military_points` - ' . $points . '
                     WHERE us.`user_statistic_user_id` = (
-                        SELECT p.planet_user_id FROM ' . PLANETS . " AS p
-                        WHERE p.planet_galaxy = '" . $data['coords']['galaxy'] . "' AND
-                            p.planet_system = '" . $data['coords']['system'] . "' AND
-                            p.planet_planet = '" . $data['coords']['planet'] . "' AND
-                            p.planet_type = '" . $data['coords']['type'] . "'
-                    );"
-                )
-            );
-        }
+                        SELECT p.planet_user_id FROM ' . PLANETS . ' AS p
+                        WHERE p.planet_galaxy = ? AND
+                            p.planet_system = ? AND
+                            p.planet_planet = ? AND
+                            p.planet_type = ?
+                    );',
+            self::coords4($data['coords'])
+        );
     }
 
-    protected function updateColonizatonReturningFleet(array $data = []): void
+    /**
+     * @param array{ships: mixed, points: mixed, fleet_id: mixed, coords: Coords4} $data
+     */
+    protected function updateColonizatonReturningFleet(array $data): void
     {
-        if (is_array($data)) {
-            $pointsValue = $data['points'] ?? 0;
-            $points = is_numeric($pointsValue) ? (int) $pointsValue : 0;
+        $points = self::int($data['points']);
 
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . FLEETS . ', ' . USERS_STATISTICS . " SET
-                    `fleet_array` = '" . $data['ships'] . "',
+        $this->statement(
+            'UPDATE ' . FLEETS . ', ' . USERS_STATISTICS . " SET
+                    `fleet_array` = ?,
                     `fleet_amount` = `fleet_amount` - 1,
                     `fleet_resource_metal` = '0',
                     `fleet_resource_crystal` = '0',
                     `fleet_resource_deuterium` = '0',
                     `fleet_mess` = '1',
                     `user_statistic_ships_points` = `user_statistic_ships_points` - " . $points . ',
-                    `user_statistic_military_points` = `user_statistic_military_points` - ' . $points . "
-                    WHERE `fleet_id` = '" . $data['fleet_id'] . "' AND
+                    `user_statistic_military_points` = `user_statistic_military_points` - ' . $points . '
+                    WHERE `fleet_id` = ? AND
                         `user_statistic_user_id` = (
-                        SELECT planet_user_id FROM " . PLANETS . "
-                        WHERE planet_galaxy = '" . $data['coords']['galaxy'] . "' AND
-                            planet_system = '" . $data['coords']['system'] . "' AND
-                            planet_planet = '" . $data['coords']['planet'] . "' AND
-                            planet_type = '" . $data['coords']['type'] . "'
-                    );"
-                )
-            );
-        }
+                        SELECT planet_user_id FROM ' . PLANETS . '
+                        WHERE planet_galaxy = ? AND
+                            planet_system = ? AND
+                            planet_planet = ? AND
+                            planet_type = ?
+                    );',
+            [
+                $data['ships'],
+                $data['fleet_id'],
+                ...self::coords4($data['coords']),
+            ]
+        );
     }
 
-    protected function updateFleetsStatusToMakeThemReturn(array $data = []): void
+    /**
+     * @param array{coords: Coords3, time: mixed, planet_id: mixed} $data
+     */
+    protected function updateFleetsStatusToMakeThemReturn(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . FLEETS . "` AS f SET
+        $coords = [$data['coords']['galaxy'], $data['coords']['system'], $data['coords']['planet']];
+
+        $this->statement(
+            'UPDATE `' . FLEETS . "` AS f SET
                         f.`fleet_start_type` = '1'
-                    WHERE f.`fleet_start_galaxy` = '" . $data['coords']['galaxy'] . "'
-                        AND f.`fleet_start_system` = '" . $data['coords']['system'] . "'
-                        AND f.`fleet_start_planet` = '" . $data['coords']['planet'] . "';"
-                )
-            );
+                    WHERE f.`fleet_start_galaxy` = ?
+                        AND f.`fleet_start_system` = ?
+                        AND f.`fleet_start_planet` = ?;",
+            $coords
+        );
 
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . FLEETS . "` AS f SET
+        $this->statement(
+            'UPDATE `' . FLEETS . "` AS f SET
                         f.`fleet_end_type` = '1'
-                    WHERE f.`fleet_end_galaxy` = '" . $data['coords']['galaxy'] . "'
-                        AND f.`fleet_end_system` = '" . $data['coords']['system'] . "'
-                        AND f.`fleet_end_planet` = '" . $data['coords']['planet'] . "';"
-                )
-            );
+                    WHERE f.`fleet_end_galaxy` = ?
+                        AND f.`fleet_end_system` = ?
+                        AND f.`fleet_end_planet` = ?;",
+            $coords
+        );
 
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . "` AS p SET
-                        `planet_destroyed` = '" . $data['time'] . "'
-                    WHERE p.`planet_id` = '" . $data['planet_id'] . "';"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE `' . PLANETS . '` AS p SET
+                        `planet_destroyed` = ?
+                    WHERE p.`planet_id` = ?;',
+            [$data['time'], $data['planet_id']]
+        );
     }
 
-    protected function updateUserCurrentPlanetByCoordsAndUserId(array $data = []): void
+    /**
+     * Point the user's current planet at the planet (type 1) on the given coords.
+     *
+     * Bugfix: the coords used to be read from keys that no caller provides
+     * ('fleet_end_galaxy', ...), so the call raised an "undefined array key"
+     * error instead of switching away from a destroyed moon.
+     *
+     * @param array{coords: Coords3, planet_user_id: mixed} $data
+     */
+    protected function updateUserCurrentPlanetByCoordsAndUserId(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . USERS . ' SET
+        $this->statement(
+            'UPDATE ' . USERS . ' SET
                         `current_planet` = (
                             SELECT `planet_id`
                             FROM ' . PLANETS . "
-                            WHERE `planet_galaxy` = '" . $data['coords']['fleet_end_galaxy'] . "' AND
-                                `planet_system` = '" . $data['coords']['fleet_end_system'] . "' AND
-                                `planet_planet` = '" . $data['coords']['fleet_end_planet'] . "' AND
+                            WHERE `planet_galaxy` = ? AND
+                                `planet_system` = ? AND
+                                `planet_planet` = ? AND
                                 `planet_type` = '1')
-                    WHERE `id` = '" . $data['planet_user_id'] . "';"
-                )
-            );
-        }
+                    WHERE `id` = ?;",
+            [
+                ...self::coords3($data['coords']),
+                $data['planet_user_id'],
+            ]
+        );
     }
 
-    protected function updateFleetArrayById(array $data = []): void
+    /**
+     * @param array{ships: mixed, fleet_id: mixed} $data
+     */
+    protected function updateFleetArrayById(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . FLEETS . " SET
-                    `fleet_array` = '" . $data['ships'] . "',
+        $this->statement(
+            'UPDATE ' . FLEETS . " SET
+                    `fleet_array` = ?,
                     `fleet_mess` = '1'
-                    WHERE `fleet_id` = '" . (int) $data['fleet_id'] . "';"
-                )
-            );
-        }
+                    WHERE `fleet_id` = ?;",
+            [$data['ships'], self::int($data['fleet_id'])]
+        );
     }
 
     protected function updateFleetResourcesById(int $fleetId, string $resource, int $amount): void
     {
-        DB::statement(
-            $this->prepareSql(
-                'UPDATE ' . FLEETS . " AS f SET
-                `fleet_resource_{$resource}` = `fleet_resource_{$resource}` + '" . $amount . "',
+        $this->statement(
+            'UPDATE ' . FLEETS . " AS f SET
+                `fleet_resource_{$resource}` = `fleet_resource_{$resource}` + ?,
                 `fleet_mess` = '1'
-                WHERE `fleet_id` = '" . $fleetId . "';"
-            )
+                WHERE `fleet_id` = ?;",
+            [$amount, $fleetId]
         );
     }
 
     protected function updateDarkMatter(int $userId, int $darkMatter): void
     {
-        DB::statement(
-            $this->prepareSql(
-                'UPDATE ' . PREMIUM . " AS p SET
-                `premium_dark_matter` = `premium_dark_matter` + '" . $darkMatter . "'
-                WHERE `premium_user_id` = '" . $userId . "';"
-            )
+        $this->statement(
+            'UPDATE ' . PREMIUM . ' AS p SET
+                `premium_dark_matter` = `premium_dark_matter` + ?
+                WHERE `premium_user_id` = ?;',
+            [$darkMatter, $userId]
         );
     }
 
     protected function updateFleetEndTime(int $fleetId, int $fleetEndTime): void
     {
-        DB::statement(
-            $this->prepareSql(
-                'UPDATE ' . FLEETS . " AS f SET
-                `fleet_end_time` = '" . $fleetEndTime . "',
+        $this->statement(
+            'UPDATE ' . FLEETS . " AS f SET
+                `fleet_end_time` = ?,
                 `fleet_mess` = '1'
-                WHERE `fleet_id` = '" . $fleetId . "';"
-            )
+                WHERE `fleet_id` = ?;",
+            [$fleetEndTime, $fleetId]
         );
     }
 
-    protected function getMissileAttackerDataByCoords(array $data = []): array
+    /**
+     * @param array{coords: Coords4} $data
+     *
+     * @return Row
+     */
+    protected function getMissileAttackerDataByCoords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT p.`planet_name`, r.`research_weapons_technology`
+        return $this->selectRow(
+            'SELECT p.`planet_name`, r.`research_weapons_technology`
                     FROM ' . PLANETS . ' AS p
                     INNER JOIN ' . RESEARCH . ' AS r ON r.research_user_id = p.planet_user_id
-                    WHERE `planet_galaxy` = ' . $data['coords']['galaxy'] . ' AND
-                        `planet_system` = ' . $data['coords']['system'] . ' AND
-                        `planet_planet` = ' . $data['coords']['planet'] . ' AND
-                        `planet_type` = ' . $data['coords']['type'] . ';'
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
+                        `planet_type` = ?;',
+            self::coords4($data['coords'])
+        );
     }
 
-    protected function getMissileTargetDataByCoords(array $data = []): array
+    /**
+     * @param array{coords: Coords4} $data
+     *
+     * @return Row
+     */
+    protected function getMissileTargetDataByCoords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT p.`planet_id`, p.`planet_name`, p.`planet_user_id`, d.*, r.`research_shielding_technology`
+        return $this->selectRow(
+            'SELECT p.`planet_id`, p.`planet_name`, p.`planet_user_id`, d.*, r.`research_shielding_technology`
                     FROM ' . PLANETS . ' AS p
                     INNER JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
                     INNER JOIN ' . RESEARCH . ' AS r ON r.research_user_id = p.planet_user_id
-                    WHERE `planet_galaxy` = ' . $data['coords']['galaxy'] . ' AND
-                        `planet_system` = ' . $data['coords']['system'] . ' AND
-                        `planet_planet` = ' . $data['coords']['planet'] . ' AND
-                        `planet_type` = ' . $data['coords']['type'] . ';'
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
+                        `planet_type` = ?;',
+            self::coords4($data['coords'])
+        );
     }
 
-    protected function updatePlanetDefenses(array $data = []): void
+    /**
+     * @param array{destroyed_query: mixed, amount: mixed, planet_id: mixed} $data
+     */
+    protected function updatePlanetDefenses(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . DEFENSES . " SET
-                    {$data['destroyed_query']}
-                    `defense_anti-ballistic_missile` = '" . $data['amount'] . "'
-                    WHERE defense_planet_id = '" . (int) $data['planet_id'] . "';"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE ' . DEFENSES . ' SET
+                    ' . self::sqlValue($data['destroyed_query']) . '
+                    `defense_anti-ballistic_missile` = ?
+                    WHERE defense_planet_id = ?;',
+            [$data['amount'], self::int($data['planet_id'])]
+        );
     }
 
-    protected function updatePlanetDebrisFieldAndFleet(array $data = []): void
+    /**
+     * @param array{recycled: array{metal: mixed, crystal: mixed}, coords: Coords3, fleet_id: mixed} $data
+     */
+    protected function updatePlanetDebrisFieldAndFleet(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . PLANETS . ', ' . FLEETS . " SET
-                    `planet_debris_metal` = `planet_debris_metal` - '" . $data['recycled']['metal'] . "',
-                    `planet_debris_crystal` = `planet_debris_crystal` - '" . $data['recycled']['crystal'] . "',
-                    `fleet_resource_metal` = `fleet_resource_metal` + '" . $data['recycled']['metal'] . "',
-                    `fleet_resource_crystal` = `fleet_resource_crystal` + '" . $data['recycled']['crystal'] . "',
+        $this->statement(
+            'UPDATE ' . PLANETS . ', ' . FLEETS . " SET
+                    `planet_debris_metal` = `planet_debris_metal` - ?,
+                    `planet_debris_crystal` = `planet_debris_crystal` - ?,
+                    `fleet_resource_metal` = `fleet_resource_metal` + ?,
+                    `fleet_resource_crystal` = `fleet_resource_crystal` + ?,
                     `fleet_mess` = '1'
-                    WHERE `planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . $data['coords']['planet'] . "' AND
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
                         `planet_type` = 1 AND
-                        `fleet_id` = '" . (int) $data['fleet_id'] . "'"
-                )
-            );
-        }
+                        `fleet_id` = ?",
+            [
+                $data['recycled']['metal'],
+                $data['recycled']['crystal'],
+                $data['recycled']['metal'],
+                $data['recycled']['crystal'],
+                ...self::coords3($data['coords']),
+                self::int($data['fleet_id']),
+            ]
+        );
     }
 
-    protected function getPlanetDebris(array $data = []): array
+    /**
+     * @param array{coords: Coords3} $data
+     *
+     * @return Row
+     */
+    protected function getPlanetDebris(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT
+        return $this->selectRow(
+            'SELECT
                         `planet_name` AS target_name,
                         `planet_debris_metal`,
                         `planet_debris_crystal`
-                    FROM `' . PLANETS . "`
-                    WHERE `planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                        `planet_system` = '" . $data['coords']['system'] . "' AND
-                        `planet_planet` = '" . $data['coords']['planet'] . "' AND
+                    FROM `' . PLANETS . '`
+                    WHERE `planet_galaxy` = ? AND
+                        `planet_system` = ? AND
+                        `planet_planet` = ? AND
                         `planet_type` = 1
-                    LIMIT 1;"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    LIMIT 1;',
+            self::coords3($data['coords'])
+        );
     }
 
-    protected function getSpyUserDataByCords(array $data = []): array
+    /**
+     * @param array{coords: Coords4} $data
+     *
+     * @return Row
+     */
+    protected function getSpyUserDataByCords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT
+        return $this->selectRow(
+            'SELECT
                         p.`planet_name`,
                         p.`planet_galaxy`,
                         p.`planet_system`,
@@ -828,25 +866,23 @@ class Missions
                     INNER JOIN `' . USERS . '` AS u ON u.`id` = p.`planet_user_id`
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.`premium_user_id` = p.`planet_user_id`
                     INNER JOIN `' . RESEARCH . '` AS r ON r.`research_user_id` = p.`planet_user_id`
-                    WHERE p.`planet_galaxy` = ' . $data['coords']['galaxy'] . ' AND
-                        p.`planet_system` = ' . $data['coords']['system'] . ' AND
-                        p.`planet_planet` = ' . $data['coords']['planet'] . ' AND
-                        p.`planet_type` = ' . $data['coords']['type'] . ';'
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    WHERE p.`planet_galaxy` = ? AND
+                        p.`planet_system` = ? AND
+                        p.`planet_planet` = ? AND
+                        p.`planet_type` = ?;',
+            self::coords4($data['coords'])
+        );
     }
 
-    protected function getInquiredUserDataByCords(array $data = []): array
+    /**
+     * @param array{coords: Coords4} $data
+     *
+     * @return Row
+     */
+    protected function getInquiredUserDataByCords(array $data): array
     {
-        if (is_array($data)) {
-            $row = DB::selectOne(
-                $this->prepareSql(
-                    'SELECT
+        return $this->selectRow(
+            'SELECT
                         p.`planet_id`,
                         p.`planet_user_id`,
                         p.`planet_name`,
@@ -865,48 +901,125 @@ class Missions
                     INNER JOIN `' . BUILDINGS . '` AS b ON b.`building_planet_id` = p.`planet_id`
                     INNER JOIN `' . USERS . '` AS u ON u.`id` = p.`planet_user_id`
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.`premium_user_id` = p.`planet_user_id`
-                    INNER JOIN `' . RESEARCH . "` AS r ON r.`research_user_id` = p.`planet_user_id`
-                    WHERE p.`planet_galaxy` = '" . $data['coords']['galaxy'] . "' AND
-                        p.`planet_system` = '" . $data['coords']['system'] . "' AND
-                        p.`planet_planet` = '" . $data['coords']['planet'] . "' AND
-                        p.`planet_type` = '" . $data['coords']['type'] . "';"
-                )
-            );
-
-            return $row !== null ? (array) $row : [];
-        }
-
-        return [];
+                    INNER JOIN `' . RESEARCH . '` AS r ON r.`research_user_id` = p.`planet_user_id`
+                    WHERE p.`planet_galaxy` = ? AND
+                        p.`planet_system` = ? AND
+                        p.`planet_planet` = ? AND
+                        p.`planet_type` = ?;',
+            self::coords4($data['coords'])
+        );
     }
 
-    protected function updateCrystalDebrisByPlanetId(array $data = []): void
+    /**
+     * @param array{time: mixed, crystal: mixed, planet_id: mixed} $data
+     */
+    protected function updateCrystalDebrisByPlanetId(array $data): void
     {
-        if (is_array($data)) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . PLANETS . " SET
-                    `planet_invisible_start_time` = '" . $data['time'] . "',
-                    `planet_debris_crystal` = `planet_debris_crystal` + '" . $data['crystal'] . "'
-                    WHERE `planet_id` = '" . $data['planet_id'] . "';"
-                )
-            );
-        }
+        $this->statement(
+            'UPDATE ' . PLANETS . ' SET
+                    `planet_invisible_start_time` = ?,
+                    `planet_debris_crystal` = `planet_debris_crystal` + ?
+                    WHERE `planet_id` = ?;',
+            [$data['time'], $data['crystal'], $data['planet_id']]
+        );
     }
 
     protected function updateReturningFleetResources(int $fleedId = 0): void
     {
         if ($fleedId > 0) {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE ' . FLEETS . " SET
+            $this->statement(
+                'UPDATE ' . FLEETS . " SET
                         `fleet_resource_metal` = '0' ,
                         `fleet_resource_crystal` = '0' ,
                         `fleet_resource_deuterium` = '0' ,
                         `fleet_mess` = '1'
-                    WHERE `fleet_id` = '" . $fleedId . "'
-                    LIMIT 1 ;"
-                )
+                    WHERE `fleet_id` = ?
+                    LIMIT 1 ;",
+                [$fleedId]
             );
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Helpers (query/coercion helpers live in BindsLegacyQueries)
+    // ------------------------------------------------------------------
+
+    /**
+     * The start or end coordinates of a fleet row.
+     *
+     * @param Row $fleetRow
+     *
+     * @return array{galaxy: int, system: int, planet: int, type: int}
+     */
+    private static function fleetCoords(array $fleetRow, bool $start): array
+    {
+        $prefix = $start ? 'fleet_start_' : 'fleet_end_';
+
+        return [
+            'galaxy' => self::int($fleetRow[$prefix . 'galaxy']),
+            'system' => self::int($fleetRow[$prefix . 'system']),
+            'planet' => self::int($fleetRow[$prefix . 'planet']),
+            'type' => self::int($fleetRow[$prefix . 'type']),
+        ];
+    }
+
+    /**
+     * @param Coords3 $coords
+     *
+     * @return list<mixed>
+     */
+    private static function coords3(array $coords): array
+    {
+        return [$coords['galaxy'], $coords['system'], $coords['planet']];
+    }
+
+    /**
+     * @param Resources $resources
+     *
+     * @return list<mixed>
+     */
+    private static function resources(array $resources): array
+    {
+        return [$resources['metal'], $resources['crystal'], $resources['deuterium']];
+    }
+
+    /**
+     * @param Coords4 $coords
+     *
+     * @return list<mixed>
+     */
+    private static function coords4(array $coords): array
+    {
+        return [$coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private static function nameMap(mixed $map): array
+    {
+        $result = [];
+        foreach (is_array($map) ? $map : [] as $key => $value) {
+            if (is_int($key) && is_string($value)) {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function specMap(mixed $map): array
+    {
+        $result = [];
+        foreach (is_array($map) ? $map : [] as $key => $value) {
+            if (is_int($key) && is_array($value)) {
+                $result[$key] = self::toRow($value);
+            }
+        }
+
+        return $result;
     }
 }

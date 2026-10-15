@@ -473,7 +473,7 @@ class Destroy extends Missions
         $this->insertReport([
             'owners' => $owners,
             'rid' => $rid,
-            'content' => addslashes($report_data),
+            'content' => $report_data,
             'time' => time(),
             'destroyed' => $destroyed,
         ]);

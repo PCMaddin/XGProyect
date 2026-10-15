@@ -234,6 +234,41 @@ es nicht, weil der Aufrufer-Fehler unter der alten Missions-Baseline lag.
 Gefixt (`?? []`, verhaltensgleich: `getRfTo()` liefert weiter 0) und per
 eigenem Regressionstest abgesichert.
 
+### Missions-Basis (`Missions.php`) ✅ getippt
+
+Die 74 Einträge hatten fast alle eine Ursache: Werte aus `mixed`-DB-Zeilen
+wurden per String-Konkatenation ins rohe SQL gespleißt. Neu:
+
+- **Gebundene Parameter statt Interpolation** über den Trait
+  `Xgp\App\Core\Concerns\BindsLegacyQueries` (`statement`/`selectRow`/
+  `selectRows`). Jeder Wert wird dabei als exakt der String gerendert, den die
+  Interpolation erzeugt hat, damit die SQL-Semantik gleich bleibt. Escapen tut
+  jetzt der Treiber. Bei `insertReport` war der Bericht-Inhalt bisher per
+  `addslashes()` in den Aufrufern vorescaped, das wurde mit entfernt, sonst
+  hätte das Binding Backslashes doppelt gespeichert.
+- **Präzise Array-Shapes** für alle `$data`-Parameter (Aliase `Coords3`/
+  `Coords4`/`Resources`/`Row`), mit `mixed`-Blättern, damit die noch
+  untypisierten Handler nicht kaskadieren. Die toten `is_array()`-Guards und
+  `= []`-Defaults sind entfernt (kein Aufrufer nutzte sie).
+- `resource`/`pricelist`/`combat_caps` sind typisiert und werden über
+  validierende Konverter gefüllt (gegen die echte Konfiguration verifiziert:
+  100 % konform, also verhaltensneutral).
+- **Bug gefixt:** `updateUserCurrentPlanetByCoordsAndUserId()` las
+  `coords['fleet_end_galaxy']`, der einzige Aufrufer (Destroy) liefert aber
+  `coords['galaxy']`. Nach einer Mondzerstörung warf das eine `ErrorException`,
+  statt den aktuellen Planeten des Users vom zerstörten Mond wegzuschalten.
+
+Die Handler-Einträge haben dadurch nur die Form gewechselt (von „offset on
+mixed“ zu „mixed given“). Sie wurden geprüft (keine konkreten Typ-Konflikte)
+und neu baselined. Sie verschwinden mit der Handler-Typisierung.
+
+> **Tooling-Fallen (lokal):** 1) PHPMD lädt `phpmd.baseline.xml` aus dem
+> Projekt **automatisch**, auch ohne `--baseline-file`. Echte Rohwerte bekommt
+> man nur mit einer explizit übergebenen *leeren* Baseline-Datei. 2) Der
+> PDepend-AST-Cache (`~/.pdepend`) kann veralten und liefert dann Ergebnisse
+> für einen alten Dateistand. Vor verlässlichen Messungen `rm -rf ~/.pdepend`.
+> Die CI ist von beidem nicht betroffen (frische Umgebung).
+
 ---
 
 ## Prinzipien für jede Migration

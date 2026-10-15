@@ -425,7 +425,7 @@ class Attack extends Missions
         $this->insertReport([
             'owners' => $owners,
             'rid' => $rid,
-            'content' => addslashes($reportContent),
+            'content' => $reportContent,
             'time' => time(),
             'destroyed' => $destroyed,
         ]);
