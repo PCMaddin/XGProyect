@@ -253,7 +253,8 @@ class Destroy extends Missions
      */
     private function getShipType($id, $count)
     {
-        $rf = isset($this->combat_caps[$id]['sd']) ? $this->combat_caps[$id]['sd'] : 0;
+        // units without a rapid-fire table get an empty one (ShipType expects an array)
+        $rf = $this->combat_caps[$id]['sd'] ?? [];
         $shield = $this->combat_caps[$id]['shield'];
         $cost = [$this->pricelist[$id]['metal'], $this->pricelist[$id]['crystal']];
         $power = $this->combat_caps[$id]['attack'];

@@ -214,6 +214,26 @@ bleiben nur konstantengetriebene Logik-Hinweise und ein paar genuin
 `Destroy`, `Spy`, …) — deren Typisierung löst die verbliebenen temporären
 Aufrufer-Baseline-Einträge auf.
 
+### Sicherheitsnetz vor den Missions-Handlern: Charakterisierungs-Tests
+
+Bevor die (ungetesteten, DB-lastigen) Kampf-Handler `Attack`/`Destroy` angefasst
+werden, nageln Charakterisierungs-Tests ihr aktuelles Verhalten fest
+(`tests/Unit/Legacy/App/Libraries/Missions/`, gemeinsame Basis
+`MissionLootCharacterizationTestCase`). Da der Kampf selbst zufallsbasiert ist,
+zielen sie auf die **deterministischen, typ-sensiblen Kerne**: die
+Beute-Arithmetik `plunder()` (Golden Values aus der Ist-Implementierung,
+inkl. Bruch-Beträgen) und die Ship/Defense-Fabrik `getShipType()` gegen die
+echte Objekt-Konfiguration (ohne DB).
+
+**Gleich beim ersten Lauf fanden sie eine echte Regression** aus der
+`ShipType`-Typisierung dieser Welle: `getShipType()` übergab Einheiten ohne
+Rapid-Fire-Tabelle (8 von 9 Verteidigungsanlagen + 502/503) eine `int 0` statt
+eines Arrays — seit `ShipType::__construct(array $rf)` warf jede Attack-/
+Destroy-Mission gegen einen verteidigten Planeten einen `TypeError`. PHPStan sah
+es nicht, weil der Aufrufer-Fehler unter der alten Missions-Baseline lag.
+Gefixt (`?? []`, verhaltensgleich: `getRfTo()` liefert weiter 0) und per
+eigenem Regressionstest abgesichert.
+
 ---
 
 ## Prinzipien für jede Migration
