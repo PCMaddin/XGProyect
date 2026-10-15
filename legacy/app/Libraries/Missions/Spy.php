@@ -11,8 +11,13 @@ use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Spy extends Missions
 {
+    private const ESPIONAGE_PROBE = 210;
+
     public function __construct(
         private FormatService $formatService,
         private OfficerService $officerService
@@ -20,284 +25,289 @@ class Spy extends Missions
         parent::__construct();
     }
 
-    public function spyMission(array $fleet_row): void
+    /**
+     * @param array<string, mixed> $fleetRow
+     */
+    public function spyMission(array $fleetRow): void
     {
-        // do mission
-        if (parent::canStartMission($fleet_row)) {
-            parent::makeUpdate($fleet_row['fleet_end_galaxy'], $fleet_row['fleet_end_system'], $fleet_row['fleet_end_planet'], $fleet_row['fleet_end_type']);
+        if (parent::canStartMission($fleetRow)) {
+            $this->spy($fleetRow);
 
-            $current_data = $this->getSpyUserDataByCords([
-                'coords' => [
-                    'galaxy' => $fleet_row['fleet_start_galaxy'],
-                    'system' => $fleet_row['fleet_start_system'],
-                    'planet' => $fleet_row['fleet_start_planet'],
-                    'type' => $fleet_row['fleet_start_type'],
-                ],
-            ]);
+            return;
+        }
 
-            $target_data = $this->getInquiredUserDataByCords([
-                'coords' => [
-                    'galaxy' => $fleet_row['fleet_end_galaxy'],
-                    'system' => $fleet_row['fleet_end_system'],
-                    'planet' => $fleet_row['fleet_end_planet'],
-                    'type' => $fleet_row['fleet_end_type'],
-                ],
-            ]);
-
-            $CurrentSpyLvl = $this->officerService->getMaxEspionage((int) $current_data['research_espionage_technology'], $this->officerService->isOfficerActive((int) $current_data['premium_officier_technocrat'], time()));
-            $TargetSpyLvl = $this->officerService->getMaxEspionage((int) $target_data['research_espionage_technology'], $this->officerService->isOfficerActive((int) $target_data['premium_officier_technocrat'], time()));
-            $fleet = FleetsLib::getFleetShipsArray($fleet_row['fleet_array']);
-
-            foreach ($fleet as $id => $amount) {
-                if ($id == '210') {
-                    $SpyMessage = '';
-                    $LS = $amount;
-                    $SpyToolDebris = $LS * 300;
-
-                    $MaterialsInfo = $this->generateSpyReport($target_data, 0, __('game/spy.spy_report_resources'));
-                    $Materials = $MaterialsInfo['String'];
-
-                    $PlanetFleetInfo = $this->generateSpyReport($target_data, 1, __('game/spy.spy_report_fleet'));
-                    $PlanetFleet = $Materials;
-                    $PlanetFleet .= $PlanetFleetInfo['String'];
-
-                    $PlanetDefenInfo = $this->generateSpyReport($target_data, 2, __('game/spy.spy_report_defenses'));
-                    $PlanetDefense = $PlanetFleet;
-                    $PlanetDefense .= $PlanetDefenInfo['String'];
-
-                    $PlanetBuildInfo = $this->generateSpyReport($target_data, 3, __('game/spy.spy_report_buildings'));
-                    $PlanetBuildings = $PlanetDefense;
-                    $PlanetBuildings .= $PlanetBuildInfo['String'];
-
-                    $TargetTechnInfo = $this->generateSpyReport($target_data, 4, __('game/spy.spy_report_research'));
-                    $TargetTechnos = $PlanetBuildings;
-                    $TargetTechnos .= $TargetTechnInfo['String'];
-
-                    $TargetForce = ($PlanetFleetInfo['Count'] * $LS) / 4;
-
-                    if ($TargetForce > 100) {
-                        $TargetForce = 100;
-                    }
-
-                    $TargetChances = mt_rand(0, intval($TargetForce));
-                    $SpyerChances = mt_rand(0, 100);
-
-                    if ($TargetChances >= $SpyerChances) {
-                        Functions::sendMessage(
-                            $fleet_row['fleet_owner'],
-                            0,
-                            $fleet_row['fleet_start_time'],
-                            0,
-                            __('game/missions.mi_fleet_command'),
-                            sprintf(__('game/spy.spy_result_destroyed_title'), $this->formatService->prettyCoords((int) $fleet_row['fleet_end_galaxy'], (int) $fleet_row['fleet_end_system'], (int) $fleet_row['fleet_end_planet'])),
-                            __('game/spy.spy_result_destroyed'),
-                            true
-                        );
-                    }
-
-                    $AttackLink = '<center>';
-                    $AttackLink .= '<a href="game.php?page=fleet1&galaxy=' . $fleet_row['fleet_end_galaxy'] . '&system=' . $fleet_row['fleet_end_system'] . '';
-                    $AttackLink .= '&planet=' . $fleet_row['fleet_end_planet'] . '&planettype=' . $fleet_row['fleet_end_type'] . '';
-                    $AttackLink .= '&target_mission=1';
-                    $AttackLink .= ' ">' . __('game/missions.type_mission')[MissionsEnumerator::ATTACK] . '';
-                    $AttackLink .= '</a></center>';
-                    $MessageEnd = '<center>' . sprintf(__('game/spy.spy_report_detection'), $TargetChances) . '</center>';
-
-                    $spionage_difference = abs($CurrentSpyLvl - $TargetSpyLvl);
-
-                    $CurrentSpyLvl = 100;
-                    $TargetSpyLvl = 0;
-                    if ($TargetSpyLvl >= $CurrentSpyLvl) {
-                        $ST = pow($spionage_difference, 2);
-                        $resources = 1;
-                        $fleet = $ST + 2;
-                        $defense = $ST + 3;
-                        $buildings = $ST + 5;
-                        $tech = $ST + 7;
-                    }
-
-                    if ($CurrentSpyLvl > $TargetSpyLvl) {
-                        $ST = pow($spionage_difference, 2) * -1;
-                        $resources = 1;
-                        $fleet = $ST + 2;
-                        $defense = $ST + 3;
-                        $buildings = $ST + 5;
-                        $tech = $ST + 7;
-                    }
-
-                    if ($resources <= $LS) {
-                        $SpyMessage = $Materials . '<br>' . $AttackLink . $MessageEnd;
-                    }
-
-                    if ($fleet <= $LS) {
-                        $SpyMessage = $PlanetFleet . '<br>' . $AttackLink . $MessageEnd;
-                    }
-
-                    if ($defense <= $LS) {
-                        $SpyMessage = $PlanetDefense . '<br>' . $AttackLink . $MessageEnd;
-                    }
-
-                    if ($buildings <= $LS) {
-                        $SpyMessage = $PlanetBuildings . '<br>' . $AttackLink . $MessageEnd;
-                    }
-
-                    if ($tech <= $LS) {
-                        $SpyMessage = $TargetTechnos . '<br>' . $AttackLink . $MessageEnd;
-                    }
-
-                    Functions::sendMessage(
-                        $fleet_row['fleet_owner'],
-                        0,
-                        $fleet_row['fleet_start_time'],
-                        0,
-                        __('game/missions.mi_fleet_command'),
-                        sprintf(__('game/spy.spy_report_title'), $target_data['planet_name'], $this->formatService->prettyCoords((int) $target_data['planet_galaxy'], (int) $target_data['planet_system'], (int) $target_data['planet_planet'])),
-                        $SpyMessage,
-                        true
-                    );
-
-                    $this->sendReportToTarget($fleet_row, $current_data, $target_data, $TargetChances);
-
-                    if ($TargetChances >= $SpyerChances) {
-                        $this->updateCrystalDebrisByPlanetId([
-                            'time' => time(),
-                            'crystal' => (0 + $SpyToolDebris),
-                            'planet_id' => $target_data['planet_id'],
-                        ]);
-
-                        parent::removeFleet($fleet_row['fleet_id']);
-                    } else {
-                        parent::returnFleet($fleet_row['fleet_id']);
-                    }
-                }
-            }
-        } elseif ($fleet_row['fleet_mess'] == 1 && $fleet_row['fleet_end_time'] <= time()) {
-            parent::restoreFleet($fleet_row, true);
-            parent::removeFleet($fleet_row['fleet_id']);
+        if ($fleetRow['fleet_mess'] == 1 && $fleetRow['fleet_end_time'] <= time()) {
+            parent::restoreFleet($fleetRow, true);
+            parent::removeFleet(self::int($fleetRow['fleet_id']));
         }
     }
 
-    private function generateSpyReport(array $target_data, int $mode, string $report_title): array
+    /**
+     * @param array<string, mixed> $fleetRow
+     */
+    private function spy(array $fleetRow): void
     {
-        $String = '';
-        $LookAtLoop = true;
-        $Count = 0;
-        $Loops = 0;
-        $ResFrom[0] = 0;
-        $ResTo[0] = 0;
+        parent::makeUpdate(
+            self::int($fleetRow['fleet_end_galaxy']),
+            self::int($fleetRow['fleet_end_system']),
+            self::int($fleetRow['fleet_end_planet']),
+            self::int($fleetRow['fleet_end_type'])
+        );
 
-        switch ($mode) {
-            case 0:
-                $String = '<table width="440"><tr><td class="c" colspan="5">';
-                $String .= $report_title;
-                $String .= '</td>';
-                $String .= '</tr><tr>';
-                $String .= '<td width=220>' . __('game/global.metal') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber((int) $target_data['planet_metal']) . '</td><td>&nbsp;</td>';
-                $String .= '<td width=220>' . __('game/global.crystal') . '</td></td><td width=220 align=right>' . $this->formatService->prettyNumber((int) $target_data['planet_crystal']) . '</td>';
-                $String .= '</tr><tr>';
-                $String .= '<td width=220>' . __('game/global.deuterium') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber((int) $target_data['planet_deuterium']) . '</td><td>&nbsp;</td>';
-                $String .= '<td width=220>' . __('game/global.energy') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber((int) $target_data['planet_energy_max']) . '</td>';
-                $String .= '</tr>';
+        $currentData = $this->getSpyUserDataByCords([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_start_galaxy'],
+                'system' => $fleetRow['fleet_start_system'],
+                'planet' => $fleetRow['fleet_start_planet'],
+                'type' => $fleetRow['fleet_start_type'],
+            ],
+        ]);
 
-                $LookAtLoop = false;
-                break;
-            case 1:
-                $ResFrom[0] = 200;
-                $ResTo[0] = 299;
-                $Loops = 1;
-                break;
-            case 2:
-                $ResFrom[0] = 400;
-                $ResTo[0] = 499;
-                $ResFrom[1] = 500;
-                $ResTo[1] = 599;
-                $Loops = 2;
-                break;
-            case 3:
-                $ResFrom[0] = 1;
-                $ResTo[0] = 99;
-                $Loops = 1;
-                break;
-            case 4:
-                $ResFrom[0] = 100;
-                $ResTo[0] = 199;
-                $Loops = 1;
-                break;
+        $targetData = $this->getInquiredUserDataByCords([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+                'type' => $fleetRow['fleet_end_type'],
+            ],
+        ]);
+
+        $levelDifference = abs($this->espionageLevel($currentData) - $this->espionageLevel($targetData));
+
+        foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $probes) {
+            if ($id != self::ESPIONAGE_PROBE) {
+                continue;
+            }
+
+            $this->spyWithProbes($fleetRow, $currentData, $targetData, $probes, $levelDifference);
         }
+    }
 
-        if ($LookAtLoop == true) {
-            $String = '<table width="440" cellspacing="1"><tr><td class="c" colspan="' . ((2 * 2) + (2 - 1)) . '">' . $report_title . '</td></tr>';
-            $Count = 0;
-            $CurrentLook = 0;
+    /**
+     * @param array<string, mixed> $user
+     */
+    private function espionageLevel(array $user): int
+    {
+        return $this->officerService->getMaxEspionage(
+            self::int($user['research_espionage_technology']),
+            $this->officerService->isOfficerActive(self::int($user['premium_officier_technocrat']), time())
+        );
+    }
 
-            while ($CurrentLook < $Loops) {
-                $row = 0;
-                for ($Item = $ResFrom[$CurrentLook]; $Item <= $ResTo[$CurrentLook]; $Item++) {
-                    if (isset($this->resource[$Item]) && $target_data[$this->resource[$Item]] > 0) {
-                        if ($row == 0) {
-                            $String .= '<tr>';
-                        }
+    /**
+     * @param array<string, mixed> $fleetRow
+     * @param array<string, mixed> $currentData
+     * @param array<string, mixed> $targetData
+     */
+    private function spyWithProbes(array $fleetRow, array $currentData, array $targetData, int $probes, int $levelDifference): void
+    {
+        // the report sections are cumulative: resources, + fleet, + defenses, + buildings, + research
+        $sections = [];
+        $fleetCount = 0;
+        foreach ([0 => 'resources', 1 => 'fleet', 2 => 'defenses', 3 => 'buildings', 4 => 'research'] as $mode => $section) {
+            $report = $this->generateSpyReport($targetData, $mode, self::str(__('game/spy.spy_report_' . $section)));
+            $sections[] = $report['text'];
 
-                        $String .= '<td align=left>' . __('game/constructions.' . $this->resource[$Item]) . '</td><td align=right>' . $this->formatService->prettyNumber((int) $target_data[$this->resource[$Item]]) . '</td>';
-
-                        if ($row < 2 - 1) {
-                            $String .= '<td>&nbsp;</td>';
-                        }
-
-                        $Count += $target_data[$this->resource[$Item]];
-                        $row++;
-
-                        if ($row == 2) {
-                            $String .= '</tr>';
-                            $row = 0;
-                        }
-                    }
-                }
-
-                while ($row != 0) {
-                    $String .= '<td>&nbsp;</td><td>&nbsp;</td>';
-                    $row++;
-
-                    if ($row == 2) {
-                        $String .= '</tr>';
-                        $row = 0;
-                    }
-                }
-                $CurrentLook++;
+            if ($mode === 1) {
+                $fleetCount = $report['count'];
             }
         }
 
-        $String .= '</table>';
+        $targetForce = ($fleetCount * $probes) / 4;
 
-        $return['String'] = $String;
-        $return['Count'] = $Count;
+        if ($targetForce > 100) {
+            $targetForce = 100;
+        }
 
-        return $return;
+        $targetChances = mt_rand(0, intval($targetForce));
+        $spyerChances = mt_rand(0, 100);
+        $arrivalTime = self::int($fleetRow['fleet_start_time']);
+        $owner = self::int($fleetRow['fleet_owner']);
+
+        if ($targetChances >= $spyerChances) {
+            Functions::sendMessage(
+                $owner,
+                0,
+                $arrivalTime,
+                0,
+                __('game/missions.mi_fleet_command'),
+                sprintf(__('game/spy.spy_result_destroyed_title'), $this->formatService->prettyCoords(self::int($fleetRow['fleet_end_galaxy']), self::int($fleetRow['fleet_end_system']), self::int($fleetRow['fleet_end_planet']))),
+                __('game/spy.spy_result_destroyed'),
+                true
+            );
+        }
+
+        $attackLink = '<center>';
+        $attackLink .= '<a href="game.php?page=fleet1&galaxy=' . self::str($fleetRow['fleet_end_galaxy']) . '&system=' . self::str($fleetRow['fleet_end_system']) . '';
+        $attackLink .= '&planet=' . self::str($fleetRow['fleet_end_planet']) . '&planettype=' . self::str($fleetRow['fleet_end_type']) . '';
+        $attackLink .= '&target_mission=1';
+        $attackLink .= ' ">' . self::str(__('game/missions.type_mission')[MissionsEnumerator::ATTACK]) . '';
+        $attackLink .= '</a></center>';
+        $messageEnd = '<center>' . sprintf(__('game/spy.spy_report_detection'), $targetChances) . '</center>';
+
+        $depth = self::reportDepth($levelDifference, $probes);
+        $spyMessage = $depth > 0
+            ? implode('', array_slice($sections, 0, $depth)) . '<br>' . $attackLink . $messageEnd
+            : '';
+
+        Functions::sendMessage(
+            $owner,
+            0,
+            $arrivalTime,
+            0,
+            __('game/missions.mi_fleet_command'),
+            sprintf(__('game/spy.spy_report_title'), self::str($targetData['planet_name']), $this->formatService->prettyCoords(self::int($targetData['planet_galaxy']), self::int($targetData['planet_system']), self::int($targetData['planet_planet']))),
+            $spyMessage,
+            true
+        );
+
+        $this->sendReportToTarget($fleetRow, $currentData, $targetData, $targetChances);
+
+        if ($targetChances >= $spyerChances) {
+            $this->updateCrystalDebrisByPlanetId([
+                'time' => time(),
+                'crystal' => (0 + $probes * 300),
+                'planet_id' => $targetData['planet_id'],
+            ]);
+
+            parent::removeFleet(self::int($fleetRow['fleet_id']));
+
+            return;
+        }
+
+        parent::returnFleet(self::int($fleetRow['fleet_id']));
     }
 
+    /**
+     * How many report sections the probes reveal (resources, fleet, defenses,
+     * buildings, research): the last section whose probe threshold is met.
+     *
+     * Legacy behaviour, kept as is: the espionage levels are treated as if the
+     * spy were always the stronger side (the original code overwrote both
+     * levels with fixed values right before comparing them), so the
+     * thresholds only ever drop with a growing level difference.
+     */
+    private static function reportDepth(int $levelDifference, int $probes): int
+    {
+        $shift = -($levelDifference ** 2);
+        $thresholds = [1, $shift + 2, $shift + 3, $shift + 5, $shift + 7];
+
+        $depth = 0;
+        foreach ($thresholds as $index => $threshold) {
+            if ($threshold <= $probes) {
+                $depth = $index + 1;
+            }
+        }
+
+        return $depth;
+    }
+
+    /**
+     * @param array<string, mixed> $targetData
+     *
+     * @return array{text: string, count: int|float}
+     */
+    private function generateSpyReport(array $targetData, int $mode, string $reportTitle): array
+    {
+        if ($mode === 0) {
+            return ['text' => $this->resourcesReport($targetData, $reportTitle) . '</table>', 'count' => 0];
+        }
+
+        $ranges = match ($mode) {
+            1 => [[200, 299]],
+            2 => [[400, 499], [500, 599]],
+            3 => [[1, 99]],
+            4 => [[100, 199]],
+            default => [],
+        };
+
+        $text = '<table width="440" cellspacing="1"><tr><td class="c" colspan="5">' . $reportTitle . '</td></tr>';
+        $count = 0;
+
+        foreach ($ranges as [$from, $to]) {
+            $row = 0;
+
+            for ($item = $from; $item <= $to; $item++) {
+                if (!isset($this->resource[$item]) || !($targetData[$this->resource[$item]] > 0)) {
+                    continue;
+                }
+
+                $name = $this->resource[$item];
+
+                if ($row == 0) {
+                    $text .= '<tr>';
+                }
+
+                $text .= '<td align=left>' . self::str(__('game/constructions.' . $name)) . '</td><td align=right>' . $this->formatService->prettyNumber(self::int($targetData[$name])) . '</td>';
+
+                if ($row == 0) {
+                    $text .= '<td>&nbsp;</td>';
+                }
+
+                $count += self::num($targetData[$name]);
+                $row++;
+
+                if ($row == 2) {
+                    $text .= '</tr>';
+                    $row = 0;
+                }
+            }
+
+            // pad an incomplete last row
+            if ($row != 0) {
+                $text .= '<td>&nbsp;</td><td>&nbsp;</td></tr>';
+            }
+        }
+
+        return ['text' => $text . '</table>', 'count' => $count];
+    }
+
+    /**
+     * @param array<string, mixed> $targetData
+     */
+    private function resourcesReport(array $targetData, string $reportTitle): string
+    {
+        $text = '<table width="440"><tr><td class="c" colspan="5">';
+        $text .= $reportTitle;
+        $text .= '</td>';
+        $text .= '</tr><tr>';
+        $text .= '<td width=220>' . __('game/global.metal') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber(self::int($targetData['planet_metal'])) . '</td><td>&nbsp;</td>';
+        $text .= '<td width=220>' . __('game/global.crystal') . '</td></td><td width=220 align=right>' . $this->formatService->prettyNumber(self::int($targetData['planet_crystal'])) . '</td>';
+        $text .= '</tr><tr>';
+        $text .= '<td width=220>' . __('game/global.deuterium') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber(self::int($targetData['planet_deuterium'])) . '</td><td>&nbsp;</td>';
+        $text .= '<td width=220>' . __('game/global.energy') . '</td><td width=220 align=right>' . $this->formatService->prettyNumber(self::int($targetData['planet_energy_max'])) . '</td>';
+
+        return $text . '</tr>';
+    }
+
+    /**
+     * @param array<string, mixed> $fleet
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $target
+     */
     private function sendReportToTarget(array $fleet, array $user, array $target, int $chances): void
     {
         Functions::sendMessage(
-            $target['planet_user_id'],
+            self::int($target['planet_user_id']),
             0,
-            $fleet['fleet_start_time'],
+            self::int($fleet['fleet_start_time']),
             0,
             __('game/spy.spy_activity_from'),
             StringsHelper::parseReplacements(
                 __('game/spy.spy_activity_title'),
                 [
                     $target['planet_name'],
-                    $this->formatService->prettyCoords((int) $target['planet_galaxy'], (int) $target['planet_system'], (int) $target['planet_planet']),
+                    $this->formatService->prettyCoords(self::int($target['planet_galaxy']), self::int($target['planet_system']), self::int($target['planet_planet'])),
                 ]
             ),
             StringsHelper::parseReplacements(
                 __('game/spy.spy_activity_enemy_seen'),
                 [
                     $user['planet_name'],
-                    $this->formatService->prettyCoords((int) $user['planet_galaxy'], (int) $user['planet_system'], (int) $user['planet_planet']),
+                    $this->formatService->prettyCoords(self::int($user['planet_galaxy']), self::int($user['planet_system']), self::int($user['planet_planet'])),
                     $user['name'],
                     $target['planet_name'],
-                    $this->formatService->prettyCoords((int) $target['planet_galaxy'], (int) $target['planet_system'], (int) $target['planet_planet']),
+                    $this->formatService->prettyCoords(self::int($target['planet_galaxy']), self::int($target['planet_system']), self::int($target['planet_planet'])),
                     $chances,
                 ]
             ),
