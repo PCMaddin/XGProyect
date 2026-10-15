@@ -86,7 +86,7 @@ class Expedition extends Missions
 
         $this->expeditionMessage($fleet, $message);
 
-        parent::restoreFleet($fleet, true);
+        parent::restoreFleet($fleet);
         parent::removeFleet(self::int($fleet['fleet_id']));
     }
 

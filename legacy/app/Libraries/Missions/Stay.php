@@ -109,7 +109,7 @@ class Stay extends Missions
                 __('game/missions.mi_fleet_back_title')
             );
 
-            parent::restoreFleet($fleetRow, true);
+            parent::restoreFleet($fleetRow);
             parent::removeFleet(self::int($fleetRow['fleet_id']));
         }
     }

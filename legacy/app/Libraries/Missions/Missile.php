@@ -90,7 +90,7 @@ class Missile extends Missions
         }
 
         $attack = floor(
-            ($missiles - $antiBallistic) * (self::num($this->combat_caps[503]['attack']) * (1 + (self::num($attackerData['research_weapons_technology']) / 10)))
+            ($missiles - $antiBallistic) * (self::num($this->combatCaps[503]['attack']) * (1 + (self::num($attackerData['research_weapons_technology']) / 10)))
         );
         $impact = $this->impactDefenses($attack, $this->setAttackOrder(self::int($fleetRow['fleet_target_obj'])), $targetData);
         $result += $impact['destroyed'];

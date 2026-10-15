@@ -36,7 +36,7 @@ class Transport extends Missions
             $this->sendDeliveryMessageToReceiver($fleet, $tradingPlanets);
 
             // transfer the fleet resources to the planet
-            parent::storeResources($fleet, false);
+            parent::storeResources($fleet);
             $this->updateReturningFleetResources(self::int($fleet['fleet_id']));
 
             // we need to remove the resources in case we are continuing with the

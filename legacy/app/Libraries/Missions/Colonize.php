@@ -30,7 +30,7 @@ class Colonize extends Missions
         }
 
         if ($fleetRow['fleet_end_time'] < time()) {
-            parent::restoreFleet($fleetRow, true);
+            parent::restoreFleet($fleetRow);
             parent::removeFleet(self::int($fleetRow['fleet_id']));
         }
     }

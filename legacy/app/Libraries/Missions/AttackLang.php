@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use Xgp\App\Libraries\BattleEngine\Utils\Lang;
+use Xgp\App\Libraries\BattleEngine\Utils\LangManager;
 
 class AttackLang implements Lang
 {
@@ -17,6 +18,18 @@ class AttackLang implements Lang
     public function __construct(array $objects)
     {
         $this->objects = $objects;
+    }
+
+    /**
+     * Use the game translations for the battle reports.
+     *
+     * @param array<int, string> $objects object names by object id
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
+    public static function activate(array $objects): void
+    {
+        LangManager::getInstance()->setImplementation(new self($objects));
     }
 
     public function getShipName(int $id): string

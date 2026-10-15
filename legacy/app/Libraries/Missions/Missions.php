@@ -6,7 +6,6 @@ namespace Xgp\App\Libraries\Missions;
 
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\BindsLegacyQueries;
-use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
 use App\Libraries\UpdatesLibrary;
@@ -40,13 +39,13 @@ class Missions
     /** @var array<int, array<string, mixed>> */
     protected array $pricelist;
     /** @var array<int, array<string, mixed>> */
-    protected array $combat_caps;
+    protected array $combatCaps;
 
     public function __construct()
     {
-        $this->resource = self::nameMap(Objects::getInstance()->getObjects());
-        $this->pricelist = self::specMap(Objects::getInstance()->getPrice());
-        $this->combat_caps = self::specMap(Objects::getInstance()->getCombatSpecs());
+        $this->resource = MissionObjects::names();
+        $this->pricelist = MissionObjects::prices();
+        $this->combatCaps = MissionObjects::combatSpecs();
     }
 
     protected function removeFleet(int $fleetId): void
@@ -60,29 +59,43 @@ class Missions
     }
 
     /**
+     * Land the fleet's ships and cargo on its start planet.
+     *
      * @param Row $fleetRow
      */
-    protected function restoreFleet(array $fleetRow, bool $start = true): void
+    protected function restoreFleet(array $fleetRow): void
     {
-        $coords = self::fleetCoords($fleetRow, $start);
+        $this->landFleet($fleetRow, self::fleetCoords($fleetRow, true), 0);
+    }
 
+    /**
+     * Land the fleet's ships and cargo on its target planet; a deployment
+     * gets half of its fuel back.
+     *
+     * @param Row $fleetRow
+     */
+    protected function restoreFleetAtTarget(array $fleetRow): void
+    {
+        $fuelReturn = $fleetRow['fleet_mission'] == 4 ? self::num($fleetRow['fleet_fuel']) / 2 : 0;
+
+        $this->landFleet($fleetRow, self::fleetCoords($fleetRow, false), $fuelReturn);
+    }
+
+    /**
+     * @param Row                                                     $fleetRow
+     * @param array{galaxy: int, system: int, planet: int, type: int} $coords
+     */
+    private function landFleet(array $fleetRow, array $coords, int | float $fuelReturn): void
+    {
         $this->makeUpdate($coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']);
 
-        $ships = FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array']));
         $shipsFields = '';
 
-        foreach ($ships as $id => $amount) {
-            $shipsFields .= '`' . $this->resource[$id] . '` = `' .
-            $this->resource[$id] . "` + '" . $amount . "', ";
+        foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $amount) {
+            $shipsFields .= '`' . $this->resource[$id] . '` = `' . $this->resource[$id] . "` + '" . $amount . "', ";
         }
 
-        $fuelReturn = 0;
-
-        if ($fleetRow['fleet_mission'] == 4 && !$start) {
-            $fuelReturn = self::num($fleetRow['fleet_fuel']) / 2;
-        }
-
-        $updateArray = [
+        $this->updatePlanetsShipsByCoords([
             'resources' => [
                 'metal' => $fleetRow['fleet_resource_metal'],
                 'crystal' => $fleetRow['fleet_resource_crystal'],
@@ -90,30 +103,28 @@ class Missions
             ],
             'ships' => $shipsFields,
             'coords' => $coords,
-        ];
-
-        $this->updatePlanetsShipsByCoords($updateArray);
+        ]);
     }
 
     /**
+     * Unload the fleet's cargo on its target planet.
+     *
      * @param Row $fleetRow
      */
-    protected function storeResources(array $fleetRow, bool $start = false): void
+    protected function storeResources(array $fleetRow): void
     {
-        $coords = self::fleetCoords($fleetRow, $start);
+        $coords = self::fleetCoords($fleetRow, false);
 
         $this->makeUpdate($coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']);
 
-        $updateArray = [
+        $this->updatePlanetResourcesByCoords([
             'resources' => [
                 'metal' => $fleetRow['fleet_resource_metal'],
                 'crystal' => $fleetRow['fleet_resource_crystal'],
                 'deuterium' => $fleetRow['fleet_resource_deuterium'],
             ],
             'coords' => $coords,
-        ];
-
-        $this->updatePlanetResourcesByCoords($updateArray);
+        ]);
     }
 
     protected function makeUpdate(int $galaxy, int $system, int $planet, int $type): void
@@ -991,35 +1002,5 @@ class Missions
     private static function coords4(array $coords): array
     {
         return [$coords['galaxy'], $coords['system'], $coords['planet'], $coords['type']];
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private static function nameMap(mixed $map): array
-    {
-        $result = [];
-        foreach (is_array($map) ? $map : [] as $key => $value) {
-            if (is_int($key) && is_string($value)) {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private static function specMap(mixed $map): array
-    {
-        $result = [];
-        foreach (is_array($map) ? $map : [] as $key => $value) {
-            if (is_int($key) && is_array($value)) {
-                $result[$key] = self::toRow($value);
-            }
-        }
-
-        return $result;
     }
 }

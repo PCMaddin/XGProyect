@@ -43,8 +43,22 @@ class Deploy extends Missions
         }
 
         // transfer the ships to the planet
-        parent::restoreFleet($fleet, $startPlanet);
+        $this->landShips($fleet, $startPlanet);
         parent::removeFleet(self::int($fleet['fleet_id']));
+    }
+
+    /**
+     * @param array<string, mixed> $fleet
+     */
+    private function landShips(array $fleet, bool $returned): void
+    {
+        if ($returned) {
+            parent::restoreFleet($fleet);
+
+            return;
+        }
+
+        parent::restoreFleetAtTarget($fleet);
     }
 
     /**
