@@ -1039,30 +1039,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Missile.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Recycle\:\:calculateCapacity\(\) has parameter \$fleet_row with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Recycle\:\:calculateCapacity\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Recycle\:\:recycleMission\(\) has parameter \$fleet_row with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Missions\\Recycle\:\:\$planet_debris type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
 			message: '#^Comparison operation "\>" between 100 and 0 is always true\.$#'
 			identifier: greater.alwaysTrue
 			count: 1
@@ -1595,24 +1571,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: legacy/app/Libraries/Missions/Missile.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
-			message: '#^Binary operation "\+" between mixed and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: legacy/app/Libraries/Missions/Recycle.php
-
-		-
-			message: '#^Binary operation "\-" between \(float\|int\) and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 4
-			path: legacy/app/Libraries/Missions/Recycle.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'

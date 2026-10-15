@@ -9,24 +9,25 @@ use App\Services\FormatService;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class Recycle extends Missions
 {
     /**
      * Contains the target planet debris amount
      *
-     * @var array
+     * @var array{metal: int|float, crystal: int|float}
      */
-    private $planet_debris = [
+    private array $planetDebris = [
         'metal' => 0,
         'crystal' => 0,
     ];
 
     /**
      * Contains the maximum capacity of the recyclers
-     *
-     * @var integer
      */
-    private $recyclers_capacity = 0;
+    private int | float $recyclersCapacity = 0;
 
     public function __construct(private FormatService $formatService)
     {
@@ -34,157 +35,148 @@ class Recycle extends Missions
     }
 
     /**
-     * recycleMission
-     *
-     * @param array $fleet_row Fleet row
-     *
-     * @return void
+     * @param array<string, mixed> $fleetRow
      */
-    public function recycleMission($fleet_row)
+    public function recycleMission(array $fleetRow): void
     {
-        $recycled_resources = $this->calculateCapacity($fleet_row);
+        $recycledResources = $this->calculateCapacity($fleetRow);
 
-        if ($fleet_row['fleet_mess'] == 0 && $fleet_row['fleet_start_time'] <= time()) {
+        if ($fleetRow['fleet_mess'] == 0 && $fleetRow['fleet_start_time'] <= time()) {
             $this->updatePlanetDebrisFieldAndFleet([
                 'recycled' => [
-                    'metal' => $recycled_resources['metal'],
-                    'crystal' => $recycled_resources['crystal'],
+                    'metal' => $recycledResources['metal'],
+                    'crystal' => $recycledResources['crystal'],
                 ],
                 'coords' => [
-                    'galaxy' => $fleet_row['fleet_end_galaxy'],
-                    'system' => $fleet_row['fleet_end_system'],
-                    'planet' => $fleet_row['fleet_end_planet'],
+                    'galaxy' => $fleetRow['fleet_end_galaxy'],
+                    'system' => $fleetRow['fleet_end_system'],
+                    'planet' => $fleetRow['fleet_end_planet'],
                 ],
-                'fleet_id' => $fleet_row['fleet_id'],
+                'fleet_id' => $fleetRow['fleet_id'],
             ]);
 
             $message = sprintf(
                 __('game/recycle.rec_result'),
-                $this->formatService->prettyNumber((int) $fleet_row['fleet_amount']),
-                $this->formatService->prettyNumber((int) $this->recyclers_capacity),
-                FleetsLib::targetLink($fleet_row, ''),
-                $this->formatService->prettyNumber((int) $this->planet_debris['metal']),
-                $this->formatService->prettyNumber((int) $this->planet_debris['crystal']),
-                $this->formatService->prettyNumber((int) $recycled_resources['metal']),
-                $this->formatService->prettyNumber((int) $recycled_resources['crystal'])
+                $this->formatService->prettyNumber(self::int($fleetRow['fleet_amount'])),
+                $this->formatService->prettyNumber((int) $this->recyclersCapacity),
+                FleetsLib::targetLink($fleetRow, ''),
+                $this->formatService->prettyNumber((int) $this->planetDebris['metal']),
+                $this->formatService->prettyNumber((int) $this->planetDebris['crystal']),
+                $this->formatService->prettyNumber((int) $recycledResources['metal']),
+                $this->formatService->prettyNumber((int) $recycledResources['crystal'])
             );
 
             $this->recycleMessage(
-                $fleet_row['fleet_owner'],
+                self::int($fleetRow['fleet_owner']),
                 $message,
-                $fleet_row['fleet_start_time'],
-                sprintf(__('game/recycle.rec_report_title'), FleetsLib::targetLink($fleet_row, ''))
+                self::int($fleetRow['fleet_start_time']),
+                sprintf(__('game/recycle.rec_report_title'), FleetsLib::targetLink($fleetRow, ''))
             );
-        } elseif ($fleet_row['fleet_end_time'] <= time()) {
+
+            return;
+        }
+
+        if ($fleetRow['fleet_end_time'] <= time()) {
             $message = sprintf(
                 __('game/missions.mi_fleet_back_with_resources'),
-                $fleet_row['planet_end_name'],
-                FleetsLib::targetLink($fleet_row, ''),
-                $fleet_row['planet_start_name'],
-                FleetsLib::startLink($fleet_row, ''),
-                $this->formatService->prettyNumber((int) $fleet_row['fleet_resource_metal']),
-                $this->formatService->prettyNumber((int) $fleet_row['fleet_resource_crystal']),
-                $this->formatService->prettyNumber((int) $fleet_row['fleet_resource_deuterium']),
+                self::str($fleetRow['planet_end_name']),
+                FleetsLib::targetLink($fleetRow, ''),
+                self::str($fleetRow['planet_start_name']),
+                FleetsLib::startLink($fleetRow, ''),
+                $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_metal'])),
+                $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_crystal'])),
+                $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_deuterium'])),
             );
 
             $this->recycleMessage(
-                $fleet_row['fleet_owner'],
+                self::int($fleetRow['fleet_owner']),
                 $message,
-                $fleet_row['fleet_end_time'],
+                self::int($fleetRow['fleet_end_time']),
                 __('game/missions.mi_fleet_back_title')
             );
 
-            parent::restoreFleet($fleet_row, true);
-            parent::removeFleet($fleet_row['fleet_id']);
+            parent::restoreFleet($fleetRow, true);
+            parent::removeFleet(self::int($fleetRow['fleet_id']));
         }
-    }
-
-    private function calculateCapacity(array $fleet_row): array
-    {
-        $target_planet = $this->getPlanetDebris([
-            'coords' => [
-                'galaxy' => $fleet_row['fleet_end_galaxy'],
-                'system' => $fleet_row['fleet_end_system'],
-                'planet' => $fleet_row['fleet_end_planet'],
-            ],
-        ]);
-
-        $this->planet_debris = [
-            'metal' => $target_planet['planet_debris_metal'],
-            'crystal' => $target_planet['planet_debris_crystal'],
-        ];
-
-        // SOME REQUIRED VALUES
-        $ships = FleetsLib::getFleetShipsArray($fleet_row['fleet_array']);
-        $recycle_capacity = 0;
-        $other_capacity = 0;
-        $current_resources = $fleet_row['fleet_resource_metal'] +
-            $fleet_row['fleet_resource_crystal'] + $fleet_row['fleet_resource_deuterium'];
-
-        // CALCULATE STORAGE FOR EACH KIND OF SHIP
-        foreach ($ships as $id => $amount) {
-            $ship_storage = app(FleetsService::class)->getMaxStorage(
-                (int) $this->pricelist[$id]['capacity'],
-                (int) $fleet_row['research_hyperspace_technology']
-            );
-
-            if ($id == 209) {
-                $recycle_capacity += $ship_storage * $amount;
-            } else {
-                $other_capacity += $ship_storage * $amount;
-            }
-        }
-
-        if ($current_resources > $other_capacity) {
-            $recycle_capacity -= ($current_resources - $other_capacity);
-        }
-
-        $this->recyclers_capacity = $recycle_capacity;
-
-        if (($target_planet['planet_debris_metal'] + $target_planet['planet_debris_crystal']) <= $recycle_capacity) {
-            $recycled_resources['metal'] = $target_planet['planet_debris_metal'];
-            $recycled_resources['crystal'] = $target_planet['planet_debris_crystal'];
-        } else {
-            if (($target_planet['planet_debris_metal'] > $recycle_capacity / 2) && ($target_planet['planet_debris_crystal'] > $recycle_capacity / 2)) {
-                $recycled_resources['metal'] = $recycle_capacity / 2;
-                $recycled_resources['crystal'] = $recycle_capacity / 2;
-            } else {
-                if ($target_planet['planet_debris_metal'] > $target_planet['planet_debris_crystal']) {
-                    $recycled_resources['crystal'] = $target_planet['planet_debris_crystal'];
-
-                    if ($target_planet['planet_debris_metal'] >
-                        ($recycle_capacity - $recycled_resources['crystal'])) {
-                        $recycled_resources['metal'] = $recycle_capacity - $recycled_resources['crystal'];
-                    } else {
-                        $recycled_resources['metal'] = $target_planet['planet_debris_metal'];
-                    }
-                } else {
-                    $recycled_resources['metal'] = $target_planet['planet_debris_metal'];
-
-                    if ($target_planet['planet_debris_crystal'] >
-                        ($recycle_capacity - $recycled_resources['metal'])) {
-                        $recycled_resources['crystal'] = $recycle_capacity - $recycled_resources['metal'];
-                    } else {
-                        $recycled_resources['crystal'] = $target_planet['planet_debris_crystal'];
-                    }
-                }
-            }
-        }
-
-        return $recycled_resources;
     }
 
     /**
-     * recycleMessage
+     * @param array<string, mixed> $fleetRow
      *
-     * @param int    $owner          Owner
-     * @param string $message        Message
-     * @param int    $time           Time
-     * @param string $status_message Status message
-     *
-     * @return void
+     * @return array{metal: int|float, crystal: int|float}
      */
-    private function recycleMessage($owner, $message, $time, $status_message)
+    private function calculateCapacity(array $fleetRow): array
+    {
+        $targetPlanet = $this->getPlanetDebris([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+            ],
+        ]);
+
+        $this->planetDebris = [
+            'metal' => self::num($targetPlanet['planet_debris_metal']),
+            'crystal' => self::num($targetPlanet['planet_debris_crystal']),
+        ];
+
+        // SOME REQUIRED VALUES
+        $ships = FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array']));
+        $recycleCapacity = 0;
+        $otherCapacity = 0;
+        $currentResources = self::num($fleetRow['fleet_resource_metal']) +
+            self::num($fleetRow['fleet_resource_crystal']) + self::num($fleetRow['fleet_resource_deuterium']);
+
+        // CALCULATE STORAGE FOR EACH KIND OF SHIP
+        foreach ($ships as $id => $amount) {
+            $shipStorage = app(FleetsService::class)->getMaxStorage(
+                self::int($this->pricelist[$id]['capacity']),
+                self::int($fleetRow['research_hyperspace_technology'])
+            );
+
+            if ($id == 209) {
+                $recycleCapacity += $shipStorage * $amount;
+                continue;
+            }
+
+            $otherCapacity += $shipStorage * $amount;
+        }
+
+        if ($currentResources > $otherCapacity) {
+            $recycleCapacity -= ($currentResources - $otherCapacity);
+        }
+
+        $this->recyclersCapacity = $recycleCapacity;
+
+        return self::splitRecycledDebris($this->planetDebris['metal'], $this->planetDebris['crystal'], $recycleCapacity);
+    }
+
+    /**
+     * How much metal and crystal the recyclers collect from a debris field.
+     *
+     * @return array{metal: int|float, crystal: int|float}
+     */
+    private static function splitRecycledDebris(int | float $metal, int | float $crystal, int | float $capacity): array
+    {
+        // everything fits into the recyclers
+        if ($metal + $crystal <= $capacity) {
+            return ['metal' => $metal, 'crystal' => $crystal];
+        }
+
+        // both resources exceed half of the capacity: split it evenly
+        if ($metal > $capacity / 2 && $crystal > $capacity / 2) {
+            return ['metal' => $capacity / 2, 'crystal' => $capacity / 2];
+        }
+
+        // take all of the smaller resource and fill the rest with the bigger one
+        if ($metal > $crystal) {
+            return ['metal' => min($metal, $capacity - $crystal), 'crystal' => $crystal];
+        }
+
+        return ['metal' => $metal, 'crystal' => min($crystal, $capacity - $metal)];
+    }
+
+    private function recycleMessage(int $owner, string $message, int $time, string $statusMessage): void
     {
         Functions::sendMessage(
             $owner,
@@ -192,7 +184,7 @@ class Recycle extends Missions
             $time,
             5,
             __('game/recycle.rec_report_from'),
-            $status_message,
+            $statusMessage,
             $message
         );
     }
