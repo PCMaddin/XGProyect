@@ -267,6 +267,15 @@ und neu baselined. Sie verschwinden mit der Handler-Typisierung.
 | Handler | Status | Notiz |
 |---|---|---|
 | Acs, AttackLang, Deploy, Stay, Transport | ✅ getippt | `array<string, mixed>`-Zeilen, Werte an typisierten Grenzen (`sendMessage`, `prettyNumber`, `returnFleet`, …) über die Trait-Helfer `int`/`num`/`str` coerced (für DB-Werte verhaltensgleich; die Sprachstrings nutzen ausschließlich `%s`). camelCase-Parameter/Locals, `StaticAccess` per Klassen-Annotation (Konvention der Handler). **Anzeige-Bug gefixt (Stay):** `stay_mess_user` hat in beiden Sprachen 5 Platzhalter (Herkunftsplanet, Link, 3 Ressourcen). Der Code übergab zusätzlich Zielname/-link, der Empfänger sah deshalb den Zielplaneten an der Stelle der Metall-/Kristallmengen. 19 PHPStan- + 13 PHPMD-Einträge abgebaut, alle fünf Dateien PHPMD-roh verletzungsfrei |
+| Colonize | ✅ getippt | **Crash gefixt:** `buildNewFleet()` war `: bool` deklariert, gab aber den serialisierten Flotten-String zurück. Unter `strict_types` warf das einen `TypeError`, und zwar bei **jeder Kolonisierung mit mehr als dem Kolonieschiff**. Der Fehler stand wörtlich in der Baseline („should return bool but returns string“). Die if/elseif/else-Kaskade wurde in `tryToColonize()` mit Guard-Clauses gezogen, Reihenfolge und Seiteneffekte bleiben identisch. `positionAllowed()` ist ohne `else` umgebaut und per Tabellen-Test gegen die **Original-Implementierung** verifiziert. Tests: `buildNewFleet` (Regression) + `positionAllowed` (9 Fälle). 7 PHPStan- + 5 PHPMD-Einträge abgebaut |
+
+> **Lehre aus dem Baseline-Audit:** Die Baseline enthält nicht nur Typ-Unschärfen,
+> sondern auch **echte Laufzeit-Crashes**: `strict_types` macht falsche Return-
+> oder Argumenttypen an *nativ* getypten Grenzen zu `TypeError`s. Beim Abbau gilt
+> deshalb: jede `return.type`/`argument.type`-Meldung mit konkretem (nicht-`mixed`)
+> Typ gegen eine *native* Signatur ist als potenzieller Crash zu behandeln. Außerhalb
+> der Baseline fand das Audit zudem einen Crash, den PHPStan gar nicht sehen
+> konnte, weil ein Docblock falsch war: den Login mit Ban-Eintrag, eigener Fix-Commit.
 
 > **Tooling-Fallen (lokal):** 1) PHPMD lädt `phpmd.baseline.xml` aus dem
 > Projekt **automatisch**, auch ohne `--baseline-file`. Echte Rohwerte bekommt

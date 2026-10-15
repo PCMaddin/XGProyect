@@ -775,30 +775,6 @@ parameters:
 			path: legacy/app/Libraries/Missions/Attack.php
 
 		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Colonize\:\:buildNewFleet\(\) should return bool but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Colonize\:\:colonizeMission\(\) has parameter \$fleet_row with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Colonize\:\:startCreation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Missions\\Colonize\:\:startCreation\(\) has parameter \$fleet_row with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
 			message: '#^Call to function is_null\(\) with array will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -1469,24 +1445,6 @@ parameters:
 			identifier: binaryOp.invalid
 			count: 1
 			path: legacy/app/Libraries/Missions/Attack.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
-			message: '#^Binary operation "\-" between mixed and 1 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
-
-		-
-			message: '#^Parameter \#2 \$level of method Xgp\\App\\Libraries\\Missions\\Colonize\:\:positionAllowed\(\) expects int, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Libraries/Missions/Colonize.php
 
 		-
 			message: '#^Parameter \#1 \$userId of method Xgp\\App\\Libraries\\Missions\\Missions\:\:getAllUserDataByUserId\(\) expects int, mixed given\.$#'
