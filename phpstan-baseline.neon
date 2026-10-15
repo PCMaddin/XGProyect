@@ -7,20 +7,8 @@ parameters:
 			path: app/Http/Controllers/Game/BannedController.php
 
 		-
-			message: '#^Parameter \#1 \$time of method App\\Services\\TimingService\:\:formatExtendedDate\(\) expects int\|string, Carbon\\Carbon given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Game/BannedController.php
-
-		-
 			message: '#^Parameter \#1 \$time of method App\\Services\\TimingService\:\:formatExtendedDate\(\) expects int\|string, float\|int\|string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Game/BannedController.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between Carbon\\Carbon and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/Http/Controllers/Game/BannedController.php
 
@@ -227,18 +215,6 @@ parameters:
 			identifier: callable.nonCallable
 			count: 4
 			path: app/Services/Game/TechnologyInfoService.php
-
-		-
-			message: '#^Comparison operation "\>" between Carbon\\Carbon and int\<1, max\> results in an error\.$#'
-			identifier: greater.invalid
-			count: 1
-			path: legacy/app/Core/Common.php
-
-		-
-			message: '#^Parameter \#1 \$time of method App\\Services\\TimingService\:\:formatExtendedDate\(\) expects int\|string, Carbon\\Carbon given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Core/Common.php
 
 		-
 			message: '#^Method Xgp\\App\\Core\\Entity\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int    $user_id
  * @property int    $admin_id
  * @property string $details
- * @property \Carbon\Carbon $until
+ * @property int|null $until  unix timestamp ('timestamp' cast); null = permanent
  * @property User   $user
  * @property User   $admin
  */
@@ -63,6 +63,14 @@ class Ban extends Model
     // Scopes...
 
     // Functions ...
+
+    /**
+     * Whether a temporary ban has run out. Permanent bans (no end) never expire.
+     */
+    public function hasExpired(): bool
+    {
+        return $this->until !== null && $this->until <= time();
+    }
 
     // Relations ...
     /** @return BelongsTo<User, $this> */
