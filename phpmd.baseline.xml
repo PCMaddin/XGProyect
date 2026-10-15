@@ -210,14 +210,6 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="legacy/app/Libraries/Missions/Destroy.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Missions/Destroy.php" method="buildDestroyReport"/>
   <violation rule="PHPMD\Rule\CleanCode\UndefinedVariable" file="legacy/app/Libraries/Missions/Destroy.php"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="legacy/app/Libraries/Missions/Expedition.php" method="expeditionMission"/>
-  <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Libraries/Missions/Expedition.php"/>
-  <violation rule="PHPMD\Rule\Naming\LongVariable" file="legacy/app/Libraries/Missions/Expedition.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Missions/Expedition.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Libraries/Missions/Expedition.php" method="resultPirates"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="legacy/app/Libraries/Missions/Expedition.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Libraries/Missions/Expedition.php" method="resultAliens"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Libraries/Missions/Expedition.php" method="resultMerchant"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Missions/Missions.php"/>
   <violation rule="PHPMD\Rule\CleanCode\BooleanArgumentFlag" file="legacy/app/Libraries/Missions/Missions.php"/>
 </phpmd-baseline>
