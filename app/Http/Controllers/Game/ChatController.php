@@ -127,8 +127,9 @@ class ChatController extends BaseController
                 $this->int($this->user, 'system'),
                 $this->int($this->user, 'planet')
             ),
-            $subject,
-            $text
+            // messages are shown as HTML: escape the player's input
+            e($subject),
+            e($text)
         );
 
         return [

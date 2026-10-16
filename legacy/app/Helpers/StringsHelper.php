@@ -36,38 +36,15 @@ abstract class StringsHelper
     }
 
     /**
-     * Replicates the behavior of mysql_real_escape_string
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public static function escapeString(string $value): string
-    {
-        return strtr($value, [
-            '\\' => '\\\\',
-            "\x00" => '\\0',
-            "\n" => '\\n',
-            "\r" => '\\r',
-            "'" => "\'",
-            '"' => '\"',
-            "\x1a" => '\\Z',
-        ]);
-    }
-
-    /**
      * Parse a line of text and replace its variables with the provided replacements
      *
-     * @param string $text
-     * @param array ...$replacements
-     *
-     * @return string
+     * @param array<mixed> $replacements values (non-scalar ones count as '')
      */
     public static function parseReplacements(string $text, array $replacements): string
     {
         return sprintf(
             $text,
-            ...$replacements
+            ...array_map(static fn (mixed $value): string => is_scalar($value) || $value === null ? (string) $value : '', $replacements)
         );
     }
 }

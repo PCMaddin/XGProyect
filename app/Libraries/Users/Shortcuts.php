@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Libraries\Users;
 
-use Xgp\App\Helpers\StringsHelper;
-
 /**
  * Fleet shortcut list, persisted as a JSON string on the user row.
  *
@@ -118,7 +116,7 @@ class Shortcuts
     private function build(string $name, int $galaxy, int $system, int $planet, int $planetType): array
     {
         return [
-            'name' => StringsHelper::escapeString(strip_tags($name)),
+            'name' => strip_tags($name),
             'g' => $galaxy,
             's' => $system,
             'p' => $planet,

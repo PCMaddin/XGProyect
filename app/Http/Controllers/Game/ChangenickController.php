@@ -79,14 +79,12 @@ class ChangenickController extends BaseController
             return ['success' => false, 'message' => $this->translation('game/preferences.pr_error_wrong_password')];
         }
 
-        $usernameLength = strlen($newUserName);
-
-        if ($usernameLength <= 3 || $usernameLength > 20) {
+        if (!self::isValidName($newUserName)) {
             return [
                 'success' => false,
                 'message' => strtr(
                     $this->translation('game/preferences.pr_error_user_invalid_characters'),
-                    ['%s' => $newUserName]
+                    ['%s' => e($newUserName)]
                 ),
             ];
         }
@@ -108,6 +106,18 @@ class ChangenickController extends BaseController
         });
 
         return ['success' => true, 'message' => $this->translation('game/changenick.cn_name_changed')];
+    }
+
+    /**
+     * 4 to 20 ASCII letters and digits, like the registration (alpha_num:ascii).
+     *
+     * Bugfix: only the length was checked, but names are shown as HTML in
+     * many places (messages, galaxy, alliance), so a name like
+     * <svg/onload=...> ran script in other players' browsers.
+     */
+    private static function isValidName(string $name): bool
+    {
+        return strlen($name) > 3 && strlen($name) <= 20 && preg_match('/^[a-zA-Z0-9]+$/', $name) === 1;
     }
 
     private function filledString(Request $request, string $key): ?string

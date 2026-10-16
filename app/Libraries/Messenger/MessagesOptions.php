@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Libraries\Messenger;
 
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
-use Xgp\App\Helpers\StringsHelper;
 
 /**
  * Value object for a single in-game message.
@@ -106,9 +105,12 @@ final class MessagesOptions
 
     public function setMessageText(string $messageText): void
     {
+        // Bugfix: plain text was SQL-escaped although it is stored through a
+        // bound parameter, so players saw it\'s and literal \n. Player input
+        // is HTML-escaped by the controllers that receive it.
         $this->messageText = $this->messageFormat === MessagesFormat::HTML
             ? stripslashes($messageText)
-            : StringsHelper::escapeString($messageText);
+            : $messageText;
     }
 
     public function setMessageFormat(int $messageFormat): void

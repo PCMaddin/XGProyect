@@ -35,13 +35,16 @@ class MessagesOptionsTest extends TestCase
         $this->assertEqualsWithDelta(time(), $options->getTime(), 2);
     }
 
-    public function testSimpleTextIsEscaped(): void
+    /**
+     * Regression: plain text was SQL-escaped although it is stored through a
+     * bound parameter, so players saw a\'b and a literal \n.
+     */
+    public function testSimpleTextIsStoredAsIs(): void
     {
         $options = new MessagesOptions();
-        $options->setMessageText("a'b");
+        $options->setMessageText("a'b\nc");
 
-        // default (SIMPLE) format escapes
-        $this->assertNotSame("a'b", $options->getMessageText());
+        $this->assertSame("a'b\nc", $options->getMessageText());
     }
 
     public function testHtmlTextIsKept(): void

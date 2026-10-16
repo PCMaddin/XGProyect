@@ -215,9 +215,3 @@ parameters:
 			identifier: callable.nonCallable
 			count: 4
 			path: app/Services/Game/TechnologyInfoService.php
-
-		-
-			message: '#^Method Xgp\\App\\Helpers\\StringsHelper\:\:parseReplacements\(\) has parameter \$replacements with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Helpers/StringsHelper.php

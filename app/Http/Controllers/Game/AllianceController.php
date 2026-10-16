@@ -426,7 +426,8 @@ class AllianceController extends BaseController
 
     private function resolveRequest(Request $request, int $show, bool $accept): RedirectResponse
     {
-        $text = $this->asString($request->input('text'));
+        // messages are shown as HTML: escape the player's input
+        $text = e($this->asString($request->input('text')));
         $current = $this->alliance->getCurrentAlliance();
         $allyId = $accept ? $this->allianceId($request) : 0;
 
@@ -1031,7 +1032,8 @@ class AllianceController extends BaseController
     private function sendCircular(Request $request): void
     {
         $rankFilter = $request->integer('r');
-        $text = is_string($raw = $request->input('text')) ? $raw : '';
+        // messages are shown as HTML: escape the player's input
+        $text = e(is_string($raw = $request->input('text')) ? $raw : '');
         $allyId = $this->userInt('ally_id');
 
         $members = $rankFilter === 0

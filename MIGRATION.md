@@ -410,6 +410,24 @@ Zeile), plus Regressionstest.
   Request-Parsing nur noch Superglobals umschrieb) ist entfernt; unbekannte
   Seiten leiten wie bisher auf die Übersicht um.
 
+- 🔴→✅ **Stored XSS in privaten Nachrichten und über Spielernamen**
+  (gefixt): Betreff und Text privater Nachrichten (Chat, Allianz-Rundmail,
+  Antwort auf Bewerbungen) werden mit `{!! !!}` ausgegeben, die Eingaben
+  aber nur SQL-escaped gespeichert. Jeder Spieler konnte so HTML/JavaScript
+  an jeden anderen schicken. Und `Changenick` prüfte nur die Länge, ein Name
+  wie `<svg/onload=…>` lief überall, wo Namen roh ausgegeben werden. Jetzt
+  werden diese Eingaben HTML-escaped, und Namen müssen wie bei der
+  Registrierung ASCII-alphanumerisch sein. Das SQL-Escaping
+  (`StringsHelper::escapeString`) ist entfernt: Die Werte werden gebunden
+  gespeichert, das Escaping machte aus `it's` ein `it\'s` und aus
+  Zeilenumbrüchen ein wörtliches `\n` (auch in Systemtexten wie den
+  Expeditionsberichten und in Flotten-Shortcut-Namen). Bereits gespeicherte
+  Nachrichten bleiben unverändert. Tests: Chat (DB), Namensregeln.
+- 🟡 **Offen: weiterer XSS-Audit nötig.** `BBCodeLib` escaped kein HTML
+  (Allianz-Beschreibung/-Text, Bewerbungstext `ally_request_text`), und viele
+  Game-Views geben Werte mit `{!! !!}` aus. Ob dort HTML gewollt ist, muss pro
+  Feld entschieden werden.
+
 ## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
 
 Abgleich aller Sprachdateien (Stand Welle 6). **Wichtig:** ein *fehlender*

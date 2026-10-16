@@ -65,5 +65,4 @@
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ResearchEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ShipsEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/SwitchIntEnumerator.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\DuplicatedArrayKey" file="legacy/app/Helpers/StringsHelper.php"/>
 </phpmd-baseline>
