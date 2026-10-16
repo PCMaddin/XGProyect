@@ -47,7 +47,8 @@ class Expedition extends Missions
                 'early' => $this->resultEarly($fleet),
                 'blackHole' => $this->resultBlackHole($fleet),
                 'merchant' => $this->resultMerchant($fleet),
-                // 'pirates' and 'aliens' are not implemented yet and end like 'nothing'
+                'pirates' => $this->resultEnemy($fleet, 'pirates'),
+                'aliens' => $this->resultEnemy($fleet, 'aliens'),
                 default => $this->resultNothing($fleet),
             };
 
@@ -371,6 +372,23 @@ class Expedition extends Missions
     {
         $this->updateLostShipsAndDefensePoints(self::int($fleet['fleet_owner']), $ships);
         parent::removeFleet(self::int($fleet['fleet_id']));
+    }
+
+    /**
+     * Pirates or aliens attack the expedition (ExpeditionBattle): the report
+     * of the expedition, then the combat report; survivors fly home.
+     *
+     * @param array<string, mixed> $fleet
+     */
+    private function resultEnemy(array $fleet, string $enemy): void
+    {
+        $texts = $enemy === 'pirates'
+            ? ['primitive_enemy_1', 'primitive_enemy_2', 'primitive_enemy_3', 'primitive_enemy_4', 'primitive_enemy_5', 'primitive_enemy_6', 'primitive_enemy_8']
+            : ['advanced_enemy_1', 'advanced_enemy_2'];
+
+        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_' . $texts[array_rand($texts)])));
+
+        app(ExpeditionBattle::class)->fight($fleet, $enemy);
     }
 
     /**

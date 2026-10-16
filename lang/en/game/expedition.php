@@ -29,6 +29,9 @@ return [
     'exp_primitive_enemy_6' => 'The expedition reports tough battles against undefined pirate ships.', // ok
     'exp_primitive_enemy_8' => 'We ran straight into an ambush set by some Star Buccaneers! A fight couldn\'t be avoided.', // ok
 
+    'exp_pirates_name' => 'Pirates',
+    'exp_aliens_name' => 'Aliens',
+
     // found advanced enemy
     'exp_advanced_enemy_1' => 'Some exotic looking ships attacked the expedition fleet without warning!', // ok
     'exp_advanced_enemy_2' => 'Your expedition fleet had an unfriendly first contact with an unknown species.', // ok

@@ -29,6 +29,9 @@ return [
     'exp_primitive_enemy_6' => 'Die Expedition meldet harte Gefechte mit nicht identifizierten Piratenschiffen.',
     'exp_primitive_enemy_8' => 'Wir sind direkt in einen Hinterhalt einiger Sternenfreibeuter geraten! Ein Kampf war nicht zu vermeiden.',
 
+    'exp_pirates_name' => 'Piraten',
+    'exp_aliens_name' => 'Aliens',
+
     // found advanced enemy
     'exp_advanced_enemy_1' => 'Einige exotisch aussehende Schiffe haben die Expeditionsflotte ohne Vorwarnung angegriffen!',
     'exp_advanced_enemy_2' => 'Deine Expeditionsflotte hatte einen unfreundlichen Erstkontakt mit einer unbekannten Spezies.',

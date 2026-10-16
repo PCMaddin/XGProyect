@@ -29,6 +29,9 @@ return [
     'exp_primitive_enemy_6' => 'La expedición informa de duros combates contra naves piratas no identificadas.', // ok
     'exp_primitive_enemy_8' => '¡Caímos de lleno en una emboscada de unos bucaneros estelares! No se pudo evitar la batalla.', // ok
 
+    'exp_pirates_name' => 'Piratas',
+    'exp_aliens_name' => 'Alienígenas',
+
     // found advanced enemy
     'exp_advanced_enemy_1' => '¡Algunas naves de apariencia exótica atacaron la expedición sin previo aviso!', // ok
     'exp_advanced_enemy_2' => 'Tu flota en expedición tuvo un primer contacto poco amistoso con una especie desconocida.', // ok

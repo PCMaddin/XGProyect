@@ -283,6 +283,22 @@ class ExpeditionServiceTest extends TestCase
         $this->assertContains($result, [2, 3, 5]); // Assert that the result is one of the allowed values
     }
 
+    public function testTheEnemyFleetIsAShareOfTheExpeditionRoundedUp(): void
+    {
+        $ships = [204 => 10, 207 => 3, 210 => 0];
+
+        $this->assertSame([204 => 3, 207 => 1], $this->expeditionService()->getEnemyFleet('pirates', 'normal', $ships));
+        $this->assertSame([204 => 8, 207 => 3], $this->expeditionService()->getEnemyFleet('pirates', 'huge', $ships));
+        $this->assertSame([204 => 6, 207 => 2], $this->expeditionService()->getEnemyFleet('aliens', 'large', $ships));
+    }
+
+    public function testPiratesAreBehindAndAliensAhead(): void
+    {
+        $this->assertSame(-3, $this->expeditionService()->getEnemyTechnologyBonus('pirates'));
+        $this->assertSame(3, $this->expeditionService()->getEnemyTechnologyBonus('aliens'));
+        $this->assertContains($this->expeditionService()->getEnemySize(), ['normal', 'large', 'huge']);
+    }
+
     /** @param array<string, int> $overrides */
     private function expeditionService(array $overrides = []): ExpeditionService
     {

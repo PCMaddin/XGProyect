@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 954 PHPUnit-Tests (20 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 958 PHPUnit-Tests (22 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
@@ -827,10 +827,23 @@ Nachgezogen:
   - Der Bericht und die Händlerseite weisen darauf hin.
   - Tests für den Freiruf und das Expeditionsergebnis.
 
+- ✅ **Expeditionsergebnisse „Piraten“ und „Aliens“** umgesetzt; beide
+  endeten bisher wie „nichts gefunden“ (`ExpeditionBattle`).
+  - Der Gegner greift die Expeditionsflotte an. Er hat deren Schiffstypen,
+    jeweils mit einem Anteil der Stückzahl (aufgerundet): Piraten 30/50/80 %,
+    Aliens 40/60/90 %, je nach Größe (normal 89 %, groß 10 %, riesig 1 %).
+  - Technik: Piraten liegen 3 Stufen unter dem Spieler, Aliens 3 darüber.
+  - Kampf im leeren Raum, also ohne Trümmerfeld und ohne Beute.
+    Überlebende fliegen heim, eine vernichtete Flotte ist weg, und die
+    Verluste zählen in die Statistik.
+  - Der Spieler bekommt den Expeditionstext und den Kampfbericht
+    („Kampfbericht Piraten [1:1:16]“).
+  - Tests für die Regeln sowie für Sieg und Totalverlust auf MariaDB, dazu
+    im Browser durchgespielt.
+
 Offen:
 
-- 🟡 Die Expeditionsergebnisse „Piraten“ und „Aliens“ sind weiterhin nicht
-  umgesetzt und enden wie „nichts gefunden“.
+- (nichts aus dem Smoke-Test)
 - ℹ️ Neue Allianzen sind standardmäßig geschlossen
   (`alliance_request_notallow = 0` heißt trotz des Namens „keine
   Bewerbungen“). So ist es durchgängig im Code, also eine

@@ -225,6 +225,50 @@ class ExpeditionService
     }
 
     /**
+     * How big the pirate or alien fleet an expedition meets is.
+     */
+    public function getEnemySize(): string
+    {
+        return (string) $this->pickWeighted(['normal' => 89, 'large' => 10, 'huge' => 1], 'normal');
+    }
+
+    /**
+     * The pirate or alien fleet an expedition meets: the expedition's own
+     * ship types, each in a share of its number (rounded up) that depends on
+     * the enemy and the size: pirates 30/50/80 %, aliens 40/60/90 %.
+     *
+     * @param array<int, int|float> $ships the expedition's ships by id
+     *
+     * @return array<int, int>
+     */
+    public function getEnemyFleet(string $enemy, string $size, array $ships): array
+    {
+        $shares = [
+            'pirates' => ['normal' => 0.3, 'large' => 0.5, 'huge' => 0.8],
+            'aliens' => ['normal' => 0.4, 'large' => 0.6, 'huge' => 0.9],
+        ];
+        $share = $shares[$enemy][$size] ?? 0.3;
+        $fleet = [];
+
+        foreach ($ships as $id => $count) {
+            if ($count > 0) {
+                $fleet[$id] = (int) ceil($count * $share);
+            }
+        }
+
+        return $fleet;
+    }
+
+    /**
+     * The enemy's technology levels relative to the player's: pirates are
+     * three levels behind, aliens three ahead.
+     */
+    public function getEnemyTechnologyBonus(string $enemy): int
+    {
+        return $enemy === 'aliens' ? 3 : -3;
+    }
+
+    /**
      * @template T of array-key
      *
      * @param array<T, int> $weights
