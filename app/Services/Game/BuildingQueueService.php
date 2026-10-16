@@ -10,6 +10,7 @@ use App\Models\Planets;
 use App\Models\UsersStatistics;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
+use App\Support\Concerns\ReadsMixedValues;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator;
 use App\Libraries\Functions;
@@ -20,6 +21,8 @@ use App\Libraries\StatisticsLibrary;
  */
 class BuildingQueueService
 {
+    use ReadsMixedValues;
+
     private const MAX_QUEUE_SIZE = 5;
 
     public function __construct(
@@ -41,7 +44,7 @@ class BuildingQueueService
         return [
             'length' => $items->count(),
             'to_destroy' => $items->where('mode', 'destroy')->count(),
-            'items' => $items->values()->toArray(),
+            'items' => $items->values()->map(static fn (BuildingQueue $item): array => $item->toArray())->all(),
         ];
     }
 
@@ -63,7 +66,7 @@ class BuildingQueueService
 
         if ($mode === 'build') {
             $terraformerCol = $this->registry->get(BuildingsEnumerator::BUILDING_TERRAFORMER)->getName();
-            $terraformerLvl = (int) ($planet->buildings?->$terraformerCol ?? 0);
+            $terraformerLvl = (int) ($planet->buildings->$terraformerCol ?? 0);
             $maxFields = $this->developmentsService->maxFields($planet->planet_field_max, $terraformerLvl);
 
             if ($planet->planet_field_current >= $maxFields - $count) {
@@ -81,9 +84,9 @@ class BuildingQueueService
         $roboticsCol = $this->registry->get(BuildingsEnumerator::BUILDING_ROBOT_FACTORY)->getName();
         $naniteCol = $this->registry->get(BuildingsEnumerator::BUILDING_NANO_FACTORY)->getName();
         $alreadyQueued = $queue->where('building_id', $buildingId)->count();
-        $currentLevel = (int) ($planet->buildings?->$buildingCol ?? 0);
-        $robotics = (int) ($planet->buildings?->$roboticsCol ?? 0);
-        $nanite = (int) ($planet->buildings?->$naniteCol ?? 0);
+        $currentLevel = (int) ($planet->buildings->$buildingCol ?? 0);
+        $robotics = (int) ($planet->buildings->$roboticsCol ?? 0);
+        $nanite = (int) ($planet->buildings->$naniteCol ?? 0);
 
         if ($mode === 'build') {
             $levelForCalc = $currentLevel + $alreadyQueued;
@@ -110,7 +113,7 @@ class BuildingQueueService
 
         $forDestroy = $mode === 'destroy';
         $ionTech = $forDestroy
-            ? (int) ($user[$this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName()] ?? 0)
+            ? self::asInt($user[$this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName()] ?? 0)
             : 0;
 
         if ($count === 0) {
@@ -133,7 +136,7 @@ class BuildingQueueService
 
         $endTime = $count === 0
             ? time() + $duration
-            : $queue->last()->end_time + $duration;
+            : ($queue->last()->end_time ?? time()) + $duration;
 
         BuildingQueue::create([
             'planet_id' => $planet->planet_id,
@@ -166,9 +169,9 @@ class BuildingQueueService
 
         $forDestroy = $firstItem->mode === 'destroy';
         $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
-        $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
+        $ionTech = $forDestroy ? self::asInt($user[$ionTechCol] ?? 0) : 0;
         $buildingCol = $this->registry->get($firstItem->building_id)->getName();
-        $currentLevel = (int) ($planet->buildings?->$buildingCol ?? 0);
+        $currentLevel = (int) ($planet->buildings->$buildingCol ?? 0);
 
         $refund = $this->developmentsService->developmentPrice(
             $firstItem->building_id,
@@ -195,8 +198,8 @@ class BuildingQueueService
 
         $roboticsCol = $this->registry->get(BuildingsEnumerator::BUILDING_ROBOT_FACTORY)->getName();
         $naniteCol = $this->registry->get(BuildingsEnumerator::BUILDING_NANO_FACTORY)->getName();
-        $robotics = (int) ($planet->buildings?->$roboticsCol ?? 0);
-        $nanite = (int) ($planet->buildings?->$naniteCol ?? 0);
+        $robotics = (int) ($planet->buildings->$roboticsCol ?? 0);
+        $nanite = (int) ($planet->buildings->$naniteCol ?? 0);
         $this->queueSequenceService->rebuildAfterHeadRemoval(
             $remaining,
             $firstItem->building_id,
@@ -207,7 +210,7 @@ class BuildingQueueService
             },
             function (BuildingQueue $item) use ($planet, $robotics, $nanite): int {
                 $itemCol = $this->registry->get($item->building_id)->getName();
-                $itemLvl = (int) ($planet->buildings?->$itemCol ?? 0);
+                $itemLvl = (int) ($planet->buildings->$itemCol ?? 0);
 
                 return $item->mode === 'build'
                     ? $this->developmentsService->developmentTime($item->building_id, $itemLvl, $robotics, $nanite, 0, 0, false)
@@ -285,7 +288,7 @@ class BuildingQueueService
             $planet->planet_field_current += 1;
         }
 
-        $newLevel = (int) ($buildings?->$buildingCol ?? 0);
+        $newLevel = (int) ($buildings->$buildingCol ?? 0);
         $points = StatisticsLibrary::calculatePoints($item->building_id, $newLevel);
 
         UsersStatistics::where('user_statistic_user_id', $planet->planet_user_id)
@@ -316,9 +319,9 @@ class BuildingQueueService
 
             $forDestroy = $first->mode === 'destroy';
             $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
-            $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
+            $ionTech = $forDestroy ? self::asInt($user[$ionTechCol] ?? 0) : 0;
             $buildingCol = $this->registry->get($first->building_id)->getName();
-            $currentLevel = (int) ($planet->buildings?->$buildingCol ?? 0);
+            $currentLevel = (int) ($planet->buildings->$buildingCol ?? 0);
 
             if ($forDestroy && $currentLevel === 0) {
                 $first->delete();
@@ -382,7 +385,7 @@ class BuildingQueueService
     ): void {
         $forDestroy = $item->mode === 'destroy';
         $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
-        $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
+        $ionTech = $forDestroy ? self::asInt($user[$ionTechCol] ?? 0) : 0;
 
         $price = $this->developmentsService->developmentPrice(
             $item->building_id,

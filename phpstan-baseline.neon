@@ -1,42 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cannot access property \$end_time on App\\Models\\BuildingQueue\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Services/Game/BuildingQueueService.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 4
-			path: app/Services/Game/BuildingQueueService.php
-
-		-
-			message: '#^Method App\\Services\\Game\\BuildingQueueService\:\:getQueueData\(\) should return array\{length\: int, to_destroy\: int, items\: array\<int, array\<string, mixed\>\>\} but returns array\{length\: int\<0, max\>, to_destroy\: int\<0, max\>, items\: array\<mixed\>\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/Game/BuildingQueueService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>\(Expression\)" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 10
-			path: app/Services/Game/BuildingQueueService.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 3
-			path: app/Services/Game/ResearchQueueService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>\(Expression\)" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Services/Game/ResearchQueueService.php
-
-		-
 			message: '#^Binary operation "\+" between mixed and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1

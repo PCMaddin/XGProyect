@@ -11,6 +11,7 @@ use App\Models\ResearchQueue;
 use App\Models\User;
 use App\Models\UsersStatistics;
 use App\Services\Game\Formulas\DevelopmentsService;
+use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Collection;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator;
@@ -22,6 +23,8 @@ use App\Libraries\StatisticsLibrary;
  */
 class ResearchQueueService
 {
+    use ReadsMixedValues;
+
     public const MAX_QUEUE_SIZE = 5;
 
     public function __construct(
@@ -52,12 +55,12 @@ class ResearchQueueService
 
         $techCol = $this->registry->get($techId)->getName();
         $alreadyQueued = $queue->where('tech_id', $techId)->count();
-        $currentLevel = (int) ($userData[$techCol] ?? 0);
+        $currentLevel = self::asInt($userData[$techCol] ?? 0);
         $levelForCalc = $currentLevel + $alreadyQueued;
 
         $labLevel = $this->labLevel($user, $planet);
         $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
-        $astrophysicsLevel = (int) ($userData[$astrophysicsCol] ?? 0);
+        $astrophysicsLevel = self::asInt($userData[$astrophysicsCol] ?? 0);
 
         $duration = $this->developmentsService->developmentTime(
             $techId,
@@ -229,15 +232,15 @@ class ResearchQueueService
         if ($intergalLevel < 1) {
             $labCol = $this->registry->get(BuildingsEnumerator::BUILDING_LABORATORY)->getName();
 
-            return (int) ($planet->buildings?->$labCol ?? 0);
+            return (int) ($planet->buildings->$labCol ?? 0);
         }
 
-        return (int) Buildings::selectRaw('SUM(building_laboratory) AS total_level')
+        return self::asInt(Buildings::selectRaw('SUM(building_laboratory) AS total_level')
             ->join('planets', 'planet_id', '=', 'building_planet_id')
             ->where('planet_user_id', $user->id)
             ->orderBy('building_laboratory', 'DESC')
             ->limit($intergalLevel + 1)
-            ->value('total_level');
+            ->value('total_level'));
     }
 
     private function startItem(User $user, ResearchQueue $item): void
