@@ -12,11 +12,19 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 711 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
+| Tests | 924 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
+| Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
-> **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
-> Ausführung (Actions läuft dort offenbar nicht), die Checks aus
-> `.github/workflows/php.yml` greifen also nur lokal.
+> **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
+> `XGProyect/XGProyect`. GitHub schaltet Actions in Forks ab, bis der
+> Besitzer sie im Tab „Actions“ einmal freigibt; deshalb gibt es keinen
+> einzigen Workflow-Lauf. Alle sechs Jobs aus `.github/workflows/php.yml`
+> (PHPUnit inkl. `composer validate`, php-cs-fixer, PHPStan, PHPMD,
+> `composer audit`) laufen lokal unter CI-Bedingungen grün, also ohne `.env`
+> und ohne Installer-Konfiguration. Dafür setzt `phpunit.xml` jetzt einen
+> Test-`APP_KEY`, und der doppelte Lockfile-Schritt ist aus dem Workflow
+> entfernt.
 
 ### Abschluss der Migration
 
@@ -111,7 +119,13 @@ promoteten Pfad verfügbar (Laravel lädt `config/legacy/constants.php` bei jede
 Request); `DPATH` dagegen **nicht** — Bildpfade über `asset()` auflösen. Array-Über-
 setzungen (`planet_type_short`, `officier.officiers`) über `trans()` statt `__()`.
 
-## Welle 2 — Geteilter Berechnungs-Layer  🟡 Enabler, keine UI
+## Welle 2 — Geteilter Berechnungs-Layer  🟡 teilweise
+
+> **Stand:** Die Services gibt es (`FormulasService`, `DevelopmentsService`,
+> `FleetsService` u. a. unter `app/Services/Game/Formulas/`). Die statischen
+> Klassen `Formulas`, `DevelopmentsLib` und `FleetsLib` liegen aber weiter in
+> `app/Libraries/` und werden noch von 5, 2 bzw. 14 Dateien benutzt. Das ist
+> reine Aufräumarbeit ohne bekannte Fehler.
 
 **Der wichtigste Schritt.** Vor den schweren Controllern die geteilten Libraries als
 typisierte Services nach `app/Services/Game/Formulas/` portieren (dort liegen schon einige).
@@ -120,14 +134,14 @@ typisierte Services nach `app/Services/Game/Formulas/` portieren (dort liegen sc
 - `DevelopmentsLib` (296 Z.), `FleetsLib` (500 Z.) → Services
 - Danach die 33 `app/`-Referenzen auf Legacy-Libs sauber umhängen
 
-## Welle 3 — Sozial & Kommunikation  🟡 mittel
+## Welle 3 — Sozial & Kommunikation  ✅ abgeschlossen
 
 | Modul | Status | Notiz |
 |---|---|---|
 | Buddies | ✅ migriert | Magic-Dispatch entfernt, Null-User-Bug behoben |
 | Messages | ✅ migriert | SQL-Injection in Bulk-Delete behoben |
 | Alliance | ✅ migriert | in 4 Etappen (public → writes → admin → Finale); 4 SQL-Injections + Template-Typo + Transfer-Key behoben |
-| Federation | ⏭️ nach Welle 4 | ACS, hängt an der Fleet-Logik |
+| Federation | ✅ migriert | in Welle 4 (siehe dort); die Ansicht war noch in alter Template-Syntax, im Smoke-Test nach Blade umgestellt |
 
 ## Welle 4 — Gameplay-Kern
 
@@ -645,3 +659,115 @@ Baseline-Einträge.
     eigenen Platzhalter des Spiels (`%1%`, `%player%`, `%t`, `%m`, `%n`). Er
     meldet außerdem Sprachdateien, die es auf Englisch nicht gibt. Neue Tests
     gibt es für den Changelog-Rückfall und die beiden Migrationen.
+
+## Smoke-Test gegen eine echte Datenbank
+
+Bis hierhin war alles nur mit Unit-Tests auf SQLite und statischer Analyse
+geprüft. Ablauf des Tests:
+
+1. MariaDB 10.11 aufgesetzt und den Installer im Browser (Playwright)
+   durchlaufen.
+2. Alle Spiel- und Admin-Seiten in Deutsch, Spanisch und Englisch
+   aufgerufen und dabei auf HTTP-Fehler, JS-Fehler, Log-Einträge, rohe
+   Sprachschlüssel und übrig gebliebene Platzhalter geprüft.
+3. Durchgespielt: Registrierung, Bauen, Forschung, Werft, Transport,
+   Spionage, Angriff, Kolonisierung, Expedition, Allianz (gründen, öffnen,
+   bewerben, annehmen, Texte), Buddies, Nachrichten, Notizen, Einstellungen,
+   Kampfbericht und das Speichern aller Admin-Formulare. Danach wurde der
+   Datenbankstand verglichen.
+
+Gefunden und behoben, jeweils mit Test:
+
+- 🔴→✅ **MariaDB: Spiel komplett unbenutzbar.** Die Flottenabfrage der
+  Missionsverarbeitung nutzte `GROUP BY` mit `f.*`. MariaDB lehnt das im
+  strikten Modus ab (`ONLY_FULL_GROUP_BY`, Laravels Standard), weil es anders
+  als MySQL keine funktionale Abhängigkeit erkennt. Jeder Seitenaufruf brach
+  ab, keine Flotte kam an. Die Planetennamen kommen jetzt aus Unterabfragen.
+  Die Allianz-Statistik gruppiert nach allen ihren Spalten.
+- 🔴→✅ **Flotten doppelt verarbeitet** (auch auf MySQL). Das alte
+  `GROUP BY` enthielt den Planetennamen. Lagen ein zerstörter Planet und
+  eine neue Kolonie auf denselben Koordinaten, kam die Flotte zweimal in die
+  Verarbeitung, ihre Mission lief also doppelt. Gegenprobe gegen den alten
+  Code im Test.
+- 🔴→✅ **Kein CSRF-Schutz im Spiel.** `VerifyCsrfToken` war in der
+  `game`-Gruppe auskommentiert, und kein Spielformular schickte ein Token.
+  Eine fremde Seite konnte einem eingeloggten Spieler jedes Formular
+  unterschieben: Flotten, Nachrichten, Einstellungen, Kontolöschung,
+  Allianz. Der Schutz ist an, alle 32 POST-Formulare, der
+  Flotten-Rückruf und der Galaxie-AJAX-Aufruf senden das Token. Tests prüfen
+  die Middleware-Gruppen und jedes POST-Formular.
+- 🔴→✅ **Übersicht stürzte ab** (`$gameTitle` fehlte im Layout), die
+  wichtigste Seite nach dem Login. Ein View-Composer liefert den Titel für
+  alle Spielseiten.
+- 🔴→✅ **Tests liefen gegen die Spieldatenbank.** Ist das Spiel
+  installiert, überschreibt `config/xgp-db-config.php` die Testkonfiguration;
+  Tests legten Zeilen an, änderten und löschten sie in der echten Datenbank.
+  Die Tests sind jetzt fest auf SQLite im Speicher gestellt und schreiben
+  nicht mehr ins Log des Spiels (sie füllten die Fehlerliste im Admin).
+- ✅ **Admin und Installer ohne JavaScript.** jQuery, Bootstrap,
+  DataTables, Chart.js und Font Awesome fehlten im Repository, weil die
+  Regel `vendor` in `.gitignore` auch `public/assets/admin/vendor`
+  ausschloss. Menüs, Tabellen und Dialoge funktionierten nicht. Ergänzt sind
+  die Dateien aus SB Admin 2 4.0.7 (die Version des vorhandenen CSS/JS),
+  nur die tatsächlich eingebundenen, mit Lizenz.
+- ✅ **Sprache nur auf Spielseiten.** Startseite, Registrierung, Login,
+  Passwort-Reset, deren Mails und der ganze Admin waren immer Englisch.
+  Eine in der Session liegende Sprache (etwa vom Installer) schlug die
+  Servereinstellung. Die Middleware `ServerLanguage` setzt die Serversprache
+  für alles außer den Installer. Darum hießen auch neue Heimatplaneten
+  „Homeworld“ und die Willkommensnachricht war englisch.
+- ✅ **Registrierung brach mit Fehlerseite ab**, wenn die Willkommens-Mail
+  nicht rausging; das Konto war da schon angelegt. Die Admin-Rundmail hörte
+  bei der ersten fehlerhaften Adresse auf, der Passwort-Reset scheiterte
+  genauso. Mail-Fehler werden jetzt geloggt, und der Vorgang läuft weiter.
+- ✅ **Admin: Spieler speichern setzte den Allianzrang zurück.** Die
+  Allianz kam als String aus dem Formular und war damit nie gleich der
+  gespeicherten Id. Jedes Speichern galt als Beitritt: Rang „Neuling“ und
+  neues Beitrittsdatum.
+- ✅ **Allianztexte im falschen Feld.** Das Formular schickte wörtlich
+  `{t}`, deshalb wurden interner Text und Bewerbungstext als externer Text
+  gespeichert und überschrieben ihn.
+- ✅ **Reste der alten Template-Syntax:** Die Verbandsangriff-Seite war
+  komplett unübersetzt (`{fl_fleet_union}` usw., leere Listen, ohne
+  Layout). Der Forschungs-Countdown leitete auf `cp={tech_home}` weiter, die
+  Startseite lud `{img_path}…png`. Ein Test verbietet solche Platzhalter in
+  Views.
+- ✅ **Spionagebericht** zeigte für Schiffe, Verteidigung und Forschung den
+  rohen Sprachschlüssel. Die Golden-Fixture hatte das mit aufgezeichnet und
+  ist gezielt angepasst.
+- ✅ **Kampfbericht:** „Attacker“, „Defender“ und „Repaired Defense“
+  standen fest im Template, jetzt übersetzt; der englische Text ist
+  unverändert.
+- ✅ Kleinigkeiten:
+  - Nachrichtenseiten (`HaltWithView`) wurden als Fehler geloggt.
+  - Händler: Tauschpreis als `%s` und englische Rohstoffnamen.
+  - Admin-Sperrseite: JS-Fehler ohne gesperrte Spieler.
+  - Startseite: Aufruf nicht existierender Cookie-Funktionen.
+  - Deutsch: Spalte „Ziel“ doppelt (jetzt „Ankunft“).
+  - Englisch: „Fllet“.
+- ✅ **Abhängigkeiten:** `composer audit` meldete sechs Lücken, darunter
+  eine hohe in `league/commonmark`, außerdem in `laravel/framework`,
+  `league/flysystem`, `symfony/http-foundation` und `symfony/yaml`. Die
+  betroffenen Pakete sind innerhalb der bestehenden Versionsgrenzen
+  aktualisiert (Laravel 12.64 → 12.70). Danach liefen alle Tests und der
+  Crawl erneut grün.
+
+Offen (bewusst nicht in diesem Schritt):
+
+- 🟡 **Aktionen per GET-Link** (Bauen/Abbrechen, Forschung, Allianz:
+  Mitglied entfernen, Rang löschen, Buddy-Aktionen) prüfen kein Token. Durch
+  `SameSite=Lax` kann eine fremde Seite sie nicht im Hintergrund auslösen,
+  ein angeklickter Link (etwa im Allianztext) aber schon. Abhilfe: auf
+  POST-Formulare umstellen.
+- 🟡 **Händler „Rohstoffe tauschen“** ist nur eine Oberfläche ohne
+  Funktion, schon im Original; der Preis aus den Admin-Einstellungen wird
+  angezeigt, aber nichts getauscht.
+- ℹ️ Neue Allianzen sind standardmäßig geschlossen
+  (`alliance_request_notallow = 0` heißt trotz des Namens „keine
+  Bewerbungen“). So ist es durchgängig im Code, also eine
+  Design-Entscheidung.
+- ℹ️ Nachrichten und Berichte werden als fertiges HTML in der Sprache zum
+  Zeitpunkt des Versands gespeichert. Ältere Nachrichten behalten deshalb
+  ihre alte Sprache und alte Fehler, etwa den rohen Schlüssel im
+  Spionagebericht.
+

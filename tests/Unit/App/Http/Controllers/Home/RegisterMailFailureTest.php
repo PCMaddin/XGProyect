@@ -23,6 +23,7 @@ class RegisterMailFailureTest extends DatabaseTestCase
     {
         config([
             'INSTALLED' => 'true',
+            'SECRETWORD' => 'test-secret',
             'mail.default' => 'smtp',
             'mail.mailers.smtp.host' => '127.0.0.1',
             'mail.mailers.smtp.port' => 1,
