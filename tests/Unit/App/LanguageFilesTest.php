@@ -18,7 +18,7 @@ use SplFileInfo;
  */
 class LanguageFilesTest extends TestCase
 {
-    private const LANGUAGES = ['es', 'de', 'fr', 'pt_BR'];
+    private const LANGUAGES = ['es', 'de', 'fr', 'pt_BR', 'nl'];
 
     /**
      * @return array<string, array{0: string, 1: string}>

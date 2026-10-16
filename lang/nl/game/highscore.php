@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'st_player' => 'Speler',
+    'st_alliance' => 'Alliantie',
+    'st_points' => 'Punten',
+    'st_total' => 'Totaal',
+    'st_economy' => 'Economie',
+    'st_research' => 'Onderzoek',
+    'st_military' => 'Militair',
+    'st_fleets' => 'Vloot',
+    'st_researh' => 'Onderzoek',
+    'st_buildings' => 'Gebouwen',
+    'st_defenses' => 'Verdediging',
+    'st_position' => 'Plaats',
+    'st_members' => 'Leden',
+    'st_per_member' => 'Per lid',
+    'st_statistics' => 'Statistieken',
+    'st_show' => 'tonen',
+    'st_per' => 'per',
+    'st_in_the_positions' => 'op plaats',
+    'st_actions' => 'Acties',
+    'st_ally_request' => 'Solliciteren bij deze alliantie',
+    'st_honour' => 'Eer',
+    'st_title_grand_emperor' => 'Grootkeizer',
+    'st_title_emperor' => 'Keizer',
+    'st_title_starlord' => 'Sterrenheer',
+    'st_title_bandit_king' => 'Bandietenkoning',
+    'st_title_bandit_lord' => 'Bandietenheer',
+    'st_title_bandit' => 'Bandiet',
+    'st_military_built' => 'Militair gebouwd',
+    'st_military_destroyed' => 'Militair vernietigd',
+    'st_military_lost' => 'Militair verloren',
+];

@@ -28,6 +28,7 @@ class LanguageMigrationsTest extends DatabaseTestCase
             'de' => ['2026_10_16_000001_add_german_language.php', 'de', 'Deutsch'],
             'fr' => ['2026_10_16_000022_add_french_language.php', 'fr', 'Français'],
             'pt_BR' => ['2026_10_16_000023_add_portuguese_brazil_language.php', 'pt_BR', 'Português (Brasil)'],
+            'nl' => ['2026_10_16_000024_add_dutch_language.php', 'nl', 'Nederlands'],
         ];
     }
 

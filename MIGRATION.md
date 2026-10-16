@@ -13,7 +13,7 @@
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
 | Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien) (Schlüssel und Platzhalter per Test gleich) |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
@@ -702,6 +702,11 @@ Baseline-Einträge.
     `/admin/ajax/update/check` als abgebrochen: Die Seite fragt
     `updates.xgproyect.org` mit 5 Sekunden Timeout ab, und der Crawler
     verlässt sie vorher; das hängt nicht an der Sprache.
+  - ✅ **Niederländisch** (`nl`, Migration `000024`): Anrede „je“,
+    Begriffe des niederländischen OGame (Klein vrachtschip, Puinveld,
+    Sensor Phalanx, Donkere Materie, Melkweg …); die V7-Schiffe heißen wie
+    dort Crawler, Reaper und Pathfinder. Mit `nl` gecrawlt, ohne neue
+    Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'Er is al een verzoek aan deze speler!',
+    'bu_cannot_request_yourself' => 'Je kunt jezelf niet als vriend toevoegen',
+    'bu_request_message' => 'Bericht bij het verzoek',
+    'bu_player' => 'Naam',
+    'bu_request_text' => 'Verzoektekst',
+    'bu_characters' => 'tekens',
+    'bu_back' => 'Terug',
+    'bu_send' => 'Versturen',
+    'bu_cancel_request' => 'Verzoek annuleren',
+    'bu_accept' => 'Accepteren',
+    'bu_decline' => 'Weigeren',
+    'bu_delete' => 'Verwijderen',
+    'bu_buddy_list' => 'Vriendenlijst',
+    'bu_requests' => 'Verzoeken',
+    'bu_alliance' => 'Alliantie',
+    'bu_coords' => 'Coördinaten',
+    'bu_text' => 'Tekst',
+    'bu_action' => 'Actie',
+    'bu_my_requests' => 'Mijn verzoeken',
+    'bu_partners' => 'Mijn vrienden',
+    'bu_estate' => 'Status',
+    'bu_deleted_title' => 'Vriend verloren',
+    'bu_deleted_text' => 'Speler %u heeft je van de vriendenlijst verwijderd.',
+    'bu_accepted_title' => 'Verzoek geaccepteerd',
+    'bu_accepted_text' => 'Speler %u heeft je vriendschapsverzoek geaccepteerd.',
+    'bu_rejected_title' => 'Verzoek geweigerd',
+    'bu_rejected_text' => 'Speler %u heeft je vriendschapsverzoek geweigerd.',
+    'bu_to_accept_title' => 'Nieuw vriendschapsverzoek',
+    'bu_to_accept_text' => 'Speler %u heeft je een vriendschapsverzoek gestuurd.',
+];
