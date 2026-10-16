@@ -37,7 +37,7 @@ class UsersManagementService
             DB::transaction(function () use ($name, $email, $auth, $pass, $galaxy, $system, $planet) {
                 $time = time();
 
-                $user = User::create([
+                $user = new User([
                     'name' => $name,
                     'email' => $email,
                     'ip_at_reg' => request()->ip() ?? '',
@@ -45,9 +45,10 @@ class UsersManagementService
                     'current_planet' => 0,
                     'register_time' => $time,
                     'onlinetime' => $time,
-                    'authlevel' => $auth,
                     'password' => $pass,
                 ]);
+                $user->authlevel = $auth;
+                $user->save();
 
                 $lastUserId = $user->id;
 

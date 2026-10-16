@@ -116,11 +116,10 @@ class Alliance extends Model
     }
 
     /**
-     * @return BelongsTo<User, self>
+     * @return BelongsTo<User, $this>
      */
     public function owner(): BelongsTo
     {
-        // @phpstan-ignore-next-line
         return $this->belongsTo(User::class, 'alliance_owner', 'id');
     }
 

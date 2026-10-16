@@ -187,7 +187,6 @@ class UsersController extends BaseController
         $updateData = [
             'name' => $validated['username'],
             'email' => $validated['email'],
-            'authlevel' => $newLevel,
             'home_planet_id' => $validated['home_planet_id'],
             'current_planet' => $validated['current_planet'],
             'ally_id' => $newAllyId,
@@ -205,12 +204,15 @@ class UsersController extends BaseController
             $updateData['ally_register_time'] = 0;
         }
 
+        // the model's password mutator hashes it (hashing here as well made
+        // the new password unusable)
         if (!empty($validated['password'])) {
-            /** @SuppressWarnings("PHPMD.StaticAccess") */
-            $updateData['password'] = Functions::hash($validated['password']);
+            $updateData['password'] = $validated['password'];
         }
 
-        $user->update($updateData);
+        $user->fill($updateData);
+        $user->authlevel = $newLevel;
+        $user->save();
 
         if ($actor->id !== $user->id) {
             DB::table('sessions')->where('user_id', $user->id)->delete();

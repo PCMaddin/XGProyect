@@ -41,7 +41,7 @@ class AdminController extends BaseController
         try {
             DB::beginTransaction();
 
-            $newUser = User::create(array_merge(
+            $newUser = new User(array_merge(
                 $request->validated(),
                 [
                     'name' => $request->validated()['username'],
@@ -53,9 +53,10 @@ class AdminController extends BaseController
                     'current_page' => $request->getRequestUri(),
                     'register_time' => time(),
                     'onlinetime' => time(),
-                    'authlevel' => UserRanksEnumerator::ADMIN,
                 ]
             ));
+            $newUser->authlevel = UserRanksEnumerator::ADMIN;
+            $newUser->save();
 
             $newUser->preferences()->create();
             $newUser->premium()->create();

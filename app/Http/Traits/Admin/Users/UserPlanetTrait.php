@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Traits\Admin\Users;
 
+use App\Support\Concerns\ReadsMixedValues;
+use Illuminate\Support\Collection;
+use App\Core\GameObjects\GameObjectRegistry;
+use App\Core\GameObjects\GameObjectInterface;
 use DirectoryIterator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +23,8 @@ use App\Libraries\StatisticsLibrary;
  */
 trait UserPlanetTrait
 {
+    use ReadsMixedValues;
+
     // ── Data retrieval ────────────────────────────────────────────────────────
 
     /**
@@ -97,32 +103,56 @@ trait UserPlanetTrait
 
     // ── Persistence ───────────────────────────────────────────────────────────
 
+    /**
+     * The planet columns the admin form may change. Not the build queues
+     * (the game engine manages them) and not the keys, owner and type.
+     *
+     * Bugfix: every submitted field starting with planet_ was written as a
+     * column name, so an unknown name failed the query and any other planet
+     * column could be set.
+     */
+    private const EDITABLE_PLANET_COLUMNS = [
+        'planet_name', 'planet_image', 'planet_galaxy', 'planet_system', 'planet_planet',
+        'planet_diameter', 'planet_field_current', 'planet_field_max', 'planet_temp_min', 'planet_temp_max',
+        'planet_metal', 'planet_crystal', 'planet_deuterium',
+        'planet_metal_perhour', 'planet_crystal_perhour', 'planet_deuterium_perhour',
+        'planet_energy_used', 'planet_energy_max',
+        'planet_building_metal_mine_percent', 'planet_building_crystal_mine_percent',
+        'planet_building_deuterium_sintetizer_percent', 'planet_building_solar_plant_percent',
+        'planet_building_fusion_reactor_percent', 'planet_ship_solar_satellite_percent',
+        'planet_debris_metal', 'planet_debris_crystal', 'planet_last_jump_time',
+    ];
+
+    /**
+     * The column names of a kind of game object (buildings, ships, defenses).
+     *
+     * @param Collection<int, covariant GameObjectInterface> $objects
+     *
+     * @return array<int, string>
+     */
+    private static function objectColumns(Collection $objects): array
+    {
+        return $objects->map(fn (GameObjectInterface $object): string => $object->getName())->values()->all();
+    }
+
     /** @SuppressWarnings("PHPMD.StaticAccess") */
     private function savePlanetData(Request $request, int $planetId): void
     {
         $stringFields = ['planet_name', 'planet_image'];
-        $skipFields = [
-            // Build-queue state — managed by the game engine
-            'planet_b_building_id', 'planet_b_tech_id', 'planet_b_hangar_id',
-            // Primary / foreign keys — must never be reassigned from a form
-            'planet_id', 'planet_user_id', 'planet_type',
-        ];
         $updates = [];
 
         // Explicitly handle the destroyed toggle — defaults to 0 (cancel) if not submitted
         $destroyedValue = $request->integer('planet_destroyed', 0);
-        /** @phpstan-ignore constant.notFound */
         $updates['planet_destroyed'] = ($destroyedValue === 1) ? (time() + (PLANETS_LIFE_TIME * 3600)) : 0;
 
-        foreach ($request->except(['_token', '_method', 'planet_destroyed', ...$skipFields]) as $field => $value) {
-            if ($value === null) {
-                continue; // skip nullable fields not submitted by this form variant (moon vs planet)
+        foreach (self::EDITABLE_PLANET_COLUMNS as $field) {
+            $value = $request->input($field);
+
+            if (!is_scalar($value)) {
+                continue; // not submitted by this form variant (moon vs planet)
             }
-            if (in_array($field, $stringFields, true)) {
-                $updates[$field] = (string) $value;
-            } elseif (is_string($field) && str_starts_with($field, 'planet_')) {
-                $updates[$field] = is_numeric($value) ? (int) $value : (string) $value;
-            }
+
+            $updates[$field] = !in_array($field, $stringFields, true) && is_numeric($value) ? (int) $value : (string) $value;
         }
 
         DB::table('planets')->where('planet_id', $planetId)->update($updates);
@@ -134,10 +164,9 @@ trait UserPlanetTrait
         $updates = [];
         $totalFields = 0;
 
-        foreach ($request->all() as $field => $value) {
-            if (is_string($field) && str_starts_with($field, 'building_') &&
-                $field !== 'building_id' && $field !== 'building_planet_id') {
-                $level = (int) $value; // @phpstan-ignore cast.int
+        foreach (self::objectColumns(app(GameObjectRegistry::class)->buildings()) as $field) {
+            if ($request->has($field)) {
+                $level = $request->integer($field);
                 $updates[$field] = $level;
                 $totalFields += $level;
             }
@@ -150,13 +179,12 @@ trait UserPlanetTrait
         $planetUpdate = ['planet_field_current' => $totalFields];
 
         if ($type === PlanetTypesEnumerator::MOON) {
-            /** @phpstan-ignore constant.notFound */
             $planetUpdate['planet_field_max'] = 1 + $request->integer('building_mondbasis', 0) * FIELDS_BY_MOONBASIS_LEVEL;
         }
 
         DB::table('planets')->where('planet_id', $planetId)->update($planetUpdate);
 
-        $userId = (int) DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'); // @phpstan-ignore cast.int
+        $userId = self::asInt(DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'));
         (new StatisticsLibrary())->rebuildPoints($userId, $planetId, 'buildings');
     }
 
@@ -165,10 +193,9 @@ trait UserPlanetTrait
     {
         $updates = [];
 
-        foreach ($request->all() as $field => $value) {
-            if (is_string($field) && str_starts_with($field, 'ship_') &&
-                $field !== 'ship_id' && $field !== 'ship_planet_id') {
-                $updates[$field] = (int) $value; // @phpstan-ignore cast.int
+        foreach (self::objectColumns(app(GameObjectRegistry::class)->ships()) as $field) {
+            if ($request->has($field)) {
+                $updates[$field] = $request->integer($field);
             }
         }
 
@@ -176,7 +203,7 @@ trait UserPlanetTrait
             DB::table('ships')->where('ship_planet_id', $planetId)->update($updates);
         }
 
-        $userId = (int) DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'); // @phpstan-ignore cast.int
+        $userId = self::asInt(DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'));
         (new StatisticsLibrary())->rebuildPoints($userId, $planetId, 'ships');
     }
 
@@ -185,10 +212,9 @@ trait UserPlanetTrait
     {
         $updates = [];
 
-        foreach ($request->all() as $field => $value) {
-            if (is_string($field) && str_starts_with($field, 'defense_') &&
-                $field !== 'defense_id' && $field !== 'defense_planet_id') {
-                $updates[$field] = (int) $value; // @phpstan-ignore cast.int
+        foreach (self::objectColumns(app(GameObjectRegistry::class)->defenses()) as $field) {
+            if ($request->has($field)) {
+                $updates[$field] = $request->integer($field);
             }
         }
 
@@ -196,7 +222,7 @@ trait UserPlanetTrait
             DB::table('defenses')->where('defense_planet_id', $planetId)->update($updates);
         }
 
-        $userId = (int) DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'); // @phpstan-ignore cast.int
+        $userId = self::asInt(DB::table('planets')->where('planet_id', $planetId)->value('planet_user_id'));
         (new StatisticsLibrary())->rebuildPoints($userId, $planetId, 'defenses');
     }
 
@@ -243,7 +269,7 @@ trait UserPlanetTrait
             ->orderBy('planet_planet')
             ->value('planet_id');
 
-        return $value !== null ? (int) $value : null; // @phpstan-ignore cast.int
+        return $value !== null ? self::asInt($value) : null;
     }
 
     // ── View preparation ──────────────────────────────────────────────────────
@@ -381,7 +407,7 @@ trait UserPlanetTrait
 
             $list[] = [
                 'field' => $key,
-                'label' => (string) __('admin/users.us_user_' . $key), // @phpstan-ignore cast.string
+                'label' => (string) __('admin/users.us_user_' . $key),
                 'level' => (int) $value,
             ];
         }
@@ -407,7 +433,7 @@ trait UserPlanetTrait
 
             $list[] = [
                 'field' => $key,
-                'label' => (string) __('admin/users.us_user_' . $key), // @phpstan-ignore cast.string
+                'label' => (string) __('admin/users.us_user_' . $key),
                 'amount' => (int) $value,
             ];
         }
@@ -439,7 +465,7 @@ trait UserPlanetTrait
 
             $list[] = [
                 'field' => $key,
-                'label' => (string) __('admin/users.us_user_' . $key), // @phpstan-ignore cast.string
+                'label' => (string) __('admin/users.us_user_' . $key),
                 'amount' => (int) $value,
             ];
         }

@@ -10,7 +10,6 @@ use App\Services\SettingsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Core\Enumerators\UserRanksEnumerator;
 use App\Libraries\PlanetLib;
 
 /**
@@ -106,7 +105,6 @@ class BotService
                     'ip_at_reg' => '',
                     'register_time' => $time,
                     'onlinetime' => $time,
-                    'authlevel' => UserRanksEnumerator::PLAYER,
                 ]);
 
                 $bot->preferences()->create();

@@ -53,7 +53,8 @@ class User extends Authenticatable
     use Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable. Not the rank (authlevel):
+     * it is only set explicitly, so no request data can grant one.
      *
     * @var list<string>
      */
@@ -61,7 +62,6 @@ class User extends Authenticatable
         'name',
         'password',
         'email',
-        'authlevel',
         'home_planet_id',
         'galaxy',
         'system',

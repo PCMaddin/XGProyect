@@ -201,11 +201,6 @@ abstract class Functions
         );
     }
 
-    public static function hash(string $password): string
-    {
-        return password_hash($password, PASSWORD_BCRYPT);
-    }
-
     public static function generatePassword(): string
     {
         return StringsHelper::randomString(16);

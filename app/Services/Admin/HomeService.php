@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Admin;
 
+use App\Support\Concerns\ReadsMixedValues;
 use App\Services\FormatService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,8 @@ use Throwable;
  */
 class HomeService
 {
+    use ReadsMixedValues;
+
     public function __construct(
         private readonly SettingsService $settings,
         private readonly FormatService $formatService,
@@ -63,16 +66,16 @@ class HomeService
 
     public function getDbVersion(): string
     {
-        return (string) DB::scalar('SELECT @@version'); // @phpstan-ignore cast.string
+        return self::asString(DB::scalar('SELECT @@version'));
     }
 
     public function getDbSize(): string
     {
         return $this->formatService->prettyBytes(
-            (int) DB::scalar( // @phpstan-ignore cast.int
+            self::asInt(DB::scalar(
                 'SELECT SUM(data_length + index_length) FROM information_schema.TABLES WHERE table_schema = ?',
                 [DB::getDatabaseName()]
-            )
+            ))
         );
     }
 }

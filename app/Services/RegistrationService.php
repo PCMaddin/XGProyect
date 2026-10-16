@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Services\Game\PlanetService;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use App\Core\Enumerators\UserRanksEnumerator;
 
 /**
  * Creates a new player: the account with its preferences, premium,
@@ -61,7 +60,6 @@ class RegistrationService
             'current_planet' => 0,
             'register_time' => time(),
             'onlinetime' => time(),
-            'authlevel' => UserRanksEnumerator::PLAYER,
         ]));
 
         $user->preferences()->create();
