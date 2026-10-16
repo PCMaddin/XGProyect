@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
+use App\Services\Game\Formulas\ClassProductionService;
+use App\Enums\PlayerClass;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
@@ -315,8 +317,10 @@ class UpdatesLibrary
         $Caps['planet_energy_max'] = 0;
         $Caps['planet_energy_used'] = 0;
 
-        // the mines' own production, which boosters (items) raise
+        // the mines' own production, which boosters (items), the
+        // collector class and crawlers raise
         $minePerHour = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+        $energyBase = 0.0;
 
         foreach ($registry->producers() as $ProdID => $producer) {
             $formula = $producer->getProduction();
@@ -369,9 +373,10 @@ class UpdatesLibrary
                 $post_percent
             );
 
-            $minePerHour['metal'] += $productionService->currentProduction($productionService->productionAmount($metal_prod, 1, $game_resource_multiplier), $post_percent);
-            $minePerHour['crystal'] += $productionService->currentProduction($productionService->productionAmount($crystal_prod, 1, $game_resource_multiplier), $post_percent);
-            $minePerHour['deuterium'] += $productionService->currentProduction($productionService->productionAmount($deuterium_prod, 1, $game_resource_multiplier), $post_percent);
+            // only what the mines produce (not the fusion reactor's use)
+            $minePerHour['metal'] += $productionService->currentProduction($productionService->productionAmount(max(0, $metal_prod), 1, $game_resource_multiplier), $post_percent);
+            $minePerHour['crystal'] += $productionService->currentProduction($productionService->productionAmount(max(0, $crystal_prod), 1, $game_resource_multiplier), $post_percent);
+            $minePerHour['deuterium'] += $productionService->currentProduction($productionService->productionAmount(max(0, $deuterium_prod), 1, $game_resource_multiplier), $post_percent);
 
             // PRODUCTION BOOST WITH PLASMA
             $Caps['planet_metal_perhour'] += $productionService->currentProduction(
@@ -400,6 +405,7 @@ class UpdatesLibrary
                     0,
                     true
                 );
+                $energyBase += $productionService->productionAmount($energy_prod, 1, 0, true);
             } else {
                 $Caps['planet_energy_used'] += $productionService->productionAmount(
                     $energy_prod,
@@ -409,6 +415,22 @@ class UpdatesLibrary
                 );
             }
         }
+
+        // player class and crawlers (OGame 7)
+        $extras = app(ClassProductionService::class)->extras(
+            $minePerHour,
+            $energyBase,
+            self::numInt($current_planet['ship_crawler'] ?? 0),
+            self::numInt($current_planet['building_metal_mine'] ?? 0) + self::numInt($current_planet['building_crystal_mine'] ?? 0) + self::numInt($current_planet['building_deuterium_sintetizer'] ?? 0),
+            self::numInt($current_planet['planet_ship_crawler_percent'] ?? 10),
+            PlayerClass::fromInt($current_user['player_class'] ?? 0),
+            $officerService->isOfficerActive(self::numInt($current_user['premium_officier_geologist'] ?? 0), time())
+        );
+        $Caps['planet_metal_perhour'] += $extras['metal'];
+        $Caps['planet_crystal_perhour'] += $extras['crystal'];
+        $Caps['planet_deuterium_perhour'] += $extras['deuterium'];
+        $Caps['planet_energy_max'] += $extras['energyMax'];
+        $Caps['planet_energy_used'] -= $extras['energyUsed'];
 
         if ($current_planet['planet_type'] == PlanetTypesEnumerator::MOON) {
             $game_metal_basic_income = 0;

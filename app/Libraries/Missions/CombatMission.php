@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Services\Game\FleetEventsService;
+use App\Enums\PlayerClass;
 use App\Support\FleetShips;
 use App\Libraries\Functions;
 use App\Libraries\UpdatesLibrary;
@@ -21,11 +22,14 @@ use App\Libraries\BattleEngine\Models\PlayerGroup;
  * @phpstan-type Loot array{metal: int|float, crystal: int|float, deuterium: int|float}
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 abstract class CombatMission extends Missions
 {
     use BuildsCombatForces;
     use SendsCombatReports;
+    /** the defender did not log in for a week: discoverers plunder more */
+    private bool $defenderInactive = false;
 
     protected const SHIP_MIN_ID = 202;
     protected const SHIP_MAX_ID = 219;
@@ -121,6 +125,8 @@ abstract class CombatMission extends Missions
         $this->releaseFleets($fleetRow);
 
         $targetUser = $this->getAllUserDataByUserId(self::int($targetPlanet['planet_user_id']));
+        $lastOnline = self::int($targetUser['onlinetime'] ?? 0);
+        $this->defenderInactive = $lastOnline > 0 && $lastOnline < time() - ONE_WEEK;
 
         UpdatesLibrary::updatePlanetResources($targetUser, $targetPlanet, time());
 
@@ -287,7 +293,9 @@ abstract class CombatMission extends Missions
                 foreach ($fleet->getIterator() as $shipId => $shipType) {
                     $capacity += $shipType->getCount() * app(FleetsService::class)->getMaxStorage(
                         self::int($this->pricelist[$shipId]['capacity']),
-                        $this->hyperspaceTechnology[$playerId] ?? 0
+                        $this->hyperspaceTechnology[$playerId] ?? 0,
+                        (int) $shipId,
+                        $this->playerClasses[$playerId] ?? PlayerClass::None
                     );
                 }
             }
@@ -343,7 +351,7 @@ abstract class CombatMission extends Missions
                     }
 
                     $ships = $returning;
-                    $fleetSteal = $this->fleetLoot($ships, $capacity, $targetPlanet);
+                    $fleetSteal = $this->fleetLoot($ships, $capacity, $targetPlanet, (int) $playerId);
 
                     $steal['metal'] += $fleetSteal['metal'];
                     $steal['crystal'] += $fleetSteal['crystal'];
@@ -373,7 +381,7 @@ abstract class CombatMission extends Missions
      *
      * @return Loot
      */
-    private function fleetLoot(array $ships, int | float $capacity, array $targetPlanet): array
+    private function fleetLoot(array $ships, int | float $capacity, array $targetPlanet, int $attackerId): array
     {
         $fleetCapacity = 0;
 
@@ -385,7 +393,8 @@ abstract class CombatMission extends Missions
             $fleetCapacity,
             self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity,
             self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity,
-            self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity
+            self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity,
+            $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? PlayerClass::None)->inactiveLootShare() : 0.5
         );
     }
 
@@ -459,15 +468,16 @@ abstract class CombatMission extends Missions
      * 4. If there is still capacity available fill half of it with metal
      * 5. Now fill the rest with crystal
      *
-     * At most half of each resource of the planet can be taken.
+     * At most half of each resource of the planet can be taken ($share; a
+     * discoverer takes 75 % from inactive players).
      *
      * @return Loot
      */
-    protected static function plunder(int | float $capacity, int | float $metal, int | float $crystal, int | float $deuterium): array
+    protected static function plunder(int | float $capacity, int | float $metal, int | float $crystal, int | float $deuterium, float $share = 0.5): array
     {
-        $metal /= 2;
-        $crystal /= 2;
-        $deuterium /= 2;
+        $metal *= $share;
+        $crystal *= $share;
+        $deuterium *= $share;
 
         $firstMetal = min($capacity / 3, $metal);
         $capacity -= $firstMetal;

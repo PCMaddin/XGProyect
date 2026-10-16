@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Support\FleetShips;
+use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -312,7 +313,9 @@ class Fleet4Controller extends BaseController
             $totalShips += $amount;
             $this->fleetStorage += $this->fleetsService->getMaxStorage(
                 ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                $this->research->getCurrentResearch()->research_hyperspace_technology
+                $this->research->getCurrentResearch()->research_hyperspace_technology,
+                $shipId,
+                app(PlayerClassService::class)->current()
             ) * $amount;
             $this->fleetShips[$column] = $amount;
         }
@@ -422,7 +425,8 @@ class Fleet4Controller extends BaseController
     private function validateExpedition(): void
     {
         $maxExpeditions = $this->fleetsService->getMaxExpeditions(
-            $this->research->getCurrentResearch()->research_astrophysics
+            $this->research->getCurrentResearch()->research_astrophysics,
+            app(PlayerClassService::class)->current()
         );
 
         if ($maxExpeditions <= 0) {
@@ -464,7 +468,8 @@ class Fleet4Controller extends BaseController
     {
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
+            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+            app(PlayerClassService::class)->current()
         );
 
         if ($maxFleets <= $this->fleets->getFleetsCount()) {

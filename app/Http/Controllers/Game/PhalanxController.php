@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Services\Game\FleetEventsService;
+use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,7 @@ use App\Libraries\Users;
  * Sensor phalanx: scan the fleet movements around a target planet.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class PhalanxController extends BaseController
 {
@@ -50,7 +52,7 @@ class PhalanxController extends BaseController
 
     private function buildPage(Request $request): View | RedirectResponse
     {
-        $range = $this->formulasService->phalanxRange($this->planetInt('building_phalanx'));
+        $range = $this->formulasService->phalanxRange($this->planetInt('building_phalanx'), app(PlayerClassService::class)->current()->phalanxRangeFactor());
         $lowerSystem = max($this->planetInt('planet_system') - $range, 1);
         $upperSystem = min($this->planetInt('planet_system') + $range, MAX_SYSTEM_IN_GALAXY);
 

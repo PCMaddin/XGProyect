@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
+use App\Services\Game\PlayerClassService;
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,13 @@ class PlanetLib
 
         $formulas = app(FormulasService::class);
         $planet = $formulas->getPlanetSize($position, $main);
+
+        // discoverers colonize 10 % larger planets (fields grow with the area)
+        if (!$main) {
+            $factor = app(PlayerClassService::class)->classOf($owner)->planetSizeFactor();
+            $planet['planet_diameter'] = (int) floor($planet['planet_diameter'] * $factor);
+            $planet['planet_field_max'] = (int) floor($planet['planet_field_max'] * $factor * $factor);
+        }
         $temp = $formulas->setPlanetTemp($position);
         $name = $name === '' ? (string) __('game/global.colony') : $name;
 
@@ -134,7 +142,8 @@ class PlanetLib
             'planet_type' => PlanetTypesEnumerator::MOON,
             'planet_image' => 'mond',
             'planet_diameter' => $diameter,
-            'planet_field_max' => $maxFields === 0 ? 1 : $maxFields,
+            // generals' moons have 5 more fields
+            'planet_field_max' => ($maxFields === 0 ? 1 : $maxFields) + app(PlayerClassService::class)->classOf($owner)->moonFieldBonus(),
             'planet_temp_min' => $minTemp === 0 ? $temp['min'] : $minTemp,
             'planet_temp_max' => $maxTemp === 0 ? $temp['max'] : $maxTemp,
             'planet_b_building_id' => '0',

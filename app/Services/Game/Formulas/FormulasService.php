@@ -15,17 +15,18 @@ class FormulasService
     {
     }
 
-    public function phalanxRange(int $phalanxLevel): int
+    /**
+     * Systems the phalanx reaches; discoverers reach 20 % farther ($factor).
+     */
+    public function phalanxRange(int $phalanxLevel, float $factor = 1.0): int
     {
-        if ($phalanxLevel > 1) {
-            return (int) pow($phalanxLevel, 2) - 1;
-        }
+        $range = match (true) {
+            $phalanxLevel > 1 => (int) pow($phalanxLevel, 2) - 1,
+            $phalanxLevel === 1 => 1,
+            default => 0,
+        };
 
-        if ($phalanxLevel == 1) {
-            return 1;
-        }
-
-        return 0;
+        return (int) floor($range * $factor);
     }
 
     public function missileRange(int $impulseDriveLevel): int

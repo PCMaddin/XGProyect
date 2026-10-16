@@ -18,6 +18,7 @@ return [
     'lm_officiers' => 'Offiziere rekrutieren',
     'lm_trader' => 'Händler',
     'lm_items' => 'Gegenstände',
+    'lm_characterclass' => 'Klasse',
     'lm_technology' => 'Technik',
     'lm_messages' => 'Nachrichten',
     'lm_alliance' => 'Allianz',

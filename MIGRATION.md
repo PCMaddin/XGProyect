@@ -1019,6 +1019,35 @@ Nachgezogen:
     neu erfasst, weil das Schnellfeuer des Zerstörers jetzt dem
     Schlachtkreuzer gilt. Tests für die neuen Werte und die
     Datenmigration auf MariaDB.
+- ✅ **Spielerklassen** (OGame 7; `App\Enums\PlayerClass`,
+  `PlayerClassService`, Seite `characterclass` im Menü „Klasse“): Die
+  erste Wahl ist kostenlos, ein Wechsel kostet 500.000 Dunkle Materie
+  (Einstellung `class_change_price`, wie das Wechsel-Token des Originals).
+  - **Kollektor**: baut Crawler; +25 % Minenproduktion, +10 % Energie;
+    Transporter +100 % Tempo und +25 % Laderaum; Crawler-Bonus ×1,5, mit
+    Geologe 10 % mehr aktive Crawler, Überladen bis 150 %.
+  - **General**: baut Reaper; Kampfschiffe (außer Todesstern) und Recycler
+    +100 % Tempo; −25 % Deuteriumverbrauch; Recycler und Pathfinder +20 %
+    Laderaum; +2 Stufen Waffen/Schild/Panzerung im Kampf; +2 Flottenslots;
+    +5 Felder auf jedem Mond (beim Wechsel angepasst).
+  - **Entdecker**: baut Pathfinder; −25 % Forschungszeit; Rohstoff- und
+    Schiffsfunde auf Expeditionen ×1,5; halb so viele Piraten/Aliens; +2
+    Expeditionsslots; neue Kolonien 10 % größer (21 % mehr Felder); +20 %
+    Phalanx-Reichweite; 75 % Beute bei Spielern, die eine Woche nicht
+    online waren.
+  - **Crawler** (`ClassProductionService`): je arbeitendem Crawler +0,02 %
+    der Minenproduktion (Kollektor 0,03 %), höchstens 8 je Minenstufe,
+    zusammen höchstens +50 %, je 50 Energie (bei 150 % doppelt); eigene
+    Zeile und Einstellung in den Rohstoffeinstellungen, nur auf Planeten.
+  - Die Bonusbasis der Booster und Klassen ist jetzt nur die
+    Minenproduktion; der Deuteriumverbrauch des Fusionskraftwerks zählte
+    bisher mit hinein.
+  - **Nicht übernommen**: Rabatte auf das Fertigstellen mit Dunkler Materie
+    (das gibt es im Spiel nicht), 5-%-Tempostufen und die Chance, mit einem
+    Leichten Jäger einen Todesstern zu zerstören (General), sichtbare
+    Expeditions-Trümmerfelder (Entdecker; kommt mit den Trümmerfeldern an
+    Position 16).
+  - Tests für alle Boni, Wahl und Wechsel; im Browser durchgespielt.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

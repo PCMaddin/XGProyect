@@ -389,6 +389,7 @@ class Missions
 
         return $this->selectRow(
             'SELECT u.name,
+                        u.player_class,
                         r.research_weapons_technology,
                         r.research_shielding_technology,
                         r.research_armour_technology,

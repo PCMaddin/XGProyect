@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Support\FleetShips;
+use App\Enums\PlayerClass;
 use App\Libraries\BattleEngine\Models\Defense;
 use App\Libraries\BattleEngine\Models\Fleet;
 use App\Libraries\BattleEngine\Models\HomeFleet;
@@ -23,6 +24,9 @@ trait BuildsCombatForces
 {
     /** @var array<int, int> hyperspace technology level by player id */
     private array $hyperspaceTechnology = [];
+
+    /** @var array<int, PlayerClass> the class of each player in the battle */
+    private array $playerClasses = [];
 
     /**
      * A ship or defense stack wired from the combat and price config.
@@ -187,10 +191,14 @@ trait BuildsCombatForces
      */
     private function equipPlayer(Player $player, array $info, array $fleetRow, string $coordsPrefix = 'fleet_start_'): void
     {
+        // generals fight with 2 more levels of each combat technology
+        $class = PlayerClass::fromInt($info['player_class'] ?? 0);
+        $this->playerClasses[$player->getId()] = $class;
+        $bonus = $class->combatTechBonus();
         $player->setTech(
-            self::int($info['research_weapons_technology']),
-            self::int($info['research_shielding_technology']),
-            self::int($info['research_armour_technology'])
+            self::int($info['research_weapons_technology']) + $bonus,
+            self::int($info['research_shielding_technology']) + $bonus,
+            self::int($info['research_armour_technology']) + $bonus
         );
 
         $player->setCoords(

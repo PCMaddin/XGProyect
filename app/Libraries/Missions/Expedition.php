@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Support\FleetShips;
+use App\Services\Game\PlayerClassService;
+use App\Enums\PlayerClass;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
@@ -31,6 +33,9 @@ class Expedition extends Missions
     /** logbook entry of a probe, added to the next report */
     private string $logbook = '';
 
+    /** the class of the fleet's owner */
+    private PlayerClass $owner = PlayerClass::None;
+
     /** the espionage probe, which reports how busy the area is */
     private const PROBE = 210;
 
@@ -49,6 +54,7 @@ class Expedition extends Missions
     public function expeditionMission(array $fleet): void
     {
         if (parent::canStartMission($fleet)) {
+            $this->owner = app(PlayerClassService::class)->classOf(self::int($fleet['fleet_owner']));
             $this->setExpeditionPoints($fleet);
 
             match ($this->result($fleet)) {
@@ -90,6 +96,11 @@ class Expedition extends Missions
         $result = $this->expeditionService->getExpeditionResult();
 
         if (mt_rand() / mt_getrandmax() < $this->areas->nothingChance($load, self::holdingTime($fleet))) {
+            $result = 'nothing';
+        }
+
+        // discoverers meet pirates and aliens half as often
+        if (in_array($result, ['pirates', 'aliens'], true) && mt_rand() / mt_getrandmax() >= $this->owner->expeditionEnemyFactor()) {
             $result = 'nothing';
         }
 
@@ -158,7 +169,9 @@ class Expedition extends Missions
 
             $this->fleetCapacity += app(FleetsService::class)->getMaxStorage(
                 $ship->getCapacity(),
-                self::int($fleet['research_hyperspace_technology'])
+                self::int($fleet['research_hyperspace_technology']),
+                $id,
+                $this->owner
             ) * $count;
         }
 
@@ -207,7 +220,7 @@ class Expedition extends Missions
             $this->expeditionService->getShipSourceSizeMultChances($this->expeditionService->calculateResourceSourceSize()),
             $this->shipExpeditionPoints
         );
-        $found = $this->expeditionService->getFoundShips($currentFleet, $budget, $this->shipStructures());
+        $found = $this->expeditionService->getFoundShips($currentFleet, (int) ($budget * $this->owner->expeditionFindFactor()), $this->shipStructures());
 
         if ($found === []) {
             $this->resultNothing($fleet);
@@ -272,7 +285,7 @@ class Expedition extends Missions
             $typeObtained
         );
 
-        $loaded = min($foundAmount, $fleetMaxCapacity);
+        $loaded = min((int) ($foundAmount * $this->owner->expeditionFindFactor()), $fleetMaxCapacity);
 
         $this->updateFleetResourcesById(self::int($fleet['fleet_id']), $typeObtained, $loaded);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Services\Game\FleetEventsService;
+use App\Services\Game\PlayerClassService;
 use App\Support\FleetShips;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
@@ -132,7 +133,9 @@ class Recycle extends Missions
         foreach ($ships as $id => $amount) {
             $shipStorage = app(FleetsService::class)->getMaxStorage(
                 self::int($this->pricelist[$id]['capacity']),
-                self::int($fleetRow['research_hyperspace_technology'])
+                self::int($fleetRow['research_hyperspace_technology']),
+                (int) $id,
+                app(PlayerClassService::class)->classOf(self::int($fleetRow['fleet_owner']))
             );
 
             if ($id == 209) {

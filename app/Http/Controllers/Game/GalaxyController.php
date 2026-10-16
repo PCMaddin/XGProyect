@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Support\FleetShips;
+use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -126,7 +127,8 @@ class GalaxyController extends BaseController
             'maxfleetcount' => $this->currentFleets(),
             'fleetmax' => $this->fleetsService->getMaxFleets(
                 $this->userInt('research_computer_technology'),
-                $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time())
+                $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
+                app(PlayerClassService::class)->current()
             ),
             'recyclers' => $this->formatService->prettyNumber($this->planetInt('ship_recycler')),
             'spyprobes' => $this->formatService->prettyNumber($this->planetInt('ship_espionage_probe')),
@@ -520,7 +522,8 @@ class GalaxyController extends BaseController
 
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->userInt('research_computer_technology'),
-            $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time())
+            $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
+            app(PlayerClassService::class)->current()
         );
 
         if ($maxFleets <= $currentFleets) {
@@ -665,7 +668,8 @@ class GalaxyController extends BaseController
             $ships,
             $this->userInt('research_combustion_drive'),
             $this->userInt('research_impulse_drive'),
-            $this->userInt('research_hyperspace_drive')
+            $this->userInt('research_hyperspace_drive'),
+            app(PlayerClassService::class)->current()
         );
         $minSpeed = $speeds === [] ? 0.0 : (float) min($speeds);
         $duration = (int) $this->fleetsService->missionDuration(10, $minSpeed, $distance, Functions::fleetSpeedFactor());
@@ -836,7 +840,7 @@ class GalaxyController extends BaseController
 
     private function shipConsumption(int $itemId): int
     {
-        return ($this->registry->findShip($itemId)?->getConsumption() ?? 0);
+        return (int) round(($this->registry->findShip($itemId)?->getConsumption() ?? 0) * app(PlayerClassService::class)->current()->consumptionFactor());
     }
 
     private function queryInt(Request $request, string $key): int

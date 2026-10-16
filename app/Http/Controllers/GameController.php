@@ -27,6 +27,7 @@ class GameController extends BaseController
         'banned' => Game\BannedController::class,
         'buddies' => Game\BuddiesController::class,
         'changelog' => Game\ChangelogController::class,
+        'characterclass' => Game\CharacterClassController::class,
         'changenick' => Game\ChangenickController::class,
         'chat' => Game\ChatController::class,
         'combatreport' => Game\CombatreportController::class,

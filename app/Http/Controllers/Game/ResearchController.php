@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Support\Concerns\ReadsMixedValues;
+use App\Services\Game\PlayerClassService;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Enums\Module;
 use App\Models\Planets;
@@ -177,7 +178,8 @@ class ResearchController extends BaseController
                 0,
                 $totalLabLevel,
                 $astrophysicsLevel,
-                $technocrateActive
+                $technocrateActive,
+                app(PlayerClassService::class)->current()
             );
 
             $technologies[] = [

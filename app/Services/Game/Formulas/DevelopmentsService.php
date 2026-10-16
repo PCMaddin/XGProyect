@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Game\Formulas;
 
 use App\Core\GameObjects\Building;
+use App\Enums\PlayerClass;
 use App\Core\GameObjects\Defense;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Research;
@@ -103,9 +104,10 @@ class DevelopmentsService
     }
 
     /**
-     * Calculate development time based on the element type.
+     * Calculate development time based on the element type; discoverers
+     * research a quarter faster.
      */
-    public function developmentTime(int $elementId, int $currentLevel, int $roboticsFactory, int $naniteFactory, int $totalLabLevel, int $astrophysicsLevel, bool $technocrateActive): int
+    public function developmentTime(int $elementId, int $currentLevel, int $roboticsFactory, int $naniteFactory, int $totalLabLevel, int $astrophysicsLevel, bool $technocrateActive, PlayerClass $class = PlayerClass::None): int
     {
         $object = $this->registry->get($elementId);
         $price = $object->getPrice();
@@ -128,7 +130,7 @@ class DevelopmentsService
 
         if ($object instanceof Research) {
             $time = $this->formulas->getResearchTime($costMetal, $costCrystal, $totalLabLevel, $astrophysicsLevel);
-            $time = floor($time * (1 - ($technocrateActive ? TECHNOCRATE_SPEED : 0)));
+            $time = floor($time * (1 - ($technocrateActive ? TECHNOCRATE_SPEED : 0)) * $class->researchTimeFactor());
         }
 
         if ($object instanceof Ship || $object instanceof Defense) {

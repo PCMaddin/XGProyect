@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
+use App\Enums\PlayerClass;
+use App\Services\Game\PlayerClassService;
+use App\Services\Game\Formulas\ClassProductionService;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
@@ -133,6 +136,11 @@ class ResourcesettingsController extends BaseController
                 'plasma_metal' => $this->coloredNumber($production['plasmaBoost']['metal']),
                 'plasma_crystal' => $this->coloredNumber($production['plasmaBoost']['crystal']),
                 'plasma_deuterium' => $this->coloredNumber($production['plasmaBoost']['deuterium']),
+                'class_name' => app(PlayerClassService::class)->current() === PlayerClass::None ? '' : __('game/characterclass.' . app(PlayerClassService::class)->current()->nameKey()),
+                'class_metal' => $this->coloredNumber($production['classBonus']['metal']),
+                'class_crystal' => $this->coloredNumber($production['classBonus']['crystal']),
+                'class_deuterium' => $this->coloredNumber($production['classBonus']['deuterium']),
+                'class_energy' => $this->coloredNumber($production['classBonus']['energyMax']),
                 'planet_metal_max' => $this->resourceColor($this->planetInt('planet_metal'), $storageMetalMax),
                 'planet_crystal_max' => $this->resourceColor($this->planetInt('planet_crystal'), $storageCrystalMax),
                 'planet_deuterium_max' => $this->resourceColor($this->planetInt('planet_deuterium'), $storageDeuteriumMax),
@@ -156,6 +164,7 @@ class ResourcesettingsController extends BaseController
      *     metalPerHour: float, crystalPerHour: float, deuteriumPerHour: float,
      *     energyMax: float, energyUsed: float,
      *     plasmaBoost: array{metal: float, crystal: float, deuterium: float},
+     *     classBonus: array{metal: float, crystal: float, deuterium: float, energyMax: float, energyUsed: float},
      *     resourceRow: string
      * }
      */
@@ -174,6 +183,8 @@ class ResourcesettingsController extends BaseController
         $energyMax = 0.0;
         $energyUsed = 0.0;
         $plasmaBoost = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+        $minePerHour = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+        $energyBase = 0.0;
         $resourceRow = '';
 
         foreach (array_keys($this->productions) as $prodId) {
@@ -203,6 +214,11 @@ class ResourcesettingsController extends BaseController
             $crystalPerHour += $this->productionService->productionAmount($crystalProd, $geologeBoost, $multiplier) + $plasmaCrystal;
             $deuteriumPerHour += $this->productionService->productionAmount($deuteriumProd, $geologeBoost, $multiplier) + $plasmaDeuterium;
 
+            $minePerHour['metal'] += $this->productionService->productionAmount(max(0, $metalProd), 1, $multiplier);
+            $minePerHour['crystal'] += $this->productionService->productionAmount(max(0, $crystalProd), 1, $multiplier);
+            $minePerHour['deuterium'] += $this->productionService->productionAmount(max(0, $deuteriumProd), 1, $multiplier);
+            $energyBase += $prodId >= 4 ? max(0, $this->productionService->productionAmount($energyProd, 1.0, 0, true)) : 0.0;
+
             $energy = $this->productionService->productionAmount($energyProd, $prodId >= 4 ? $engineerBoost : 1.0, 0, true);
             $energyMax += $energy > 0 ? $energy : 0.0;
             $energyUsed += $energy > 0 ? 0.0 : $energy;
@@ -215,15 +231,74 @@ class ResourcesettingsController extends BaseController
             ]);
         }
 
+        $extras = $this->classExtras($minePerHour, $energyBase, $geologeBoost > 1.0);
+        $resourceRow .= $this->crawlerRow($extras['crawlers'], $postPercent);
+
         return [
-            'metalPerHour' => $metalPerHour,
-            'crystalPerHour' => $crystalPerHour,
-            'deuteriumPerHour' => $deuteriumPerHour,
-            'energyMax' => $energyMax,
-            'energyUsed' => $energyUsed,
+            'metalPerHour' => $metalPerHour + $extras['all']['metal'],
+            'crystalPerHour' => $crystalPerHour + $extras['all']['crystal'],
+            'deuteriumPerHour' => $deuteriumPerHour + $extras['all']['deuterium'],
+            'energyMax' => $energyMax + $extras['all']['energyMax'],
+            'energyUsed' => $energyUsed - $extras['all']['energyUsed'],
             'plasmaBoost' => $plasmaBoost,
+            'classBonus' => $extras['class'],
             'resourceRow' => $resourceRow,
         ];
+    }
+
+    /**
+     * The collector bonus and the crawlers (ClassProductionService): all of
+     * it, the class alone, and the crawlers alone.
+     *
+     * @param array{metal: float, crystal: float, deuterium: float} $minePerHour
+     *
+     * @return array{
+     *     all: array{metal: float, crystal: float, deuterium: float, energyMax: float, energyUsed: float},
+     *     class: array{metal: float, crystal: float, deuterium: float, energyMax: float, energyUsed: float},
+     *     crawlers: array{metal: float, crystal: float, deuterium: float, energyMax: float, energyUsed: float}
+     * }
+     */
+    private function classExtras(array $minePerHour, float $energyBase, bool $geologist): array
+    {
+        $service = app(ClassProductionService::class);
+        $class = app(PlayerClassService::class)->current();
+        $mineLevels = $this->planetInt('building_metal_mine') + $this->planetInt('building_crystal_mine') + $this->planetInt('building_deuterium_sintetizer');
+        $all = $service->extras($minePerHour, $energyBase, $this->planetInt('ship_crawler'), $mineLevels, $this->planetInt('planet_ship_crawler_percent'), $class, $geologist);
+        $classOnly = $service->extras($minePerHour, $energyBase, 0, $mineLevels, 0, $class, $geologist);
+        $crawlers = [];
+
+        foreach ($all as $key => $value) {
+            $crawlers[$key] = $value - $classOnly[$key];
+        }
+
+        return ['all' => $all, 'class' => $classOnly, 'crawlers' => $crawlers];
+    }
+
+    /**
+     * The crawlers' row with their setting (up to 150 % for collectors).
+     *
+     * @param array{metal: float, crystal: float, deuterium: float, energyMax: float, energyUsed: float} $crawlers
+     */
+    private function crawlerRow(array $crawlers, int $postPercent): string
+    {
+        if ($this->planetInt('ship_crawler') <= 0) {
+            return '';
+        }
+
+        $setting = $this->planetInt('planet_ship_crawler_percent');
+
+        return view('resourcesettings.resources_row', [
+            'name' => 'ship_crawler',
+            'percent' => $setting,
+            'option' => $this->buildPercentageOptions($setting, app(ClassProductionService::class)->maxCrawlerSetting(app(PlayerClassService::class)->current())),
+            'type' => $this->setLangLine('ship_crawler'),
+            'level' => __('game/resources.rs_amount'),
+            'level_type' => $this->planetInt('ship_crawler'),
+            'metal_type' => $this->coloredNumber($this->productionService->currentProduction($crawlers['metal'], $postPercent)),
+            'crystal_type' => $this->coloredNumber($this->productionService->currentProduction($crawlers['crystal'], $postPercent)),
+            'deuterium_type' => $this->coloredNumber($this->productionService->currentProduction($crawlers['deuterium'], $postPercent)),
+            'energy_type' => $this->coloredNumber(-$crawlers['energyUsed']),
+        ])->render();
     }
 
     /**
@@ -315,8 +390,11 @@ class ResourcesettingsController extends BaseController
             }
 
             $numeric = is_numeric($value) ? (int) $value : -1;
+            $valid = $field === 'ship_crawler' && app(ClassProductionService::class)->maxCrawlerSetting(app(PlayerClassService::class)->current()) === 15
+                ? [...self::VALID_PERCENTAGES, 110, 120, 130, 140, 150]
+                : self::VALID_PERCENTAGES;
 
-            if (!in_array($numeric, self::VALID_PERCENTAGES, true)) {
+            if (!in_array($numeric, $valid, true)) {
                 return redirect(self::REDIRECT_TARGET);
             }
 
@@ -352,11 +430,11 @@ class ResourcesettingsController extends BaseController
         } ?? 0.0;
     }
 
-    private function buildPercentageOptions(int $currentPercentage): string
+    private function buildPercentageOptions(int $currentPercentage, int $max = 10): string
     {
         $options = '';
 
-        for ($option = 10; $option >= 0; $option--) {
+        for ($option = $max; $option >= 0; $option--) {
             $value = $option * 10;
             $selected = $option === $currentPercentage ? ' selected=selected' : '';
             $options .= '<option value="' . $value . '"' . $selected . '>' . $value . '%</option>';

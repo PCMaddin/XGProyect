@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
+use App\Enums\PlayerClass;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
@@ -203,7 +204,9 @@ class GalaxyLib
 
         $recyclerStorage = app(FleetsService::class)->getMaxStorage(
             $this->recyclerCapacity,
-            self::asInt($this->user['research_hyperspace_technology'] ?? 0)
+            self::asInt($this->user['research_hyperspace_technology'] ?? 0),
+            Ships::SHIP_RECYCLER,
+            PlayerClass::fromInt($this->user['player_class'] ?? 0)
         );
         $recyclerStorage = $recyclerStorage === 0 ? 1 : $recyclerStorage;
 
@@ -534,7 +537,10 @@ class GalaxyLib
             !$this->isCurrentPlayer() &&
             self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0) &&
             self::asInt($this->currentPlanet['planet_type'] ?? 0) === PlanetTypesEnumerator::MOON) {
-            return $this->isInRange(app(FormulasService::class)->phalanxRange(self::asInt($this->currentPlanet['building_phalanx'] ?? 0)));
+            return $this->isInRange(app(FormulasService::class)->phalanxRange(
+                self::asInt($this->currentPlanet['building_phalanx'] ?? 0),
+                PlayerClass::fromInt($this->user['player_class'] ?? 0)->phalanxRangeFactor()
+            ));
         }
 
         return false;

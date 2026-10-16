@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
+use App\Services\Game\PlayerClassService;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\Game\Formulas\OfficerService;
@@ -94,11 +95,13 @@ class Fleet1Controller extends BaseController
                 'fleets' => $this->fleets->getFleetsCount(),
                 'max_fleets' => $this->fleetsService->getMaxFleets(
                     $this->research->getCurrentResearch()->research_computer_technology,
-                    $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
+                    $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+                    app(PlayerClassService::class)->current()
                 ),
                 'expeditions' => $this->fleets->getExpeditionsCount(),
                 'max_expeditions' => $this->fleetsService->getMaxExpeditions(
-                    $this->research->getCurrentResearch()->research_astrophysics
+                    $this->research->getCurrentResearch()->research_astrophysics,
+                    app(PlayerClassService::class)->current()
                 ),
                 'no_slot' => $this->buildNoSlotBlock(),
                 'list_of_ships' => $listOfShips,
@@ -160,11 +163,13 @@ class Fleet1Controller extends BaseController
                 'ships_input' => $this->buildShipsInput($shipId) ?? '-',
                 'ship_id' => $shipId,
                 'max_ships' => $amount,
-                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
-                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
+                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
+                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                    $this->research->getCurrentResearch()->research_hyperspace_technology
+                    $this->research->getCurrentResearch()->research_hyperspace_technology,
+                    $shipId,
+                    app(PlayerClassService::class)->current()
                 ),
             ];
         }
@@ -175,7 +180,7 @@ class Fleet1Controller extends BaseController
     private function buildShipName(string $shipName, int $shipId): string
     {
         $title = __('game/fleet.fl_speed_title')
-            . $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'));
+            . $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current());
 
         return $this->formatService->link('', (string) __('game/ships.' . $shipName), $title);
     }
@@ -229,7 +234,8 @@ class Fleet1Controller extends BaseController
     {
         return $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
+            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+            app(PlayerClassService::class)->current()
         ) > $this->fleets->getFleetsCount();
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Support\FleetShips;
+use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -109,11 +110,13 @@ class MovementController extends BaseController
             'fleets' => $this->fleets->getFleetsCount(),
             'max_fleets' => $this->fleetsService->getMaxFleets(
                 $this->research->getCurrentResearch()->research_computer_technology,
-                $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
+                $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+                app(PlayerClassService::class)->current()
             ),
             'expeditions' => $this->fleets->getExpeditionsCount(),
             'max_expeditions' => $this->fleetsService->getMaxExpeditions(
-                $this->research->getCurrentResearch()->research_astrophysics
+                $this->research->getCurrentResearch()->research_astrophysics,
+                app(PlayerClassService::class)->current()
             ),
             'list_of_movements' => $this->buildMovements(),
         ]);

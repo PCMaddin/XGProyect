@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Game;
 
 use App\Core\GameObjects\GameObjectRegistry;
+use App\Enums\PlayerClass;
 use App\Models\Buildings;
 use App\Models\Planets;
 use App\Models\ResearchQueue;
@@ -69,7 +70,8 @@ class ResearchQueueService
             0,
             $labLevel,
             $astrophysicsLevel,
-            $technocrateActive
+            $technocrateActive,
+            PlayerClass::fromInt($user->player_class)
         );
 
         $endTime = (int) $queue->last()?->end_time + $duration;
@@ -328,7 +330,8 @@ class ResearchQueueService
             0,
             $this->labLevel($user, $planet),
             $astrophysicsLevel,
-            $technocrateActive
+            $technocrateActive,
+            PlayerClass::fromInt($user->player_class)
         );
     }
 

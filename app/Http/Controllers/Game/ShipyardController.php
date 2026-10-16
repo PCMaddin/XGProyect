@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Services\Game\PlayerClassService;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use Illuminate\Contracts\View\View;
@@ -333,9 +335,16 @@ class ShipyardController extends BaseController
             $levels[$id] = $this->planetInt($column) !== 0 ? $this->planetInt($column) : $this->userInt($column);
         }
 
+        // crawlers, reapers and pathfinders belong to a player class; crawlers
+        // work on planets only
+        $class = app(PlayerClassService::class)->current();
+        $onMoon = $this->planetInt('planet_type') === PlanetTypesEnumerator::MOON;
+
         $this->allowedStructures = array_filter(
             $this->allowedStructures,
-            fn (int $value): bool => $this->developmentsService->isDevelopmentAllowed($value, $levels)
+            fn (int $value): bool => $this->developmentsService->isDevelopmentAllowed($value, $levels) &&
+                $class->canBuild($value) &&
+                !($onMoon && $value === Ships::SHIP_CRAWLER)
         );
     }
 
