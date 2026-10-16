@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Legacy\App\Libraries\Missions;
 
+use App\Services\FormatService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -87,5 +88,28 @@ class MissileTest extends TestCase
         $this->assertSame($expectedQuery, $impact['query']);
         $this->assertEquals($expectedDestroyed, $impact['destroyed']);
         $this->assertSame(array_keys($expectedDestroyed), array_keys($impact['destroyed']), 'attack order');
+    }
+
+    /**
+     * Regression: intercepting every missile used to leave the anti-ballistic
+     * missiles untouched. Now one interceptor is used up per missile.
+     */
+    public function testInterceptingAllMissilesUsesUpOneInterceptorEach(): void
+    {
+        $missile = new class (app(FormatService::class)) extends Missile {
+            /** @var list<array<string, mixed>> */
+            public array $defenseUpdates = [];
+
+            protected function updatePlanetDefenses(array $data): void
+            {
+                $this->defenseUpdates[] = $data;
+            }
+        };
+
+        $result = (new ReflectionMethod(Missile::class, 'interceptAll'))->invoke($missile, ['planet_id' => 42], 3, 10);
+
+        $this->assertSame([['destroyed_query' => '', 'amount' => 7, 'planet_id' => 42]], $missile->defenseUpdates);
+        $this->assertIsArray($result);
+        $this->assertSame([], $result[1]);
     }
 }

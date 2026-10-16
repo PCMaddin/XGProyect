@@ -50,10 +50,8 @@ class Missile extends Missions
         $missiles = self::int($fleetRow['fleet_amount']);
         $antiBallistic = self::int($targetData['defense_anti-ballistic_missile']);
 
-        // note: when every missile is intercepted, the anti-ballistic missiles are
-        // not consumed (unchanged legacy behaviour)
         [$message, $result] = $antiBallistic >= $missiles
-            ? [self::text(__('game/missile.mis_all_destroyed')) . '<br>', []]
+            ? $this->interceptAll($targetData, $missiles, $antiBallistic)
             : $this->penetrateDefenses($fleetRow, $attackerData, $targetData, $missiles, $antiBallistic);
 
         if (count($result) > 0) {
@@ -67,6 +65,28 @@ class Missile extends Missions
         $this->sendResults($fleetRow, $attackerData, $targetData, $message);
 
         parent::removeFleet(self::int($fleetRow['fleet_id']));
+    }
+
+    /**
+     * At least as many anti-ballistic missiles as missiles: every missile is
+     * intercepted, one interceptor each.
+     *
+     * Bugfix: the interceptors used to stay on the planet, so a stock of them
+     * stopped any number of attacks.
+     *
+     * @param array<string, mixed> $targetData
+     *
+     * @return array{0: string, 1: array<int, mixed>}
+     */
+    private function interceptAll(array $targetData, int $missiles, int $antiBallistic): array
+    {
+        $this->updatePlanetDefenses([
+            'destroyed_query' => '',
+            'amount' => $antiBallistic - $missiles,
+            'planet_id' => $targetData['planet_id'],
+        ]);
+
+        return [self::text(__('game/missile.mis_all_destroyed')) . '<br>', []];
     }
 
     /**
