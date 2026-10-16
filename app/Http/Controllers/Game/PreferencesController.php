@@ -74,6 +74,7 @@ class PreferencesController extends BaseController
             $this->userData($user, $preferences),
             [
                 'preference_spy_probes' => $preferences->preference_spy_probes,
+                'preference_fleet_escape' => $preferences->preference_fleet_escape !== 0,
                 'sort_planet' => $this->preferencesService->planetSortOptions($preferences),
                 'sort_sequence' => $this->preferencesService->planetSortSequenceOptions($preferences),
             ],

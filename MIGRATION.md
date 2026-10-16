@@ -1173,9 +1173,21 @@ Nachgezogen:
     (85 % statt 70 % werden wieder aufgebaut).
   - **Kommandostab** (alle fünf Offiziere): +1 Flottenslot, +2 % Energie,
     +2 % Minen, +1 Spionagestufe; auf der Offiziersseite beschrieben.
-  - Die „verbesserte Fluchtrate“ des Admirals kommt mit der Flottenflucht.
   - Tests für alle Boni, den Ingenieur in einem Kampf und die Priorität;
     im Browser gesendet.
+- ✅ **Flottenflucht** (taktischer Rückzug des Originals; Forum-Regeln,
+  `FleetEscape`, `FleesFromBattle`): Die Schiffe des Verteidigers auf dem
+  Planeten fliehen vor dem Kampf, wenn die Angreifer mindestens 5-mal so
+  stark sind (mit Admiral 3-mal). Stärke sind die Kosten der Schiffe im
+  Kampf, zivile Schiffe zählen ein Viertel, Verteidigung gar nicht.
+  Todessterne, Sonden, Solarsatelliten und Crawler bleiben; stationierte
+  fremde Flotten fliehen nicht. Die Flucht kostet das 1,5-Fache des
+  Deuteriums für einen Flug zur Nachbarposition; fehlt es, bleibt die
+  Flotte. Nur innerhalb der Noob-Schutz-Grenze (Punkte unter
+  `noobprotectiontime`), nicht bei Inaktiven; in den Einstellungen
+  abschaltbar (etwa für Mondschüsse). Der Kampfbericht nennt die
+  geflohenen Schiffe. Die Bedingung „nicht bei ehrenhaften Kämpfen“ kommt
+  mit dem Ehrensystem. Tests mit echten Angriffen auf MariaDB.
 
 Offen:
 

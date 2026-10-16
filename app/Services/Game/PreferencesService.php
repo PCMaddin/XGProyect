@@ -91,6 +91,7 @@ class PreferencesService
         return [
             'preference_delete_mode' => $request->input('preference_delete_mode') === 'on' ? time() : null,
             'preference_spy_probes' => $this->boundedInteger($request, 'preference_spy_probes', 1, 1, 99),
+            'preference_fleet_escape' => $request->input('preference_fleet_escape') === 'on' ? 1 : 0,
             'preference_planet_sort' => $this->boundedInteger(
                 $request,
                 'preference_planet_sort',

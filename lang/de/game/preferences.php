@@ -49,4 +49,5 @@ return [
     'pr_error_nick_in_use' => 'Der Spielername ist bereits vergeben!',
     'pr_error_email_in_use' => 'Die E-Mail-Adresse wird bereits verwendet!',
     'pr_delete_mode_active' => 'Dieses Konto wird am %s gelöscht',
+    'pr_fleet_escape' => 'Flotte flieht vor übermächtigen Angreifern (5:1, mit Admiral 3:1)',
 ];

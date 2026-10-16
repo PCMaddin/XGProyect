@@ -85,6 +85,12 @@
                 </th>
             </tr>
             <tr {!! $hide_vacation_invalid !!}>
+                <th>{{ __('game/preferences.pr_fleet_escape') }}:</th>
+                <th>
+                    <input type="checkbox" name="preference_fleet_escape"{{ $preference_fleet_escape ? ' checked' : '' }}/>
+                </th>
+            </tr>
+            <tr {!! $hide_vacation_invalid !!}>
                 <th colspan="2">
                     <input type="submit" name="apply_settings" value="{{ __('game/preferences.pr_use_settings') }}"/>
                 </th>

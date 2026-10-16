@@ -30,6 +30,7 @@ use App\Libraries\BattleEngine\Models\PlayerGroup;
  */
 abstract class CombatMission extends Missions
 {
+    use FleesFromBattle;
     use BuildsCombatForces;
     use SendsCombatReports;
     /** the defender did not log in for a week: discoverers plunder more */
@@ -102,7 +103,7 @@ abstract class CombatMission extends Missions
      */
     protected function reportAppendix(array $fleetRow, BattleReport $report): string
     {
-        return $this->reaperLine;
+        return implode('<br>', array_filter([$this->escapeLine, $this->reaperLine], fn (string $line): bool => $line !== ''));
     }
 
     /**
@@ -166,7 +167,8 @@ abstract class CombatMission extends Missions
             ]),
             $targetUser
         );
-        $this->addPlanetForces($defenders, $targetUser, $targetPlanet, $fleetRow);
+        $fled = $this->fleeFrom($attackers, $defenders, $targetUser, $targetPlanet);
+        $this->addPlanetForces($defenders, $targetUser, $targetPlanet, $fleetRow, $fled);
 
         $battle = new Battle($attackers, $defenders);
         $battle->startBattle();

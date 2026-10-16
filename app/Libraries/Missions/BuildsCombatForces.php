@@ -123,8 +123,9 @@ trait BuildsCombatForces
      * @param array<string, mixed> $targetUser
      * @param array<string, mixed> $targetPlanet
      * @param array<string, mixed> $fleetRow
+     * @param array<int, int>      $fled     the planet's ships that fled from the battle
      */
-    private function addPlanetForces(PlayerGroup $defenders, array $targetUser, array $targetPlanet, array $fleetRow): void
+    private function addPlanetForces(PlayerGroup $defenders, array $targetUser, array $targetPlanet, array $fleetRow, array $fled = []): void
     {
         $homeFleet = new HomeFleet(self::PLANET_FORCES);
 
@@ -132,7 +133,7 @@ trait BuildsCombatForces
             for ($id = $fromId; $id <= $toId; $id++) {
                 $column = $this->resource[$id] ?? null;
 
-                if ($column !== null && isset($targetPlanet[$column]) && $targetPlanet[$column] != 0) {
+                if ($column !== null && isset($targetPlanet[$column]) && $targetPlanet[$column] != 0 && !isset($fled[$id])) {
                     $homeFleet->addShipType($this->getShipType($id, self::num($targetPlanet[$column])));
                 }
             }

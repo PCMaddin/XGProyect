@@ -277,6 +277,7 @@ class Missions
                         r.*,
                         pr.*,
                         pref.preference_vacation_mode,
+                        pref.preference_fleet_escape,
                         a.alliance_class
                     FROM `' . USERS . '` AS u
                     INNER JOIN `' . RESEARCH . '` AS r ON r.research_user_id = u.id
