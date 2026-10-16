@@ -194,7 +194,7 @@ class FederationController extends BaseController
             $this->addAcsMember($userId, $fleetId);
 
             $this->message = $this->formatService->customColor(
-                (string) __('game/fleet.fl_player') . ' ' . $username . ' ' . __('game/fleet.fl_add_to_attack'),
+                (string) __('game/fleet.fl_player') . ' ' . e($username) . ' ' . __('game/fleet.fl_add_to_attack'),
                 'lime'
             );
 
@@ -202,7 +202,7 @@ class FederationController extends BaseController
         }
 
         $this->message = $this->formatService->colorRed(
-            (string) __('game/fleet.fl_player') . ' ' . $username . ' ' . __('game/fleet.fl_dont_exist')
+            (string) __('game/fleet.fl_player') . ' ' . e($username) . ' ' . __('game/fleet.fl_dont_exist')
         );
     }
 

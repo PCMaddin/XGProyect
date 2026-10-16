@@ -10,7 +10,7 @@ function t(){
 	h  = 0;
 	if ( s < 0 ) {
 		brp.innerHTML = '{{ __('game/research.re_ready') }}<br><a href=game.php?page=research&cp={{ $tech_home }}>{{ __('game/research.re_continue') }}</a>';
-		window.setTimeout('document.location.href="game.php?page=research&cp={tech_home}";', 1000);
+		window.setTimeout('document.location.href="game.php?page=research&cp={{ $tech_home }}";', 1000);
 	} else {
 		if ( s > 59 ) { m = Math.floor( s / 60 ); s = s - m * 60; }
 		if ( m > 59 ) { h = Math.floor( m / 60 ); m = m - h * 60; }

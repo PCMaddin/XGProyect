@@ -25,7 +25,7 @@
     </tr>
 </table>
 <form action="" method="POST" role="form">
-    <input type="hidden" name="t" value="{t}">
+    <input type="hidden" name="t" value="{{ $t }}">
     <table role="presentation" width="519">
         <tr>
             <td role="heading" aria-level="2" class="c" colspan="3">{{ __('game/alliance.al_texts') }}</td>
@@ -46,7 +46,7 @@
         </tr>
         <tr>
             <th colspan="3">
-                <input type="hidden" name="t" value="{t}"><input type="reset" value="{{ __('game/alliance.al_circular_reset') }}">
+                <input type="hidden" name="t" value="{{ $t }}"><input type="reset" value="{{ __('game/alliance.al_circular_reset') }}">
                 <input type="submit" value="{{ __('game/alliance.al_save') }}">
             </th>
         </tr>

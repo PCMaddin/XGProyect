@@ -487,7 +487,13 @@ class StatisticsLibrary
                         ON a.`alliance_id` = u.`ally_id` AND u.`authlevel` <= ' . app(SettingsService::class)->getInt('stat_admin_level') . '
                         INNER JOIN ' . USERS_STATISTICS . ' AS us ON us.`user_statistic_user_id` = u.`id`
                         INNER JOIN ' . ALLIANCE_STATISTICS . ' AS ass ON ass.`alliance_statistic_alliance_id` = a.`alliance_id`
-                    GROUP BY alliance_id'
+                    GROUP BY a.`alliance_id`,
+                        ass.alliance_statistic_technology_rank,
+                        ass.alliance_statistic_buildings_rank,
+                        ass.alliance_statistic_defenses_rank,
+                        ass.alliance_statistic_ships_rank,
+                        ass.alliance_statistic_military_rank,
+                        ass.alliance_statistic_total_rank'
                 )
             )
         );

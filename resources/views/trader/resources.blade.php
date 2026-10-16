@@ -86,22 +86,22 @@
                                 </tr>
                                 <tr>
                                     <th>
-                                        <a title="Sell your Metal and get Crystal or Deuterium. Costs: 3.500 Dark Matter">Metal</a>
+                                        <a title="{{ sprintf(__('game/trader.tr_price'), $exchangePrice) }}">{{ __('game/global.metal') }}</a>
                                         <input type="radio" name="sell" value="metal">
                                     </th>
                                     <th>
-                                        <a title="Sell your Crystal and get Metal or Deuterium. Costs: 3.500 Dark Matter">Crystal</a>
+                                        <a title="{{ sprintf(__('game/trader.tr_price'), $exchangePrice) }}">{{ __('game/global.crystal') }}</a>
                                         <input type="radio" name="sell" value="crystal">
                                     </th>
                                     <th>
-                                        <a title="Sell your Deuterium and get Metal or Crystal. Costs: 3.500 Dark Matter">Deuterium</a>
+                                        <a title="{{ sprintf(__('game/trader.tr_price'), $exchangePrice) }}">{{ __('game/global.deuterium') }}</a>
                                         <input type="radio" name="sell" value="deuterium">
                                     </th>
                                 </tr>
                             </table>
                         </th>
                         <th width="50%">
-                            {{ __('game/trader.tr_price') }}<br>
+                            {{ sprintf(__('game/trader.tr_price'), $exchangePrice) }}<br>
                             <input type="button" value="{{ __('game/trader.tr_call_button') }}">
                         </th>
                     </tr>

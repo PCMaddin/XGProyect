@@ -24,7 +24,9 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
-        //
+        // a message page, not an error; it filled the log and the admin's
+        // error list
+        HaltWithView::class,
     ];
 
     /**

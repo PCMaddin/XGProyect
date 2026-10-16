@@ -57,6 +57,15 @@ class MissionControlLib
     }
 
     /**
+     * One row per fleet, with the names of its start and end planet and the
+     * owner's hyperspace technology.
+     *
+     * The planet names come from subqueries: several planets can share the
+     * coordinates (a destroyed one and a new colony), and a join would return
+     * the fleet once per planet. The former GROUP BY against that is rejected
+     * by MariaDB in strict mode (ONLY_FULL_GROUP_BY, Laravel's default), so no
+     * fleet was processed there and every game page failed.
+     *
      * @return array<int, array<string, mixed>>
      */
     private function fetchFleets(string $whereClause): array
@@ -65,24 +74,13 @@ class MissionControlLib
             $this->prepareSql(
                 'SELECT
                     f.*,
-                    sp.`planet_name` AS `planet_start_name`,
-                    ep.`planet_name` AS `planet_end_name`,
+                    (' . $this->planetName('f.`fleet_start_galaxy`', 'f.`fleet_start_system`', 'f.`fleet_start_planet`', 'f.`fleet_start_type`') . ') AS `planet_start_name`,
+                    (' . $this->planetName('f.`fleet_end_galaxy`', 'f.`fleet_end_system`', 'f.`fleet_end_planet`', 'f.`fleet_end_type`') . ') AS `planet_end_name`,
                     sr.`research_hyperspace_technology`
                 FROM `' . FLEETS . '` f
-                LEFT JOIN `' . PLANETS . '` sp
-                    ON (sp.`planet_galaxy` = f.`fleet_start_galaxy` AND
-                        sp.`planet_system` = f.`fleet_start_system` AND
-                        sp.`planet_planet` = f.`fleet_start_planet` AND
-                        sp.`planet_type` = f.`fleet_start_type`)
                 LEFT JOIN `' . RESEARCH . '` sr
                     ON sr.`research_user_id` = f.`fleet_owner`
-                LEFT JOIN `' . PLANETS . '` ep
-                    ON (ep.`planet_galaxy` = f.`fleet_end_galaxy` AND
-                        ep.`planet_system` = f.`fleet_end_system` AND
-                        ep.`planet_planet` = f.`fleet_end_planet` AND
-                        ep.`planet_type` = f.`fleet_end_type`)
                 WHERE ' . $whereClause . '
-                GROUP BY f.`fleet_id`, sp.`planet_name`, ep.`planet_name`
                 ORDER BY f.`fleet_id` ASC'
             ),
             [time()]
@@ -92,6 +90,21 @@ class MissionControlLib
             static fn (object $row): array => (array) $row,
             $rows
         );
+    }
+
+    /**
+     * The name of the planet at the given coordinates, an intact one first.
+     */
+    private function planetName(string $galaxy, string $system, string $planet, string $type): string
+    {
+        return 'SELECT p.`planet_name`
+            FROM `' . PLANETS . '` p
+            WHERE p.`planet_galaxy` = ' . $galaxy . '
+                AND p.`planet_system` = ' . $system . '
+                AND p.`planet_planet` = ' . $planet . '
+                AND p.`planet_type` = ' . $type . '
+            ORDER BY p.`planet_destroyed` ASC, p.`planet_id` DESC
+            LIMIT 1';
     }
 
     /**

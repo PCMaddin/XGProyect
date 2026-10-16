@@ -27,6 +27,5 @@ storage/cache/*.html
 storage/logs/*.txt
 .phpdoc/*
 /docs/*
-vendor
 config/xgp-db-config.php
 .php-cs-fixer.cache

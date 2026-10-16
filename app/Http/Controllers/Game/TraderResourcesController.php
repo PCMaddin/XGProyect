@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
 use App\Services\FormatService;
+use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,6 +74,7 @@ class TraderResourcesController extends BaseController
             [
                 'currentMode' => view('trader.resources', [
                     'resourcesList' => $this->buildResourcesSection(),
+                    'exchangePrice' => $this->formatService->prettyNumber(app(SettingsService::class)->getFloat('merchant_price')),
                 ])->render(),
             ]
         ));
