@@ -109,4 +109,6 @@ return [
     'fl_save_all' => 'Ok',
     'fl_class_speed_expedition' => 'Clase de alianza investigador: +10% de velocidad al destino de la expedición',
     'fl_class_speed_ally' => 'Clase de alianza guerrero: +10% de velocidad hacia miembros de la alianza',
+    'fl_loot_priority' => 'Prioridad de saqueo',
+    'fl_loot_priority_default' => 'Reparto habitual',
 ];

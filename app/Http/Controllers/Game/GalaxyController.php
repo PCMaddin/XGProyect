@@ -142,7 +142,7 @@ class GalaxyController extends BaseController
             'maxfleetcount' => $this->currentFleets(),
             'fleetmax' => $this->fleetsService->getMaxFleets(
                 $this->userInt('research_computer_technology'),
-                $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
+                $this->officerService->bonuses($this->user, time()),
                 app(PlayerClassService::class)->currentBonuses()
             ),
             'recyclers' => $this->formatService->prettyNumber($this->planetInt('ship_recycler')),
@@ -221,7 +221,7 @@ class GalaxyController extends BaseController
         $deuterium = $this->planetInt('planet_deuterium');
         $freeSlots = $this->fleetsService->getMaxFleets(
             $this->userInt('research_computer_technology'),
-            $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), $now),
+            $this->officerService->bonuses($this->user, $now),
             app(PlayerClassService::class)->currentBonuses()
         ) - $this->currentFleets();
         $sent = 0;
@@ -748,7 +748,7 @@ class GalaxyController extends BaseController
 
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->userInt('research_computer_technology'),
-            $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
+            $this->officerService->bonuses($this->user, time()),
             app(PlayerClassService::class)->currentBonuses()
         );
 

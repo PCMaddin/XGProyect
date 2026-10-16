@@ -272,16 +272,15 @@ class TechnologyTableService
      */
     private function productionInputs(string $resourceKey): array
     {
-        $geologist = $this->officerService->isOfficerActive(self::asInt($this->user['premium_officier_geologist'] ?? 0), time());
-        $engineer = $this->officerService->isOfficerActive(self::asInt($this->user['premium_officier_engineer'] ?? 0), time());
+        $officers = $this->officerService->bonuses($this->user, time());
 
         return [
             'levelFactor' => self::asInt($this->planet['planet_' . $resourceKey . '_percent'] ?? 0),
             'temperature' => self::asInt($this->planet['planet_temp_max'] ?? 0),
             'energyTech' => self::asInt($this->user['research_energy_technology'] ?? 0),
             'multiplier' => $this->settings->getInt('resource_multiplier'),
-            'geologistBoost' => 1 + (1 * ($geologist ? GEOLOGUE : 0)),
-            'engineerBoost' => 1 + (1 * ($engineer ? ENGINEER_ENERGY : 0)),
+            'geologistBoost' => 1 + $officers->mineBonus(),
+            'engineerBoost' => 1 + $officers->energyBonus(),
         ];
     }
 

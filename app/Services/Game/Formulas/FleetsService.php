@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Game\Formulas;
 
+use App\Support\OfficerBonuses;
 use App\Support\ClassBonuses;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
@@ -145,14 +146,23 @@ class FleetsService
         return round($consumption);
     }
 
-    public function getMaxFleets(int $computerTech, bool $admiralActive, ClassBonuses $bonuses = new ClassBonuses()): int
+    /**
+     * The fleet slots: computer technology, the admiral (or all officers
+     * with the commanding staff) and the player class.
+     */
+    public function getMaxFleets(int $computerTech, bool | OfficerBonuses $officers, ClassBonuses $bonuses = new ClassBonuses()): int
     {
-        return 1 + $computerTech + ($admiralActive ? AMIRAL : 0) + $bonuses->extraFleetSlots();
+        $officerSlots = $officers instanceof OfficerBonuses ? $officers->extraFleetSlots() : ($officers ? AMIRAL : 0);
+
+        return 1 + $computerTech + $officerSlots + $bonuses->extraFleetSlots();
     }
 
-    public function getMaxExpeditions(int $astrophysicsTech, ClassBonuses $bonuses = new ClassBonuses()): int
+    /**
+     * The expedition slots: astrophysics, the admiral (+1) and the class.
+     */
+    public function getMaxExpeditions(int $astrophysicsTech, ClassBonuses $bonuses = new ClassBonuses(), OfficerBonuses $officers = new OfficerBonuses()): int
     {
-        return (int) floor(sqrt($astrophysicsTech)) + $bonuses->extraExpeditions();
+        return (int) floor(sqrt($astrophysicsTech)) + $bonuses->extraExpeditions() + $officers->extraExpeditions();
     }
 
     public function getMaxColonies(int $astrophysicsTech): int

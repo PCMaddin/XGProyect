@@ -109,4 +109,6 @@ return [
     'fl_save_all' => 'Ok',
     'fl_class_speed_expedition' => 'Researcher alliance class: +10% speed to the expedition destination',
     'fl_class_speed_ally' => 'Warrior alliance class: +10% speed to alliance members',
+    'fl_loot_priority' => 'Plunder priority',
+    'fl_loot_priority_default' => 'Usual split',
 ];

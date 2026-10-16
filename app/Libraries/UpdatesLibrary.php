@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Support\OfficerBonuses;
 use App\Services\Game\WreckFieldService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\ClassProductionService;
@@ -341,14 +342,10 @@ class UpdatesLibrary
             $BuildEnergy = $current_user['research_energy_technology'];
 
             // BOOST
-            $geologe_boost = 1 + (1 * ($officerService->isOfficerActive(
-                self::numInt($current_user['premium_officier_geologist']),
-                time()
-            ) ? GEOLOGUE : 0));
-            $engineer_boost = 1 + (1 * ($officerService->isOfficerActive(
-                self::numInt($current_user['premium_officier_engineer']),
-                time()
-            ) ? ENGINEER_ENERGY : 0));
+            // geologist, engineer and the commanding staff
+            $officers = OfficerBonuses::fromRow($current_user, time());
+            $geologe_boost = 1 + $officers->mineBonus();
+            $engineer_boost = 1 + $officers->energyBonus();
 
             // PRODUCTION FORMULAS
             $level = (int) self::num($BuildLevel);

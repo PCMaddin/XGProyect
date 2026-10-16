@@ -114,8 +114,9 @@ class ResourcesettingsController extends BaseController
 
         $buildTemp = $this->planetInt('planet_temp_max');
         $energyTech = $this->userInt('research_energy_technology');
-        $geologeBoost = 1.0 + ($this->officerService->isOfficerActive($this->userInt('premium_officier_geologist'), time()) ? GEOLOGUE : 0);
-        $engineerBoost = 1.0 + ($this->officerService->isOfficerActive($this->userInt('premium_officier_engineer'), time()) ? ENGINEER_ENERGY : 0);
+        $officers = $this->officerService->bonuses(Users::getInstance()->getUserData(), time());
+        $geologeBoost = 1.0 + $officers->mineBonus();
+        $engineerBoost = 1.0 + $officers->energyBonus();
         $plasmaLevel = $this->userInt('research_plasma_technology');
 
         $production = $this->accumulateProduction($multiplier, $buildTemp, $energyTech, $geologeBoost, $engineerBoost, $plasmaLevel, $postPercent);

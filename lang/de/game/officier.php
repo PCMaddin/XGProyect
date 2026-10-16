@@ -51,4 +51,6 @@ return [
             'benefits' => '+2 Spionagestufen, 25% weniger Forschungszeit',
         ],
     ],
+    'of_commanding_staff' => 'Kommandostab',
+    'of_commanding_staff_benefits' => 'Sind alle fünf Offiziere gleichzeitig aktiv: +1 Flottenslot, +2 % Energieproduktion, +2 % Minenproduktion, +1 Spionagestufe.',
 ];

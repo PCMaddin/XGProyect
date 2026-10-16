@@ -55,6 +55,9 @@ class Player extends IterableUtil
     private ?int $system = null;
     private ?int $planet = null;
 
+    /** share of the destroyed defenses that stays lost (the engineer halves it) */
+    private float $defenseLossFactor = 1.0;
+
     /**
      * @param Fleet[] $fleets
      */
@@ -72,6 +75,16 @@ class Player extends IterableUtil
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setDefenseLossFactor(float $factor): void
+    {
+        $this->defenseLossFactor = $factor;
+    }
+
+    public function getDefenseLossFactor(): float
+    {
+        return $this->defenseLossFactor;
     }
 
     public function setName(string $name): void
@@ -248,7 +261,7 @@ class Player extends IterableUtil
     public function cloneMe(): self
     {
         $fleets = array_values($this->array);
-        return new Player(
+        $clone = new Player(
             $this->id,
             $fleets,
             $this->weaponsTech,
@@ -259,5 +272,8 @@ class Player extends IterableUtil
             $this->system,
             $this->planet
         );
+        $clone->defenseLossFactor = $this->defenseLossFactor;
+
+        return $clone;
     }
 }

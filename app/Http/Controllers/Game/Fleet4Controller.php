@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Libraries\Missions\CombatMission;
 use App\Services\Game\SystemEspionageService;
 use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
@@ -94,6 +95,9 @@ class Fleet4Controller extends BaseController
     /** @var array<string, mixed> */
     private array $targetData = [];
 
+    /** the plunder priority an admiral chose */
+    private string $lootPriority = '';
+
     private bool $ownPlanet = false;
 
     private bool $occupiedPlanet = false;
@@ -169,6 +173,7 @@ class Fleet4Controller extends BaseController
             'expeditiontime' => $this->rangeInt($request, 'expeditiontime', $expTime <= 0 ? 0 : 1, $expTime),
             'holdingtime' => $this->rangeInt($request, 'holdingtime', 0, 32),
         ];
+        $this->lootPriority = is_string($request->input('loot_priority')) ? $request->input('loot_priority') : '';
     }
 
     private function getTarget(): void
@@ -353,6 +358,17 @@ class Fleet4Controller extends BaseController
 
         $this->fleetData['fleet_mission'] = $mission;
 
+        // the admiral sets the plunder priority of an attack
+        $priority = $this->lootPriority;
+
+        if (
+            in_array($mission, [Missions::ATTACK, Missions::ACS], true) &&
+            CombatMission::isLootPriority($priority) &&
+            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time())->admiral
+        ) {
+            $this->fleetData['fleet_loot_priority'] = $priority;
+        }
+
         return true;
     }
 
@@ -451,7 +467,8 @@ class Fleet4Controller extends BaseController
     {
         $maxExpeditions = $this->fleetsService->getMaxExpeditions(
             $this->research->getCurrentResearch()->research_astrophysics,
-            app(PlayerClassService::class)->currentBonuses()
+            app(PlayerClassService::class)->currentBonuses(),
+            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time())
         );
 
         if ($maxExpeditions <= 0) {
@@ -493,7 +510,7 @@ class Fleet4Controller extends BaseController
     {
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time()),
             app(PlayerClassService::class)->currentBonuses()
         );
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Game;
 
+use App\Support\OfficerBonuses;
 use App\Libraries\Functions;
 use App\Libraries\Template;
 use App\Services\FormatService;
@@ -104,7 +105,7 @@ class FleetEventsService
         $officer = $this->officer;
         $espionage = $officer->getMaxEspionage(
             self::asInt($currentUser['research_espionage_technology'] ?? 0),
-            $officer->isOfficerActive(self::asInt($currentUser['premium_officier_technocrat'] ?? 0), time())
+            OfficerBonuses::fromRow($currentUser, time())
         );
 
         $body = '<table width=200>' . $this->popupBody($ships, $objects, $isOwn, $espionage, $amount) . '</table>';

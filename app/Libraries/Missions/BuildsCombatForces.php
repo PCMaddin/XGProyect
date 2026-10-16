@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\OfficerBonuses;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Support\ClassBonuses;
@@ -25,6 +26,9 @@ trait BuildsCombatForces
 {
     /** @var array<int, int> hyperspace technology level by player id */
     private array $hyperspaceTechnology = [];
+
+    /** @var array<int, string> the plunder priority an admiral set, by fleet */
+    private array $lootPriorities = [];
 
     /** @var array<int, ClassBonuses> the class bonuses of each player in the battle */
     private array $playerClasses = [];
@@ -136,17 +140,20 @@ trait BuildsCombatForces
 
         $targetUserId = self::int($targetUser['id']);
         $defender = $defenders->getPlayer($targetUserId);
+        $defenseLossFactor = OfficerBonuses::fromRow($targetUser, time())->defenseLossFactor();
 
         // the planet's forces stay a fleet of their own (id 0), so they can be
         // told apart from the defender's stationed fleets after the battle
         // (OPBE's addDefense() merged them into the defender's first fleet)
         if ($defender !== false) {
             $defender->addFleet($homeFleet);
+            $defender->setDefenseLossFactor($defenseLossFactor);
 
             return;
         }
 
         $player = new Player($targetUserId, [$homeFleet]);
+        $player->setDefenseLossFactor($defenseLossFactor);
         $this->equipPlayer($player, $targetUser, $fleetRow, 'fleet_end_');
         $defenders->addPlayer($player);
     }
@@ -157,6 +164,7 @@ trait BuildsCombatForces
     private function buildFleet(array $fleetRow): Fleet
     {
         $fleet = new Fleet(self::int($fleetRow['fleet_id']));
+        $this->lootPriorities[self::int($fleetRow['fleet_id'])] = self::str($fleetRow['fleet_loot_priority'] ?? '');
 
         foreach (FleetShips::decode(self::str($fleetRow['fleet_array'])) as $id => $count) {
             if ($id != 0 && $count != 0) {

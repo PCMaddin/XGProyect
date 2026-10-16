@@ -109,4 +109,6 @@ return [
     'fl_save_all' => 'Ok',
     'fl_class_speed_expedition' => 'Allianzklasse Forscher: +10 % Tempo zum Expeditionsziel',
     'fl_class_speed_ally' => 'Allianzklasse Krieger: +10 % Tempo zu Allianzmitgliedern',
+    'fl_loot_priority' => 'Beutepriorität',
+    'fl_loot_priority_default' => 'Normale Aufteilung',
 ];

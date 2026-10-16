@@ -51,4 +51,6 @@ return [
             'benefits' => '+2 espionage levels, 25% less research time',
         ],
     ],
+    'of_commanding_staff' => 'Commanding staff',
+    'of_commanding_staff_benefits' => 'With all five officers active at once: +1 fleet slot, +2% energy production, +2% mine production, +1 espionage level.',
 ];

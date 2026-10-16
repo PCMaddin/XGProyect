@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\OfficerBonuses;
 use App\Enums\Module;
 use App\Services\Game\PlayerClassService;
 use App\Services\FormatService;
@@ -88,6 +89,7 @@ class Fleet3Controller extends BaseController
                 'title' => $title,
                 'mission_selector' => $missionSelector,
                 'stay_block' => $stayBlock,
+                'loot_priority' => $this->lootPriorityAllowed(),
             ],
             $inputsData
         ));
@@ -355,6 +357,15 @@ class Fleet3Controller extends BaseController
             'speed' => $this->asInt($data['speed']),
             'speedfactor' => Functions::fleetSpeedFactor(),
         ];
+    }
+
+    /**
+     * An admiral sets the plunder priority of attacks.
+     */
+    private function lootPriorityAllowed(): bool
+    {
+        return (in_array(Missions::ATTACK, $this->allowedMissions, true) || in_array(Missions::ACS, $this->allowedMissions, true)) &&
+            OfficerBonuses::fromRow($this->user, time())->admiral;
     }
 
     /**

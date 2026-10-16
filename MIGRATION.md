@@ -1162,6 +1162,20 @@ Nachgezogen:
   gebaut. Auch der Komplett-Reset ließ sie (und jetzt Gegenstände und
   Booster) stehen, weil dort die Fremdschlüssel abgeschaltet sind. Tests mit
   Gegenprobe; der Komplett-Reset hat jetzt einen MariaDB-Test.
+- 🔴→✅ **Offiziere wirkten nicht wie beschrieben** (gefixt, owiki
+  „Kommandostab“; `App\Support\OfficerBonuses`):
+  - **Admiral**: +1 Expeditionsslot fehlte (nur die Flottenslots wirkten).
+    Neu: die **Beutepriorität** – bei Angriffen wählt man in Flotte 3 die
+    Reihenfolge der Rohstoffe (z. B. Deuterium > Kristall > Metall), jeder
+    bis zur Hälfte des Vorrats (`fleets.fleet_loot_priority`).
+  - **Ingenieur**: „halbiert die Verluste der Verteidigung“ wirkte nicht;
+    jetzt bleiben von zerstörter Verteidigung 15 % statt 30 % verloren
+    (85 % statt 70 % werden wieder aufgebaut).
+  - **Kommandostab** (alle fünf Offiziere): +1 Flottenslot, +2 % Energie,
+    +2 % Minen, +1 Spionagestufe; auf der Offiziersseite beschrieben.
+  - Die „verbesserte Fluchtrate“ des Admirals kommt mit der Flottenflucht.
+  - Tests für alle Boni, den Ingenieur in einem Kampf und die Priorität;
+    im Browser gesendet.
 
 Offen:
 

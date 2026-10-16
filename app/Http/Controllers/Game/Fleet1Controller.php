@@ -95,13 +95,14 @@ class Fleet1Controller extends BaseController
                 'fleets' => $this->fleets->getFleetsCount(),
                 'max_fleets' => $this->fleetsService->getMaxFleets(
                     $this->research->getCurrentResearch()->research_computer_technology,
-                    $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+                    $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time()),
                     app(PlayerClassService::class)->currentBonuses()
                 ),
                 'expeditions' => $this->fleets->getExpeditionsCount(),
                 'max_expeditions' => $this->fleetsService->getMaxExpeditions(
                     $this->research->getCurrentResearch()->research_astrophysics,
-                    app(PlayerClassService::class)->currentBonuses()
+                    app(PlayerClassService::class)->currentBonuses(),
+                    $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time())
                 ),
                 'no_slot' => $this->buildNoSlotBlock(),
                 'list_of_ships' => $listOfShips,
@@ -234,7 +235,7 @@ class Fleet1Controller extends BaseController
     {
         return $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
+            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time()),
             app(PlayerClassService::class)->currentBonuses()
         ) > $this->fleets->getFleetsCount();
     }

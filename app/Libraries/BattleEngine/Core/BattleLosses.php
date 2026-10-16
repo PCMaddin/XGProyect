@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\BattleEngine\Core;
 
+use App\Libraries\BattleEngine\Models\Defense;
 use Exception;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
@@ -128,7 +129,9 @@ final class BattleLosses
         foreach ($lostShips->getIterator() as $idPlayer => $player) {
             foreach ($player->getIterator() as $idFleet => $fleet) {
                 foreach ($fleet->getIterator() as $idShipType => $shipType) {
-                    $lostShips->decrement($idPlayer, $idFleet, $idShipType, (int) round($shipType->getCount() * (1 - $shipType->getRepairProb())));
+                    // the engineer halves the losses of defenses
+                    $loss = (1 - $shipType->getRepairProb()) * ($shipType instanceof Defense ? $player->getDefenseLossFactor() : 1.0);
+                    $lostShips->decrement($idPlayer, $idFleet, $idShipType, (int) round($shipType->getCount() * $loss));
                 }
             }
         }

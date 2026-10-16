@@ -79,5 +79,11 @@
         <td colspan="3" class="c" style='height:4px;'></td>
     </tr>
     @endforeach
+    <tr>
+        <td colspan="3" class="c">{{ __('game/officier.of_commanding_staff') }}</td>
+    </tr>
+    <tr>
+        <th colspan="3">{{ __('game/officier.of_commanding_staff_benefits') }}</th>
+    </tr>
 </table>
 @endsection

@@ -503,7 +503,7 @@ abstract class CombatMission extends Missions
                     }
 
                     $ships = $returning;
-                    $fleetSteal = $this->fleetLoot($ships, $capacity, $targetPlanet, (int) $playerId);
+                    $fleetSteal = $this->fleetLoot($ships, $capacity, $targetPlanet, (int) $playerId, (int) $fleetId);
 
                     $steal['metal'] += $fleetSteal['metal'];
                     $steal['crystal'] += $fleetSteal['crystal'];
@@ -538,7 +538,7 @@ abstract class CombatMission extends Missions
      *
      * @return Loot
      */
-    private function fleetLoot(array $ships, int | float $capacity, array $targetPlanet, int $attackerId): array
+    private function fleetLoot(array $ships, int | float $capacity, array $targetPlanet, int $attackerId, int $fleetId = 0): array
     {
         $fleetCapacity = 0;
 
@@ -546,13 +546,45 @@ abstract class CombatMission extends Missions
             $fleetCapacity += $amount * self::num($this->pricelist[$shipId]['capacity']);
         }
 
-        return self::plunder(
-            $fleetCapacity,
-            self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity,
-            self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity,
-            self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity,
-            $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? new ClassBonuses())->player->inactiveLootShare() : 0.5
-        );
+        $share = $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? new ClassBonuses())->player->inactiveLootShare() : 0.5;
+        $metal = self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity;
+        $crystal = self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity;
+        $deuterium = self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity;
+        $priority = $this->lootPriorities[$fleetId] ?? '';
+
+        // an admiral's plunder priority: the resources in that order
+        if (self::isLootPriority($priority)) {
+            return self::plunderInOrder($fleetCapacity, ['metal' => $metal, 'crystal' => $crystal, 'deuterium' => $deuterium], $share, $priority);
+        }
+
+        return self::plunder($fleetCapacity, $metal, $crystal, $deuterium, $share);
+    }
+
+    public static function isLootPriority(string $priority): bool
+    {
+        return in_array($priority, ['mcd', 'mdc', 'cmd', 'cdm', 'dmc', 'dcm'], true);
+    }
+
+    /**
+     * Load the resources one after the other in the given order ('mcd' =
+     * metal, crystal, deuterium), each up to the share that can be taken.
+     *
+     * @param array{metal: int|float, crystal: int|float, deuterium: int|float} $available
+     *
+     * @return Loot
+     */
+    protected static function plunderInOrder(int | float $capacity, array $available, float $share, string $order): array
+    {
+        $names = ['m' => 'metal', 'c' => 'crystal', 'd' => 'deuterium'];
+        $loot = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
+
+        foreach (str_split($order) as $letter) {
+            $resource = $names[$letter];
+            $loot[$resource] = min($capacity, $available[$resource] * $share);
+            $capacity -= $loot[$resource];
+        }
+
+        return $loot;
     }
 
     /**
