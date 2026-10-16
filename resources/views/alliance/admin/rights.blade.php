@@ -5,6 +5,7 @@
 
 <table width="519"><tr><td class="c" colspan="11">{{ __('game/alliance.al_configure_ranks') }}</td></tr>
     <form action="game.php?page=alliance&mode=admin&edit=rights" method="POST" role="form">
+        @csrf
         <tr>
             <th colspan="2"><span style="color: #6f9fc8;">{{ __('game/alliance.al_rank_name_title') }}</span></th>
             <th style="color: #6f9fc8;" colspan="2">{{ __('game/alliance.al_rank_applications_title') }}</th>
@@ -51,6 +52,7 @@
 </table>
 <br>
 <form action="game.php?page=alliance&mode=admin&edit=rights" method="POST" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_create_new_rank') }}</td>
@@ -65,6 +67,7 @@
     </table>
 </form>
 <form action="game.php?page=alliance&mode=admin&edit=rights" method="POST" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_legend') }}</td>

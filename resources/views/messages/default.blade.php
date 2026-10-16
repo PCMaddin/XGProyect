@@ -8,6 +8,7 @@
     }
 </script>
 <form action="game.php?page=messages" method="post" role="form">
+    @csrf
     <table width="519">
         <table>
             <tr>

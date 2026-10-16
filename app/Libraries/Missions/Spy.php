@@ -240,7 +240,7 @@ class Spy extends Missions
                     $text .= '<tr>';
                 }
 
-                $text .= '<td align=left>' . self::str(__('game/constructions.' . $name)) . '</td><td align=right>' . $this->formatService->prettyNumber(self::int($targetData[$name])) . '</td>';
+                $text .= '<td align=left>' . self::str(__(self::nameKey($name))) . '</td><td align=right>' . $this->formatService->prettyNumber(self::int($targetData[$name])) . '</td>';
 
                 if ($row == 0) {
                     $text .= '<td>&nbsp;</td>';
@@ -315,5 +315,22 @@ class Spy extends Missions
             ),
             true
         );
+    }
+
+    /**
+     * The language key of an object's name: buildings, research, ships and
+     * defenses are in different files. The report looked all of them up among
+     * the buildings and showed the raw key for ships, defenses and research.
+     */
+    private static function nameKey(string $name): string
+    {
+        $file = match (true) {
+            str_starts_with($name, 'ship_') => 'ships',
+            str_starts_with($name, 'defense_') => 'defenses',
+            str_starts_with($name, 'research_') => 'technologies',
+            default => 'constructions',
+        };
+
+        return 'game/' . $file . '.' . $name;
     }
 }

@@ -230,6 +230,7 @@ class MovementController extends BaseController
         $fleetId = $this->asInt($fleet->fleet_id);
 
         $actions = '<form action="game.php?page=movement&action=return" method="post">'
+            . csrf_field()
             . '<input type="hidden" name="fleetid" value="' . $fleetId . '">'
             . '<input type="submit" name="send" value="' . __('game/fleet.fl_send_back') . '">'
             . '</form>';

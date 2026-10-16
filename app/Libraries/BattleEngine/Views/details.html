@@ -16,8 +16,8 @@ $Cdebris = number_format($debris[1],0, ',', '.');
 <br>
 <?php $repairedDefenders = $this->getDefendersRepaired(); ?>
 <?php if (!$repairedDefenders->isEmpty()) { ?>
-Repaired Defense:<br>
+<?php echo __('game/combatreport.cr_repaired_defense'); ?><br>
 <?php foreach ($repairedDefenders as $_id => $_player) {  ?>
-    <?php $st='Defender'; include('player2.html'); ?>
+    <?php $_st = __('game/combatreport.cr_defender'); include('player2.html'); ?>
 <?php } ?>
 <?php } ?>

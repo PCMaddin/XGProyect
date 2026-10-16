@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="" method="POST" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_find_alliances') }}</td>

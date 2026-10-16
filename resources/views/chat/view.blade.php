@@ -4,6 +4,7 @@
 <script src="{{ asset('assets/js/cntchar-min.js') }}" type="text/javascript"></script>
 <x-notice width="519px" :color="$error_color" :message="$error_text" />
 <form action="game.php?page=chat&playerId={{ $id }}" method="post" role="form">
+    @csrf
     <table width="519px">
         <tr>
             <td class="c" colspan="2">{{ __('game/chat.pm_send_message') }}</td>

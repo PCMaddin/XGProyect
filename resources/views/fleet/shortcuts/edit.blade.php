@@ -2,6 +2,7 @@
 
 @section('content')
 <form name="short_panel" method="POST"  action="game.php?page=shortcuts{{ $shortcut_id }}" role="form">
+    @csrf
     <table border="0" cellpadding="0" cellspacing="1" width="519px">
         <tr height="20">
             <td colspan="2" class="c">{{ __('game/fleet.fl_shortcut_add_title') }}</td>

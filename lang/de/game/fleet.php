@@ -23,7 +23,7 @@ return [
     'fl_beginning' => 'Start',
     'fl_departure' => 'Abflug',
     'fl_destiny' => 'Ziel',
-    'fl_objective' => 'Ziel',
+    'fl_objective' => 'Ankunft',
     'fl_arrival' => 'Rückkehr',
     'fl_order' => 'Befehl',
     'fl_new_mission_title' => 'Bitte wähle deine Schiffe für diesen Auftrag:',

@@ -15,6 +15,7 @@
                     <table width="519">
                         <tbody>
                             <form action="{{ $form_submit }}" method="POST" role="form">
+                                @csrf
                                 <tr>
                                     <td colspan="4" class="c">{{ __('game/messages.mg_title') }}</td>
                                 </tr>
@@ -73,6 +74,7 @@
                                 <input type="hidden" name="messages" value="1" />
                             </form>
                             <form action="game.php?page=messages" method="POST" role="form">
+                                @csrf
                                 <tr height="20"> </tr>
                                 <tr>
                                     <td colspan="4" class="c">{{ __('game/messages.mg_address_book') }}</td>
@@ -135,6 +137,7 @@
                                 </tr>
                             </form>
                             <form action="game.php?page=messages" method="POST" role="form">
+                                @csrf
                                 <tr height="20">
                                 </tr>
                                 <tr>

@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 use App\Libraries\Functions;
 
 class RegisterController extends BaseController
@@ -66,9 +67,14 @@ class RegisterController extends BaseController
             );
         }
 
-        // send welcome email
+        // send welcome email; the account exists already, so a mail server
+        // that cannot be reached must not end the registration with an error
         if ($this->settingsService->getString('reg_welcome_email')) {
-            Mail::to($newUser->email)->send(new Welcome($newUser->name));
+            try {
+                Mail::to($newUser->email)->send(new Welcome($newUser->name));
+            } catch (Throwable $e) {
+                report($e);
+            }
         }
 
         if (Auth::attempt($request->only('email', 'password'))) {

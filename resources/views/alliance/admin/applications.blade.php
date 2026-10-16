@@ -8,6 +8,7 @@
     @if($showForm)
     <script src="{{ asset('assets/js/cntchar-min.js') }}" type="text/javascript"></script>
     <form action="game.php?page=alliance&mode=admin&edit=requests&show={{ $id }}&sort=0" method="POST" role="form">
+        @csrf
         <tr>
             <th role="cell" colspan="2">{{ $request_from }}</th>
         </tr>

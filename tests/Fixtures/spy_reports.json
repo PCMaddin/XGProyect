@@ -74,11 +74,11 @@
             "count": 0
         },
         {
-            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-fleet</td></tr><tr><td align=left>game/constructions.ship_small_cargo_ship</td><td align=right>5</td><td>&nbsp;</td><td align=left>game/constructions.ship_light_fighter</td><td align=right>12</td></tr><tr><td align=left>game/constructions.ship_espionage_probe</td><td align=right>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-fleet</td></tr><tr><td align=left>Small Cargo</td><td align=right>5</td><td>&nbsp;</td><td align=left>Light Fighter</td><td align=right>12</td></tr><tr><td align=left>Espionage Probe</td><td align=right>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
             "count": 20
         },
         {
-            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-defenses</td></tr><tr><td align=left>game/constructions.defense_rocket_launcher</td><td align=right>20</td><td>&nbsp;</td><td align=left>game/constructions.defense_light_laser</td><td align=right>7</td></tr><tr><td align=left>game/constructions.defense_anti-ballistic_missile</td><td align=right>4</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-defenses</td></tr><tr><td align=left>Rocket Launcher</td><td align=right>20</td><td>&nbsp;</td><td align=left>Light Laser</td><td align=right>7</td></tr><tr><td align=left>Anti-Ballistic Missiles</td><td align=right>4</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
             "count": 31
         },
         {
@@ -86,7 +86,7 @@
             "count": 39
         },
         {
-            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-research</td></tr><tr><td align=left>game/constructions.research_espionage_technology</td><td align=right>8</td><td>&nbsp;</td><td align=left>game/constructions.research_weapons_technology</td><td align=right>10</td></tr><tr><td align=left>game/constructions.research_combustion_drive</td><td align=right>6</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-research</td></tr><tr><td align=left>Espionage Technology</td><td align=right>8</td><td>&nbsp;</td><td align=left>Weapons Technology</td><td align=right>10</td></tr><tr><td align=left>Combustion Drive</td><td align=right>6</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
             "count": 24
         }
     ]

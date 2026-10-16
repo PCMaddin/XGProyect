@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 use Illuminate\Support\Facades\Password;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -51,7 +52,13 @@ class RecoverController extends BaseController
             function (CanResetPassword $user, string $token): void {
                 $email = $user->getEmailForPasswordReset();
 
-                Mail::to($email)->send(new Recover(route('account.reset', ['token' => $token, 'email' => $email])));
+                // the answer stays the same either way (it must not tell
+                // whether an account exists); the failure is logged
+                try {
+                    Mail::to($email)->send(new Recover(route('account.reset', ['token' => $token, 'email' => $email])));
+                } catch (Throwable $e) {
+                    report($e);
+                }
             }
         );
 

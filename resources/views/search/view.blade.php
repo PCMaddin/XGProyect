@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="" method="POST" role="form">
+    @csrf
     <table width="519px">
         <tr>
             <td class="c">{{ __('game/search.sh_search_universe') }}</td>

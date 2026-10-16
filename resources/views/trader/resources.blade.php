@@ -5,6 +5,7 @@
     <tr>
         <td>
             <form name="refill-resources" method="POST" action="" role="form">
+                @csrf
                 <table width="100%">
                     <tr>
                         <td class="c" colspan="2">{{ __('game/trader.tr_merchant1_tab_title') }}</td>
@@ -53,6 +54,7 @@
                 </table>
             </form>
             <form name="trade-resources" method="POST" action="" role="form">
+                @csrf
                 <table width="100%">
                     <tr>
                         <td class="c" colspan="2">{{ __('game/trader.tr_merchant2_tab_title') }}</td>

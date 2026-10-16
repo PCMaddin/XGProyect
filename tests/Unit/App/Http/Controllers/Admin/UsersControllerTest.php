@@ -52,6 +52,24 @@ class UsersControllerTest extends DatabaseTestCase
     }
 
     /**
+     * Regression: the form sends the alliance as a string, which never equalled
+     * the stored id, so every save reset the player's alliance rank to
+     * newcomer and the join date to now.
+     */
+    public function testSavingKeepsTheAllianceRankAndJoinDate(): void
+    {
+        [$admin, $player] = $this->seedUsers();
+        DB::table('users')->where('id', $player->id)->update(['ally_id' => 5, 'ally_rank_id' => 3, 'ally_register_time' => 1000]);
+        $player = $player->fresh() ?? $player;
+
+        $this->updateInfo($admin, $player, ['ally_id' => '5', 'authlevel' => '0', 'home_planet_id' => '2', 'current_planet' => '2']);
+
+        $row = DB::table('users')->where('id', $player->id)->first(['ally_id', 'ally_rank_id', 'ally_register_time']);
+        $this->assertNotNull($row);
+        $this->assertSame([5, 3, 1000], [(int) $row->ally_id, (int) $row->ally_rank_id, (int) $row->ally_register_time]);
+    }
+
+    /**
      * @return array{0: User, 1: User}
      */
     private function seedUsers(): array

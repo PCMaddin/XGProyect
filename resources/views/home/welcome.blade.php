@@ -253,7 +253,7 @@
                             </span>
 						</label>
                         <div onclick="if($.validationEngine.submitValidation(&#39;subscribeForm&#39;)) {document.forms[&#39;subscribeForm&#39;].submit();}">
-                            <input type="submit" onclick="setServerCookie(&#39;subscribeForm&#39;);setUserNameCookie(&#39;subscribeForm&#39;);" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
+                            <input type="submit" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
                         </div>
 					</div>
 				</form>

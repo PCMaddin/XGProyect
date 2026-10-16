@@ -145,19 +145,24 @@ abstract class Functions
         exit;
     }
 
+    /**
+     * Use the server language (or $locale) for this request; English when it
+     * has no language directory.
+     *
+     * The server setting wins over a language left in the session (the
+     * installer stores the one picked there): the game, home page, admin and
+     * mails speak the language the admin set.
+     */
     public static function setLanguage(string $locale = ''): void
     {
         if ($locale === '') {
-            $stored = session('locale');
-            $locale = is_string($stored) ? $stored : app(SettingsService::class)->getString('lang');
+            $locale = app(SettingsService::class)->getString('lang');
         }
 
         // force english
         if (!in_array($locale, self::getLanguagesList(), true)) {
             $locale = 'en';
         }
-
-        session(['locale' => $locale]);
 
         App::setLocale($locale);
     }

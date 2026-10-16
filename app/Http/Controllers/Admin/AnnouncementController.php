@@ -13,11 +13,15 @@ use Illuminate\Mail\SentMessage;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 use Illuminate\View\View;
 use App\Core\Enumerators\MessagesEnumerator;
 use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ */
 class AnnouncementController extends BaseController
 {
     public function __construct(
@@ -97,10 +101,16 @@ class AnnouncementController extends BaseController
         $results = [];
 
         foreach ($players as $index => $player) {
-            $result = Mail::to($player->email, $player->name)->send(new Announcement(
-                (string) $request->string('subject'),
-                strtr((string) $request->string('text'), ['%player%' => $this->formatService->strongText($player->name)])
-            ));
+            // one address that fails must not stop the others
+            try {
+                $result = Mail::to($player->email, $player->name)->send(new Announcement(
+                    (string) $request->string('subject'),
+                    strtr((string) $request->string('text'), ['%player%' => $this->formatService->strongText($player->name)])
+                ));
+            } catch (Throwable $e) {
+                report($e);
+                $result = null;
+            }
 
             $results[] = $player->name . ': ' . ($result instanceof SentMessage
                 ? __('admin/announcement.an_email_sent')

@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="{{ $goto }}" method="post" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ $title }}</td>

@@ -8,6 +8,7 @@
     }
 </script>
 <form action="game.php?page=fleet4" method="post" onsubmit='this.submit.disabled = true;' role="form">
+    @csrf
     <input type="hidden" name="thisresource1"  value="{{ $this_metal }}" />
     <input type="hidden" name="thisresource2"  value="{{ $this_crystal }}" />
     <input type="hidden" name="thisresource3"  value="{{ $this_deuterium }}" />

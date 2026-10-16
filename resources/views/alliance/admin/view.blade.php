@@ -25,6 +25,7 @@
     </tr>
 </table>
 <form action="" method="POST" role="form">
+    @csrf
     <input type="hidden" name="t" value="{{ $t }}">
     <table role="presentation" width="519">
         <tr>
@@ -53,6 +54,7 @@
     </table>
 </form>
 <form action="" method="POST" role="form">
+    @csrf
     <table width=519>
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_manage_options') }}</td>

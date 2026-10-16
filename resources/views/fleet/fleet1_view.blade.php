@@ -17,6 +17,7 @@
     {!! $no_slot !!}
 </table>
 <form action="game.php?page=fleet2" method="POST" role="form">
+    @csrf
     <table width="519" border="0" cellpadding="0" cellspacing="1">
         <tr height="20">
             <td colspan="4" class="c">{{ __('game/fleet.fl_new_mission_title') }}</td>

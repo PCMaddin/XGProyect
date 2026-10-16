@@ -18,6 +18,7 @@
         <tr>
             <td colspan="3">
                 <form id="planetMaintenance" method="POST" action="game.php?page=planetlayer">
+                    @csrf
                     <input type="hidden" id="newPlanetName" name="newPlanetName" value="{{ $defaultName }}">
                     <input type="text" maxlength="20" size="25" id="planetName" name="planetName" value="{{ $defaultName }}">
                     <input type="submit" value="{{ __('game/planetlayer.rename') }}" name="action">
@@ -69,6 +70,7 @@
         <tr>
             <td colspan="3">
                 <form id="planetMaintenanceDelete" method="POST" action="game.php?page=planetlayer">
+                    @csrf
                     <div class="validate" id="validate" style="display:none;">
                         <p>{{ __('game/planetlayer.abandon_confirm_message', ['coords' => $planetCoords]) }}</p>
                         <input type="password" name="password" maxlength="1024" size="25"/>

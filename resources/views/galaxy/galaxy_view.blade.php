@@ -138,6 +138,7 @@
         ajax.runResponse = whenResponse;
         ajax.execute = true;
 
+        ajax.setVar("_token", "{{ csrf_token() }}");
         ajax.setVar("session", "");
         ajax.setVar("order", order);
         ajax.setVar("galaxy", galaxy);
@@ -220,6 +221,7 @@
     <tr>
         <td class="c" colspan="8">
             <form action="game.php?page=galaxy&mode=1" method="post" id="galaxy_form" style="margin:0" role="form">
+                @csrf
                 <input type="hidden" id="auto" value="dr" >
                 <table width="100%">
                     <tr>

@@ -3,6 +3,7 @@
 @section('content')
 <x-notice width="519px" :color="$color" :message="$message" />
 <form action="game.php?page=preferences" method="post" role="form">
+    @csrf
     <table role="presentation" width="519px">
         <tbody>
             <tr>

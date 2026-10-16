@@ -21,4 +21,7 @@ return [
     'cr_both_won' => 'Die Schlacht endete unentschieden',
     'cr_stealed_ressources' => 'Gesamtbeute: %s Metall, %s Kristall und %s Deuterium.',
     'cr_moonbuilt' => 'Die gewaltigen Mengen an Metall und Kristall verbinden sich und bilden einen Mond im Orbit des Planeten %s [%d:%d:%d]!',
+    'cr_attacker' => 'Angreifer',
+    'cr_defender' => 'Verteidiger',
+    'cr_repaired_defense' => 'Instand gesetzte Verteidigung:',
 ];

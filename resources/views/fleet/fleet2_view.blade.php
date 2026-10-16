@@ -18,6 +18,7 @@
     }
 </script>
 <form action="game.php?page=fleet3" method="post" onsubmit='this.submit.disabled = true;' role="form">
+    @csrf
     @foreach ($fleet_block as $item)
         <input type="hidden" name="consumption{{ $item['ship_id'] }}" value="{{ $item['consumption'] }}" />
         <input type="hidden" name="speed{{ $item['ship_id'] }}" value="{{ $item['speed'] }}" />
