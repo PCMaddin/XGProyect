@@ -140,7 +140,7 @@ class Fleet3Controller extends BaseController
                 'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                    $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
+                    $this->research->getCurrentResearch()->research_hyperspace_technology
                 ),
                 'ship' => min($requested, $available),
             ];
@@ -187,7 +187,7 @@ class Fleet3Controller extends BaseController
     private function buildStayBlock(): string
     {
         // by rule, expedition time is based on the astrophysics level, 1:1 level:hour
-        $maxExpTime = $this->research->getCurrentResearch()->getResearchAstrophysics();
+        $maxExpTime = $this->research->getCurrentResearch()->research_astrophysics;
         $hours = [0, 1, 2, 4, 8, 16, 32];
         $options = [];
         $stayType = '';

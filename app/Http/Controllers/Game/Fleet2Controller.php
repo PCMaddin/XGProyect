@@ -157,7 +157,7 @@ class Fleet2Controller extends BaseController
                 'speed' => $speed,
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                    $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
+                    $this->research->getCurrentResearch()->research_hyperspace_technology
                 ),
                 'ship' => $amount,
             ];
@@ -197,7 +197,7 @@ class Fleet2Controller extends BaseController
 
     private function buildShortcutsBlock(): string
     {
-        if (!$this->officerService->isOfficerActive($this->premium->getCurrentPremium()->getPremiumOfficierCommander(), time())) {
+        if (!$this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_commander, time())) {
             return '';
         }
 

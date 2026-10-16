@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use App\Core\Entity\FleetEntity;
+use App\Models\Fleets as FleetsModel;
 use App\Libraries\Functions;
 use App\Libraries\Game\AcsFleets;
 use App\Libraries\Game\Fleets;
@@ -96,13 +96,13 @@ class FederationController extends BaseController
     private function buildPage(Request $request): View
     {
         $group = $this->resolveGroup($request);
-        $groupId = $this->asInt($group->getFirstAcs()->getAcsFleetId());
+        $groupId = $this->asInt($group->getFirstAcs()->acs_id);
 
         $members = $this->buildMembersList($groupId);
         $buddies = $this->buildBuddiesList($groupId);
 
         return view('fleet.fleet_federation_view', [
-            'acs_code' => $this->asString($group->getFirstAcs()->getAcsFleetName()),
+            'acs_code' => $this->asString($group->getFirstAcs()->acs_name),
             'buddies_list' => $buddies,
             'members_list' => $members,
             'invited_count' => $this->membersCount,
@@ -122,7 +122,7 @@ class FederationController extends BaseController
             return;
         }
 
-        $group = $this->asInt($ownFleet->getFleetGroup());
+        $group = $this->asInt($ownFleet->fleet_group);
         $acs = $this->getAcsDataByGroupId($group);
 
         if ($this->asInt($acs['acs_members'] ?? 0) >= 5 || $member === $this->userInt('id')) {
@@ -157,7 +157,7 @@ class FederationController extends BaseController
             return;
         }
 
-        $group = $this->asInt($ownFleet->getFleetGroup());
+        $group = $this->asInt($ownFleet->fleet_group);
         $acs = $this->getAcsDataByGroupId($group);
 
         if ($this->asInt($acs['acs_members'] ?? 0) < 1 || $member === $this->userInt('id')) {
@@ -220,7 +220,7 @@ class FederationController extends BaseController
             return;
         }
 
-        $acs = $this->getAcsDataByGroupId($this->asInt($ownFleet->getFleetGroup()));
+        $acs = $this->getAcsDataByGroupId($this->asInt($ownFleet->fleet_group));
 
         DB::update(
             $this->prepareSql(
@@ -244,7 +244,7 @@ class FederationController extends BaseController
             $this->redirectToStart();
         }
 
-        $groupId = $this->asInt($ownFleet->getFleetGroup());
+        $groupId = $this->asInt($ownFleet->fleet_group);
 
         if ($groupId <= 0) {
             $groupId = $this->createGroup($ownFleet);
@@ -253,7 +253,7 @@ class FederationController extends BaseController
         return new AcsFleets([$this->getAcsDataByGroupId($groupId)]);
     }
 
-    private function createGroup(FleetEntity $ownFleet): int
+    private function createGroup(FleetsModel $ownFleet): int
     {
         $acsCode = 'AG' . mt_rand(100000, 999999999);
 
@@ -265,11 +265,11 @@ class FederationController extends BaseController
                 ),
                 [
                     $acsCode,
-                    $this->asInt($ownFleet->getFleetOwner()),
-                    $this->asInt($ownFleet->getFleetEndGalaxy()),
-                    $this->asInt($ownFleet->getFleetEndSystem()),
-                    $this->asInt($ownFleet->getFleetEndPlanet()),
-                    $this->asInt($ownFleet->getFleetEndType()),
+                    $this->asInt($ownFleet->fleet_owner),
+                    $this->asInt($ownFleet->fleet_end_galaxy),
+                    $this->asInt($ownFleet->fleet_end_system),
+                    $this->asInt($ownFleet->fleet_end_planet),
+                    $this->asInt($ownFleet->fleet_end_type),
                 ]
             );
 
@@ -277,12 +277,12 @@ class FederationController extends BaseController
 
             DB::update(
                 $this->prepareSql('UPDATE `' . FLEETS . '` SET `fleet_group` = ? WHERE `fleet_id` = ?;'),
-                [$groupId, $this->asInt($ownFleet->getFleetId())]
+                [$groupId, $this->asInt($ownFleet->fleet_id)]
             );
 
             DB::insert(
                 $this->prepareSql('INSERT INTO `' . ACS_MEMBERS . '` SET `acs_group_id` = ?, `acs_user_id` = ?;'),
-                [$groupId, $this->asInt($ownFleet->getFleetOwner())]
+                [$groupId, $this->asInt($ownFleet->fleet_owner)]
             );
 
             return $groupId;

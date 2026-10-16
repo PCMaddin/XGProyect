@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Premium;
 use App\Libraries\Premium\Premium;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use App\Core\Entity\PremiumEntity;
+use App\Models\Premium as PremiumModel;
 
 #[CoversClass(Premium::class)]
 class PremiumTest extends TestCase
@@ -19,7 +19,7 @@ class PremiumTest extends TestCase
         ]);
 
         $this->assertCount(1, $premium->getPremium());
-        $this->assertSame(500, $premium->getCurrentPremium()->getPremiumDarkMatter());
+        $this->assertSame(500, $premium->getCurrentPremium()->premium_dark_matter);
     }
 
     public function testGetCurrentPremiumOnEmptySetReturnsAnEmptyEntity(): void
@@ -27,6 +27,6 @@ class PremiumTest extends TestCase
         $premium = new Premium([]);
 
         // legacy indexed [0] on an empty array here
-        $this->assertInstanceOf(PremiumEntity::class, $premium->getCurrentPremium());
+        $this->assertInstanceOf(PremiumModel::class, $premium->getCurrentPremium());
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\Concerns\HydratesModels;
 use App\Enums\Module;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
@@ -12,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use App\Core\Entity\BuddyEntity;
+use App\Models\Buddys;
 use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 use App\Libraries\Buddies\Buddy;
 use App\Libraries\Functions;
@@ -26,6 +27,8 @@ use App\Libraries\Users;
  */
 class BuddiesController extends BaseController
 {
+    use HydratesModels;
+
     use PreparesLegacySql;
 
     private const REDIRECT_TARGET = 'game.php?page=buddies';
@@ -121,13 +124,13 @@ class BuddiesController extends BaseController
             return redirect(self::REDIRECT_TARGET);
         }
 
-        $target = $this->asInt($buddy->getBuddySender()) !== $this->userId()
-            ? $this->asInt($buddy->getBuddySender())
-            : $this->asInt($buddy->getBuddyReceiver());
+        $target = $this->asInt($buddy->buddy_sender) !== $this->userId()
+            ? $this->asInt($buddy->buddy_sender)
+            : $this->asInt($buddy->buddy_receiver);
 
         $this->sendBuddyMessage(
             $target,
-            $this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_NOT_BUDDY ? 1 : 2
+            $this->asInt($buddy->buddy_status) === BuddiesStatus::IS_NOT_BUDDY ? 1 : 2
         );
 
         DB::delete(
@@ -147,11 +150,11 @@ class BuddiesController extends BaseController
         $buddy = $this->findBuddy($bid);
 
         // only the receiver can accept
-        if ($buddy === null || $this->asInt($buddy->getBuddyReceiver()) !== $this->userId()) {
+        if ($buddy === null || $this->asInt($buddy->buddy_receiver) !== $this->userId()) {
             return redirect(self::REDIRECT_TARGET);
         }
 
-        $this->sendBuddyMessage($this->asInt($buddy->getBuddySender()), 3);
+        $this->sendBuddyMessage($this->asInt($buddy->buddy_sender), 3);
 
         DB::update(
             $this->prepareSql(
@@ -212,7 +215,7 @@ class BuddiesController extends BaseController
      * id was accepted, so a user could send "rejected" / "deleted" /
      * "accepted" messages about other players' requests.
      */
-    private function findBuddy(int $bid): ?BuddyEntity
+    private function findBuddy(int $bid): ?Buddys
     {
         $row = DB::selectOne(
             $this->prepareSql(
@@ -222,7 +225,7 @@ class BuddiesController extends BaseController
             [$bid, $this->userId(), $this->userId()]
         );
 
-        return is_object($row) ? new BuddyEntity(get_object_vars($row)) : null;
+        return is_object($row) ? self::hydrateRow(Buddys::class, get_object_vars($row)) : null;
     }
 
     private function relationshipExists(int $target): bool
@@ -236,7 +239,7 @@ class BuddiesController extends BaseController
             [$this->userId(), $target, $target, $this->userId()]
         );
 
-        return is_object($row) && $this->asInt((new BuddyEntity(get_object_vars($row)))->getBuddyId()) !== 0;
+        return is_object($row) && $this->asInt((self::hydrateRow(Buddys::class, get_object_vars($row)))->buddy_id) !== 0;
     }
 
     private function sendBuddyMessage(int $to, int $type): void
@@ -277,7 +280,7 @@ class BuddiesController extends BaseController
         }
 
         foreach ($entities as $entity) {
-            if (!$entity instanceof BuddyEntity) {
+            if (!$entity instanceof Buddys) {
                 continue;
             }
 
@@ -294,11 +297,11 @@ class BuddiesController extends BaseController
     /**
      * @return array<string, mixed>|null
      */
-    private function extractPlayerData(BuddyEntity $buddy): ?array
+    private function extractPlayerData(Buddys $buddy): ?array
     {
-        $idToGet = $this->asInt($buddy->getBuddySender()) === $this->userId()
-            ? $this->asInt($buddy->getBuddyReceiver())
-            : $this->asInt($buddy->getBuddySender());
+        $idToGet = $this->asInt($buddy->buddy_sender) === $this->userId()
+            ? $this->asInt($buddy->buddy_receiver)
+            : $this->asInt($buddy->buddy_sender);
 
         $row = DB::selectOne(
             $this->prepareSql(
@@ -332,24 +335,24 @@ class BuddiesController extends BaseController
         ];
     }
 
-    private function setText(BuddyEntity $buddy, int $onlineTime): string
+    private function setText(Buddys $buddy, int $onlineTime): string
     {
-        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_BUDDY) {
+        if ($this->asInt($buddy->buddy_status) === BuddiesStatus::IS_BUDDY) {
             return $this->timingService->getOnlineStatus($onlineTime, time());
         }
 
-        return $this->asString($buddy->getRequestText());
+        return $this->asString($buddy->buddy_request_text);
     }
 
-    private function setAction(BuddyEntity $buddy): string
+    private function setAction(Buddys $buddy): string
     {
-        $bid = $this->asInt($buddy->getBuddyId());
+        $bid = $this->asInt($buddy->buddy_id);
 
-        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_BUDDY) {
+        if ($this->asInt($buddy->buddy_status) === BuddiesStatus::IS_BUDDY) {
             return $this->generateUrl($bid, 1, (string) __('game/buddies.bu_delete'));
         }
 
-        if ($this->asInt($buddy->getBuddySender()) === $this->userId()) {
+        if ($this->asInt($buddy->buddy_sender) === $this->userId()) {
             return $this->generateUrl($bid, 1, (string) __('game/buddies.bu_cancel_request'));
         }
 

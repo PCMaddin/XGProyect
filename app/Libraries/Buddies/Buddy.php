@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Buddies;
 
-use App\Core\Entity\BuddyEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Buddys;
 use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 
 /**
@@ -13,7 +14,9 @@ use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
  */
 class Buddy
 {
-    /** @var list<BuddyEntity> */
+    use HydratesModels;
+
+    /** @var list<Buddys> */
     private array $buddies = [];
 
     /**
@@ -22,56 +25,56 @@ class Buddy
     public function __construct(array $buddies, private int $currentUserId)
     {
         foreach ($buddies as $buddy) {
-            $this->buddies[] = new BuddyEntity($buddy);
+            $this->buddies[] = self::hydrateRow(Buddys::class, $buddy);
         }
     }
 
     /**
      * Players this user sent a still-pending request to.
      *
-     * @return list<BuddyEntity>
+     * @return list<Buddys>
      */
     public function getSentRequests(): array
     {
         return array_values(array_filter(
             $this->buddies,
-            fn (BuddyEntity $buddy): bool => !$this->isBuddy($buddy) && $this->isOwnRequest($buddy)
+            fn (Buddys $buddy): bool => !$this->isBuddy($buddy) && $this->isOwnRequest($buddy)
         ));
     }
 
     /**
      * Players who sent a still-pending request to this user.
      *
-     * @return list<BuddyEntity>
+     * @return list<Buddys>
      */
     public function getReceivedRequests(): array
     {
         return array_values(array_filter(
             $this->buddies,
-            fn (BuddyEntity $buddy): bool => !$this->isBuddy($buddy) && !$this->isOwnRequest($buddy)
+            fn (Buddys $buddy): bool => !$this->isBuddy($buddy) && !$this->isOwnRequest($buddy)
         ));
     }
 
     /**
      * Confirmed buddies.
      *
-     * @return list<BuddyEntity>
+     * @return list<Buddys>
      */
     public function getBuddies(): array
     {
         return array_values(array_filter(
             $this->buddies,
-            fn (BuddyEntity $buddy): bool => $this->isBuddy($buddy)
+            fn (Buddys $buddy): bool => $this->isBuddy($buddy)
         ));
     }
 
-    private function isBuddy(BuddyEntity $buddy): bool
+    private function isBuddy(Buddys $buddy): bool
     {
-        return (int) $buddy->getBuddyStatus() === BuddiesStatus::IS_BUDDY;
+        return (int) $buddy->buddy_status === BuddiesStatus::IS_BUDDY;
     }
 
-    private function isOwnRequest(BuddyEntity $buddy): bool
+    private function isOwnRequest(Buddys $buddy): bool
     {
-        return (int) $buddy->getBuddySender() === $this->currentUserId;
+        return (int) $buddy->buddy_sender === $this->currentUserId;
     }
 }

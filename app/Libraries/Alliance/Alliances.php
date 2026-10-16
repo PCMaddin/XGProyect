@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Alliance;
 
-use App\Core\Entity\AllianceEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Alliance;
 use App\Core\Enumerators\SwitchIntEnumerator;
 
 /**
@@ -16,7 +17,9 @@ use App\Core\Enumerators\SwitchIntEnumerator;
  */
 class Alliances
 {
-    /** @var list<AllianceEntity> */
+    use HydratesModels;
+
+    /** @var list<Alliance> */
     private array $alliances = [];
 
     /**
@@ -29,32 +32,32 @@ class Alliances
     ) {
         foreach (array_filter($alliances) as $alliance) {
             if (is_array($alliance)) {
-                $this->alliances[] = new AllianceEntity($alliance);
+                $this->alliances[] = self::hydrateRow(Alliance::class, $alliance);
             }
         }
     }
 
     /**
-     * @return list<AllianceEntity>
+     * @return list<Alliance>
      */
     public function getAlliances(): array
     {
         return $this->alliances;
     }
 
-    public function getCurrentAlliance(): AllianceEntity
+    public function getCurrentAlliance(): Alliance
     {
-        return $this->alliances[0] ?? new AllianceEntity([]);
+        return $this->alliances[0] ?? self::hydrateRow(Alliance::class, []);
     }
 
     public function getCurrentAllianceRankObject(): Ranks
     {
-        return new Ranks($this->getCurrentAlliance()->getAllianceRanks());
+        return new Ranks($this->getCurrentAlliance()->alliance_ranks);
     }
 
     public function isOwner(): bool
     {
-        return (int) $this->getCurrentAlliance()->getAllianceOwner() === $this->currentUserId;
+        return (int) $this->getCurrentAlliance()->alliance_owner === $this->currentUserId;
     }
 
     public function checkRank(int $rank): bool

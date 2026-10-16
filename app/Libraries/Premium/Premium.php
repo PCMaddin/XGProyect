@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Premium;
 
-use App\Core\Entity\PremiumEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Premium as PremiumModel;
 
 /**
  * Wraps a user's premium/officer rows into typed entities.
@@ -15,7 +16,9 @@ use App\Core\Entity\PremiumEntity;
  */
 class Premium
 {
-    /** @var list<PremiumEntity> */
+    use HydratesModels;
+
+    /** @var list<PremiumModel> */
     private array $premium = [];
 
     /**
@@ -24,20 +27,20 @@ class Premium
     public function __construct(array $premium)
     {
         foreach ($premium as $entry) {
-            $this->premium[] = new PremiumEntity($entry);
+            $this->premium[] = self::hydrateRow(PremiumModel::class, $entry);
         }
     }
 
     /**
-     * @return list<PremiumEntity>
+     * @return list<PremiumModel>
      */
     public function getPremium(): array
     {
         return $this->premium;
     }
 
-    public function getCurrentPremium(): PremiumEntity
+    public function getCurrentPremium(): PremiumModel
     {
-        return $this->premium[0] ?? new PremiumEntity([]);
+        return $this->premium[0] ?? self::hydrateRow(PremiumModel::class, []);
     }
 }

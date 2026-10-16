@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 707 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
+| Tests | 710 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
 
 > **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
 > Ausführung (Actions läuft dort offenbar nicht), die Checks aus
@@ -35,16 +35,21 @@
    Request eine eigene Registry). `MissionObjects` liefert die Array-Formen
    der Kampf-Engine; vor dem Löschen wurde geprüft, dass Arrays und
    Formelergebnisse identisch sind.
+5. **Entities (deprecated) durch Eloquent ersetzt:** `Alliances`, `Buddy`,
+   `Fleets`, `AcsFleets`, `Premium`, `Researches` und `ResourceMarket` liefern
+   Eloquent-Modelle, die Aufrufer lesen Properties statt Getter (128 Stellen).
+   Damit das Verhalten gleich bleibt, füllt `HydratesModels::hydrateRow()`
+   fehlende und NULL-Werte typgerecht mit `0`/`''`/`false` vor, so wie die
+   Getter es taten; damit stimmen auch die `@property`-Typen. Fehlende Casts
+   und Properties in den Modellen ergänzt (`Fleets`: Id, Menge, Ladung,
+   Treibstoff; `Planets`: Id, Trümmerfeld; `Acs`: Id; `Alliance`:
+   Mitgliederzahl). **Bugfix:** `Fleets::fleet_mess` war auf `boolean`
+   gecastet, die Spalte kennt aber 0/1/2. Die Admin-Flottenliste zeigte
+   stehende Flotten deshalb als „zurückkehrend“; `Acs::acs_planet_type`
+   (1/3) hatte denselben Fehler. Beide sind jetzt `int`. Tests.
 
 ### Bewusst offen (Modernisierung, keine Migration)
 
-- **Entities** (`App\Core\Entity\*`, als deprecated markiert): getippte
-  Lese-Wrapper um DB-Zeilen, genutzt über `Alliances`, `Buddy`, `Fleets`,
-  `AcsFleets`, `Premium`, `Researches`, `ResourceMarket` (128 Aufrufstellen).
-  Eine Umstellung auf Eloquent ist möglich (die Modelle haben passende
-  Casts), aber nicht risikofrei: Die Getter liefern bei fehlenden Werten
-  `0`/`''`, Eloquent `null`, obwohl die Modelle `@property int` deklarieren —
-  PHPStan sieht diese Unterschiede nicht.
 - **Konstantenklassen vs. Enums:** `App\Enums\Game\{BuildingId, ShipId, …}`
   existieren parallel zu den Enumeratoren, werden aber praktisch nur in Tests
   genutzt.

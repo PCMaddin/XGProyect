@@ -135,19 +135,19 @@ class AllianceController extends BaseController
             3 => (string) __('game/alliance.al_request_text'),
         ];
         $text = [
-            1 => $current->getAllianceDescription(),
-            2 => $current->getAllianceText(),
-            3 => $current->getAllianceRequest(),
+            1 => $current->alliance_description,
+            2 => $current->alliance_text,
+            3 => $current->alliance_request,
         ];
 
         return view('alliance.admin.view', [
             't' => $tab,
             'request_type' => $requestType[$tab],
             'text' => $text[$tab],
-            'alliance_web' => $current->getAllianceWeb(),
-            'alliance_image' => $current->getAllianceImage(),
-            'alliance_request_notallow_0' => $current->getAllianceRequestNotAllow() === SwitchInt::OFF ? 'selected' : '',
-            'alliance_request_notallow_1' => $current->getAllianceRequestNotAllow() === SwitchInt::ON ? 'selected' : '',
+            'alliance_web' => $current->alliance_web,
+            'alliance_image' => $current->alliance_image,
+            'alliance_request_notallow_0' => $current->alliance_request_notallow === SwitchInt::OFF ? 'selected' : '',
+            'alliance_request_notallow_1' => $current->alliance_request_notallow === SwitchInt::ON ? 'selected' : '',
             'alliance_owner_range' => $this->rankName($ranks, self::DEFAULT_RANKS['founder']),
             'alliance_newcomer_range' => $this->rankName($ranks, self::DEFAULT_RANKS['newcomer']),
         ]);
@@ -292,7 +292,7 @@ class AllianceController extends BaseController
 
         $kick = $request->integer('kick');
 
-        if ($kick === $this->alliance->getCurrentAlliance()->getAllianceOwner()) {
+        if ($kick === $this->alliance->getCurrentAlliance()->alliance_owner) {
             return;
         }
 
@@ -312,7 +312,7 @@ class AllianceController extends BaseController
 
         $memberId = $request->integer('id');
 
-        if ($memberId === $this->alliance->getCurrentAlliance()->getAllianceOwner()) {
+        if ($memberId === $this->alliance->getCurrentAlliance()->alliance_owner) {
             return;
         }
 
@@ -350,7 +350,7 @@ class AllianceController extends BaseController
         }
 
         return view('alliance.admin.edit', [
-            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceName()]),
+            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_name]),
             'title' => (string) __('game/alliance.al_new_name'),
         ]);
     }
@@ -381,7 +381,7 @@ class AllianceController extends BaseController
         }
 
         return view('alliance.admin.edit', [
-            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceTag()]),
+            'case' => strtr((string) __('game/alliance.al_change_title'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_tag]),
             'title' => (string) __('game/alliance.al_new_tag'),
         ]);
     }
@@ -452,9 +452,9 @@ class AllianceController extends BaseController
             $this->userInt('id'),
             0,
             3,
-            $current->getAllianceTag(),
-            __('game/alliance.' . $titleKey) . $current->getAllianceName(),
-            __('game/alliance.al_hi_the_alliance') . $current->getAllianceName() . __('game/alliance.' . $verb) . $text
+            $current->alliance_tag,
+            __('game/alliance.' . $titleKey) . $current->alliance_name,
+            __('game/alliance.al_hi_the_alliance') . $current->alliance_name . __('game/alliance.' . $verb) . $text
         );
 
         return redirect('game.php?page=alliance&mode=admin&edit=requests');
@@ -625,7 +625,7 @@ class AllianceController extends BaseController
 
     private function adminMemberActionBlock(int $memberId, string $memberName, int $requestedRank): string
     {
-        if ($this->alliance->getCurrentAlliance()->getAllianceOwner() === $memberId || $requestedRank === $memberId) {
+        if ($this->alliance->getCurrentAlliance()->alliance_owner === $memberId || $requestedRank === $memberId) {
             return '-';
         }
 
@@ -816,9 +816,9 @@ class AllianceController extends BaseController
 
         return view('alliance.ainfo', [
             'image' => $this->imageBlock(),
-            'tag' => $current->getAllianceTag(),
-            'name' => $current->getAllianceName(),
-            'members' => $this->asString($current->getAllianceMembers()),
+            'tag' => $current->alliance_tag,
+            'name' => $current->alliance_name,
+            'members' => $this->asString($current->alliance_members),
             'description' => $this->descriptionBlock(),
             'web' => $this->webBlock(),
             'requests' => $this->publicRequestsBlock(),
@@ -852,11 +852,11 @@ class AllianceController extends BaseController
             foreach ($alliances->getAlliances() as $result) {
                 $results[] = [
                     'ally_tag' => $this->formatService->link(
-                        'game.php?page=alliance&mode=apply&allyid=' . $result->getAllianceId(),
-                        $result->getAllianceTag()
+                        'game.php?page=alliance&mode=apply&allyid=' . $result->alliance_id,
+                        $result->alliance_tag
                     ),
-                    'alliance_name' => $result->getAllianceName(),
-                    'ally_members' => $this->asString($result->getAllianceMembers()),
+                    'alliance_name' => $result->alliance_name,
+                    'ally_members' => $this->asString($result->alliance_members),
                 ];
             }
         }
@@ -945,7 +945,7 @@ class AllianceController extends BaseController
     {
         $current = $this->alliance->getCurrentAlliance();
 
-        if ($current->getAllianceRequestNotAllow() === 0) {
+        if ($current->alliance_request_notallow === 0) {
             Functions::message((string) __('game/alliance.al_alliance_closed'), 'game.php?page=alliance', 3);
         }
 
@@ -967,10 +967,10 @@ class AllianceController extends BaseController
 
         return view('alliance.apply', [
             'allyid' => $this->allianceId($request),
-            'text_apply' => $current->getAllianceRequest() !== ''
-                ? $current->getAllianceRequest()
+            'text_apply' => $current->alliance_request !== ''
+                ? $current->alliance_request
                 : (string) __('game/alliance.al_default_request_text'),
-            'write_to_alliance' => strtr((string) __('game/alliance.al_write_request'), ['%s' => $current->getAllianceTag()]),
+            'write_to_alliance' => strtr((string) __('game/alliance.al_write_request'), ['%s' => $current->alliance_tag]),
         ]);
     }
 
@@ -1119,7 +1119,7 @@ class AllianceController extends BaseController
             );
 
             Functions::messageBox(
-                strtr((string) __('game/alliance.al_leave_sucess'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceName()]),
+                strtr((string) __('game/alliance.al_leave_sucess'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_name]),
                 '<br>',
                 'game.php?page=alliance',
                 (string) __('game/alliance.al_continue')
@@ -1127,7 +1127,7 @@ class AllianceController extends BaseController
         }
 
         Functions::messageBox(
-            strtr((string) __('game/alliance.al_do_you_really_want_to_go_out'), ['%s' => $this->alliance->getCurrentAlliance()->getAllianceName()]),
+            strtr((string) __('game/alliance.al_do_you_really_want_to_go_out'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_name]),
             '<br>',
             'game.php?page=alliance&mode=exit&yes=1',
             (string) __('game/alliance.al_go_out_yes')
@@ -1175,10 +1175,10 @@ class AllianceController extends BaseController
         if (
             $this->userInt('ally_id') === 0 &&
             $this->userInt('ally_request') === 0 &&
-            $this->alliance->getCurrentAlliance()->getAllianceRequestNotAllow() !== 0
+            $this->alliance->getCurrentAlliance()->alliance_request_notallow !== 0
         ) {
             $url = $this->formatService->link(
-                'game.php?page=alliance&mode=apply&allyid=' . $this->alliance->getCurrentAlliance()->getAllianceId(),
+                'game.php?page=alliance&mode=apply&allyid=' . $this->alliance->getCurrentAlliance()->alliance_id,
                 (string) __('game/alliance.al_click_to_send_request'),
                 (string) __('game/alliance.al_click_to_send_request')
             );
@@ -1191,7 +1191,7 @@ class AllianceController extends BaseController
 
     private function imageBlock(): string
     {
-        $image = $this->alliance->getCurrentAlliance()->getAllianceImage();
+        $image = $this->alliance->getCurrentAlliance()->alliance_image;
 
         if ($image !== '') {
             return '<tr><th role="cell" colspan="2">' . Functions::setImage(e($image), e($image)) . '</th></tr>';
@@ -1207,7 +1207,7 @@ class AllianceController extends BaseController
     {
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_tag'),
-            'detail_content' => $this->alliance->getCurrentAlliance()->getAllianceTag(),
+            'detail_content' => $this->alliance->getCurrentAlliance()->alliance_tag,
         ];
     }
 
@@ -1218,7 +1218,7 @@ class AllianceController extends BaseController
     {
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_name'),
-            'detail_content' => $this->alliance->getCurrentAlliance()->getAllianceName(),
+            'detail_content' => $this->alliance->getCurrentAlliance()->alliance_name,
         ];
     }
 
@@ -1235,7 +1235,7 @@ class AllianceController extends BaseController
 
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_members'),
-            'detail_content' => $this->asString($this->alliance->getCurrentAlliance()->getAllianceMembers()) . $link,
+            'detail_content' => $this->asString($this->alliance->getCurrentAlliance()->alliance_members) . $link,
         ];
     }
 
@@ -1266,7 +1266,7 @@ class AllianceController extends BaseController
 
         $row = DB::selectOne(
             $this->prepareSql('SELECT COUNT(id) AS total_requests FROM `' . USERS . '` WHERE `ally_request` = ?;'),
-            [$this->alliance->getCurrentAlliance()->getAllianceId()]
+            [$this->alliance->getCurrentAlliance()->alliance_id]
         );
 
         $count = is_object($row) ? $this->asInt(get_object_vars($row)['total_requests'] ?? 0) : 0;
@@ -1302,7 +1302,7 @@ class AllianceController extends BaseController
     private function descriptionBlock(): string
     {
         $description = (string) __('game/alliance.al_description_message');
-        $current = $this->alliance->getCurrentAlliance()->getAllianceDescription();
+        $current = $this->alliance->getCurrentAlliance()->alliance_description;
 
         if ($current !== '') {
             $description = nl2br($this->bbcode->bbCode($current)) . '</th></tr>';
@@ -1313,7 +1313,7 @@ class AllianceController extends BaseController
 
     private function webBlock(): string
     {
-        $webUrl = $this->alliance->getCurrentAlliance()->getAllianceWeb();
+        $webUrl = $this->alliance->getCurrentAlliance()->alliance_web;
 
         if ($webUrl === '') {
             return '-';
@@ -1326,7 +1326,7 @@ class AllianceController extends BaseController
 
     private function textBlock(): string
     {
-        return nl2br($this->bbcode->bbCode($this->alliance->getCurrentAlliance()->getAllianceText()));
+        return nl2br($this->bbcode->bbCode($this->alliance->getCurrentAlliance()->alliance_text));
     }
 
     private function userRank(int $memberId, int $memberRankId): string
@@ -1337,14 +1337,14 @@ class AllianceController extends BaseController
             return $rank['rank'];
         }
 
-        return $this->alliance->getCurrentAlliance()->getAllianceOwner() === $memberId
+        return $this->alliance->getCurrentAlliance()->alliance_owner === $memberId
             ? (string) __('game/alliance.al_founder_rank_text')
             : (string) __('game/alliance.al_new_member_rank_text');
     }
 
     private function currentAllianceTag(): string
     {
-        return $this->alliance->getCurrentAlliance()->getAllianceTag();
+        return $this->alliance->getCurrentAlliance()->alliance_tag;
     }
 
     private function userInt(string $key): int

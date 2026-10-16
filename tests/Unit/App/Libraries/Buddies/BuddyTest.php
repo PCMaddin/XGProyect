@@ -34,7 +34,7 @@ class BuddyTest extends TestCase
         $buddies = (new Buddy($this->rows(), self::CURRENT_USER))->getBuddies();
 
         $this->assertCount(1, $buddies);
-        $this->assertSame(1, $buddies[0]->getBuddyId());
+        $this->assertSame(1, $buddies[0]->buddy_id);
     }
 
     public function testSentRequestsAreOwnPendingRequests(): void
@@ -42,7 +42,7 @@ class BuddyTest extends TestCase
         $sent = (new Buddy($this->rows(), self::CURRENT_USER))->getSentRequests();
 
         $this->assertCount(1, $sent);
-        $this->assertSame(2, $sent[0]->getBuddyId());
+        $this->assertSame(2, $sent[0]->buddy_id);
     }
 
     public function testReceivedRequestsArePendingRequestsFromOthers(): void
@@ -50,7 +50,7 @@ class BuddyTest extends TestCase
         $received = (new Buddy($this->rows(), self::CURRENT_USER))->getReceivedRequests();
 
         $this->assertCount(1, $received);
-        $this->assertSame(3, $received[0]->getBuddyId());
+        $this->assertSame(3, $received[0]->buddy_id);
     }
 
     public function testEmptyInputYieldsEmptyLists(): void

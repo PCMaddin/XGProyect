@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use App\Core\Entity\FleetEntity;
+use App\Models\Fleets as FleetsModel;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\FleetsLib;
@@ -107,12 +107,12 @@ class MovementController extends BaseController
         return view('movement.view', [
             'fleets' => $this->fleets->getFleetsCount(),
             'max_fleets' => $this->fleetsService->getMaxFleets(
-                $this->research->getCurrentResearch()->getResearchComputerTechnology(),
-                $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->getPremiumOfficierAdmiral(), time())
+                $this->research->getCurrentResearch()->research_computer_technology,
+                $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
             ),
             'expeditions' => $this->fleets->getExpeditionsCount(),
             'max_expeditions' => $this->fleetsService->getMaxExpeditions(
-                $this->research->getCurrentResearch()->getResearchAstrophysics()
+                $this->research->getCurrentResearch()->research_astrophysics
             ),
             'list_of_movements' => $this->buildMovements(),
         ]);
@@ -131,28 +131,28 @@ class MovementController extends BaseController
         $count = 0;
 
         foreach ($this->fleets->getFleets() as $fleet) {
-            $mess = $this->asInt($fleet->getFleetMess());
+            $mess = $this->asInt($fleet->fleet_mess);
 
             $list[] = [
                 'num' => ++$count,
-                'fleet_mission' => $this->missionName($this->asInt($fleet->getFleetMission())),
+                'fleet_mission' => $this->missionName($this->asInt($fleet->fleet_mission)),
                 'title' => $this->buildTitleBlock($mess),
                 'tooltip' => $this->buildToolTipBlock($mess),
-                'fleet_amount' => $this->formatService->prettyNumber($this->asInt($fleet->getFleetAmount())),
-                'fleet' => $this->buildShipsBlock($this->asString($fleet->getFleetArray())),
+                'fleet_amount' => $this->formatService->prettyNumber($this->asInt($fleet->fleet_amount)),
+                'fleet' => $this->buildShipsBlock($this->asString($fleet->fleet_array)),
                 'fleet_start' => $this->formatService->prettyCoords(
-                    $this->asInt($fleet->getFleetStartGalaxy()),
-                    $this->asInt($fleet->getFleetStartSystem()),
-                    $this->asInt($fleet->getFleetStartPlanet())
+                    $this->asInt($fleet->fleet_start_galaxy),
+                    $this->asInt($fleet->fleet_start_system),
+                    $this->asInt($fleet->fleet_start_planet)
                 ),
-                'fleet_start_time' => $this->timingService->formatExtendedDate($this->asInt($fleet->getFleetCreation())),
+                'fleet_start_time' => $this->timingService->formatExtendedDate($this->asInt($fleet->fleet_creation)),
                 'fleet_end' => $this->formatService->prettyCoords(
-                    $this->asInt($fleet->getFleetEndGalaxy()),
-                    $this->asInt($fleet->getFleetEndSystem()),
-                    $this->asInt($fleet->getFleetEndPlanet())
+                    $this->asInt($fleet->fleet_end_galaxy),
+                    $this->asInt($fleet->fleet_end_system),
+                    $this->asInt($fleet->fleet_end_planet)
                 ),
-                'fleet_end_time' => $this->timingService->formatExtendedDate($this->asInt($fleet->getFleetStartTime())),
-                'fleet_arrival' => $this->timingService->formatExtendedDate($this->asInt($fleet->getFleetEndTime())),
+                'fleet_end_time' => $this->timingService->formatExtendedDate($this->asInt($fleet->fleet_start_time)),
+                'fleet_arrival' => $this->timingService->formatExtendedDate($this->asInt($fleet->fleet_end_time)),
                 'fleet_actions' => $this->buildActionsBlock($fleet),
             ];
         }
@@ -221,20 +221,20 @@ class MovementController extends BaseController
         return $tooltips === [] ? '' : implode("\n", $tooltips);
     }
 
-    private function buildActionsBlock(FleetEntity $fleet): string
+    private function buildActionsBlock(FleetsModel $fleet): string
     {
-        if ($this->asInt($fleet->getFleetMess()) !== 0) {
+        if ($this->asInt($fleet->fleet_mess) !== 0) {
             return '-';
         }
 
-        $fleetId = $this->asInt($fleet->getFleetId());
+        $fleetId = $this->asInt($fleet->fleet_id);
 
         $actions = '<form action="game.php?page=movement&action=return" method="post">'
             . '<input type="hidden" name="fleetid" value="' . $fleetId . '">'
             . '<input type="submit" name="send" value="' . __('game/fleet.fl_send_back') . '">'
             . '</form>';
 
-        if ($this->asInt($fleet->getFleetMission()) === Missions::ATTACK) {
+        if ($this->asInt($fleet->fleet_mission) === Missions::ATTACK) {
             $content = '<input type="button" value="' . __('game/fleet.fl_acs') . '">';
             $attributes = 'onClick="f(\'game.php?page=federationlayer&fleet=' . $fleetId . '\', \'\')"';
 
@@ -254,7 +254,7 @@ class MovementController extends BaseController
 
         $fleet = $this->fleets->getOwnFleetById($fleetId);
 
-        if ($fleet === null || $this->asInt($fleet->getFleetMess()) === 1) {
+        if ($fleet === null || $this->asInt($fleet->fleet_mess) === 1) {
             return null;
         }
 
@@ -263,18 +263,18 @@ class MovementController extends BaseController
         return redirect(self::REDIRECT_TARGET);
     }
 
-    private function returnFleet(FleetEntity $fleet, int $userId): void
+    private function returnFleet(FleetsModel $fleet, int $userId): void
     {
         DB::transaction(function () use ($fleet, $userId): void {
             $this->releaseAcsGroup($fleet);
 
             $baseTime = time();
-            $creation = $this->asInt($fleet->getFleetCreation());
+            $creation = $this->asInt($fleet->fleet_creation);
             $elapsed = $baseTime - $creation;
-            $flightLength = $this->asInt($fleet->getFleetStartTime()) - $creation;
+            $flightLength = $this->asInt($fleet->fleet_start_time) - $creation;
             $returnTime = $baseTime + $elapsed;
 
-            if ($this->asInt($fleet->getFleetEndStay()) !== 0 && $elapsed > $flightLength) {
+            if ($this->asInt($fleet->fleet_end_stay) !== 0 && $elapsed > $flightLength) {
                 $returnTime = $baseTime + $flightLength;
             }
 
@@ -285,20 +285,20 @@ class MovementController extends BaseController
                         f.`fleet_target_owner` = ?, f.`fleet_mess` = 1
                     WHERE f.`fleet_id` = ?;'
                 ),
-                [$baseTime, $returnTime, $userId, $this->asInt($fleet->getFleetId())]
+                [$baseTime, $returnTime, $userId, $this->asInt($fleet->fleet_id)]
             );
         });
     }
 
-    private function releaseAcsGroup(FleetEntity $fleet): void
+    private function releaseAcsGroup(FleetsModel $fleet): void
     {
-        $group = $this->asInt($fleet->getFleetGroup());
+        $group = $this->asInt($fleet->fleet_group);
 
         if ($group <= 0) {
             return;
         }
 
-        $mission = $this->asInt($fleet->getFleetMission());
+        $mission = $this->asInt($fleet->fleet_mission);
 
         if ($mission === Missions::ATTACK) {
             $row = DB::selectOne(
@@ -307,7 +307,7 @@ class MovementController extends BaseController
             );
             $acsOwner = is_object($row) ? $this->asInt(get_object_vars($row)['acs_owner'] ?? 0) : 0;
 
-            if ($acsOwner > 0 && $acsOwner === $this->asInt($fleet->getFleetOwner())) {
+            if ($acsOwner > 0 && $acsOwner === $this->asInt($fleet->fleet_owner)) {
                 DB::delete($this->prepareSql('DELETE FROM `' . ACS . '` WHERE `acs_id` = ?;'), [$group]);
                 DB::update(
                     $this->prepareSql('UPDATE `' . FLEETS . '` f SET f.`fleet_group` = 0 WHERE f.`fleet_group` = ?;'),
@@ -319,7 +319,7 @@ class MovementController extends BaseController
         if ($mission === Missions::ACS) {
             DB::update(
                 $this->prepareSql('UPDATE `' . FLEETS . '` f SET f.`fleet_group` = 0 WHERE f.`fleet_id` = ?;'),
-                [$this->asInt($fleet->getFleetId())]
+                [$this->asInt($fleet->fleet_id)]
             );
         }
     }

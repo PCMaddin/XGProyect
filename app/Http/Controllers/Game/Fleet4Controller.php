@@ -151,7 +151,7 @@ class Fleet4Controller extends BaseController
             $this->redirectTo('game.php?page=fleet1');
         }
 
-        $expTime = $this->research->getCurrentResearch()->getResearchAstrophysics();
+        $expTime = $this->research->getCurrentResearch()->research_astrophysics;
 
         $this->cleanInput = [
             'mission' => $this->rangeInt($request, 'mission', 1, 15),
@@ -307,7 +307,7 @@ class Fleet4Controller extends BaseController
             $totalShips += $amount;
             $this->fleetStorage += $this->fleetsService->getMaxStorage(
                 ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
+                $this->research->getCurrentResearch()->research_hyperspace_technology
             ) * $amount;
             $this->fleetShips[$column] = $amount;
         }
@@ -417,7 +417,7 @@ class Fleet4Controller extends BaseController
     private function validateExpedition(): void
     {
         $maxExpeditions = $this->fleetsService->getMaxExpeditions(
-            $this->research->getCurrentResearch()->getResearchAstrophysics()
+            $this->research->getCurrentResearch()->research_astrophysics
         );
 
         if ($maxExpeditions <= 0) {
@@ -458,8 +458,8 @@ class Fleet4Controller extends BaseController
     private function validateFleets(): bool
     {
         $maxFleets = $this->fleetsService->getMaxFleets(
-            $this->research->getCurrentResearch()->getResearchComputerTechnology(),
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->getPremiumOfficierAdmiral(), time())
+            $this->research->getCurrentResearch()->research_computer_technology,
+            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
         );
 
         if ($maxFleets <= $this->fleets->getFleetsCount()) {

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
+ * @property int                         $planet_id
  * @property string                      $planet_name
  * @property string                      $planet_b_hangar_id
  * @property string                      $planet_b_building_id
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int                         $planet_b_tech_id   tech ID currently being researched (legacy cache)
  * @property int                         $planet_b_hangar
  * @property Collection<int,BuildingQueue> $buildingQueue
+ * @property int    $planet_debris_metal
+ * @property int    $planet_debris_crystal
  * @property int    $planet_diameter
  * @property int    $planet_field_current
  * @property int    $planet_field_max
@@ -127,6 +130,9 @@ class Planets extends Model
      */
     protected $casts = [
         'planet_name' => 'string',
+        'planet_b_building_id' => 'string',
+        'planet_debris_metal' => 'int',
+        'planet_debris_crystal' => 'int',
         'planet_user_id' => 'int',
         'planet_galaxy' => 'int',
         'planet_system' => 'int',

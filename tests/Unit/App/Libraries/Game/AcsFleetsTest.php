@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Game;
 use App\Libraries\Game\AcsFleets;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use App\Core\Entity\AcsFleetEntity;
+use App\Models\Acs;
 
 #[CoversClass(AcsFleets::class)]
 class AcsFleetsTest extends TestCase
@@ -22,15 +22,15 @@ class AcsFleetsTest extends TestCase
         $entities = $group->getAcs();
 
         $this->assertCount(2, $entities);
-        $this->assertSame('Alpha', $entities[0]->getAcsFleetName());
-        $this->assertSame('Beta', $entities[1]->getAcsFleetName());
+        $this->assertSame('Alpha', $entities[0]->acs_name);
+        $this->assertSame('Beta', $entities[1]->acs_name);
     }
 
     public function testGetFirstAcsReturnsTheFirstEntity(): void
     {
         $group = new AcsFleets([['acs_id' => 7, 'acs_name' => 'Gamma']]);
 
-        $this->assertSame('Gamma', $group->getFirstAcs()->getAcsFleetName());
+        $this->assertSame('Gamma', $group->getFirstAcs()->acs_name);
     }
 
     public function testGetFirstAcsOnEmptySetReturnsAnEmptyEntity(): void
@@ -38,6 +38,6 @@ class AcsFleetsTest extends TestCase
         $group = new AcsFleets([]);
 
         // legacy indexed [0] on an empty array here
-        $this->assertInstanceOf(AcsFleetEntity::class, $group->getFirstAcs());
+        $this->assertInstanceOf(Acs::class, $group->getFirstAcs());
     }
 }

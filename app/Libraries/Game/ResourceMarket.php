@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
+use App\Support\Concerns\HydratesModels;
 use App\Services\Game\Formulas\ProductionService;
-use App\Core\Entity\BuildingsEntity;
-use App\Core\Entity\PlanetEntity;
-use App\Core\Entity\PremiumEntity;
+use App\Models\Buildings;
+use App\Models\Planets;
+use App\Models\Premium;
 
 /**
  * Dark-matter pricing for the resource-market storage refill.
@@ -18,11 +19,13 @@ use App\Core\Entity\PremiumEntity;
  */
 class ResourceMarket
 {
-    private PremiumEntity $premium;
+    use HydratesModels;
 
-    private PlanetEntity $planet;
+    private Premium $premium;
 
-    private BuildingsEntity $buildings;
+    private Planets $planet;
+
+    private Buildings $buildings;
 
     /**
      * @param  array<string, mixed>  $user
@@ -30,9 +33,9 @@ class ResourceMarket
      */
     public function __construct(array $user, array $planet, private ProductionService $productionService)
     {
-        $this->premium = new PremiumEntity($user);
-        $this->planet = new PlanetEntity($planet);
-        $this->buildings = new BuildingsEntity($planet);
+        $this->premium = self::hydrateRow(Premium::class, $user);
+        $this->planet = self::hydrateRow(Planets::class, $planet);
+        $this->buildings = self::hydrateRow(Buildings::class, $planet);
     }
 
     public function calculateBasePriceToRefill(int $maxStorage, int $baseDm): float
@@ -111,7 +114,7 @@ class ResourceMarket
 
     public function isRefillPayable(string $resource, int $percentage): bool
     {
-        return $this->premium->getPremiumDarkMatter() >= $this->calculateRefillStoragePrice(
+        return $this->premium->premium_dark_matter >= $this->calculateRefillStoragePrice(
             $resource,
             $percentage,
             $percentage === 100 ? $this->planetAmount($resource) : 0
@@ -135,9 +138,9 @@ class ResourceMarket
     private function planetAmount(string $resource): float
     {
         return match ($resource) {
-            'metal' => $this->planet->getPlanetAmountOfMetal(),
-            'crystal' => $this->planet->getPlanetAmountOfCrystal(),
-            'deuterium' => $this->planet->getPlanetAmountOfDeuterium(),
+            'metal' => $this->planet->planet_metal,
+            'crystal' => $this->planet->planet_crystal,
+            'deuterium' => $this->planet->planet_deuterium,
             default => 0.0,
         };
     }
@@ -145,9 +148,9 @@ class ResourceMarket
     private function storeLevel(string $resource): int
     {
         return match ($resource) {
-            'metal' => $this->buildings->getBuildingMetalStore(),
-            'crystal' => $this->buildings->getBuildingCrystalStore(),
-            'deuterium' => $this->buildings->getBuildingDeuteriumStore(),
+            'metal' => $this->buildings->building_metal_store,
+            'crystal' => $this->buildings->building_crystal_store,
+            'deuterium' => $this->buildings->building_deuterium_tank,
             default => 0,
         };
     }

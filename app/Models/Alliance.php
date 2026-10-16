@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $alliance_owner
  * @property int    $alliance_register_time
  * @property int    $alliance_request_notallow
+ * @property-read int $alliance_members  only when selected with the member count
  */
 class Alliance extends Model
 {
@@ -74,6 +75,7 @@ class Alliance extends Model
      */
     protected $casts = [
         'alliance_name' => 'string',
+        'alliance_members' => 'int',
         'alliance_tag' => 'string',
         'alliance_owner' => 'int',
         'alliance_register_time' => 'int',

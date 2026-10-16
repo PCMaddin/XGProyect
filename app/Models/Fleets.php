@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @property int     $fleet_id
  * @property int     $fleet_owner
  * @property int     $fleet_mission
  * @property int     $fleet_start_time
@@ -23,9 +24,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property int     $fleet_target_obj
  * @property int     $fleet_target_owner
  * @property int     $fleet_creation
+ * @property int     $fleet_amount
  * @property string  $fleet_array
+ * @property int     $fleet_resource_metal
+ * @property int     $fleet_resource_crystal
+ * @property int     $fleet_resource_deuterium
+ * @property int     $fleet_fuel
  * @property string  $fleet_group
- * @property boolean $fleet_mess
+ * @property int     $fleet_mess  0 outbound, 1 returning, 2 staying at the target
  */
 class Fleets extends Model
 {
@@ -92,7 +98,12 @@ class Fleets extends Model
     protected $casts = [
         'fleet_owner' => 'int',
         'fleet_mission' => 'int',
+        'fleet_amount' => 'int',
         'fleet_array' => 'string',
+        'fleet_resource_metal' => 'int',
+        'fleet_resource_crystal' => 'int',
+        'fleet_resource_deuterium' => 'int',
+        'fleet_fuel' => 'int',
         'fleet_start_time' => 'int',
         'fleet_start_galaxy' => 'int',
         'fleet_start_system' => 'int',
@@ -107,7 +118,7 @@ class Fleets extends Model
         'fleet_target_obj' => 'int',
         'fleet_target_owner' => 'int',
         'fleet_group' => 'string',
-        'fleet_mess' => 'boolean',
+        'fleet_mess' => 'int',
         'fleet_creation' => 'int',
     ];
 

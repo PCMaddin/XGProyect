@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Research;
 
-use App\Core\Entity\ResearchEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Research;
 
 /**
  * Wraps a user's research rows into typed entities.
@@ -15,7 +16,9 @@ use App\Core\Entity\ResearchEntity;
  */
 class Researches
 {
-    /** @var list<ResearchEntity> */
+    use HydratesModels;
+
+    /** @var list<Research> */
     private array $research = [];
 
     /**
@@ -24,20 +27,20 @@ class Researches
     public function __construct(array $research)
     {
         foreach ($research as $entry) {
-            $this->research[] = new ResearchEntity($entry);
+            $this->research[] = self::hydrateRow(Research::class, $entry);
         }
     }
 
     /**
-     * @return list<ResearchEntity>
+     * @return list<Research>
      */
     public function getResearch(): array
     {
         return $this->research;
     }
 
-    public function getCurrentResearch(): ResearchEntity
+    public function getCurrentResearch(): Research
     {
-        return $this->research[0] ?? new ResearchEntity([]);
+        return $this->research[0] ?? self::hydrateRow(Research::class, []);
     }
 }

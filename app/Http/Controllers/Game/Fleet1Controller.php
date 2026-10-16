@@ -93,12 +93,12 @@ class Fleet1Controller extends BaseController
             [
                 'fleets' => $this->fleets->getFleetsCount(),
                 'max_fleets' => $this->fleetsService->getMaxFleets(
-                    $this->research->getCurrentResearch()->getResearchComputerTechnology(),
-                    $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->getPremiumOfficierAdmiral(), time())
+                    $this->research->getCurrentResearch()->research_computer_technology,
+                    $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
                 ),
                 'expeditions' => $this->fleets->getExpeditionsCount(),
                 'max_expeditions' => $this->fleetsService->getMaxExpeditions(
-                    $this->research->getCurrentResearch()->getResearchAstrophysics()
+                    $this->research->getCurrentResearch()->research_astrophysics
                 ),
                 'no_slot' => $this->buildNoSlotBlock(),
                 'list_of_ships' => $listOfShips,
@@ -163,7 +163,7 @@ class Fleet1Controller extends BaseController
                 'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
-                    $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
+                    $this->research->getCurrentResearch()->research_hyperspace_technology
                 ),
             ];
         }
@@ -219,8 +219,8 @@ class Fleet1Controller extends BaseController
     private function checkAvailableSlot(): bool
     {
         return $this->fleetsService->getMaxFleets(
-            $this->research->getCurrentResearch()->getResearchComputerTechnology(),
-            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->getPremiumOfficierAdmiral(), time())
+            $this->research->getCurrentResearch()->research_computer_technology,
+            $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time())
         ) > $this->fleets->getFleetsCount();
     }
 

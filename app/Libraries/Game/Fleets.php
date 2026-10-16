@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
-use App\Core\Entity\FleetEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Fleets as FleetsModel;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 /**
@@ -16,7 +17,9 @@ use App\Core\Enumerators\MissionsEnumerator as Missions;
  */
 class Fleets
 {
-    /** @var list<FleetEntity> */
+    use HydratesModels;
+
+    /** @var list<FleetsModel> */
     private array $fleets = [];
 
     /** @var array<int, int> */
@@ -34,39 +37,39 @@ class Fleets
         $index = 0;
 
         foreach ($fleets as $fleet) {
-            $entity = new FleetEntity($fleet);
+            $entity = self::hydrateRow(FleetsModel::class, $fleet);
 
             $this->fleets[] = $entity;
-            $this->fleetsIndex[$this->asInt($entity->getFleetId())] = $index++;
+            $this->fleetsIndex[$this->asInt($entity->fleet_id)] = $index++;
             $this->fleetCount++;
 
-            if ($this->asInt($entity->getFleetMission()) === Missions::EXPEDITION) {
+            if ($this->asInt($entity->fleet_mission) === Missions::EXPEDITION) {
                 $this->expeditionCount++;
             }
         }
     }
 
     /**
-     * @return list<FleetEntity>
+     * @return list<FleetsModel>
      */
     public function getFleets(): array
     {
         return $this->fleets;
     }
 
-    public function getFleetById(int $fleetId): FleetEntity
+    public function getFleetById(int $fleetId): FleetsModel
     {
-        return $this->fleets[$this->fleetsIndex[$fleetId] ?? -1] ?? new FleetEntity([]);
+        return $this->fleets[$this->fleetsIndex[$fleetId] ?? -1] ?? self::hydrateRow(FleetsModel::class, []);
     }
 
-    public function getOwnFleetById(int $fleetId): ?FleetEntity
+    public function getOwnFleetById(int $fleetId): ?FleetsModel
     {
         $fleet = $this->getFleetById($fleetId);
 
-        return $this->asInt($fleet->getFleetOwner()) === $this->currentUserId ? $fleet : null;
+        return $this->asInt($fleet->fleet_owner) === $this->currentUserId ? $fleet : null;
     }
 
-    public function getOwnValidFleetById(int $fleetId): ?FleetEntity
+    public function getOwnValidFleetById(int $fleetId): ?FleetsModel
     {
         $fleet = $this->getOwnFleetById($fleetId);
 
@@ -75,9 +78,9 @@ class Fleets
         }
 
         if (
-            $this->asInt($fleet->getFleetStartTime()) <= time() ||
-            $this->asInt($fleet->getFleetEndTime()) < time() ||
-            $this->asInt($fleet->getFleetMess()) === 1
+            $this->asInt($fleet->fleet_start_time) <= time() ||
+            $this->asInt($fleet->fleet_end_time) < time() ||
+            $this->asInt($fleet->fleet_mess) === 1
         ) {
             return null;
         }

@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Game;
 use App\Libraries\Game\Fleets;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use App\Core\Entity\FleetEntity;
+use App\Models\Fleets as FleetsModel;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 #[CoversClass(Fleets::class)]
@@ -44,9 +44,9 @@ class FleetsTest extends TestCase
     {
         $fleets = new Fleets($this->rows(), self::OWNER);
 
-        $this->assertSame(2, $fleets->getFleetById(2)->getFleetId());
-        // unknown id -> a (blank) FleetEntity rather than null
-        $this->assertInstanceOf(FleetEntity::class, $fleets->getFleetById(999));
+        $this->assertSame(2, $fleets->getFleetById(2)->fleet_id);
+        // unknown id -> a (blank) FleetsModel rather than null
+        $this->assertInstanceOf(FleetsModel::class, $fleets->getFleetById(999));
     }
 
     public function testGetOwnFleetByIdRejectsOtherPlayersFleets(): void
@@ -61,7 +61,7 @@ class FleetsTest extends TestCase
     {
         $fleets = new Fleets($this->rows(), self::OWNER);
 
-        $this->assertSame(1, $fleets->getOwnValidFleetById(1)?->getFleetId());
+        $this->assertSame(1, $fleets->getOwnValidFleetById(1)?->fleet_id);
     }
 
     public function testGetOwnValidFleetByIdGuardsAgainstOtherPlayersFleet(): void

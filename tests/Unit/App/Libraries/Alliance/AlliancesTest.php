@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Alliance;
 use App\Libraries\Alliance\Alliances;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use App\Core\Entity\AllianceEntity;
+use App\Models\Alliance;
 
 #[CoversClass(Alliances::class)]
 class AlliancesTest extends TestCase
@@ -46,7 +46,7 @@ class AlliancesTest extends TestCase
         $alliances = new Alliances([], 1);
 
         // legacy indexed [0] on an empty array here
-        $this->assertInstanceOf(AllianceEntity::class, $alliances->getCurrentAlliance());
+        $this->assertInstanceOf(Alliance::class, $alliances->getCurrentAlliance());
     }
 
     public function testFalsyRowsAreFilteredOut(): void

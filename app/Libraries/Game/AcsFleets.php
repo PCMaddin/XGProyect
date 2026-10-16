@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
-use App\Core\Entity\AcsFleetEntity;
+use App\Support\Concerns\HydratesModels;
+use App\Models\Acs;
 
 /**
  * Wraps a set of ACS group rows into typed entities.
@@ -15,7 +16,9 @@ use App\Core\Entity\AcsFleetEntity;
  */
 class AcsFleets
 {
-    /** @var list<AcsFleetEntity> */
+    use HydratesModels;
+
+    /** @var list<Acs> */
     private array $acs = [];
 
     /**
@@ -24,20 +27,20 @@ class AcsFleets
     public function __construct(array $acs)
     {
         foreach ($acs as $fleet) {
-            $this->acs[] = new AcsFleetEntity($fleet);
+            $this->acs[] = self::hydrateRow(Acs::class, $fleet);
         }
     }
 
     /**
-     * @return list<AcsFleetEntity>
+     * @return list<Acs>
      */
     public function getAcs(): array
     {
         return $this->acs;
     }
 
-    public function getFirstAcs(): AcsFleetEntity
+    public function getFirstAcs(): Acs
     {
-        return $this->acs[0] ?? new AcsFleetEntity([]);
+        return $this->acs[0] ?? self::hydrateRow(Acs::class, []);
     }
 }
