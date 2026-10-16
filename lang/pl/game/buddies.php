@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'Zaproszenie do tego gracza już istnieje!',
+    'bu_cannot_request_yourself' => 'Nie możesz zaprosić samego siebie do przyjaciół',
+    'bu_request_message' => 'Treść zaproszenia',
+    'bu_player' => 'Nazwa',
+    'bu_request_text' => 'Tekst zaproszenia',
+    'bu_characters' => 'znaków',
+    'bu_back' => 'Wstecz',
+    'bu_send' => 'Wyślij',
+    'bu_cancel_request' => 'Anuluj zaproszenie',
+    'bu_accept' => 'Akceptuj',
+    'bu_decline' => 'Odrzuć',
+    'bu_delete' => 'Usuń',
+    'bu_buddy_list' => 'Lista przyjaciół',
+    'bu_requests' => 'Zaproszenia',
+    'bu_alliance' => 'Sojusz',
+    'bu_coords' => 'Współrzędne',
+    'bu_text' => 'Tekst',
+    'bu_action' => 'Akcja',
+    'bu_my_requests' => 'Moje zaproszenia',
+    'bu_partners' => 'Moi przyjaciele',
+    'bu_estate' => 'Status',
+    'bu_deleted_title' => 'Utracono przyjaciela',
+    'bu_deleted_text' => 'Gracz %u usunął cię ze swojej listy przyjaciół.',
+    'bu_accepted_title' => 'Zaproszenie przyjęte',
+    'bu_accepted_text' => 'Gracz %u przyjął twoje zaproszenie do przyjaciół.',
+    'bu_rejected_title' => 'Zaproszenie odrzucone',
+    'bu_rejected_text' => 'Gracz %u odrzucił twoje zaproszenie do przyjaciół.',
+    'bu_to_accept_title' => 'Nowe zaproszenie do przyjaciół',
+    'bu_to_accept_text' => 'Gracz %u wysłał ci zaproszenie do przyjaciół.',
+];

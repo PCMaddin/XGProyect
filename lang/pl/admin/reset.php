@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Zresetuj wszechświat',
+    're_sub_title' => 'Tutaj możesz zresetować poszczególne elementy wszechświata albo wyczyścić wszystko. Tej operacji nie można cofnąć — najpierw upewnij się, że masz kopię zapasową.',
+    're_reset_universe_confirmation' => 'Po kliknięciu OK wybrane opcje zostaną wyzerowane. Tej operacji nie można cofnąć, a za kopię zapasową bazy danych odpowiadasz ty. Przy resecie całego wszechświata konta nie zostaną usunięte.',
+    're_defenses_and_ships' => 'Stocznia i obrona',
+    're_defenses' => 'Resetuj obronę',
+    're_ships' => 'Resetuj statki',
+    're_reset_hangar' => 'Resetuj kolejkę stoczni i obrony',
+    're_buldings' => 'Budynki',
+    're_buildings_pl' => 'Resetuj budynki planetarne',
+    're_buildings_lu' => 'Resetuj budynki księżycowe',
+    're_reset_buldings' => 'Resetuj kolejkę budowy',
+    're_inve_ofis' => 'Badania i oficerowie',
+    're_ofici' => 'Resetuj oficerów',
+    're_investigations' => 'Resetuj badania',
+    're_reset_invest' => 'Resetuj trwające badania',
+    're_resources' => 'Surowce',
+    're_resources_dark' => 'Resetuj Ciemną Materię',
+    're_resources_met_cry' => 'Resetuj metal, kryształ i deuter',
+    're_general' => 'Ogólne',
+    're_reset_moons' => 'Resetuj księżyce',
+    're_reset_notes' => 'Resetuj notatki',
+    're_reset_rw' => 'Resetuj raporty wojenne',
+    're_reset_buddies' => 'Resetuj listy przyjaciół',
+    're_reset_allys' => 'Resetuj sojusze',
+    're_reset_fleets' => 'Resetuj floty',
+    're_reset_banned' => 'Resetuj zablokowanych użytkowników',
+    're_reset_messages' => 'Resetuj wiadomości',
+    're_reset_statpoints' => 'Resetuj statystyki',
+    're_reset_all' => 'Zresetuj cały wszechświat',
+    're_reset_h1' => 'Opcje resetu',
+    're_reset_excess' => 'Opcje zostały zresetowane',
+    're_reset_go' => 'Resetuj',
+];

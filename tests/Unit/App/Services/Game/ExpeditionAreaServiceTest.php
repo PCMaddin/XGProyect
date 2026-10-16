@@ -62,7 +62,7 @@ class ExpeditionAreaServiceTest extends DatabaseTestCase
         $this->assertSame('exp_status_crowded', $areas->logbookKey(30));
         $this->assertSame('exp_status_overrun', $areas->logbookKey(51));
 
-        foreach (['de', 'en', 'es', 'fr', 'pt_BR', 'nl', 'it'] as $language) {
+        foreach (['de', 'en', 'es', 'fr', 'pt_BR', 'nl', 'it', 'pl'] as $language) {
             foreach (['exp_status_fresh_1', 'exp_status_fresh_2', 'exp_status_busy', 'exp_status_crowded', 'exp_status_overrun'] as $key) {
                 $this->assertNotSame('game/expedition.' . $key, __('game/expedition.' . $key, [], $language));
             }

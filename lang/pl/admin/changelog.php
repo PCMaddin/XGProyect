@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Lista zmian',
+    'ch_new_item' => 'Dodaj nowy wpis',
+    'ch_sub_title' => 'Tutaj możesz edytować listę zmian (changelog) swojego serwera. Ta sekcja znajduje się w lewym menu gry.',
+    'ch_general' => 'Lista zmian',
+    'ch_date' => 'Data wpisu',
+    'ch_version' => 'Wersja wpisu',
+    'ch_language' => 'Język wpisu',
+    'ch_language_locked' => 'Języka nie można zmienić po utworzeniu.',
+    'ch_translations' => 'Tłumaczenia',
+    'ch_edit_translation' => 'Edytuj tłumaczenie',
+    'ch_delete_translation' => 'Usuń tłumaczenie',
+    'ch_actions' => 'Akcje',
+    'ch_the_description' => 'Opis',
+    'ch_edit_this' => 'Edytuj ten wpis',
+    'ch_delete_this' => 'Usuń ten wpis',
+    'ch_delete_confirm' => 'Czy na pewno chcesz usunąć ten wpis?',
+    'ch_add_action' => 'Dodaj nowy wpis',
+    'ch_edit_action' => 'Edytuj wpis: %s',
+    'ch_version_info' => 'Przykłady poprawnych wersji:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Wybierz język',
+    'ch_characters' => 'znaków',
+    'ch_save' => 'Zapisz wpis',
+    'ch_back' => 'Wróć do listy',
+    'ch_no_entries' => 'Brak wpisów na liście zmian. Dodaj pierwszy!',
+    'ch_description_placeholder' => 'Opisz zmiany wprowadzone w tej wersji...',
+    'ch_entry_details' => 'Szczegóły wpisu',
+    'ch_action_add_done' => 'Wpis został dodany!',
+    'ch_action_edit_done' => 'Wpis został zmieniony!',
+    'ch_action_delete_done' => 'Wpis został usunięty!',
+];

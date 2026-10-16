@@ -13,7 +13,7 @@
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
 | Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch (Schlüssel und Platzhalter per Test gleich) |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
@@ -713,6 +713,14 @@ Baseline-Einträge.
     anhängt (Galaxie: „membro“/„nave“), steht wie im Englischen „(i)“, weil
     Italienisch die Endung austauscht statt sie anzuhängen. Mit `it`
     gecrawlt, ohne neue Fehler.
+  - ✅ **Polnisch** (`pl`, Migration `000026`): Anrede „ty“, Begriffe des
+    polnischen OGame (Mały transporter, Pole zniszczeń, Falanga czujników,
+    Ciemna Materia, Gwiazda Śmierci, Pełzacz/Rozpruwacz/Pionier …). Die
+    Pluraltexte (`bn_players_banned`, `er_errors`, `er_occurrences`) nutzen
+    feste Bereiche mit „Gracze: :count“, weil Polnisch nach 2–4 und ab 5
+    verschiedene Formen braucht; wo die Galaxie Endungen anhängt, steht eine
+    zählbare Form („szt.“, „członkowie: 5“). Mit `pl` gecrawlt, ohne neue
+    Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
 
