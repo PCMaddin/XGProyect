@@ -65,24 +65,15 @@
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="isServerOpen"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="checkBanStatus"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Core/Concerns/PreparesLegacySql.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Core/Entity/ShipsEntity.php"/>
-  <violation rule="PHPMD\Rule\Design\ExitExpression" file="legacy/app/Core/Entity/ShipsEntity.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/BuddiesStatusEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/DefensesEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ImportanceEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/PreferencesEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ReportStatusEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ResearchEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ShipsEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/SwitchIntEnumerator.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="legacy/app/Core/Objects.php"/>
   <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Core/Template.php"/>
   <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Core/Template.php"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Helpers/ArraysHelper.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Helpers/ArraysHelper.php"/>
   <violation rule="PHPMD\Rule\CleanCode\DuplicatedArrayKey" file="legacy/app/Helpers/StringsHelper.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCasePropertyName" file="legacy/app/Libraries/Combatreport/Report.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="__construct"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Libraries/Combatreport/Report.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="legacy/app/Libraries/Combatreport/Report.php" method="getReportOwnersAsArrayByReportId"/>
 </phpmd-baseline>

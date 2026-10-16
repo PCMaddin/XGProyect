@@ -265,22 +265,10 @@ parameters:
 			path: legacy/app/Core/Entity/FleetEntity.php
 
 		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\NotesEntity\:\:__construct\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Entity/NotesEntity.php
-
-		-
 			message: '#^Method Xgp\\App\\Core\\Entity\\PlanetEntity\:\:__construct\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: legacy/app/Core/Entity/PlanetEntity.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\PreferencesEntity\:\:__construct\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Entity/PreferencesEntity.php
 
 		-
 			message: '#^Method Xgp\\App\\Core\\Entity\\PremiumEntity\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
@@ -289,52 +277,10 @@ parameters:
 			path: legacy/app/Core/Entity/PremiumEntity.php
 
 		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\ReportEntity\:\:__construct\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Entity/ReportEntity.php
-
-		-
 			message: '#^Method Xgp\\App\\Core\\Entity\\ResearchEntity\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: legacy/app/Core/Entity/ResearchEntity.php
-
-		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: legacy/app/Core/Entity/ShipsEntity.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\ShipsEntity\:\:__construct\(\) has parameter \$ships with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Entity/ShipsEntity.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\ShipsEntity\:\:setShips\(\) has parameter \$ships with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Core/Entity/ShipsEntity.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\ShipsEntity\:\:setShips\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: legacy/app/Core/Entity/ShipsEntity.php
-
-		-
-			message: '#^Property Xgp\\App\\Core\\Entity\\ShipsEntity\:\:\$_ships type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Core/Entity/ShipsEntity.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Entity\\UserEntity\:\:__construct\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Entity/UserEntity.php
 
 		-
 			message: '#^Method Xgp\\App\\Core\\Objects\:\:getCombatSpecs\(\) has no return type specified\.$#'
@@ -445,88 +391,10 @@ parameters:
 			path: legacy/app/Core/Template.php
 
 		-
-			message: '#^Method Xgp\\App\\Helpers\\ArraysHelper\:\:inMultiArray\(\) has parameter \$haystack with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Helpers/ArraysHelper.php
-
-		-
-			message: '#^Method Xgp\\App\\Helpers\\ArraysHelper\:\:multiArraySearch\(\) has parameter \$haystack with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Helpers/ArraysHelper.php
-
-		-
 			message: '#^Method Xgp\\App\\Helpers\\StringsHelper\:\:parseReplacements\(\) has parameter \$replacements with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: legacy/app/Helpers/StringsHelper.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:__construct\(\) has parameter \$reports with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:createNewReportEntity\(\) has parameter \$report with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getAllDestroyedReports\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getAllReports\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getAllReportsOwnedByUserId\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getFirstReportOwnersAsArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getReportOwnersAsArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getReportOwnersAsArrayByReportId\(\) has parameter \$report_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:getReportOwnersAsArrayByReportId\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Method Xgp\\App\\Libraries\\Combatreport\\Report\:\:setUp\(\) has parameter \$reports with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
-
-		-
-			message: '#^Property Xgp\\App\\Libraries\\Combatreport\\Report\:\:\$_reports type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Libraries/Combatreport/Report.php
 
 		-
 			message: '#^Binary operation "\." between mixed and \(array\<string\>\|string\) results in an error\.$#'

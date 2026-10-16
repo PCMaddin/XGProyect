@@ -38,20 +38,6 @@ class CombatreportController extends BaseController
 
         $content = stripslashes($report->report_content);
 
-        // legacy stuff (just keeping it around for reference.)
-        // foreach (__('game/combatreport.cr_tech_short') as $id => $s_name) {
-        //     $search = [$id];
-        //     $replace = [$s_name];
-        //     $content = str_replace($search, $replace, $content);
-        // }
-
-        // $no_fleet = Template::render('combatreport/combatreport_no_fleet_view');
-        // $destroyed = Template::render('combatreport/combatreport_destroyed_view');
-
-        // $search = [$no_fleet];
-        // $replace = [$destroyed];
-        // $content = str_replace($search, $replace, $content);
-
         return view('combatreport.view', [
             'gameTitle' => $this->settings->getString('game_name'),
             'report' => $content,
