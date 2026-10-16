@@ -29,3 +29,6 @@ storage/logs/*.txt
 /docs/*
 config/xgp-db-config.php
 .php-cs-fixer.cache
+
+#simulator reports (tools/simulate-bots.php)
+/storage/simulations/
