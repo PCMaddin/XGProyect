@@ -263,17 +263,17 @@ class Users
         // Preserve the legacy comparison semantics exactly — these are the
         // session/auth integrity gates.
         if (($userRow['id'] ?? null) != session('user_id')) {
-            Functions::redirect(SYSTEM_ROOT);
+            Functions::redirect(url('/'));
         }
 
         if (Auth::id() !== session('user_id')) {
-            Functions::redirect(SYSTEM_ROOT);
+            Functions::redirect(url('/'));
         }
 
         $expected = self::asString($userRow['password'] ?? '') . '-' . self::asString(config('SECRETWORD'));
 
         if (!Hash::check($expected, self::asString(session('user_password')))) {
-            Functions::redirect(SYSTEM_ROOT);
+            Functions::redirect(url('/'));
         }
     }
 

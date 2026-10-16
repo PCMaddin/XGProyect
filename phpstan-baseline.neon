@@ -221,27 +221,3 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: legacy/app/Helpers/StringsHelper.php
-
-		-
-			message: '#^Binary operation "\." between mixed and \(array\<string\>\|string\) results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: legacy/config/constants.php
-
-		-
-			message: '#^Parameter \#1 \$path of function basename expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/config/constants.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/config/constants.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtr expects string, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/public/game.php

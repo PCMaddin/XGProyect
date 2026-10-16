@@ -16,6 +16,14 @@
  * TIMING CONSTANTS
  *
  */
+/**
+ *
+ * PATHS
+ *
+ */
+// the skin (images) of the game, relative to the public directory
+defined('DPATH') || define('DPATH', 'assets/upload/skins/xgproyect/');
+
 defined('ONE_DAY') || define('ONE_DAY', (60 * 60 * 24)); // 1 DAY
 defined('ONE_WEEK') || define('ONE_WEEK', (ONE_DAY * 7)); // 1 WEEK
 defined('ONE_MONTH') || define('ONE_MONTH', (ONE_DAY * 30)); // 1 MONTH

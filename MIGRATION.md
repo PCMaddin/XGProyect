@@ -386,6 +386,30 @@ Zeile), plus Regressionstest.
   (`false` an den Entity-Konstruktor → `TypeError`). `findBuddy()` sucht jetzt
   nur Anfragen des Spielers, annehmen darf nur der Empfänger. 3 DB-Tests.
 
+- 🔴→✅ **Verlorener Spiel-Bootstrap** (gefixt): Mit der letzten
+  promoteten Seite lief der Legacy-Bootstrap `Core\Common` (über
+  `legacy/public/game.php`) für **keine** Spielseite mehr; `LegacyController`
+  holte nur den Tick nach. Damit fehlten unbemerkt:
+  - **Server geschlossen** (`game_enable`): Nicht-Admins konnten weiterspielen.
+  - **Bann-Prüfung**: gebannte Spieler mit laufender Session spielten weiter
+    (permanente Banns wären auch im alten Code durchgerutscht: `null > time()`).
+  - **Spielersprache** (`Functions::setLanguage()`) und **Spiel-Zeitzone**
+    (`date_time_zone`).
+  - **Konstanten** aus `legacy/config/constants.php`: `LIB_PATH` (→ **jeder
+    Kampf** crashte mit „Undefined constant“), `DPATH` (Galaxie-Aktionen,
+    Feind-Links), `XGP_ROOT`/`IMG_PATH` (BBCode-Bilder, dazu ein Server-Pfad im
+    `src`), `SYSTEM_ROOT` (Session-Redirects in `Users`).
+
+  Jetzt läuft vor jeder Spielseite `App\Services\Game\GameBootstrap`
+  (Sprache, Zeitzone, Tick, Server-/Bann-Prüfung; 8 Tests). `DPATH` steht in
+  `config/legacy/constants.php`, die anderen Stellen brauchen ihre Konstante
+  nicht mehr. `GlobalConstantsTest` prüft per Tokenizer, dass jede in `app/`
+  und `legacy/` benutzte globale Konstante nach dem Boot definiert ist. Der
+  tote Legacy-Pfad (`app/Http/game.php`, `legacy/public/game.php`,
+  `Core\Common`, `legacy/config/constants.php`, `SecurePageLib`, die nach dem
+  Request-Parsing nur noch Superglobals umschrieb) ist entfernt; unbekannte
+  Seiten leiten wie bisher auf die Übersicht um.
+
 ## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
 
 Abgleich aller Sprachdateien (Stand Welle 6). **Wichtig:** ein *fehlender*

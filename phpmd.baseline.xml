@@ -57,13 +57,6 @@
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="app/View/Components/Game/Topnav.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="app/View/Components/Game/Topnav.php"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="app/View/Components/Install/Navigation.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="setSystemTimezone"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="setSecure"/>
-  <violation rule="PHPMD\Rule\Controversial\Superglobals" file="legacy/app/Core/Common.php" method="setSecure"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Core/Common.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="setUpdates"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="isServerOpen"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="legacy/app/Core/Common.php" method="checkBanStatus"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Core/Concerns/PreparesLegacySql.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/BuddiesStatusEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/DefensesEnumerator.php"/>

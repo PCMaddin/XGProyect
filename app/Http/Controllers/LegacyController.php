@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\LegacyView;
-use App\Services\SettingsService;
+use App\Models\User;
+use App\Services\Game\GameBootstrap;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
-use App\Libraries\UpdatesLibrary;
 
 class LegacyController extends BaseController
 {
     /**
-     * Game pages promoted to Laravel controllers.
-     * These bypass the legacy bootstrap entirely.
+     * Game pages served by native controllers (after the GameBootstrap).
      *
      * @var array<string, class-string>
      */
@@ -60,60 +58,29 @@ class LegacyController extends BaseController
         'traderResources' => Game\TraderResourcesController::class,
     ];
 
-    public function __invoke(Request $request): BaseResponse
+    public function __invoke(Request $request, GameBootstrap $bootstrap): BaseResponse
     {
         $file = strtr($request->getPathInfo(), ['/' => '', '.php' => '']);
 
-        if ($file === 'game') {
-            $page = $request->query('page');
-
-            if (is_string($page) && isset(self::PROMOTED_PAGES[$page])) {
-                $this->runLegacyUpdates();
-
-                $result = app()->call(self::PROMOTED_PAGES[$page]);
-
-                return $result instanceof BaseResponse ? $result : new Response($result);
-            }
+        if ($file !== 'game') {
+            return new Response('');
         }
 
-        try {
-            ob_start();
+        $page = $request->query('page');
 
-            if (empty($file)) {
-                $file = 'index';
-            }
-
-            if (in_array($file, ['game'])) {
-                require app_path('Http') . '/' . $file . '.php';
-            }
-
-            $output = ob_get_clean();
-        } catch (LegacyView $e) {
-            $output = $e->getView();
+        // unknown pages: the legacy front controller redirected to the overview
+        if (!is_string($page) || !isset(self::PROMOTED_PAGES[$page])) {
+            return redirect('game.php?page=overview');
         }
 
-        return new Response($output);
-    }
+        $user = $request->user();
 
-    /**
-     * Run the per-request game updates that the legacy bootstrap (Common) runs
-     * in setUpdates(). Promoted pages bypass that bootstrap, so without this the
-     * fleet-arrival tick (and statistics/cleanup) would never fire on a session
-     * that only visits native pages. The legacy fallthrough path still runs
-     * Common itself, so this only covers the promoted branch (no double run).
-     */
-    private function runLegacyUpdates(): void
-    {
-        $settings = app(SettingsService::class);
-
-        if (!defined('SHIP_DEBRIS_FACTOR')) {
-            define('SHIP_DEBRIS_FACTOR', $settings->getInt('fleet_cdr') / 100);
+        if ($user instanceof User) {
+            $bootstrap->run($user);
         }
 
-        if (!defined('DEFENSE_DEBRIS_FACTOR')) {
-            define('DEFENSE_DEBRIS_FACTOR', $settings->getInt('defs_cdr') / 100);
-        }
+        $result = app()->call(self::PROMOTED_PAGES[$page]);
 
-        app(UpdatesLibrary::class);
+        return $result instanceof BaseResponse ? $result : new Response($result);
     }
 }

@@ -111,7 +111,9 @@ abstract class CombatMission extends Missions
             ],
         ]);
 
-        require_once LIB_PATH . 'BattleEngine' . DIRECTORY_SEPARATOR . 'Utils' . DIRECTORY_SEPARATOR . 'Includer.php';
+        // bugfix: LIB_PATH was only defined by the legacy bootstrap, which no
+        // longer runs, so every battle crashed with "Undefined constant"
+        require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'BattleEngine' . DIRECTORY_SEPARATOR . 'Utils' . DIRECTORY_SEPARATOR . 'Includer.php';
 
         AttackLang::activate($this->resource);
 
