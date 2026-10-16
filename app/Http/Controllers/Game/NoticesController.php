@@ -74,8 +74,8 @@ class NoticesController extends BaseController
             'note_owner' => $user->id,
             'note_time' => time(),
             'note_priority' => $this->sanitizePriority($request->integer('u')),
-            'note_title' => $this->sanitizeTitle($request->input('title')),
-            'note_text' => strip_tags((string) $request->input('text', '')),
+            'note_title' => $this->sanitizeTitle($request->string('title')->toString()),
+            'note_text' => strip_tags($request->string('text')->toString()),
         ]);
     }
 
@@ -86,11 +86,14 @@ class NoticesController extends BaseController
             ->update([
                 'note_time' => time(),
                 'note_priority' => $this->sanitizePriority($request->integer('u')),
-                'note_title' => $this->sanitizeTitle($request->input('title')),
-                'note_text' => strip_tags((string) $request->input('text', '')),
+                'note_title' => $this->sanitizeTitle($request->string('title')->toString()),
+                'note_text' => strip_tags($request->string('text')->toString()),
             ]);
     }
 
+    /**
+     * @param array<mixed> $delete note id => 'y' for the notes to delete
+     */
     private function deleteNotes(array $delete, User $user): void
     {
         $ids = array_keys(array_filter($delete, fn ($val) => $val === 'y'));
@@ -102,6 +105,9 @@ class NoticesController extends BaseController
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildListData(User $user): array
     {
         $notes = Notes::where('note_owner', $user->id)
@@ -113,12 +119,15 @@ class NoticesController extends BaseController
             'notes' => $notes->map(fn (Notes $note) => [
                 'id' => $note->note_id,
                 'time' => $this->timingService->formatExtendedDate($note->note_time),
-                'color' => $this->formatService->getImportanceColor($note->note_priority),
+                'color' => $this->formatService->getImportanceColor($note->note_priority ?? 0),
                 'title' => $note->note_title,
             ])->all(),
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildWriteData(Request $request, User $user): array
     {
         $action = (int) $request->query('a', 0);
@@ -157,9 +166,9 @@ class NoticesController extends BaseController
         return in_array($value, self::VALID_PRIORITIES) ? $value : self::DEFAULT_PRIORITY;
     }
 
-    private function sanitizeTitle(?string $title): string
+    private function sanitizeTitle(string $title): string
     {
-        $title = strip_tags(trim((string) $title));
+        $title = strip_tags(trim($title));
 
         return $title !== '' ? $title : (string) __('game/notices.nt_your_subject');
     }

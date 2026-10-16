@@ -40,12 +40,7 @@ class SearchService
             ->orderBy('name')
             ->limit(self::MAX_RESULTS_PER_GROUP)
             ->get(['id', 'name', 'email'])
-            ->map(fn (User $user) => [
-                'label' => $user->name,
-                'type' => 'User',
-                'detail' => $user->email,
-                'url' => route('admin.users.info', $user->id),
-            ]);
+            ->map(fn (User $user): array => self::result($user->name, 'User', $user->email, route('admin.users.info', $user->id)));
     }
 
     /**
@@ -59,12 +54,12 @@ class SearchService
             ->orderBy('alliance_name')
             ->limit(self::MAX_RESULTS_PER_GROUP)
             ->get(['alliance_id', 'alliance_name', 'alliance_tag'])
-            ->map(fn (Alliance $alliance) => [
-                'label' => $alliance->alliance_name,
-                'type' => 'Alliance',
-                'detail' => '[' . $alliance->alliance_tag . ']',
-                'url' => route('admin.alliances.info', $alliance->alliance_id),
-            ]);
+            ->map(fn (Alliance $alliance): array => self::result(
+                $alliance->alliance_name,
+                'Alliance',
+                '[' . $alliance->alliance_tag . ']',
+                route('admin.alliances.info', $alliance->alliance_id)
+            ));
     }
 
     /**
@@ -80,14 +75,22 @@ class SearchService
             ->orderBy('planet_name')
             ->limit(self::MAX_RESULTS_PER_GROUP)
             ->get(['planet_id', 'planet_name', 'planet_galaxy', 'planet_system', 'planet_planet', 'planet_user_id'])
-            ->map(fn (Planets $planet) => [
-                'label' => $planet->planet_name,
-                'type' => $type === PlanetTypes::MOON ? 'Moon' : 'Planet',
-                'detail' => $planet->planet_galaxy . ':' . $planet->planet_system . ':' . $planet->planet_planet
+            ->map(fn (Planets $planet): array => self::result(
+                $planet->planet_name,
+                $type === PlanetTypes::MOON ? 'Moon' : 'Planet',
+                $planet->planet_galaxy . ':' . $planet->planet_system . ':' . $planet->planet_planet
                     . ' (' . $planet->user?->name . ')',
-                'url' => $type === PlanetTypes::MOON
+                $type === PlanetTypes::MOON
                     ? route('admin.users.moons', $planet->planet_user_id)
-                    : route('admin.users.planet.edit', [$planet->planet_user_id, $planet->planet_id]),
-            ]);
+                    : route('admin.users.planet.edit', [$planet->planet_user_id, $planet->planet_id])
+            ));
+    }
+
+    /**
+     * @return array{label: string, type: string, detail: string, url: string}
+     */
+    private static function result(string $label, string $type, string $detail, string $url): array
+    {
+        return ['label' => $label, 'type' => $type, 'detail' => $detail, 'url' => $url];
     }
 }
