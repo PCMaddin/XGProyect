@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Http\Controllers\Game;
 
 use App\Http\Controllers\Game\BuddiesController;
+use App\Models\Buddys;
 use App\Services\SettingsService;
 use App\Services\TimingService;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -37,5 +38,21 @@ class BuddiesControllerTest extends TestCase
         $method = new ReflectionMethod(BuddiesController::class, 'resolveAction');
 
         $this->assertSame($expected, $method->invoke($controller, $mode, $sm));
+    }
+
+    /**
+     * Regression (stored XSS): the request text was output as HTML; texts
+     * stored before it was stripped of tags could carry script.
+     */
+    public function testTheRequestTextIsEscaped(): void
+    {
+        $controller = new BuddiesController(new TimingService(new SettingsService()));
+        $buddy = new Buddys();
+        $buddy->buddy_status = false;
+        $buddy->buddy_request_text = '<script>alert(1)</script> & hi';
+
+        $text = (new ReflectionMethod(BuddiesController::class, 'setText'))->invoke($controller, $buddy, 0);
+
+        $this->assertSame('&lt;script&gt;alert(1)&lt;/script&gt; &amp; hi', $text);
     }
 }

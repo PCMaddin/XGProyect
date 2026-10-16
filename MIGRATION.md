@@ -587,14 +587,16 @@ Baseline-Einträge.
   - Geprüft und in Ordnung: Planetennamen (Zeichenprüfung), Buddy-Texte
     (`strip_tags`), Notizen, Spielernamen (Regel siehe oben).
 
-  **Rest-Risiko:** Schon gespeicherte Werte (Namen, Tags, Texte aus der
-  Zeit vor diesen Fixes) werden nicht nachträglich bereinigt. Einmalig
-  prüfen mit z. B.
-  ``SELECT alliance_id, alliance_name, alliance_tag FROM alliance WHERE CONCAT(alliance_name, alliance_tag) REGEXP '[<>"\'&]'``
-  (analog `users.name`).
-
-## Übersetzungslücken (`lang/en` ↔ `lang/es`) ✅ geschlossen
-
+  **Altdaten:** `php artisan xgp:clean-player-texts` (erst mit `--dry-run`
+  ansehen) bereinigt einmalig, was vor diesen Fixes gespeichert wurde und die
+  heutigen Eingaberegeln nicht erfüllt: Spielernamen (nur ASCII-Buchstaben
+  und -Ziffern, sonst `Player<Id>`), Allianzname und -tag (ohne
+  `< > " ' & \`, sonst `Alliance<Id>`/`A<Id>`), Allianzbild und -homepage
+  (nur http(s), sonst leer), Rangnamen (ohne Tags) und Planetennamen. Nicht
+  angefasst werden Spielernachrichten: Sie mischen Spielertext mit gewolltem
+  HTML und werden nach einer Woche ohnehin gelöscht. Allianztexte,
+  Bewerbungstexte, Buddy-Anfragen und Flotten-Shortcuts werden bei der
+  Ausgabe escaped (Buddy-Anfragen neu in diesem Schritt).
 - **Spanische Expeditionsberichte:** 34 leere Texte übersetzt, darunter alle,
   die das Spiel auswählt (neue Schiffe 5, Ressourcen 3/4, Dunkle Materie 2–5,
   Verzögerung 2–5, schnellere Rückkehr 1/2, nichts gefunden 4–6, Flotte

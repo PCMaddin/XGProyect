@@ -341,7 +341,7 @@ class BuddiesController extends BaseController
             return $this->timingService->getOnlineStatus($onlineTime, time());
         }
 
-        return $this->asString($buddy->buddy_request_text);
+        return e($buddy->buddy_request_text);
     }
 
     private function setAction(Buddys $buddy): string
