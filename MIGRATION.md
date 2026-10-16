@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 958 PHPUnit-Tests (22 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 967 PHPUnit-Tests (25 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
@@ -185,7 +185,7 @@ verschachtelten Helfern (Session-Ships fehlen, keine erlaubte Mission,
 ungültiges Ziel) sauber nach fleet1 zurückzuspringen — der Legacy-Code machte
 das per `header()+exit`, was in Laravel die Session-Speicherung umgangen hätte.
 
-## Welle 5 — Leaf-Bibliotheken 🟢 laufend
+## Welle 5 — Leaf-Bibliotheken ✅ abgeschlossen
 
 Nachdem alle Controller nativ sind, werden die verbleibenden Legacy-Bibliotheken
 (`legacy/app/Libraries/`) einzeln zu typisierten `app/`-Klassen migriert. Ein
