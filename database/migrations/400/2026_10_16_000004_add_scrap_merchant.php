@@ -16,14 +16,20 @@ return new class () extends Migration {
     ];
 
     /**
-     * The scrap merchant: his settings and the rate a player bargained,
-     * kept until the next sale.
+     * The scrap merchant: his settings, and the rate and number of bargains
+     * of a player, kept until the next sale.
      */
     public function up(): void
     {
         if (!Schema::hasColumn('premium', 'premium_scrap_rate')) {
             Schema::table('premium', function (Blueprint $table): void {
                 $table->unsignedTinyInteger('premium_scrap_rate')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('premium', 'premium_scrap_bargains')) {
+            Schema::table('premium', function (Blueprint $table): void {
+                $table->unsignedTinyInteger('premium_scrap_bargains')->default(0);
             });
         }
 
@@ -37,10 +43,12 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        if (Schema::hasColumn('premium', 'premium_scrap_rate')) {
-            Schema::table('premium', function (Blueprint $table): void {
-                $table->dropColumn('premium_scrap_rate');
-            });
+        foreach (['premium_scrap_rate', 'premium_scrap_bargains'] as $column) {
+            if (Schema::hasColumn('premium', $column)) {
+                Schema::table('premium', function (Blueprint $table) use ($column): void {
+                    $table->dropColumn($column);
+                });
+            }
         }
 
         Options::whereIn('name', array_keys($this->options))->delete();

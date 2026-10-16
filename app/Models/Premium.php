@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $premium_officier_technocrat
  * @property string|null $premium_merchant_offer
  * @property int|null $premium_scrap_rate
+ * @property int $premium_scrap_bargains
  */
 class Premium extends Model
 {

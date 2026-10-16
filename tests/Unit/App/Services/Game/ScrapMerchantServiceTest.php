@@ -11,9 +11,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
 
 /**
- * The scrap merchant: he buys ships and defense systems of the planet for
- * 35 % of their price, bargaining raises the share for dark matter up to
- * 75 %, a sale resets it.
+ * The scrap merchant, as in OGame: he buys ships and defense systems of the
+ * planet for 35 % of their price, as much as fits into the storages;
+ * bargaining raises the share by 5 to 14 points up to 75 % and costs 2.000
+ * dark matter more each time (at most 10.000); a sale resets both.
  */
 #[CoversClass(ScrapMerchantService::class)]
 class ScrapMerchantServiceTest extends DatabaseTestCase
@@ -36,6 +37,8 @@ class ScrapMerchantServiceTest extends DatabaseTestCase
         DB::table('planets')->insert(['planet_id' => self::PLANET, 'planet_user_id' => self::USER, 'planet_metal' => 100, 'planet_crystal' => 0, 'planet_deuterium' => 0]);
         DB::table('ships')->insert(['ship_planet_id' => self::PLANET, 'ship_cruiser' => 10, 'ship_small_cargo_ship' => 1]);
         DB::table('defenses')->insert(['defense_planet_id' => self::PLANET, 'defense_rocket_launcher' => 4, 'defense_interplanetary_missile' => 5]);
+        // level 5 storages hold 255.000 of each resource
+        DB::table('buildings')->insert(['building_planet_id' => self::PLANET, 'building_metal_store' => 5, 'building_crystal_store' => 5, 'building_deuterium_tank' => 5]);
     }
 
     public function testHeBuysShipsAndDefensesButNoMissiles(): void
@@ -61,7 +64,7 @@ class ScrapMerchantServiceTest extends DatabaseTestCase
 
     public function testASaleRemovesTheUnitsPaysAndResetsTheRate(): void
     {
-        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_scrap_rate' => 50]);
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_scrap_rate' => 50, 'premium_scrap_bargains' => 3]);
 
         $result = $this->merchant()->scrap(self::USER, self::PLANET, [206 => 3, 401 => 4, 202 => 0, 503 => 5]);
 
@@ -70,6 +73,21 @@ class ScrapMerchantServiceTest extends DatabaseTestCase
         $this->assertSame([0, 5], $this->defenses());
         $this->assertSame([34100, 10500, 3000], $this->resources());
         $this->assertSame(35, $this->merchant()->rate(self::USER));
+        $this->assertSame(2000, $this->merchant()->bargainPrice(self::USER));
+    }
+
+    public function testHePaysOnlyWhatFitsIntoTheStorages(): void
+    {
+        DB::table('planets')->where('planet_id', self::PLANET)->update(['planet_metal' => 250000]);
+
+        // 3 cruisers bring 21.000 metal, 5.000 fit
+        $this->assertSame(['error' => ['tr_no_enough_storage_for', 'metal']], $this->merchant()->scrap(self::USER, self::PLANET, [206 => 3]));
+        $this->assertSame([10, 1], $this->ships());
+
+        // 1 cruiser brings 7.000 metal: still too much; a small cargo 700
+        $this->assertSame(['error' => ['tr_no_enough_storage_for', 'metal']], $this->merchant()->scrap(self::USER, self::PLANET, [206 => 1]));
+        $this->assertArrayHasKey('payment', $this->merchant()->scrap(self::USER, self::PLANET, [202 => 1]));
+        $this->assertSame([250700, 700, 0], $this->resources());
     }
 
     public function testNothingChangesWhenTheUnitsAreNotThere(): void
@@ -84,25 +102,39 @@ class ScrapMerchantServiceTest extends DatabaseTestCase
         $this->assertSame([100, 0, 0], $this->resources());
     }
 
-    public function testBargainingCostsDarkMatterAndStopsAtTheMaximum(): void
+    public function testBargainingCostsMoreEachTimeAndStopsAtTheMaximum(): void
     {
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_dark_matter' => 100000]);
         $this->assertSame(35, $this->merchant()->rate(self::USER));
+        $this->assertSame(2000, $this->merchant()->bargainPrice(self::USER));
 
         $this->assertNull($this->merchant()->bargain(self::USER));
         $rate = $this->merchant()->rate(self::USER);
-        $this->assertGreaterThanOrEqual(36, $rate);
-        $this->assertLessThanOrEqual(45, $rate);
-        $this->assertSame(3000, $this->darkMatter());
+        $this->assertGreaterThanOrEqual(40, $rate);
+        $this->assertLessThanOrEqual(49, $rate);
+        $this->assertSame(98000, $this->darkMatter());
+        $this->assertSame(4000, $this->merchant()->bargainPrice(self::USER));
 
-        $this->assertNull($this->merchant()->bargain(self::USER));
-        $this->assertSame('tr_no_enough_dark_matter', $this->merchant()->bargain(self::USER));
-        $this->assertSame(1000, $this->darkMatter());
+        // the price grows by 2.000 a bargain, up to 10.000
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_scrap_rate' => 40, 'premium_scrap_bargains' => 4]);
+        $this->assertSame(10000, $this->merchant()->bargainPrice(self::USER));
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_scrap_bargains' => 9]);
+        $this->assertSame(10000, $this->merchant()->bargainPrice(self::USER));
 
-        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_dark_matter' => 100000, 'premium_scrap_rate' => 74]);
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_scrap_rate' => 70]);
         $this->assertNull($this->merchant()->bargain(self::USER));
         $this->assertSame(75, $this->merchant()->rate(self::USER));
         $this->assertSame('tr_scrap_final', $this->merchant()->bargain(self::USER));
-        $this->assertSame(98000, $this->darkMatter());
+        $this->assertSame(88000, $this->darkMatter());
+    }
+
+    public function testNoBargainWithoutEnoughDarkMatter(): void
+    {
+        DB::table('premium')->where('premium_user_id', self::USER)->update(['premium_dark_matter' => 1999]);
+
+        $this->assertSame('tr_no_enough_dark_matter', $this->merchant()->bargain(self::USER));
+        $this->assertSame(35, $this->merchant()->rate(self::USER));
+        $this->assertSame(1999, $this->darkMatter());
     }
 
     private function merchant(): ScrapMerchantService

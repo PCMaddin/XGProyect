@@ -89,7 +89,7 @@ class TraderScrapController extends BaseController
             return redirect(self::REDIRECT_TARGET)->with('trader_success', $this->paymentText($result['payment']));
         }
 
-        return sprintf((string) __('game/trader.' . $result['error'][0]), $this->unitName($result['error'][1]));
+        return sprintf((string) __('game/trader.' . $result['error'][0]), $this->unitName($result['error'][1]) ?: (string) __('game/global.' . $result['error'][1]));
     }
 
     /**
@@ -132,7 +132,11 @@ class TraderScrapController extends BaseController
             'canBargain' => !$atMax,
             'bargainPrice' => sprintf(
                 (string) __('game/trader.tr_scrap_bargain_price'),
-                $this->formatService->prettyNumber($this->scrapMerchant->bargainPrice())
+                $this->formatService->prettyNumber($this->scrapMerchant->bargainPrice($userId))
+            ),
+            'freeStorage' => array_map(
+                fn (string $resource): string => $this->formatService->prettyNumber($this->scrapMerchant->freeStorage($planet, $resource)),
+                ['metal' => 'metal', 'crystal' => 'crystal', 'deuterium' => 'deuterium']
             ),
             'units' => $units,
         ];

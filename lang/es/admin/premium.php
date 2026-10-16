@@ -18,7 +18,7 @@ return [
     'pr_scrap' => 'Chatarrero',
     'pr_scrap_base_rate' => 'Parte del precio de construcción (%)',
     'pr_scrap_max_rate' => 'Parte máxima tras regatear (%)',
-    'pr_scrap_bargain_price' => 'Precio por regateo (Materia Oscura)',
+    'pr_scrap_bargain_price' => 'Precio del primer regateo (cada uno más cuesta eso más, como mucho el quíntuple)',
     'pr_merchant_explanation' => 'Las tasas del mercader varían en una proporción de 3/2/1 (valores por defecto), dados por los 3 valores base. Con cada llamada al mercader el precio fluctua entre un 0.7% y un 1%. Entonces por ejemplo, si vendemos metal, el precio base es 3 pero el cristal y deuterio serán calculados en base a un numero aleatorio entre 0.7 (valor por defecto) y 1 (valor por defecto).<br><br>Ejemplo:<br>aleatorio(0.7,1)=0.88;<br>precio metal = 3<br>precio cristal = 2 * 0.88 (3 metal = 1.76 cristal)<br>precio deuterio = 1 * 0.88 (3 metal = 0.88 deuterio)<br><br>Esto se repite por igual con los 3 recursos, siendo siempre el que se vende constante.',
     'pr_save_changes' => 'Guardar cambios',
     'pr_all_ok_message' => '¡Cambios guardados con éxito!',

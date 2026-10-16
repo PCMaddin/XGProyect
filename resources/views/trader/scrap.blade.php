@@ -62,6 +62,14 @@
                         </th>
                     </tr>
                     <tr>
+                        <th colspan="2" style="text-align:right">{{ __('game/trader.tr_free_storage') }}:</th>
+                        <th colspan="2" style="text-align:left">
+                            @foreach ($freeStorage as $resource => $free)
+                            {{ __('game/global.' . $resource) }}: {{ $free }}<br>
+                            @endforeach
+                        </th>
+                    </tr>
+                    <tr>
                         <th colspan="4"><input type="submit" name="scrap" value="{{ __('game/trader.tr_scrap_button') }}"></th>
                     </tr>
                     @endif
