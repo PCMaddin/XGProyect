@@ -10,7 +10,6 @@ use App\Services\TimingService;
 use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
 use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
-use Xgp\App\Core\Template;
 
 /**
  * Presentation helpers for in-flight fleets (event rows, hover popups, coord

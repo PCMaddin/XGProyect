@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class LegacyView extends Exception
 {

@@ -72,7 +72,5 @@
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ResearchEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ShipsEnumerator.php"/>
   <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/SwitchIntEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Controversial\CamelCaseVariableName" file="legacy/app/Core/Template.php"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="legacy/app/Core/Template.php"/>
   <violation rule="PHPMD\Rule\CleanCode\DuplicatedArrayKey" file="legacy/app/Helpers/StringsHelper.php"/>
 </phpmd-baseline>

@@ -9,7 +9,6 @@ use App\Services\Game\Formulas\OfficerService;
 use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Core\Objects;
-use Xgp\App\Core\Template;
 
 /**
  * Development cost / time / price helpers, shared by the native build pages and

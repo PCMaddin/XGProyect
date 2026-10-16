@@ -283,42 +283,6 @@ parameters:
 			path: legacy/app/Core/Entity/ResearchEntity.php
 
 		-
-			message: '#^Method Xgp\\App\\Core\\Template\:\:legacyView\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Template\:\:legacyView\(\) has parameter \$mergeData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Template\:\:legacyView\(\) has parameter \$view with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Template\:\:render\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
-			message: '#^Method Xgp\\App\\Core\\Template\:\:render\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
-			message: '#^Parameter \#1 \$view of class App\\Exceptions\\LegacyView constructor expects Illuminate\\View\\View, Illuminate\\Contracts\\View\\Factory\|Illuminate\\View\\View given\.$#'
-			identifier: argument.type
-			count: 1
-			path: legacy/app/Core/Template.php
-
-		-
 			message: '#^Method Xgp\\App\\Helpers\\StringsHelper\:\:parseReplacements\(\) has parameter \$replacements with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1

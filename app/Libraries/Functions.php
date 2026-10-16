@@ -12,7 +12,6 @@ use App\Services\SettingsService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
-use Xgp\App\Core\Template;
 use Xgp\App\Helpers\StringsHelper;
 
 /**
