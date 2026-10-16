@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'Ce menu vous permet de renommer planètes et lunes, de déplacer des planètes ou de les abandonner complètement.',
+    'rename' => 'Renommer',
+    'new_planet_name' => 'Nouveau nom de planète',
+    'new_moon_name' => 'Nouveau nom de lune',
+    'abandon_homeplanet' => 'Abandonner la planète mère',
+    'abandon_homeplanet_button' => 'Abandonner la planète mère',
+    'abandon_colony' => 'Abandonner la colonie',
+    'abandon_colony_button' => 'Abandonner la colonie',
+    'abandon_moon' => 'Abandonner la lune',
+    'abandon_moon_button' => 'Abandonner la lune',
+    'abandon_homeplanet_unique' => 'Vous ne pouvez pas abandonner votre planète mère tant que vous n’avez pas colonisé une autre planète.',
+    'abandon_homeplanet_with_colonies' => 'Si vous abandonnez votre planète mère, vous arriverez directement sur votre colonie suivante lors de la connexion.',
+    'abandon_confirm_message' => 'Veuillez confirmer la suppression de la planète :coords en saisissant votre mot de passe',
+    'abandon_confirm' => 'Confirmer',
+    'rename_error' => 'Les caractères spéciaux ne sont pas autorisés !',
+    'rename_success' => 'La planète a été renommée en : :name',
+    'wrong_password' => 'Mot de passe incorrect !',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => 'Impossible d’abandonner une planète avec des mouvements de flotte',
+    'rp_planet_abandoned' => 'Planète abandonnée avec succès',
+    'rp_wrong_pass' => 'Mot de passe incorrect, veuillez le saisir à nouveau.',
+
+    'rl_title' => 'Déplacer la planète',
+    'rl_description' => 'Pour %s d’antimatière, la planète et sa lune se déplacent en 24 heures vers une position libre de la même plage (1-3, 4-12, 13-15). L’antimatière n’est prélevée qu’au moment du déplacement. D’ici là, rien ne peut être construit, recherché ou produit au chantier spatial sur la planète et sa lune, et aucune flotte propre ne peut en partir ni s’y rendre. Les vaisseaux suivent sans carburant avec leur durée de vol normale, le champ de débris reste en place et la porte de saut est inactive pendant 24 heures. Le mode vacances annule le déplacement.',
+    'rl_target' => 'Destination',
+    'rl_start' => 'Déplacer',
+    'rl_running' => 'La planète se déplace vers %s le %s.',
+    'rl_cancel' => 'Annuler le déplacement',
+    'rl_started' => 'Le déplacement a commencé.',
+    'rl_cancelled' => 'Le déplacement a été annulé.',
+    'rl_error_planet' => 'Cette planète ne peut pas être déplacée.',
+    'rl_error_running' => 'La planète est déjà en cours de déplacement.',
+    'rl_error_target' => 'Position de destination invalide.',
+    'rl_error_band' => 'La destination doit se trouver dans la même plage de positions (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'La position de destination est occupée ou réservée.',
+    'rl_error_vacation' => 'Impossible de déplacer une planète en mode vacances.',
+    'rl_error_dark_matter' => 'Vous n’avez pas assez d’antimatière.',
+    'rl_error_building' => 'Une construction est en cours sur la planète ou la lune.',
+    'rl_error_research' => 'Une recherche est en cours sur la planète ou la lune.',
+    'rl_error_shipyard' => 'Le chantier spatial de la planète ou de la lune a des ordres.',
+    'rl_error_fleets' => 'Des flottes propres volent depuis ou vers la planète ou la lune.',
+    'rl_error_wreck_field' => 'Le dock spatial répare des vaisseaux ou ils attendent d’être remis en service.',
+    'rl_from' => 'Administration',
+    'rl_subject' => 'Déplacement',
+    'rl_done' => 'La planète s’est déplacée vers %s. Les vaisseaux suivent.',
+    'rl_failed' => 'Le déplacement vers %s a échoué : %s',
+];

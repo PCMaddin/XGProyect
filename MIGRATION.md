@@ -13,7 +13,7 @@
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
 | Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
@@ -666,6 +666,23 @@ Baseline-Einträge.
     eigenen Platzhalter des Spiels (`%1%`, `%player%`, `%t`, `%m`, `%n`). Er
     meldet außerdem Sprachdateien, die es auf Englisch nicht gibt. Neue Tests
     gibt es für den Changelog-Rückfall und die beiden Migrationen.
+- **Französisch als vierte Sprache:** `lang/fr` mit allen 92 Sprachdateien
+  (Spiel, Admin, Installer, E-Mails, Laravel-Validierung). Wie Deutsch
+  erscheint die Sprache automatisch im Installer und in den
+  Servereinstellungen. Gesiezt wird wie im französischen OGame, mit dessen
+  Begriffen (Petit transporteur, Champ de débris, Phalange de capteur,
+  Antimatière, Attaque groupée …). Apostrophe sind typografisch (’), damit
+  keine Escapes in den PHP-Strings nötig sind.
+  - **Tabelle `languages`:** `LanguagesTableSeeder` legt `fr` an; für
+    bestehende Installationen fügt
+    `400/2026_10_16_000022_add_french_language.php` die Zeile hinzu, falls sie
+    fehlt. Beim Zurückrollen bleibt sie, solange es Changelog-Einträge in ihr
+    gibt.
+  - **Changelog:** Ohne französische Einträge zeigt die Seite die englischen.
+  - **Tests:** `LanguageFilesTest`, `AdminObjectNamesTest` und der Test der
+    Expeditionsgebiete prüfen Französisch mit; ein Migrationstest prüft die
+    neue Zeile. Alle Spiel- und Admin-Seiten mit Französisch als
+    Serversprache gecrawlt, ohne neue Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
 

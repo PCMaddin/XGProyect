@@ -22,7 +22,7 @@ class AdminObjectNamesTest extends TestCase
      */
     public static function languages(): array
     {
-        return ['de' => ['de'], 'en' => ['en'], 'es' => ['es']];
+        return ['de' => ['de'], 'en' => ['en'], 'es' => ['es'], 'fr' => ['fr']];
     }
 
     #[DataProvider('languages')]

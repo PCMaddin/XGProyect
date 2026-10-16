@@ -30,7 +30,7 @@ class ChangelogController extends BaseController
 
         $changes = $this->entries($this->settings->getString('lang'));
 
-        // a language without changelog entries of its own (German) shows the
+        // a language without changelog entries of its own (German, French) shows the
         // English ones
         if ($changes->isEmpty()) {
             $changes = $this->entries('en');

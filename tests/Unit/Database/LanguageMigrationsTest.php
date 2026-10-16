@@ -26,7 +26,20 @@ class LanguageMigrationsTest extends DatabaseTestCase
         Languages::where('code', 'de')->delete();
         self::migrate('2026_10_16_000001_add_german_language.php');
         $this->assertSame(1, Languages::where('code', 'de')->count());
-        $this->assertSame(['es', 'en', 'de'], Languages::orderBy('id')->pluck('code')->all());
+        $this->assertSame(['es', 'en', 'fr', 'de'], Languages::orderBy('id')->pluck('code')->all());
+    }
+
+    public function testFrenchIsAddedOnce(): void
+    {
+        $this->seed(LanguagesTableSeeder::class);
+
+        self::migrate('2026_10_16_000022_add_french_language.php');
+        $this->assertSame(1, Languages::where('code', 'fr')->count());
+
+        Languages::where('code', 'fr')->delete();
+        self::migrate('2026_10_16_000022_add_french_language.php');
+        $this->assertSame(['es', 'en', 'de', 'fr'], Languages::orderBy('id')->pluck('code')->all());
+        $this->assertSame('Français', Languages::where('code', 'fr')->value('name'));
     }
 
     public function testAnUnknownServerLanguageBecomesEnglish(): void
@@ -38,6 +51,7 @@ class LanguageMigrationsTest extends DatabaseTestCase
     {
         $this->assertSame('de', $this->serverLanguageAfterMigration('de'));
         $this->assertSame('es', $this->serverLanguageAfterMigration('es'));
+        $this->assertSame('fr', $this->serverLanguageAfterMigration('fr'));
     }
 
     private function serverLanguageAfterMigration(string $language): string
