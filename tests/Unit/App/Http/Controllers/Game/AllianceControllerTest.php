@@ -63,6 +63,53 @@ class AllianceControllerTest extends TestCase
     }
 
     /**
+     * @return iterable<string, array{0: string, 1: string, 2: bool}>
+     */
+    public static function labelProvider(): iterable
+    {
+        yield 'plain name' => ['Dark Empire', 'name', true];
+        yield 'plain tag' => ['DE-1', 'tag', true];
+        yield 'too short' => ['DE', 'tag', false];
+        yield 'markup in name' => ['<svg onload=x>', 'name', false];
+        yield 'quote in tag' => ['A"B', 'tag', false];
+        yield 'ampersand' => ['A&B Corp', 'name', false];
+    }
+
+    /**
+     * Regression (stored XSS): alliance names and tags were only checked for
+     * their length.
+     */
+    #[DataProvider('labelProvider')]
+    public function testAllianceNamesAndTagsMustBePlainText(string $label, string $kind, bool $valid): void
+    {
+        $error = (new ReflectionMethod(AllianceController::class, 'invalidLabel'))
+            ->invoke($this->controllerWithUser([]), $label, $kind);
+
+        $this->assertSame($valid, $error === null);
+    }
+
+    /**
+     * @return iterable<string, array{0: string, 1: string}>
+     */
+    public static function urlProvider(): iterable
+    {
+        yield 'https' => ['https://xgp.test/logo.png', 'https://xgp.test/logo.png'];
+        yield 'javascript' => ['javascript://x%0Aalert(1)', ''];
+        yield 'quote breaks out' => ['http://xgp.test/"onerror=alert(1)', ''];
+        yield 'not a url' => ['logo.png', ''];
+    }
+
+    /**
+     * Regression (stored XSS): FILTER_VALIDATE_URL accepted javascript: and
+     * quotes for the alliance image and homepage.
+     */
+    #[DataProvider('urlProvider')]
+    public function testOnlyPlainHttpAddressesAreKept(string $url, string $expected): void
+    {
+        $this->assertSame($expected, (new ReflectionMethod(AllianceController::class, 'validUrl'))->invoke($this->controllerWithUser([]), $url));
+    }
+
+    /**
      * @param  array<string, mixed>  $user
      */
     private function controllerWithUser(array $user): AllianceController

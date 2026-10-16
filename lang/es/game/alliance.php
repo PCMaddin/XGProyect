@@ -9,6 +9,8 @@ return [
     'al_click_to_send_request' => 'Click aqui para enviar su solicitud a la alianza',
     'al_tag_required' => 'La etiqueta de la alianza es muy corta.',
     'al_name_required' => 'El nombre de la alianza es muy corto.',
+    'al_tag_invalid' => 'La etiqueta de la alianza contiene caracteres no válidos.',
+    'al_name_invalid' => 'El nombre de la alianza contiene caracteres no válidos.',
     'al_name_already_exists' => 'El nombre de la alianza "%s" ya existe.',
     'al_tag_already_exists' => 'La etiqueta de la alianza "%s" ya existe.',
     'al_created' => 'La alianza %s [%d] ha sido creada',

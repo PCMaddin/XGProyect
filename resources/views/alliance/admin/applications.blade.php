@@ -12,7 +12,7 @@
             <th role="cell" colspan="2">{{ $request_from }}</th>
         </tr>
         <tr>
-            <th role="cell" colspan="2">{{ $request_text }}</th>
+            <th role="cell" colspan="2">{!! nl2br(e($request_text)) !!}</th>
         </tr>
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_reply_to_request') }}</td>

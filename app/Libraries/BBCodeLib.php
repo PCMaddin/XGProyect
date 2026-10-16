@@ -12,6 +12,11 @@ use App\Services\FormatService;
  * The legacy version dispatched each tag through eval() on a string built from
  * the matched content; this one maps every tag to a typed handler instead, so
  * no user input is ever evaluated as PHP.
+ *
+ * The text is HTML-escaped before the tags are rendered, and tag arguments
+ * (colors, fonts, sizes, links, images, emails) are only used when valid.
+ * Bugfix (stored XSS): the text was not escaped at all, and arguments could
+ * break out of their attribute, e.g. [img]x" onerror="...[/img].
  */
 class BBCodeLib
 {
@@ -21,7 +26,7 @@ class BBCodeLib
 
     public function bbCode(?string $string = ''): string
     {
-        $result = stripslashes($string ?? '');
+        $result = htmlspecialchars(stripslashes($string ?? ''), ENT_QUOTES | ENT_SUBSTITUTE);
 
         foreach ($this->rules() as [$pattern, $handler]) {
             $replaced = preg_replace_callback($pattern, $handler, $result);
@@ -49,10 +54,10 @@ class BBCodeLib
             ['/\[url=(.*?)\](.*?)\[\/url\]/is', fn (array $matches): string => $this->setUrl($this->group($matches, 1), $this->group($matches, 2))],
             ['/\[email=(.*?)\](.*?)\[\/email\]/is', fn (array $matches): string => $this->setEmail($this->group($matches, 1), $this->group($matches, 2))],
             ['/\[img\](.*?)\[\/img\]/is', fn (array $matches): string => $this->setImage($this->group($matches, 1))],
-            ['/\[color=(.*?)\](.*?)\[\/color\]/is', fn (array $matches): string => $this->wrapStyle('color:' . $this->group($matches, 1), $this->group($matches, 2))],
-            ['/\[font=(.*?)\](.*?)\[\/font\]/is', fn (array $matches): string => $this->wrapStyle('font-family:' . $this->group($matches, 1), $this->group($matches, 2))],
-            ['/\[bg=(.*?)\](.*?)\[\/bg\]/is', fn (array $matches): string => $this->wrapStyle('background-color:' . $this->group($matches, 1), $this->group($matches, 2))],
-            ['/\[size=(.*?)\](.*?)\[\/size\]/is', fn (array $matches): string => $this->wrapStyle('font-size:' . $this->group($matches, 1) . 'px', $this->group($matches, 2))],
+            ['/\[color=(#?[a-z0-9]+)\](.*?)\[\/color\]/is', fn (array $matches): string => $this->wrapStyle('color:' . $this->group($matches, 1), $this->group($matches, 2))],
+            ['/\[font=([a-z0-9 ,\-]+)\](.*?)\[\/font\]/is', fn (array $matches): string => $this->wrapStyle('font-family:' . $this->group($matches, 1), $this->group($matches, 2))],
+            ['/\[bg=(#?[a-z0-9]+)\](.*?)\[\/bg\]/is', fn (array $matches): string => $this->wrapStyle('background-color:' . $this->group($matches, 1), $this->group($matches, 2))],
+            ['/\[size=([0-9]{1,2})\](.*?)\[\/size\]/is', fn (array $matches): string => $this->wrapStyle('font-size:' . $this->group($matches, 1) . 'px', $this->group($matches, 2))],
             ['/\[coordinates\](.*?):(.*?):(.*?)\[\/coordinates\]/is', fn (array $matches): string => $this->setCoordinates($this->group($matches, 1), $this->group($matches, 2), $this->group($matches, 3))],
         ];
     }
@@ -67,14 +72,14 @@ class BBCodeLib
 
     private function wrapStyle(string $style, string $content): string
     {
-        return '<span style="' . $style . '">' . stripslashes($content) . '</span>';
+        return '<span style="' . $style . '">' . $content . '</span>';
     }
 
     private function setList(string $string): string
     {
         $out = '';
 
-        foreach (explode('[*]', stripslashes($string)) as $list) {
+        foreach (explode('[*]', $string) as $list) {
             if (trim($list) !== '') {
                 $out .= '<li>' . trim($list) . '</li>';
             }
@@ -83,27 +88,42 @@ class BBCodeLib
         return '<ul>' . $out . '</ul>';
     }
 
+    /**
+     * Only http(s) and ftp links (the legacy blocklist let JavaScript: or
+     * " javascript:" through); anything else stays text.
+     */
     private function setUrl(string $url, string $title): string
     {
-        $title = htmlspecialchars(stripslashes($title), ENT_QUOTES);
         $url = trim($url);
-        $excluded = ['data', 'file', 'javascript', 'jar', '#'];
 
-        if (in_array(strstr($url, ':', true), $excluded, true)) {
-            return $url;
+        if (preg_match('#^(https?|ftp)://[^\s"<>]+$#i', $url) !== 1) {
+            return $title;
         }
 
-        return $this->formatService->link($url, $title, $title);
+        return $this->formatService->link($url, $title, strip_tags($title));
     }
 
     private function setEmail(string $mail, string $title): string
     {
-        return '<a href="mailto:' . $mail . '" title="' . $mail . '">' . stripslashes($title) . '</a>';
+        if (str_contains($mail, '<') || filter_var(html_entity_decode($mail, ENT_QUOTES), FILTER_VALIDATE_EMAIL) === false) {
+            return $title;
+        }
+
+        return '<a href="mailto:' . $mail . '" title="' . $mail . '">' . $title . '</a>';
     }
 
+    /**
+     * An http(s) image, or one of the game's images by relative path.
+     */
     private function setImage(string $img): string
     {
-        if (!str_starts_with($img, 'http://') && !str_starts_with($img, 'https://')) {
+        $img = trim($img);
+
+        if (preg_match('#^https?://[^\s"<>]+$#i', $img) !== 1) {
+            if (preg_match('#^[a-z0-9_\-/]+\.[a-z]+$#i', $img) !== 1) {
+                return $img;
+            }
+
             $img = 'assets/images/' . $img;
         }
 

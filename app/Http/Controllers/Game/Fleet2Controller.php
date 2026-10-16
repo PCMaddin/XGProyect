@@ -208,7 +208,7 @@ class Fleet2Controller extends BaseController
             $rows[] = [
                 'value' => $this->coord($shortcut, 'g') . ';' . $this->coord($shortcut, 's') . ';' . $this->coord($shortcut, 'p') . ';' . $this->coord($shortcut, 'pt'),
                 'selected' => '',
-                'title' => $this->asString($shortcut['name']) . ' ' . $this->formatService->prettyCoords(
+                'title' => e($this->asString($shortcut['name'])) . ' ' . $this->formatService->prettyCoords(
                     $this->coord($shortcut, 'g'),
                     $this->coord($shortcut, 's'),
                     $this->coord($shortcut, 'p')

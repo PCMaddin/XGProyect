@@ -95,9 +95,15 @@ final class Ranks
         }
     }
 
+    /**
+     * Tags are stripped, as for a new rank (they were kept here, and rank
+     * names are output unescaped); an empty name changes nothing.
+     */
     public function editRankNameById(int $rankId, string $name): void
     {
-        if (isset($this->ranks[$rankId])) {
+        $name = strip_tags($name);
+
+        if ($name !== '' && isset($this->ranks[$rankId])) {
             $this->ranks[$rankId]['rank'] = $name;
         }
     }

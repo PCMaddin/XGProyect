@@ -496,10 +496,37 @@ Baseline-Einträge.
   eine Ergebnis der Aggregation, also zählen **alle** Labore des Spielers statt
   der Stufe+1 besten (Forschung damit schneller als vorgesehen). Der Fehler
   stammt aus dem Upstream-Code.
-- 🟡 **Offen: weiterer XSS-Audit nötig.** `BBCodeLib` escaped kein HTML
-  (Allianz-Beschreibung/-Text, Bewerbungstext `ally_request_text`), und viele
-  Game-Views geben Werte mit `{!! !!}` aus. Ob dort HTML gewollt ist, muss pro
-  Feld entschieden werden.
+- 🔴→✅ **XSS-Audit Spielereingaben** (gefixt). Geprüft wurden die von
+  Spielern gesetzten Texte und ihr Weg in die rund 250 `{!! !!}`-Ausgaben:
+  - **Allianztexte (BBCode):** `BBCodeLib` escaped den Text jetzt vor dem
+    Rendern. Tag-Argumente werden nur gültig übernommen: Farben/Hintergrund
+    `#?[a-z0-9]+`, Schrift `[a-z0-9 ,-]+`, Größe 1–2 Ziffern, Links nur
+    http(s)/ftp, Bilder http(s) oder ein einfacher Pfad, E-Mail per
+    `FILTER_VALIDATE_EMAIL`. Vorher ging `<script>` durch, und
+    `[img]x" onerror="…[/img]`, `[color=…" onmouseover=…]` oder
+    `[url=JavaScript:…]` brachen aus. 9 Payload-Tests, 8 davon schlugen gegen
+    die alte Version an.
+  - **Allianzname und -tag** wurden nur auf die Länge geprüft und an vielen
+    Stellen roh ausgegeben (Galaxie, Statistik, Suche, Nachrichten). Jetzt
+    sind `< > " ' & \` beim Gründen, Umbenennen und im Admin verboten.
+  - **Allianzbild/-homepage:** `FILTER_VALIDATE_URL` akzeptiert
+    `javascript:` und Anführungszeichen (`<img src="http://x/"onerror=…">`).
+    Erlaubt sind nur noch http(s)-Adressen ohne Anführungszeichen und
+    spitze Klammern, die Ausgabe wird zusätzlich escaped.
+  - **Rangnamen:** Umbenennen entfernt Tags jetzt wie beim Anlegen.
+  - **Bewerbungstext:** wird escaped mit Zeilenumbrüchen ausgegeben (vorher
+    escaped *nach* `nl2br`, also mit sichtbarem `<br />`). Der Allianztag
+    in der Warte-Meldung wird escaped.
+  - **Flotten-Shortcuts:** Namen werden in der Zielauswahl escaped
+    (Self-XSS).
+  - Geprüft und in Ordnung: Planetennamen (Zeichenprüfung), Buddy-Texte
+    (`strip_tags`), Notizen, Spielernamen (Regel siehe oben).
+
+  **Rest-Risiko:** Schon gespeicherte Werte (Namen, Tags, Texte aus der
+  Zeit vor diesen Fixes) werden nicht nachträglich bereinigt. Einmalig
+  prüfen mit z. B.
+  ``SELECT alliance_id, alliance_name, alliance_tag FROM alliance WHERE CONCAT(alliance_name, alliance_tag) REGEXP '[<>"\'&]'``
+  (analog `users.name`).
 
 ## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
 

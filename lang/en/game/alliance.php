@@ -9,6 +9,8 @@ return [
     'al_click_to_send_request' => 'Click here to send your application to the alliance',
     'al_tag_required' => 'Alliance tag too short',
     'al_name_required' => 'Alliance name too short',
+    'al_tag_invalid' => 'The alliance tag contains invalid characters',
+    'al_name_invalid' => 'The alliance name contains invalid characters',
     'al_name_already_exists' => 'The alliance name "%s" already exists.',
     'al_tag_already_exists' => 'The alliance tag "%s" already exists.',
     'al_created' => 'The alliance %s was created',

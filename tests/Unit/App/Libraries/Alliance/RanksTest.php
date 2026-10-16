@@ -115,6 +115,16 @@ class RanksTest extends TestCase
         $this->assertSame([0, 1, 2], array_keys($ranks->getAllRanksAsArray()));
     }
 
+    public function testRenamingStripsTagsAndIgnoresEmptyNames(): void
+    {
+        $ranks = new Ranks(self::DEFAULT_RANKS);
+
+        $ranks->editRankNameById(Ranks::FOUNDER, '<b>Boss</b>');
+        $ranks->editRankNameById(Ranks::NEWCOMER, '<script></script>');
+
+        $this->assertSame(['Boss', 'Newcomer'], array_column($ranks->getAllRanksAsArray(), 'rank'));
+    }
+
     public function testTheFounderAndNewcomerRanksCannotBeDeleted(): void
     {
         $ranks = new Ranks(self::DEFAULT_RANKS);

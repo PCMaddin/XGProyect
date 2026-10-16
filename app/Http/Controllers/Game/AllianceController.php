@@ -330,8 +330,10 @@ class AllianceController extends BaseController
             $name = $this->asString($request->input('nametag'));
             $editUrl = 'game.php?page=alliance&mode=admin&edit=name';
 
-            if (strlen($name) < 3 || strlen($name) > 30) {
-                Functions::message((string) __('game/alliance.al_name_required'), $editUrl, 3);
+            $error = $this->invalidLabel($name, 'name');
+
+            if ($error !== null) {
+                Functions::message($error, $editUrl, 3);
             }
 
             if ($this->allianceNameExists($name) !== null) {
@@ -359,8 +361,10 @@ class AllianceController extends BaseController
             $tag = $this->asString($request->input('nametag'));
             $editUrl = 'game.php?page=alliance&mode=admin&edit=tag';
 
-            if (strlen($tag) < 3 || strlen($tag) > 8) {
-                Functions::message((string) __('game/alliance.al_tag_required'), $editUrl, 3);
+            $error = $this->invalidLabel($tag, 'tag');
+
+            if ($error !== null) {
+                Functions::message($error, $editUrl, 3);
             }
 
             if ($this->allianceTagExists($tag) !== null) {
@@ -404,7 +408,7 @@ class AllianceController extends BaseController
                 'id' => $id,
                 'username' => $this->asString($requestRow['name'] ?? ''),
                 'time' => $this->timingService->formatExtendedDate($this->asInt($requestRow['ally_register_time'] ?? 0)),
-                'ally_request_text' => nl2br($this->asString($requestRow['ally_request_text'] ?? '')),
+                'ally_request_text' => $this->asString($requestRow['ally_request_text'] ?? ''),
             ];
         }
 
@@ -652,9 +656,41 @@ class AllianceController extends BaseController
         return $ranks->getRankById($rankId)['rank'] ?? '';
     }
 
+    /**
+     * Why an alliance name or tag is not acceptable, or null.
+     *
+     * Bugfix (stored XSS): only the length was checked, but names and tags
+     * are output unescaped in many places (galaxy, statistics, search,
+     * messages).
+     *
+     * @param 'name'|'tag' $kind
+     */
+    private function invalidLabel(string $value, string $kind): ?string
+    {
+        $maxLength = $kind === 'tag' ? 8 : 30;
+
+        if (strlen($value) < 3 || strlen($value) > $maxLength) {
+            return $this->asString(__('game/alliance.al_' . $kind . '_required'));
+        }
+
+        if (preg_match('/[<>"\'&\\\\]/', $value) === 1) {
+            return $this->asString(__('game/alliance.al_' . $kind . '_invalid'));
+        }
+
+        return null;
+    }
+
+    /**
+     * An http(s) address without characters that end an HTML attribute.
+     *
+     * Bugfix (stored XSS): FILTER_VALIDATE_URL accepts javascript: and
+     * quotes, so the image or homepage could carry script.
+     */
     private function validUrl(mixed $value): string
     {
-        return is_string($value) && filter_var($value, FILTER_VALIDATE_URL) !== false ? $value : '';
+        return is_string($value) && preg_match('#^https?://[^\s"\'<>]+$#i', $value) === 1 && filter_var($value, FILTER_VALIDATE_URL) !== false
+            ? $value
+            : '';
     }
 
     private function setUpAlliances(Request $request): Alliances
@@ -744,7 +780,7 @@ class AllianceController extends BaseController
         }
 
         return view('alliance.awaiting', [
-            'request_text' => str_replace('%s', $this->currentAllianceTag(), $requestText),
+            'request_text' => str_replace('%s', e($this->currentAllianceTag()), $requestText),
             'button_text' => $buttonText,
         ]);
     }
@@ -846,16 +882,20 @@ class AllianceController extends BaseController
         $name = is_string($rawName = $request->input('aname')) ? $rawName : '';
         $makeUrl = 'game.php?page=alliance&mode=make';
 
-        if (strlen($tag) < 3 || strlen($tag) > 8) {
-            Functions::message((string) __('game/alliance.al_tag_required'), $makeUrl, 3);
+        $error = $this->invalidLabel($tag, 'tag');
+
+        if ($error !== null) {
+            Functions::message($error, $makeUrl, 3);
         }
 
         if ($this->allianceTagExists($tag) !== null) {
             Functions::message(strtr((string) __('game/alliance.al_tag_already_exists'), ['%s' => $tag]), $makeUrl, 3);
         }
 
-        if (strlen($name) < 3 || strlen($name) > 30) {
-            Functions::message((string) __('game/alliance.al_name_required'), $makeUrl, 3);
+        $error = $this->invalidLabel($name, 'name');
+
+        if ($error !== null) {
+            Functions::message($error, $makeUrl, 3);
         }
 
         if ($this->allianceNameExists($name) !== null) {
@@ -1154,7 +1194,7 @@ class AllianceController extends BaseController
         $image = $this->alliance->getCurrentAlliance()->getAllianceImage();
 
         if ($image !== '') {
-            return '<tr><th role="cell" colspan="2">' . Functions::setImage($image, $image) . '</th></tr>';
+            return '<tr><th role="cell" colspan="2">' . Functions::setImage(e($image), e($image)) . '</th></tr>';
         }
 
         return '';
@@ -1279,7 +1319,7 @@ class AllianceController extends BaseController
             return '-';
         }
 
-        $url = UrlHelper::prepUrl($webUrl);
+        $url = e(UrlHelper::prepUrl($webUrl));
 
         return $this->formatService->link($url, $url, $url, 'target="_blank"');
     }
