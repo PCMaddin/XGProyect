@@ -9,7 +9,7 @@ use App\Services\Game\Formulas\OfficerService;
 use App\Services\TimingService;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 
 /**
  * Presentation helpers for in-flight fleets (event rows, hover popups, coord

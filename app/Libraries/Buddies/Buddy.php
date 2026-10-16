@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Buddies;
 
-use Xgp\App\Core\Entity\BuddyEntity;
+use App\Core\Entity\BuddyEntity;
 use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 
 /**

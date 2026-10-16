@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Premium;
 use App\Libraries\Premium\Premium;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Entity\PremiumEntity;
+use App\Core\Entity\PremiumEntity;
 
 #[CoversClass(Premium::class)]
 class PremiumTest extends TestCase

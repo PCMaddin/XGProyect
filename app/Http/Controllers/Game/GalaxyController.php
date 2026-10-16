@@ -15,7 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;

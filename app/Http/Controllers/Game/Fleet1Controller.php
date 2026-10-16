@@ -14,7 +14,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;

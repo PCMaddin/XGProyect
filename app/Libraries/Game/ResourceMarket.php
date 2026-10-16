@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Libraries\Game;
 
 use App\Services\Game\Formulas\ProductionService;
-use Xgp\App\Core\Entity\BuildingsEntity;
-use Xgp\App\Core\Entity\PlanetEntity;
-use Xgp\App\Core\Entity\PremiumEntity;
+use App\Core\Entity\BuildingsEntity;
+use App\Core\Entity\PlanetEntity;
+use App\Core\Entity\PremiumEntity;
 
 /**
  * Dark-matter pricing for the resource-market storage refill.

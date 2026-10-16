@@ -8,7 +8,7 @@ use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\ResearchEnumerator as Research;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 
 /**
  * Development cost / time / price helpers, shared by the native build pages and

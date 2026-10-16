@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
-use Xgp\App\Core\Entity\AcsFleetEntity;
+use App\Core\Entity\AcsFleetEntity;
 
 /**
  * Wraps a set of ACS group rows into typed entities.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Research;
 
-use Xgp\App\Core\Entity\ResearchEntity;
+use App\Core\Entity\ResearchEntity;
 
 /**
  * Wraps a user's research rows into typed entities.

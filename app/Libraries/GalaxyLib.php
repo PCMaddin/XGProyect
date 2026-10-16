@@ -10,7 +10,7 @@ use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Helpers\StringsHelper;
 use App\Helpers\UrlHelper;
 

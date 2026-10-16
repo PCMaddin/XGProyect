@@ -102,7 +102,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Run PHPMD
-        run: vendor/bin/phpmd app/,legacy/ github phpmd.xml --baseline-file phpmd.baseline.xml
+        run: vendor/bin/phpmd app/ github phpmd.xml --baseline-file phpmd.baseline.xml
 
   composer-audit:
     name: Composer Audit

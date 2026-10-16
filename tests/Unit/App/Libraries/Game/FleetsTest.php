@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Game;
 use App\Libraries\Game\Fleets;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Entity\FleetEntity;
+use App\Core\Entity\FleetEntity;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 #[CoversClass(Fleets::class)]

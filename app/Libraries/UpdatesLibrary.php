@@ -17,7 +17,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ResearchEnumerator as Research;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\DevelopmentsLib as Developments;
 
 /**

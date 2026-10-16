@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Research;
 use App\Libraries\Research\Researches;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Entity\ResearchEntity;
+use App\Core\Entity\ResearchEntity;
 
 #[CoversClass(Researches::class)]
 class ResearchesTest extends TestCase

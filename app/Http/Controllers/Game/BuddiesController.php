@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Entity\BuddyEntity;
+use App\Core\Entity\BuddyEntity;
 use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 use App\Libraries\Buddies\Buddy;
 use App\Libraries\Functions;

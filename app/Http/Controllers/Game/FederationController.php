@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Entity\FleetEntity;
+use App\Core\Entity\FleetEntity;
 use App\Libraries\Functions;
 use App\Libraries\Game\AcsFleets;
 use App\Libraries\Game\Fleets;

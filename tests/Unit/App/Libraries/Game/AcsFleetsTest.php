@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Game;
 use App\Libraries\Game\AcsFleets;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Entity\AcsFleetEntity;
+use App\Core\Entity\AcsFleetEntity;
 
 #[CoversClass(AcsFleets::class)]
 class AcsFleetsTest extends TestCase

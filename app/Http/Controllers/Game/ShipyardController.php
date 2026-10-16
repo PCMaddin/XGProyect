@@ -16,7 +16,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;

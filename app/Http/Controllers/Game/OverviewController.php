@@ -13,7 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;

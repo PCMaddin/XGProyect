@@ -30,7 +30,7 @@ class GlobalConstantsTest extends TestCase
         $used = [];
         $root = dirname(__DIR__, 3);
 
-        foreach (['app', 'legacy'] as $directory) {
+        foreach (['app'] as $directory) {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/' . $directory));
 
             foreach ($files as $file) {
@@ -87,7 +87,7 @@ class GlobalConstantsTest extends TestCase
     public function testEveryUsedConstantIsDefined(): void
     {
         // the battle engine defines its own constants when a battle starts
-        require_once dirname(__DIR__, 3) . '/legacy/app/Libraries/BattleEngine/Utils/Includer.php';
+        require_once dirname(__DIR__, 3) . '/app/Libraries/BattleEngine/Utils/Includer.php';
 
         $undefined = [];
 

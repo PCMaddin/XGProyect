@@ -1,0 +1,440 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Libraries\BattleEngine\Models;
+
+use Exception;
+use App\Libraries\BattleEngine\CombatObject\PhysicShot;
+use App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
+
+/**
+ *  OPBE
+ *  Copyright (C) 2015  Jstar
+ *
+ * This file is part of OPBE.
+ *
+ * OPBE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OPBE is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OPBE.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package OPBE
+ *
+ * @author Jstar <frascafresca@gmail.com>
+ * @copyright 2015 Jstar <frascafresca@gmail.com>
+ * @license http://www.gnu.org/licenses/ GNU AGPLv3 License
+ *
+ * @version 6-3-1015
+ *
+ * @link https://github.com/jstar88/opbe
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ */
+class ShipType extends Type
+{
+    private int | float $originalPower;
+    private int | float $originalShield;
+    private int | float $singleShield;
+    private float $singleLife = 0;
+    private int | float $singlePower;
+    private int | float $fullShield = 0;
+    private int | float $fullLife = 0;
+    private int | float $fullPower = 0;
+    protected int | float $currentShield = 0;
+    protected int | float $currentLife = 0;
+    /** @var array{weapons: int, shields: int, armour: int} the technology levels */
+    private array $techs = ['weapons' => 0, 'shields' => 0, 'armour' => 0];
+    /** @var array<int, int> */
+    private array $rf;
+    protected int | float $lastShots = 0;
+    protected int | float $lastShipHit = 0;
+    /** @var array<int, int> */
+    private array $cost;
+
+    /**
+     * @param array<int, int> $rf
+     * @param array<int, int> $cost
+     */
+    public function __construct(int $id, int | float $count, array $rf, int | float $shield, array $cost, int | float $power, ?int $weaponsTech = null, ?int $shieldsTech = null, ?int $armourTech = null)
+    {
+        parent::__construct($id, 0);
+
+        $this->rf = $rf;
+        $this->lastShots = 0;
+        $this->lastShipHit = 0;
+        $this->cost = $cost;
+
+        $this->originalShield = $shield;
+        $this->originalPower = $power;
+
+        $this->singleShield = $shield;
+        $this->singleLife = COST_TO_ARMOUR * array_sum($cost);
+        $this->singlePower = $power;
+
+        $this->increment($count);
+        $this->setWeaponsTech($weaponsTech);
+        $this->setArmourTech($armourTech);
+        $this->setShieldsTech($shieldsTech);
+    }
+
+    /**
+     * ShipType::setWeaponsTech()
+     * Set new weapon techs level.
+     *
+     * @param int|null $level
+     */
+    public function setWeaponsTech(?int $level): void
+    {
+        if (!is_numeric($level)) {
+            return;
+        }
+        $diff = $level - $this->techs['weapons'];
+        if ($diff < 0) {
+            throw new Exception('Trying to decrease tech');
+        }
+        $this->techs['weapons'] = $level;
+        $incr = 1 + WEAPONS_TECH_INCREMENT_FACTOR * $diff;
+        $this->singlePower *= $incr;
+        $this->fullPower *= $incr;
+    }
+
+    /**
+     * ShipType::setShieldsTech()
+     * Set new shield techs level.
+     *
+     * @param int|null $level
+     */
+    public function setShieldsTech(?int $level): void
+    {
+        if (!is_numeric($level)) {
+            return;
+        }
+        $diff = $level - $this->techs['shields'];
+        if ($diff < 0) {
+            throw new Exception('Trying to decrease tech');
+        }
+        $this->techs['shields'] = $level;
+        $incr = 1 + SHIELDS_TECH_INCREMENT_FACTOR * $diff;
+        $this->singleShield *= $incr;
+        $this->fullShield *= $incr;
+        $this->currentShield *= $incr;
+    }
+
+    /**
+     * ShipType::setArmourTech()
+     * Set new armour techs level
+     *
+     * @param int|null $level
+     */
+    public function setArmourTech(?int $level): void
+    {
+        if (!is_numeric($level)) {
+            return;
+        }
+        $diff = $level - $this->techs['armour'];
+        if ($diff < 0) {
+            throw new Exception('Trying to decrease tech');
+        }
+        $this->techs['armour'] = $level;
+        $incr = 1 + ARMOUR_TECH_INCREMENT_FACTOR * $diff;
+        $this->singleLife *= $incr;
+        $this->fullLife *= $incr;
+        $this->currentLife *= $incr;
+    }
+
+    /**
+     * ShipType::increment()
+     * Increment the amount of ships of this type.
+     *
+     * @param int|float $number : the amount of ships to add.
+     * @param int|float|null $newLife : the life of new ships added, default = full health
+     * @param int|float|null $newShield : the shield of new ships added, default = full shield
+     */
+    public function increment($number, $newLife = null, $newShield = null): void
+    {
+        parent::increment($number);
+        if ($newLife == null) {
+            $newLife = $this->singleLife;
+        }
+        if ($newShield == null) {
+            $newShield = $this->singleShield;
+        }
+        $this->fullLife += $this->singleLife * $number;
+        $this->fullPower += $this->singlePower * $number;
+        $this->fullShield += $this->singleShield * $number;
+
+        $this->currentLife += $newLife * $number;
+        $this->currentShield += $newShield * $number;
+    }
+
+    /**
+     * ShipType::decrement()
+     * Decrement the amount of ships of this type.
+     *
+     * @param int|float $number : the amount of ships to be removed.
+     * @param int|float|null $remainLife : the life of removed ships, default = full health
+     * @param int|float|null $remainShield : the shield of removed ships, default = full shield
+     */
+    public function decrement($number, $remainLife = null, $remainShield = null): void
+    {
+        parent::decrement($number);
+        if ($remainLife == null) {
+            $remainLife = $this->singleLife;
+        }
+        if ($remainShield == null) {
+            $remainShield = $this->singleShield;
+        }
+        $this->fullLife -= $this->singleLife * $number;
+        $this->fullPower -= $this->singlePower * $number;
+        $this->fullShield -= $this->singleShield * $number;
+
+        $this->currentLife -= $remainLife * $number;
+        $this->currentShield -= $remainShield * $number;
+    }
+
+    /**
+     * ShipType::setCount()
+     * Set the amount of ships of this type.
+     *
+     * @param int|float $number : the amount of ships.
+     * @param int|float|null $life : the life of ships, default = full health
+     * @param int|float|null $shield : the life of ships, default = full health
+     */
+    public function setCount($number, $life = null, $shield = null): void
+    {
+        parent::setCount($number);
+        $diff = $number - $this->getCount();
+        if ($diff > 0) {
+            $this->increment($diff, $life, $shield);
+        } elseif ($diff < 0) {
+            $this->decrement($diff, $life, $shield);
+        }
+    }
+
+    /**
+     * ShipType::getCost()
+     * Get the array of cost to build this type of ship.
+     *
+     * @return array<int, int>
+     */
+    public function getCost(): array
+    {
+        return $this->cost;
+    }
+
+    /**
+     * ShipType::getWeaponsTech()
+     * Get the level of current weapon tech.
+     */
+    public function getWeaponsTech(): int
+    {
+        return $this->techs['weapons'];
+    }
+
+    /**
+     * ShipType::getShieldsTech()
+     * Get the level of current shield tech.
+     */
+    public function getShieldsTech(): int
+    {
+        return $this->techs['shields'];
+    }
+
+    /**
+     * ShipType::getArmourTech()
+     * Get the level of current armour tech.
+     */
+    public function getArmourTech(): int
+    {
+        return $this->techs['armour'];
+    }
+
+    /**
+     * ShipType::getRfTo()
+     * Get the propability of this shipType to shot again given shipType
+     */
+    public function getRfTo(ShipType $other): int
+    {
+        return (isset($this->rf[$other->getId()])) ? $this->rf[$other->getId()] : 0;
+    }
+
+    /**
+     * ShipType::getRF()
+     * Get an array of rapid fire
+     *
+     * @return array<int, int>
+     */
+    public function getRF(): array
+    {
+        return $this->rf;
+    }
+
+    /**
+     * ShipType::getShield()
+     * Get the shield value of a single ship of this type.
+     */
+    public function getShield(): int | float
+    {
+        return $this->singleShield;
+    }
+
+    /**
+     * ShipType::getShieldCellValue()
+     * Get the shield cell value of a single ship of this type.
+     */
+    public function getShieldCellValue(): int | float
+    {
+        if ($this->isShieldDisabled()) {
+            return 0;
+        }
+        return $this->singleShield / SHIELD_CELLS;
+    }
+
+    /**
+     * ShipType::getHull()
+     * Get the hull value of a single ship of this type.
+     */
+    public function getHull(): int | float
+    {
+        return $this->singleLife;
+    }
+
+    /**
+     * ShipType::getPower()
+     * Get the power value of a single ship of this type.
+     */
+    public function getPower(): int | float
+    {
+        return $this->singlePower;
+    }
+
+    /**
+     * ShipType::getCurrentShield()
+     * Get the current shield value of a all ships of this type.
+     */
+    public function getCurrentShield(): int | float
+    {
+        return $this->currentShield;
+    }
+
+    /**
+     * ShipType::getCurrentLife()
+     * Get the current hull value of a all ships of this type.
+     */
+    public function getCurrentLife(): int | float
+    {
+        return $this->currentLife;
+    }
+
+    /**
+     * ShipType::getCurrentPower()
+     * Get the current attack power value of a all ships of this type.
+     */
+    public function getCurrentPower(): int | float
+    {
+        return $this->fullPower;
+    }
+
+    /**
+     * ShipType::inflictDamage()
+     * Inflict damage to all ships of this type.
+     */
+    public function inflictDamage(int | float $damage, int | float $shotsToThisShipType): ?PhysicShot
+    {
+        if ($shotsToThisShipType == 0) {
+            return null;
+        }
+        if ($shotsToThisShipType < 0) {
+            throw new Exception('Negative amount of shotsToThisShipType!');
+        }
+
+        $this->lastShots += $shotsToThisShipType;
+        $ps = new PhysicShot($this, $damage, (int) $shotsToThisShipType);
+        $ps->start();
+        $this->currentShield = self::withoutRoundingError($this->currentShield - $ps->getAssorbedDamage());
+        $this->currentLife = self::withoutRoundingError($this->currentLife - $ps->getHullDamage());
+        $this->lastShipHit += $ps->getHitShips();
+
+        if ($this->currentLife < 0 || $this->currentShield < 0 || $this->lastShipHit < 0) {
+            throw new Exception('Negative currentLife, currentShield or lastShipHit!');
+        }
+        return $ps; //for web
+    }
+
+    /**
+     * A tiny negative value left by floating point arithmetic is zero.
+     */
+    private static function withoutRoundingError(int | float $value): int | float
+    {
+        return $value < 0 && $value > -EPSILON ? 0 : $value;
+    }
+
+    /**
+     * ShipType::cleanShips()
+     * Start the task of explosion system.
+     */
+    public function cleanShips(): ShipsCleaner
+    {
+        $sc = new ShipsCleaner($this, (int) $this->lastShipHit, (int) $this->lastShots);
+        $sc->start();
+        $this->decrement($sc->getExplodedShips(), $sc->getRemainLife(), 0);
+        $this->lastShipHit = 0;
+        $this->lastShots = 0;
+        return $sc;
+    }
+
+    /**
+     * ShipType::repairShields()
+     * Repair all shields.
+     */
+    public function repairShields(): void
+    {
+        $this->currentShield = $this->fullShield;
+    }
+
+    /**
+     * ShipType::__toString()
+     */
+    public function __toString(): string
+    {
+        return parent::__toString();
+    }
+
+    /**
+     * ShipType::isShieldDisabled()
+     * Return true if the current shield of each ships are almost zero.
+     */
+    public function isShieldDisabled(): bool
+    {
+        return $this->currentShield / $this->getCount() < 0.01;
+    }
+
+    /**
+     * ShipType::getRepairProb()
+     * Base repair probability; overridden by Ship and Defense.
+     */
+    public function getRepairProb(): float
+    {
+        return 0;
+    }
+
+    public function cloneMe(): ShipType
+    {
+        $class = get_class($this);
+        $tmp = new $class($this->getId(), $this->getCount(), $this->rf, $this->originalShield, $this->cost, $this->originalPower, $this->techs['weapons'], $this->techs['shields'], $this->techs['armour']);
+        $tmp->currentShield = $this->currentShield;
+        $tmp->currentLife = $this->currentLife;
+        $tmp->lastShots = $this->lastShots;
+        $tmp->lastShipHit = $this->lastShipHit;
+        return $tmp;
+    }
+}

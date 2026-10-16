@@ -15,7 +15,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\Functions;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;

@@ -6,17 +6,17 @@ namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Libraries\Missions\Acs;
-use Xgp\App\Libraries\Missions\Attack;
-use Xgp\App\Libraries\Missions\Colonize;
-use Xgp\App\Libraries\Missions\Deploy;
-use Xgp\App\Libraries\Missions\Destroy;
-use Xgp\App\Libraries\Missions\Expedition;
-use Xgp\App\Libraries\Missions\Missile;
-use Xgp\App\Libraries\Missions\Recycle;
-use Xgp\App\Libraries\Missions\Spy;
-use Xgp\App\Libraries\Missions\Stay;
-use Xgp\App\Libraries\Missions\Transport;
+use App\Libraries\Missions\Acs;
+use App\Libraries\Missions\Attack;
+use App\Libraries\Missions\Colonize;
+use App\Libraries\Missions\Deploy;
+use App\Libraries\Missions\Destroy;
+use App\Libraries\Missions\Expedition;
+use App\Libraries\Missions\Missile;
+use App\Libraries\Missions\Recycle;
+use App\Libraries\Missions\Spy;
+use App\Libraries\Missions\Stay;
+use App\Libraries\Missions\Transport;
 
 /**
  * Fleet-mission dispatcher for the tick. Ported from the legacy static class:

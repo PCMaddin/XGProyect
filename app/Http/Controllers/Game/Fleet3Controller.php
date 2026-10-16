@@ -16,7 +16,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use Xgp\App\Core\Objects;
+use App\Core\Objects;
 use App\Libraries\Functions;
 use App\Libraries\Research\Researches;
 use App\Libraries\Users;

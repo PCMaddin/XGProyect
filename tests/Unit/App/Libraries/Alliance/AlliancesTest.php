@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Alliance;
 use App\Libraries\Alliance\Alliances;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Entity\AllianceEntity;
+use App\Core\Entity\AllianceEntity;
 
 #[CoversClass(Alliances::class)]
 class AlliancesTest extends TestCase

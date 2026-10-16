@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Premium;
 
-use Xgp\App\Core\Entity\PremiumEntity;
+use App\Core\Entity\PremiumEntity;
 
 /**
  * Wraps a user's premium/officer rows into typed entities.

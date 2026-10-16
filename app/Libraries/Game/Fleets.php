@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
-use Xgp\App\Core\Entity\FleetEntity;
+use App\Core\Entity\FleetEntity;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 /**

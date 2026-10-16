@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Alliance;
 
-use Xgp\App\Core\Entity\AllianceEntity;
+use App\Core\Entity\AllianceEntity;
 use App\Core\Enumerators\SwitchIntEnumerator;
 
 /**
