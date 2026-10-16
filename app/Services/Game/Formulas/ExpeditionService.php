@@ -39,13 +39,14 @@ class ExpeditionService
 
     /**
      * The ships an expedition can find, from light to heavy: each ship of
-     * the fleet finds these up to one step heavier than itself (there is no
-     * battlecruiser; the reaper comes after the destroyer).
+     * the fleet finds these up to one step heavier than itself (probe, small
+     * and large cargo, light and heavy fighter, pathfinder, cruiser,
+     * battleship, battlecruiser, bomber, destroyer, reaper).
      */
-    private const FINDABLE_SHIPS = [210, 202, 204, 203, 205, 206, 207, 211, 213, 215];
+    private const FINDABLE_SHIPS = [210, 202, 204, 203, 205, 219, 206, 207, 215, 211, 213, 218];
 
-    /** solar satellites do not fly; all other ships count */
-    private const NO_EXPEDITION_SHIPS = [212];
+    /** solar satellites and crawlers do not fly; all other ships count */
+    private const NO_EXPEDITION_SHIPS = [212, 217];
 
     /**
      * Pirates and aliens: share of each ship type of the expedition (each

@@ -18,4 +18,7 @@ return [
     'ship_destroyer' => 'Zerstörer',
     'ship_deathstar' => 'Todesstern',
     'ship_reaper' => 'Reaper',
+    'ship_battlecruiser' => 'Schlachtkreuzer',
+    'ship_crawler' => 'Crawler',
+    'ship_pathfinder' => 'Pathfinder',
 ];

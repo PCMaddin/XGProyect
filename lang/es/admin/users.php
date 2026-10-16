@@ -96,6 +96,9 @@ return [
     'us_user_ship_destroyer' => 'Destructor',
     'us_user_ship_deathstar' => 'Estrella de la muerte',
     'us_user_ship_reaper' => 'Segador',
+    'us_user_ship_battlecruiser' => 'Acorazado',
+    'us_user_ship_crawler' => 'Taladrador',
+    'us_user_ship_pathfinder' => 'Explorador',
 
     // ── Defenses labels ───────────────────────────────────────────────────────
     'us_user_defense_rocket_launcher' => 'Lanzamisiles',

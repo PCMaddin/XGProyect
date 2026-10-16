@@ -268,9 +268,13 @@ class ExpeditionServiceTest extends TestCase
 
         $this->assertSame([210, 202], $expedition->getFindableShips([210 => 5]));
         $this->assertSame([210, 202, 204, 203, 205], $expedition->getFindableShips([203 => 100, 202 => 3]));
-        $this->assertSame([210, 202, 204, 203, 205, 206, 207, 211, 213, 215], $expedition->getFindableShips([213 => 1]));
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206, 207, 215, 211, 213, 218], $expedition->getFindableShips([213 => 1]));
+        // the battlecruiser finds up to the bomber, the pathfinder up to the cruiser
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206, 207, 215, 211], $expedition->getFindableShips([215 => 1]));
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206], $expedition->getFindableShips([219 => 1]));
         // recyclers, colony ships and deathstars find nothing on their own
         $this->assertSame([], $expedition->getFindableShips([208 => 1, 209 => 10, 214 => 1]));
+        $this->assertFalse($expedition->countsForExpeditionPoints(217));
         $this->assertSame([210, 202], $expedition->getFindableShips([209 => 10, 210 => 1]));
     }
 

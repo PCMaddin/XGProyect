@@ -633,7 +633,8 @@ class Fleet4Controller extends BaseController
                     s.`ship_small_cargo_ship`, s.`ship_big_cargo_ship`, s.`ship_light_fighter`,
                     s.`ship_heavy_fighter`, s.`ship_cruiser`, s.`ship_battleship`, s.`ship_colony_ship`,
                     s.`ship_recycler`, s.`ship_espionage_probe`, s.`ship_bomber`, s.`ship_solar_satellite`,
-                    s.`ship_destroyer`, s.`ship_deathstar`, s.`ship_reaper`
+                    s.`ship_destroyer`, s.`ship_deathstar`, s.`ship_battlecruiser`,
+                    s.`ship_crawler`, s.`ship_reaper`, s.`ship_pathfinder`
                 FROM `' . SHIPS . '` AS s
                 WHERE s.`ship_planet_id` = ?;'
             ),

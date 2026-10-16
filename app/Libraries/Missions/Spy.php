@@ -230,7 +230,7 @@ class Spy extends Missions
             $row = 0;
 
             for ($item = $from; $item <= $to; $item++) {
-                if (!isset($this->resource[$item]) || !($targetData[$this->resource[$item]] > 0)) {
+                if (!isset($this->resource[$item]) || !(($targetData[$this->resource[$item]] ?? 0) > 0)) {
                     continue;
                 }
 

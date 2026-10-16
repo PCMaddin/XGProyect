@@ -52,7 +52,10 @@ class ShipyardController extends BaseController
         Ships::SHIP_SOLAR_SATELLITE,
         Ships::SHIP_DESTROYER,
         Ships::SHIP_DEATHSTAR,
+        Ships::SHIP_BATTLECRUISER,
+        Ships::SHIP_CRAWLER,
         Ships::SHIP_REAPER,
+        Ships::SHIP_PATHFINDER,
     ];
 
     /** @var array<int, int> */

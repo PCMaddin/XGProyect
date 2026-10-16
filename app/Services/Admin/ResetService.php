@@ -51,7 +51,10 @@ class ResetService
             'ship_solar_satellite' => 0,
             'ship_destroyer' => 0,
             'ship_deathstar' => 0,
+            'ship_battlecruiser' => 0,
+            'ship_crawler' => 0,
             'ship_reaper' => 0,
+            'ship_pathfinder' => 0,
         ]);
     }
 

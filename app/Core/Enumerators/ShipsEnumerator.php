@@ -19,5 +19,8 @@ abstract class ShipsEnumerator
     public const SHIP_SOLAR_SATELLITE = 212;
     public const SHIP_DESTROYER = 213;
     public const SHIP_DEATHSTAR = 214;
-    public const SHIP_REAPER = 215;
+    public const SHIP_BATTLECRUISER = 215;
+    public const SHIP_CRAWLER = 217;
+    public const SHIP_REAPER = 218;
+    public const SHIP_PATHFINDER = 219;
 }

@@ -96,6 +96,9 @@ return [
     'us_user_ship_destroyer' => 'Destroyer',
     'us_user_ship_deathstar' => 'Deathstar',
     'us_user_ship_reaper' => 'Reaper',
+    'us_user_ship_battlecruiser' => 'Battlecruiser',
+    'us_user_ship_crawler' => 'Crawler',
+    'us_user_ship_pathfinder' => 'Pathfinder',
 
     // ── Defenses labels ───────────────────────────────────────────────────────
     'us_user_defense_rocket_launcher' => 'Rocket Launcher',

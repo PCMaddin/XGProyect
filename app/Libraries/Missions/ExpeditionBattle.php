@@ -29,7 +29,7 @@ class ExpeditionBattle extends Missions
     use BuildsCombatForces;
 
     protected const SHIP_MIN_ID = 202;
-    protected const SHIP_MAX_ID = 215;
+    protected const SHIP_MAX_ID = 219;
     protected const DEFENSE_MIN_ID = 401;
     protected const DEFENSE_MAX_ID = 408;
     protected const PLANET_FORCES = 0;

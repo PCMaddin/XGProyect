@@ -542,7 +542,7 @@ class UpdatesLibrary
                     if ($element != '') {
                         // POINTS
                         switch ($element) {
-                            case (($element >= 202) && ($element <= 215)):
+                            case (($element >= 202) && ($element <= 219)):
                                 $ship_points += StatisticsLibrary::calculatePoints($element, $count) * $count;
                                 break;
                             case (($element >= 401) && ($element <= 503)):

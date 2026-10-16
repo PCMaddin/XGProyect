@@ -438,11 +438,11 @@
                 3
             ]
         ],
-        "nextRandom": 1986819936
+        "nextRandom": 2141908754
     },
     "several players, seed 5": {
-        "report": "89ae3438ce5db8e9c0c36fc7957a4c7d",
-        "reportLength": 40056,
+        "report": "eae8a70938621b42143b30e3783f26b1",
+        "reportLength": 40326,
         "rounds": 6,
         "result": [
             false,
@@ -488,16 +488,12 @@
                 {
                     "Defense": {
                         "401": [
-                            180000,
+                            178000,
                             0
                         ],
                         "403": [
-                            72000,
-                            24000
-                        ],
-                        "406": [
-                            50000,
-                            50000
+                            66000,
+                            22000
                         ]
                     }
                 }
@@ -506,12 +502,8 @@
                 "20": {
                     "Ship": {
                         "206": [
-                            1200000,
-                            420000
-                        ],
-                        "213": [
-                            180000,
-                            150000
+                            1180000,
+                            413000
                         ]
                     }
                 }
@@ -522,16 +514,12 @@
                 {
                     "Defense": {
                         "401": [
-                            600000,
+                            594000,
                             0
                         ],
                         "403": [
-                            240000,
-                            80000
-                        ],
-                        "406": [
-                            100000,
-                            100000
+                            228000,
+                            76000
                         ]
                     }
                 }
@@ -540,12 +528,8 @@
                 "20": {
                     "Ship": {
                         "206": [
-                            1200000,
-                            420000
-                        ],
-                        "213": [
-                            180000,
-                            150000
+                            1180000,
+                            413000
                         ]
                     }
                 }
@@ -553,7 +537,7 @@
         },
         "totalLost": [
             3725000,
-            2326000
+            1859000
         ],
         "debris": [
             [
@@ -561,15 +545,15 @@
                 372000.0
             ],
             [
-                696000.0,
-                225000.0
+                600600.0,
+                146700.0
             ],
             [
-                1441500.0,
-                597000.0
+                1346100.0,
+                518700.0
             ]
         ],
-        "moonProb": 20,
+        "moonProb": 18,
         "tech": [
             {
                 "1": [
@@ -598,11 +582,11 @@
         ],
         "afterBattle": [
             "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 120% Shields: 110% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship<\/th>\n                                                    <th>Reaper<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>3<\/th>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player4 [1:2:4]<br>\n            Weapons: 90% Shields: 90% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Bomber<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>4<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
-            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Plasma Turret<\/th>\n                                                    <th>Small Shield Dome<\/th>\n                                                    <th>Large Shield Dome<\/th>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>4<\/th>\n                                                    <th>1<\/th>\n                                                    <th>1<\/th>\n                                                    <th>210<\/th>\n                                                    <th>28<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 100% Shields: 100% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Destroyer<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>5<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                                    <th>Small Shield Dome<\/th>\n                                                    <th>Large Shield Dome<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>211<\/th>\n                                                    <th>29<\/th>\n                                                    <th>5<\/th>\n                                                    <th>1<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 100% Shields: 100% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Cruiser<\/th>\n                                                    <th>Destroyer<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1<\/th>\n                                                    <th>8<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
         ],
         "repaired": [
             "",
-            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>210<\/th>\n                                                    <th>28<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>208<\/th>\n                                                    <th>27<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
         ],
         "ids": [
             [
@@ -614,7 +598,7 @@
                 3
             ]
         ],
-        "nextRandom": 46706671
+        "nextRandom": 1400740846
     },
     "death stars, seed 6": {
         "report": "77a9e922695862b5647cd93e98ea95d4",

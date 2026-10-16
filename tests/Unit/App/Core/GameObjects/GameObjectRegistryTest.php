@@ -39,7 +39,7 @@ class GameObjectRegistryTest extends TestCase
     public function testTotalObjectCount(): void
     {
         // 18 buildings + 16 research + 14 ships + 10 defenses + 5 officers = 63
-        $this->assertCount(63, $this->registry->all());
+        $this->assertCount(66, $this->registry->all());
     }
 
     public function testBuildingCount(): void
@@ -54,7 +54,7 @@ class GameObjectRegistryTest extends TestCase
 
     public function testShipCount(): void
     {
-        $this->assertCount(14, $this->registry->ships());
+        $this->assertCount(17, $this->registry->ships());
     }
 
     public function testDefenseCount(): void
@@ -234,7 +234,7 @@ class GameObjectRegistryTest extends TestCase
     {
         foreach ($this->registry->ships() as $id => $obj) {
             $this->assertGreaterThanOrEqual(202, $id);
-            $this->assertLessThanOrEqual(215, $id);
+            $this->assertLessThanOrEqual(219, $id);
             $this->assertSame($id, $obj->getId());
         }
     }
@@ -337,14 +337,15 @@ class GameObjectRegistryTest extends TestCase
         $this->assertSame(7000, $reaper->getSpeed());
         $this->assertSame(7000, $reaper->getSpeed2());
         $this->assertSame(10000, $reaper->getCapacity());
-        $this->assertSame(550, $reaper->getConsumption());
-        $this->assertSame(550, $reaper->getConsumption2());
+        $this->assertSame(1100, $reaper->getConsumption());
+        $this->assertSame(1100, $reaper->getConsumption2());
         $this->assertSame([
             ShipsEnumerator::SHIP_BATTLESHIP => 7,
             ShipsEnumerator::SHIP_ESPIONAGE_PROBE => 5,
             ShipsEnumerator::SHIP_BOMBER => 4,
             ShipsEnumerator::SHIP_SOLAR_SATELLITE => 5,
             ShipsEnumerator::SHIP_DESTROYER => 3,
+            ShipsEnumerator::SHIP_CRAWLER => 5,
         ], $reaper->getRapidFire()->toArray());
 
         /** @var Ship $deathstar */
@@ -354,6 +355,40 @@ class GameObjectRegistryTest extends TestCase
         /** @var Defense $ionCannon */
         $ionCannon = $this->registry->get(DefensesEnumerator::DEFENSE_ION_CANNON);
         $this->assertSame(2, $ionCannon->getRapidFire()->get(ShipsEnumerator::SHIP_REAPER));
+    }
+
+    /**
+     * The ships of OGame 7 with their original ids: the battlecruiser is
+     * back at 215, the reaper has 218.
+     */
+    public function testTheShipsOfVersionSeven(): void
+    {
+        /** @var Ship $battlecruiser */
+        $battlecruiser = $this->registry->get(ShipsEnumerator::SHIP_BATTLECRUISER);
+        $this->assertSame('ship_battlecruiser', $battlecruiser->getName());
+        $this->assertSame([30000, 40000, 15000], [$battlecruiser->getPrice()->getMetal(), $battlecruiser->getPrice()->getCrystal(), $battlecruiser->getPrice()->getDeuterium()]);
+        $this->assertSame([400.0, 700.0, 10000, 250, 750], [$battlecruiser->getShield(), $battlecruiser->getAttack(), $battlecruiser->getSpeed(), $battlecruiser->getConsumption(), $battlecruiser->getCapacity()]);
+        $this->assertSame(7, $battlecruiser->getRapidFire()->get(ShipsEnumerator::SHIP_BATTLESHIP));
+
+        /** @var Ship $pathfinder */
+        $pathfinder = $this->registry->get(ShipsEnumerator::SHIP_PATHFINDER);
+        $this->assertSame([8000, 15000, 8000], [$pathfinder->getPrice()->getMetal(), $pathfinder->getPrice()->getCrystal(), $pathfinder->getPrice()->getDeuterium()]);
+        $this->assertSame([100.0, 200.0, 12000, 300, 10000], [$pathfinder->getShield(), $pathfinder->getAttack(), $pathfinder->getSpeed(), $pathfinder->getConsumption(), $pathfinder->getCapacity()]);
+
+        /** @var Ship $crawler */
+        $crawler = $this->registry->get(ShipsEnumerator::SHIP_CRAWLER);
+        $this->assertSame([2000, 2000, 1000], [$crawler->getPrice()->getMetal(), $crawler->getPrice()->getCrystal(), $crawler->getPrice()->getDeuterium()]);
+        $this->assertSame(0, $crawler->getSpeed());
+
+        /** @var Ship $deathstar */
+        $deathstar = $this->registry->get(ShipsEnumerator::SHIP_DEATHSTAR);
+        $this->assertSame([15, 10, 30, 1250], [
+            $deathstar->getRapidFire()->get(ShipsEnumerator::SHIP_BATTLECRUISER),
+            $deathstar->getRapidFire()->get(ShipsEnumerator::SHIP_REAPER),
+            $deathstar->getRapidFire()->get(ShipsEnumerator::SHIP_PATHFINDER),
+            $deathstar->getRapidFire()->get(ShipsEnumerator::SHIP_CRAWLER),
+        ]);
+        $this->assertSame(2, $this->registry->findShip(ShipsEnumerator::SHIP_DESTROYER)?->getRapidFire()->get(ShipsEnumerator::SHIP_BATTLECRUISER));
     }
 
     public function testSmallCargoShipDriveIsUpgradeable(): void

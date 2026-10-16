@@ -993,6 +993,32 @@ Nachgezogen:
 - ℹ️ **Nicht übernommen** aus den Gegenständen des Originals: M.O.O.N.S.
   (ein gekaufter Mondschuss), Ehrenpunkte und Buddy-Punkte als
   Zahlungsmittel.
+- ✅ **Schiffe von OGame 7** (Zielversion: das Spiel mit dem
+  Klassen-Update; Werte aus dem OGame-Wiki):
+  - **Schlachtkreuzer** wieder unter seiner Id 215 (30.000/40.000/15.000,
+    Schild 400, Angriff 700, Tempo 10.000, Laderaum 750, Schnellfeuer gegen
+    KT/GT 3, SJ/Kreuzer 4, SS 7). Unter 215 stand ein Zwitter: Name, Preis
+    und Kampfwerte des Reapers, Anforderungen und Schnellfeuer (Zerstörer
+    2, Todesstern) des Schlachtkreuzers.
+  - **Reaper** unter seiner Id 218 mit den Werten des Originals (Verbrauch
+    1.100 statt 550; Anforderungen Werft 10, Hyperraumtechnik 6,
+    Hyperraumantrieb 7, Schildtechnik 6). Bestehende Reaper bleiben Reaper
+    (Spalte `ship_reaper`); Flotten im Flug und Werftaufträge mit 215
+    werden per Update-Migration auf 218 umgeschrieben.
+  - **Pathfinder** (219) und **Crawler** (217) neu; der Crawler fliegt
+    nicht.
+  - Schnellfeuer gegen die neuen Schiffe (alle gegen Crawler 5, Todesstern
+    1.250/15/10/30, Schlachtschiff gegen Pathfinder 5, Ionenkanone gegen
+    Reaper 2).
+  - Die Klassen-Beschränkungen (Reaper nur General usw.), die Wirkung der
+    Crawler und die Expeditionsboni des Pathfinders folgen mit den
+    Klassen.
+  - Bilder für Reaper, Pathfinder und Crawler sind eingefärbte Varianten
+    vorhandener Grafiken (Platzhalter).
+  - Zwei Kampf-Referenzwerte (BattleOutcomeTest, „several players“) sind
+    neu erfasst, weil das Schnellfeuer des Zerstörers jetzt dem
+    Schlachtkreuzer gilt. Tests für die neuen Werte und die
+    Datenmigration auf MariaDB.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig
