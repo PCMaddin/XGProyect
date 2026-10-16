@@ -6,12 +6,15 @@ namespace App\Services\Game\Bots;
 
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\ResearchEnumerator as Research;
+use App\Core\GameObjects\Building;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Services\Game\Formulas\DevelopmentsService;
 
 /**
  * What a bot builds next: a plain build order like a careful new player's.
- * Energy first, then a full storage, the facilities that lag behind the
- * mines, then the mines (crystal two, deuterium four levels behind metal);
+ * Energy first (solar plant or fusion reactor, whichever gives energy more
+ * cheaply), then a full storage, the facilities that lag behind the mines,
+ * then the mines (crystal two, deuterium four levels behind metal);
  * of these the most urgent one it can pay now, so it does not sit on its
  * stock waiting for a scarce resource. Research follows a short opening
  * list and then always takes the cheapest useful step. Ships and defences
@@ -73,8 +76,10 @@ class BotStrategy
         'deuterium' => Buildings::BUILDING_DEUTERIUM_SINTETIZER,
     ];
 
-    public function __construct(private DevelopmentsService $developments)
-    {
+    public function __construct(
+        private DevelopmentsService $developments,
+        private GameObjectRegistry $registry,
+    ) {
     }
 
     /**
@@ -154,18 +159,56 @@ class BotStrategy
         $energyMax = (float) ($planet['planet_energy_max'] ?? 0);
         $energy = $energyMax + (float) ($planet['planet_energy_used'] ?? 0);
 
-        // short of energy, the mines run slower: nothing but the power plant,
+        // short of energy, the mines run slower: nothing but a power plant,
         // even if the bot has to save for it
         if ($energy < 0) {
-            return [Buildings::BUILDING_SOLAR_PLANT];
+            return $this->powerPlants($levels);
         }
 
         return array_merge(
-            $energy < 15 + $energyMax * 0.1 ? [Buildings::BUILDING_SOLAR_PLANT] : [],
+            $energy < 15 + $energyMax * 0.1 ? $this->powerPlants($levels) : [],
             $this->fullStorages($planet),
             $this->laggingFacilities($levels, $metal, $hasLab && !$researching),
             $this->mines($levels, $metal)
         );
+    }
+
+    /**
+     * The solar plant and, once allowed, the fusion reactor, the one whose
+     * next level costs less per unit of energy first.
+     *
+     * @param array<int, int> $levels
+     *
+     * @return list<int>
+     */
+    private function powerPlants(array $levels): array
+    {
+        $plants = [Buildings::BUILDING_SOLAR_PLANT];
+
+        if ($this->developments->isDevelopmentAllowed(Buildings::BUILDING_FUSION_REACTOR, $levels)) {
+            $plants[] = Buildings::BUILDING_FUSION_REACTOR;
+        }
+
+        usort($plants, fn (int $one, int $other): int => $this->pricePerEnergy($one, $levels) <=> $this->pricePerEnergy($other, $levels));
+
+        return $plants;
+    }
+
+    /**
+     * What the next level costs for each unit of energy it adds.
+     *
+     * @param array<int, int> $levels
+     */
+    private function pricePerEnergy(int $plant, array $levels): float
+    {
+        $level = $levels[$plant] ?? 0;
+        $energyTech = $levels[Research::RESEARCH_ENERGY_TECHNOLOGY] ?? 0;
+        $building = $this->registry->get($plant);
+        $production = $building instanceof Building ? $building->getProduction() : null;
+        $gain = $production === null ? 0.0
+            : $production->calculateEnergy($level + 1, 10, 0, $energyTech) - $production->calculateEnergy($level, 10, 0, $energyTech);
+
+        return $gain > 0 ? array_sum($this->developments->developmentPrice($plant, $level)) / $gain : PHP_FLOAT_MAX;
     }
 
     /**

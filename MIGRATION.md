@@ -856,6 +856,9 @@ Baseline-Einträge.
     (je bis 2 × Metallminenstufe, höchstens 40/50), dann Verteidigung.
     Kolonien halten nur Transporter. Forschung um Verbrennungstriebwerk 3,
     Impulstriebwerk 3, Spionage 4 und Astrophysik 1/3 ergänzt.
+  - Energie: Bei Mangel baut der Bot Solar- oder Fusionskraftwerk, je
+    nachdem, welches die nächste Stufe billiger pro Energieeinheit liefert
+    (vorher nur Solar; ab Stufe 20 warteten Bots tagelang darauf).
 
   Ein Fehler in einem Bot-Zug wird wie bisher nur gemeldet; die Bot-Tests
   prüfen jetzt aber, dass nichts gemeldet wurde (so fiel ein fehlendes

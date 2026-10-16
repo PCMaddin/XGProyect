@@ -40,6 +40,21 @@ class BotStrategyTest extends TestCase
         $this->assertSame(Buildings::BUILDING_SOLAR_PLANT, $this->strategy->nextBuilding($levels, $planet, true, false));
     }
 
+    public function testTheFusionReactorTakesOverWhenItGivesEnergyMoreCheaply(): void
+    {
+        $levels = [Buildings::BUILDING_METAL_MINE => 20, Buildings::BUILDING_DEUTERIUM_SINTETIZER => 15, Buildings::BUILDING_SOLAR_PLANT => 21,
+            Research::RESEARCH_ENERGY_TECHNOLOGY => 3];
+        $planet = $this->planet(3000, -3100);
+        $planet['planet_metal_max'] = $planet['planet_crystal_max'] = $planet['planet_deuterium_max'] = 1000000;
+
+        // solar plant 22 costs about 1,100 per unit of energy, fusion reactor 1 about 45
+        $this->assertSame(Buildings::BUILDING_FUSION_REACTOR, $this->strategy->nextBuilding($levels, $planet, true, false));
+
+        // without its requirements only the solar plant is left
+        unset($levels[Research::RESEARCH_ENERGY_TECHNOLOGY]);
+        $this->assertSame(Buildings::BUILDING_SOLAR_PLANT, $this->strategy->nextBuilding($levels, $planet, true, false));
+    }
+
     public function testWithEnoughEnergyTheMetalMineComesFirst(): void
     {
         $levels = [Buildings::BUILDING_METAL_MINE => 1, Buildings::BUILDING_SOLAR_PLANT => 2];
