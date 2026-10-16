@@ -49,6 +49,9 @@ class PremiumController extends AdminSettingsController
             'merchant_metal_multiplier' => $this->settings->getFloat('merchant_metal_multiplier'),
             'merchant_crystal_multiplier' => $this->settings->getFloat('merchant_crystal_multiplier'),
             'merchant_deuterium_multiplier' => $this->settings->getFloat('merchant_deuterium_multiplier'),
+            'merchant_scrap_base_rate' => $this->settings->getInt('merchant_scrap_base_rate'),
+            'merchant_scrap_max_rate' => $this->settings->getInt('merchant_scrap_max_rate'),
+            'merchant_scrap_bargain_price' => $this->settings->getInt('merchant_scrap_bargain_price'),
         ];
     }
 }

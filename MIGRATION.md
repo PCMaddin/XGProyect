@@ -846,6 +846,27 @@ Nachgezogen:
   - Tests für die Regeln sowie für Sieg und Totalverlust auf MariaDB, dazu
     im Browser durchgespielt.
 
+- ✅ **Schrotthändler** umgesetzt (`ScrapMerchantService`, Seite
+  `traderScrap`); die Seite war ein Platzhalter, der Link im Händlermenü
+  auskommentiert.
+  - Er kauft Schiffe und Verteidigungsanlagen des Planeten für 35 % ihres
+    Baupreises, in denselben Rohstoffen. Raketen kauft er nicht.
+  - Feilschen kostet 2.000 Dunkle Materie und hebt den Anteil um 1 bis 10
+    Punkte, höchstens auf 75 %. Danach kommt „Das ist mein letztes Wort!“,
+    sonst einer der elf vorhandenen Sprüche.
+  - Der Anteil bleibt beim Spieler (`premium_scrap_rate`, neue Spalte) bis
+    zum nächsten Verkauf und fällt dann auf 35 % zurück.
+  - Die Rohstoffe werden auch über die Speicherkapazität hinaus
+    gutgeschrieben, wie bei einer Flottenladung.
+  - Alle drei Werte sind im Admin unter „Premium“ einstellbar (neue Optionen
+    per Update-Migration).
+  - Verkauf in einer Transaktion mit Sperre, Aktionen nur per POST.
+  - Tests für Anteil, Feilschen, Verkauf und Fehlerfälle; im Browser auf
+    MariaDB durchgespielt.
+  - Auktionator und Import/Export bleiben aus: Beide verkaufen
+    Gegenstände (Booster u. Ä.), und ein Gegenstandssystem gibt es im Spiel
+    nicht. Die leeren Platzhalter-Seiten sind entfernt.
+
 Offen:
 
 - (nichts aus dem Smoke-Test)

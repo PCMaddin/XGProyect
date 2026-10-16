@@ -60,6 +60,7 @@ class GameController extends BaseController
         'technologytree' => Game\TechnologytreeController::class,
         'traderOverview' => Game\TraderOverviewController::class,
         'traderResources' => Game\TraderResourcesController::class,
+        'traderScrap' => Game\TraderScrapController::class,
     ];
 
     public function __invoke(Request $request, GameBootstrap $bootstrap): BaseResponse
