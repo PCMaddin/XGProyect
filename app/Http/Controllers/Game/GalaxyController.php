@@ -65,7 +65,7 @@ class GalaxyController extends BaseController
     ) {
     }
 
-    public function __invoke(Request $request): View|Response
+    public function __invoke(Request $request): View | Response
     {
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Galaxy));
 
@@ -489,10 +489,10 @@ class GalaxyController extends BaseController
         $planetType = $request->post('planettype') !== null ? $this->postInt($request, 'planettype') : GalaxyLib::PLANET_TYPE;
 
         if (
-            ($galaxy > MAX_GALAXY_IN_WORLD || $galaxy < 1)
-            || ($system > MAX_SYSTEM_IN_GALAXY || $system < 1)
-            || ($planet > MAX_PLANET_IN_SYSTEM || $planet < 1)
-            || $ships === []
+            ($galaxy > MAX_GALAXY_IN_WORLD || $galaxy < 1) ||
+            ($system > MAX_SYSTEM_IN_GALAXY || $system < 1) ||
+            ($planet > MAX_PLANET_IN_SYSTEM || $planet < 1) ||
+            $ships === []
         ) {
             return new Response('614 ');
         }
@@ -629,9 +629,9 @@ class GalaxyController extends BaseController
         $debris = get_object_vars($row);
 
         if (
-            $this->asInt($debris['planet_debris_metal'] ?? 0) === 0
-            && $this->asInt($debris['planet_debris_crystal'] ?? 0) === 0
-            && time() > ($this->asInt($debris['planet_invisible_start_time'] ?? 0) + DEBRIS_LIFE_TIME)
+            $this->asInt($debris['planet_debris_metal'] ?? 0) === 0 &&
+            $this->asInt($debris['planet_debris_crystal'] ?? 0) === 0 &&
+            time() > ($this->asInt($debris['planet_invisible_start_time'] ?? 0) + DEBRIS_LIFE_TIME)
         ) {
             return new Response('');
         }
@@ -643,6 +643,7 @@ class GalaxyController extends BaseController
      * Distance, duration and fuel for the fleet.
      *
      * @param  array<int, int>  $ships
+     *
      * @return array{fuel: int, duration: int, startTime: int, endTime: int, shipCount: int}
      */
     private function fleetConsumption(array $ships, int $galaxy, int $system, int $planet): array
@@ -815,28 +816,12 @@ class GalaxyController extends BaseController
      */
     private function fleetShipIds(): array
     {
-        $list = $this->objects->getObjectsList('fleet');
-
-        if (!is_array($list)) {
-            return [];
-        }
-
-        $ids = [];
-
-        foreach ($list as $shipId) {
-            if (is_numeric($shipId)) {
-                $ids[] = (int) $shipId;
-            }
-        }
-
-        return $ids;
+        return $this->objects->getObjectsList('fleet');
     }
 
     private function resourceName(int $itemId): string
     {
-        $name = $this->objects->getObjects($itemId);
-
-        return is_string($name) ? $name : '';
+        return $this->objects->getObjects($itemId);
     }
 
     private function shipSpeed(int $itemId): int

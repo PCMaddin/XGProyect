@@ -73,8 +73,8 @@ class ResourcesettingsController extends BaseController
 
         $objects = Objects::getInstance();
         $this->resource = $this->toStringMap($objects->getObjects());
-        $this->prodGrid = is_array($grid = $objects->getProduction()) ? $grid : [];
-        $this->reslist = is_array($list = $objects->getObjectsList()) ? $list : [];
+        $this->prodGrid = $objects->getProduction();
+        $this->reslist = $objects->getObjectsList();
 
         if ($request->isMethod('post') && !Users::getInstance()->isOnVacations($this->user)) {
             return $this->savePercentages($request);
@@ -260,8 +260,8 @@ class ResourcesettingsController extends BaseController
      */
     private function basicIncome(SettingsService $settings): array
     {
-        $onMoonOrVacation = $this->userInt('preference_vacation_mode') > 0
-            || $this->planetInt('planet_type') === PlanetTypesEnumerator::MOON;
+        $onMoonOrVacation = $this->userInt('preference_vacation_mode') > 0 ||
+            $this->planetInt('planet_type') === PlanetTypesEnumerator::MOON;
 
         return [
             'metal' => $onMoonOrVacation ? 0 : $settings->getInt('metal_basic_income'),

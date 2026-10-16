@@ -71,13 +71,10 @@ class MissileTest extends TestCase
         string $expectedQuery
     ): void {
         $resource = Objects::getInstance()->getObjects();
-        $this->assertIsArray($resource);
 
         $targetData = ['research_shielding_technology' => $shielding];
         foreach ([401, 402, 403, 404, 405, 406, 407, 408, 502, 503] as $id) {
-            $column = $resource[$id];
-            $this->assertIsString($column);
-            $targetData[$column] = $counts[$id] ?? 0;
+            $targetData[$resource[$id]] = $counts[$id] ?? 0;
         }
 
         $ref = new ReflectionMethod(Missile::class, 'impactDefenses');

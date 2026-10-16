@@ -61,7 +61,7 @@ class Fleet2Controller extends BaseController
     ) {
     }
 
-    public function __invoke(Request $request): View|RedirectResponse
+    public function __invoke(Request $request): View | RedirectResponse
     {
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Fleet));
 
@@ -75,7 +75,7 @@ class Fleet2Controller extends BaseController
         return $this->buildPage($request);
     }
 
-    private function buildPage(Request $request): View|RedirectResponse
+    private function buildPage(Request $request): View | RedirectResponse
     {
         $fleetBlock = $this->buildFleetBlock($request);
 
@@ -136,7 +136,7 @@ class Fleet2Controller extends BaseController
                 continue;
             }
 
-            $shipId = is_array($objects) ? $this->asInt(array_search($shipName, $objects, true)) : 0;
+            $shipId = $this->asInt(array_search($shipName, $objects, true));
             $requested = $this->asInt($request->post('ship' . $shipId));
 
             if ($requested <= 0) {

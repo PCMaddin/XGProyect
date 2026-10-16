@@ -172,8 +172,7 @@ class Missile extends Missions
         $report = '';
         $defenses = Objects::getInstance()->getObjectsList('defense');
 
-        foreach (is_array($defenses) ? $defenses : [] as $defense) {
-            $defenseId = self::int($defense);
+        foreach ($defenses as $defenseId) {
             $column = $this->resource[$defenseId];
             $report .= $this->formatService->prettyNumber(self::int($targetData[$column])) . ' ' . self::text(__('game/defenses.' . $column));
 

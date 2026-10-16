@@ -127,7 +127,7 @@ class Fleet3Controller extends BaseController
                 continue;
             }
 
-            $shipId = is_array($objects) ? $this->asInt(array_search($shipName, $objects, true)) : 0;
+            $shipId = $this->asInt(array_search($shipName, $objects, true));
             $requested = $this->asInt($selected[$shipId] ?? 0);
 
             if ($requested === 0) {
@@ -246,6 +246,7 @@ class Fleet3Controller extends BaseController
      * Missions allowed by the target planet/relationship, before ship filtering.
      *
      * @param  array<string, mixed>  $target
+     *
      * @return array<int, int>
      */
     private function possibleMissionsForTarget(array $target): array
@@ -365,7 +366,7 @@ class Fleet3Controller extends BaseController
             'acs_target' => $this->rawOrNull($request, 'acs_target'),
         ];
 
-        $kept = array_filter($fields, fn (int|string|null $value): bool => $value !== null && (string) $value !== '');
+        $kept = array_filter($fields, fn (int | string | null $value): bool => $value !== null && (string) $value !== '');
 
         if (count($kept) !== 8 || $this->isCurrentPlanet($fields)) {
             $this->redirectToStart();
@@ -480,6 +481,7 @@ class Fleet3Controller extends BaseController
 
     /**
      * @param  array<int, int>  $missions
+     *
      * @return array<int, int>
      */
     private function without(array $missions, int $mission): array

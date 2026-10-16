@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
-use App\Libraries\Functions;
-
-use App\Libraries\Formulas;
-
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
-use App\Services\FormatService;
 use App\Services\Game\BuildingQueueService;
-use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
 use App\Services\Game\ResearchQueueService;
@@ -25,9 +19,6 @@ use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib as Developments;
-use App\Libraries\MissionControlLib;
-use App\Libraries\StatisticsLibrary;
-use App\Libraries\Users;
 
 /**
  * The tick: on construction it runs cleanup, backups, fleet missions and the
@@ -336,10 +327,11 @@ class UpdatesLibrary
             ) ? ENGINEER_ENERGY : 0));
 
             // PRODUCTION FORMULAS
-            $metal_prod = ($formula['formule']['metal'])($BuildLevel, $BuildLevelFactor, $BuildTemp, $BuildEnergy);
-            $crystal_prod = ($formula['formule']['crystal'])($BuildLevel, $BuildLevelFactor, $BuildTemp, $BuildEnergy);
-            $deuterium_prod = ($formula['formule']['deuterium'])($BuildLevel, $BuildLevelFactor, $BuildTemp, $BuildEnergy);
-            $energy_prod = ($formula['formule']['energy'])($BuildLevel, $BuildLevelFactor, $BuildTemp, $BuildEnergy);
+            $formulaArgs = [self::num($BuildLevel), self::num($BuildLevelFactor), self::num($BuildTemp), self::num($BuildEnergy)];
+            $metal_prod = ($formula['formule']['metal'])(...$formulaArgs);
+            $crystal_prod = ($formula['formule']['crystal'])(...$formulaArgs);
+            $deuterium_prod = ($formula['formule']['deuterium'])(...$formulaArgs);
+            $energy_prod = ($formula['formule']['energy'])(...$formulaArgs);
 
             // PLASMA BOOST
             $metalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'metal');

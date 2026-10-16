@@ -13,15 +13,25 @@ use App\Core\GameObjects\Ship;
 
 /**
  * @deprecated Use GameObjectRegistry instead
+ *
+ * @phpstan-type Formula \Closure(int|float|string, int|float|string, int|float|string=, int|float|string=): float
+ * @phpstan-type ProductionSpec array{metal: int, crystal: int, deuterium: int, energy: int, factor: float, formule: array{metal: Formula, crystal: Formula, deuterium: Formula, energy: Formula}}
+ * @phpstan-type CombatSpec array{shield: float, attack: float, sd?: array<int, int>}
  */
 class Objects
 {
     private static ?Objects $instance = null;
+    /** @var array<int, string> */
     private array $objects = [];
+    /** @var array<int, array<int, int>> */
     private array $relations = [];
+    /** @var array<int, array<string, int|float|string>> */
     private array $price = [];
+    /** @var array<int, CombatSpec> */
     private array $combatSpecs = [];
+    /** @var array<int, ProductionSpec> */
     private array $production = [];
+    /** @var array<string, list<int>> */
     private array $objectsList = [];
     private GameObjectRegistry $registry;
 
@@ -51,66 +61,60 @@ class Objects
         return $this->registry;
     }
 
-    public function getObjects(?int $objectId = null)
+    /**
+     * @return ($objectId is int ? string : array<int, string>)
+     */
+    public function getObjects(?int $objectId = null): array | string
     {
-        if (!empty($objectId)) {
-            return $this->objects[$objectId];
-        } else {
-            return $this->objects;
-        }
+        return empty($objectId) ? $this->objects : $this->objects[$objectId];
     }
 
-    public function getRelations(?int $objectId = null)
+    /**
+     * @return ($objectId is int ? array<int, int> : array<int, array<int, int>>)
+     */
+    public function getRelations(?int $objectId = null): array
     {
-        if (!empty($objectId)) {
-            return $this->relations[$objectId];
-        } else {
-            return $this->relations;
-        }
+        return empty($objectId) ? $this->relations : $this->relations[$objectId];
     }
 
-    public function getPrice(?int $objectId = null, string $resource = '')
+    /**
+     * @return ($objectId is int ? ($resource is non-empty-string ? int|float|string : array<string, int|float|string>) : array<int, array<string, int|float|string>>)
+     */
+    public function getPrice(?int $objectId = null, string $resource = ''): array | int | float | string
     {
-        if (!empty($objectId)) {
-            if (empty($resource)) {
-                return $this->price[$objectId];
-            } else {
-                return $this->price[$objectId][$resource];
-            }
-        } else {
+        if (empty($objectId)) {
             return $this->price;
         }
+
+        return empty($resource) ? $this->price[$objectId] : $this->price[$objectId][$resource];
     }
 
-    public function getCombatSpecs(?int $objectId = null, string $type = '')
+    /**
+     * @return ($objectId is int ? ($type is non-empty-string ? float|array<int, int> : CombatSpec) : array<int, CombatSpec>)
+     */
+    public function getCombatSpecs(?int $objectId = null, string $type = ''): array | float
     {
-        if (!empty($objectId)) {
-            if (empty($type)) {
-                return $this->combatSpecs[$objectId];
-            } else {
-                return $this->combatSpecs[$objectId][$type];
-            }
-        } else {
+        if (empty($objectId)) {
             return $this->combatSpecs;
         }
+
+        return empty($type) ? $this->combatSpecs[$objectId] : $this->combatSpecs[$objectId][$type];
     }
 
-    public function getProduction(?int $objectId = null)
+    /**
+     * @return ($objectId is int ? ProductionSpec : array<int, ProductionSpec>)
+     */
+    public function getProduction(?int $objectId = null): array
     {
-        if (!empty($objectId)) {
-            return $this->production[$objectId];
-        } else {
-            return $this->production;
-        }
+        return empty($objectId) ? $this->production : $this->production[$objectId];
     }
 
-    public function getObjectsList(?string $objectId = null)
+    /**
+     * @return ($objectId is non-empty-string ? list<int> : array<string, list<int>>)
+     */
+    public function getObjectsList(?string $objectId = null): array
     {
-        if (!empty($objectId)) {
-            return $this->objectsList[$objectId];
-        } else {
-            return $this->objectsList;
-        }
+        return empty($objectId) ? $this->objectsList : $this->objectsList[$objectId];
     }
 
     private function buildNames(): void
@@ -124,7 +128,7 @@ class Objects
     {
         foreach ($this->registry->all() as $id => $obj) {
             if ($obj instanceof GameObject && $obj->getRequirements()->isNotEmpty()) {
-                $this->relations[$id] = $obj->getRequirements()->toArray();
+                $this->relations[$id] = $obj->getRequirements()->all();
             }
         }
     }
@@ -164,7 +168,7 @@ class Objects
             $this->combatSpecs[$id] = [
                 'shield' => $ship->getShield(),
                 'attack' => $ship->getAttack(),
-                'sd' => $ship->getRapidFire()->toArray(),
+                'sd' => $ship->getRapidFire()->all(),
             ];
         }
 
@@ -175,30 +179,30 @@ class Objects
             ];
 
             if ($defense->getRapidFire()->isNotEmpty()) {
-                $this->combatSpecs[$id]['sd'] = $defense->getRapidFire()->toArray();
+                $this->combatSpecs[$id]['sd'] = $defense->getRapidFire()->all();
             }
         }
     }
 
     private function buildObjectsList(): void
     {
-        $resourceIds = $this->registry->resourceBuildings()->keys()->toArray();
-        $facilityIds = $this->registry->facilityBuildings()->keys()->toArray();
-        $moonIds = $this->registry->moonBuildings()->keys()->toArray();
+        $resourceIds = $this->registry->resourceBuildings()->keys()->all();
+        $facilityIds = $this->registry->facilityBuildings()->keys()->all();
+        $moonIds = $this->registry->moonBuildings()->keys()->all();
         $defenseIds = $this->registry->defenses()
             ->filter(fn (Defense $d) => $d->getId() < 500)
-            ->keys()->toArray();
+            ->keys()->all();
         $missileIds = $this->registry->defenses()
             ->filter(fn (Defense $d) => $d->getId() >= 500)
-            ->keys()->toArray();
-        $allBuildingIds = $this->registry->buildings()->keys()->toArray();
-        $techIds = $this->registry->research()->keys()->toArray();
-        $fleetIds = $this->registry->ships()->keys()->toArray();
-        $allDefenseIds = $this->registry->defenses()->keys()->toArray();
-        $officierIds = $this->registry->officers()->keys()->toArray();
-        $prodIds = $this->registry->producers()->keys()->toArray();
+            ->keys()->all();
+        $allBuildingIds = $this->registry->buildings()->keys()->all();
+        $techIds = $this->registry->research()->keys()->all();
+        $fleetIds = $this->registry->ships()->keys()->all();
+        $allDefenseIds = $this->registry->defenses()->keys()->all();
+        $officierIds = $this->registry->officers()->keys()->all();
+        $prodIds = $this->registry->producers()->keys()->all();
 
-        $this->objectsList = [
+        $this->objectsList = array_map(array_values(...), [
             'resources' => $resourceIds,
             'facilities' => array_merge($facilityIds, $moonIds),
             'defenses' => $defenseIds,
@@ -209,7 +213,7 @@ class Objects
             'defense' => $allDefenseIds,
             'officier' => $officierIds,
             'prod' => $prodIds,
-        ];
+        ]);
     }
 
     private function buildProduction(): void

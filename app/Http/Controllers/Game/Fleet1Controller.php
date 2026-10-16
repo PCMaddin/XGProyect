@@ -150,7 +150,7 @@ class Fleet1Controller extends BaseController
             }
 
             $this->shipCount += $amount;
-            $shipId = is_array($objects) ? $this->asInt(array_search($shipName, $objects, true)) : 0;
+            $shipId = $this->asInt(array_search($shipName, $objects, true));
 
             $list[] = [
                 'ship_name' => $this->buildShipName($shipName, $shipId),

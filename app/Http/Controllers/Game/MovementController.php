@@ -58,7 +58,7 @@ class MovementController extends BaseController
     ) {
     }
 
-    public function __invoke(Request $request): View|RedirectResponse
+    public function __invoke(Request $request): View | RedirectResponse
     {
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Fleet));
 
@@ -213,9 +213,7 @@ class MovementController extends BaseController
         $tooltips = [];
 
         foreach ($ships as $ship => $amount) {
-            $name = is_array($objects) && isset($objects[$ship]) && is_scalar($objects[$ship])
-                ? (string) $objects[$ship]
-                : '';
+            $name = $objects[$ship] ?? '';
 
             $tooltips[] = __('game/ships.' . $name) . ' :' . $this->asInt($amount);
         }

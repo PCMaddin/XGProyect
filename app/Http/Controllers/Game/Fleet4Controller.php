@@ -209,16 +209,16 @@ class Fleet4Controller extends BaseController
 
     private function runValidations(): bool
     {
-        return $this->validateAdmin()
-            && $this->validateOwnVacations()
-            && $this->validateTargetVacations()
-            && $this->validateAcs()
-            && $this->validateShips()
-            && $this->validateMission()
-            && $this->validateNoobProtection()
-            && $this->validateFleets()
-            && $this->validateResources()
-            && $this->validateTime();
+        return $this->validateAdmin() &&
+            $this->validateOwnVacations() &&
+            $this->validateTargetVacations() &&
+            $this->validateAcs() &&
+            $this->validateShips() &&
+            $this->validateMission() &&
+            $this->validateNoobProtection() &&
+            $this->validateFleets() &&
+            $this->validateResources() &&
+            $this->validateTime();
     }
 
     private function validateAdmin(): bool
@@ -228,9 +228,9 @@ class Fleet4Controller extends BaseController
         }
 
         if (
-            $this->settingsService->getInt('adm_attack') !== 0
-            && $this->asInt($this->targetData['authlevel'] ?? 0) >= 1
-            && $this->userInt('authlevel') === 0
+            $this->settingsService->getInt('adm_attack') !== 0 &&
+            $this->asInt($this->targetData['authlevel'] ?? 0) >= 1 &&
+            $this->userInt('authlevel') === 0
         ) {
             $this->showMessage((string) __('game/fleet.fl_admins_cannot_be_attacked'));
         }
@@ -298,7 +298,7 @@ class Fleet4Controller extends BaseController
         $totalShips = 0;
 
         foreach ($fleet as $shipId => $amount) {
-            $column = is_array($objects) && isset($objects[$shipId]) && is_scalar($objects[$shipId]) ? (string) $objects[$shipId] : '';
+            $column = $objects[$shipId] ?? '';
 
             if ($column === '' || !isset($planetShips[$column]) || $amount > $this->asInt($planetShips[$column])) {
                 return false;
@@ -356,10 +356,10 @@ class Fleet4Controller extends BaseController
             Missions::SPY => isset($fleet[Ships::ship_espionage_probe]) && !$this->ownPlanet,
             Missions::COLONIZE => isset($fleet[Ships::ship_colony_ship]),
             Missions::RECYCLE => !$this->isEmptyDebris(),
-            Missions::DESTROY => !$this->ownPlanet
-                && $this->occupiedPlanet
-                && $this->asInt($this->sessionTarget()['type'] ?? 0) === PlanetTypes::MOON
-                && isset($fleet[Ships::ship_deathstar]),
+            Missions::DESTROY => !$this->ownPlanet &&
+                $this->occupiedPlanet &&
+                $this->asInt($this->sessionTarget()['type'] ?? 0) === PlanetTypes::MOON &&
+                isset($fleet[Ships::ship_deathstar]),
             default => true,
         };
     }
@@ -409,9 +409,9 @@ class Fleet4Controller extends BaseController
             return true;
         }
 
-        return $this->asInt($this->targetData['planet_debris_metal'] ?? 0) === 0
-            && $this->asInt($this->targetData['planet_debris_crystal'] ?? 0) === 0
-            && time() > ($this->asInt($this->targetData['planet_invisible_start_time'] ?? 0) + DEBRIS_LIFE_TIME);
+        return $this->asInt($this->targetData['planet_debris_metal'] ?? 0) === 0 &&
+            $this->asInt($this->targetData['planet_debris_crystal'] ?? 0) === 0 &&
+            time() > ($this->asInt($this->targetData['planet_invisible_start_time'] ?? 0) + DEBRIS_LIFE_TIME);
     }
 
     private function validateExpedition(): void

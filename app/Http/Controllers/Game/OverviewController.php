@@ -279,9 +279,9 @@ class OverviewController extends BaseController
     private function getPlanetMoon(): array
     {
         if (
-            $this->planetInt('moon_id') === 0
-            || $this->planetInt('moon_destroyed') !== 0
-            || $this->planetInt('planet_type') !== PlanetTypesEnumerator::PLANET
+            $this->planetInt('moon_id') === 0 ||
+            $this->planetInt('moon_destroyed') !== 0 ||
+            $this->planetInt('planet_type') !== PlanetTypesEnumerator::PLANET
         ) {
             return ['moonImg' => '', 'moon' => ''];
         }
@@ -306,8 +306,8 @@ class OverviewController extends BaseController
 
         foreach ($this->colonyRows() as $planet) {
             if (
-                $this->arrInt($planet, 'planet_id') === $this->userInt('current_planet')
-                || $this->arrInt($planet, 'planet_type') === PlanetTypesEnumerator::MOON
+                $this->arrInt($planet, 'planet_id') === $this->userInt('current_planet') ||
+                $this->arrInt($planet, 'planet_type') === PlanetTypesEnumerator::MOON
             ) {
                 continue;
             }
@@ -381,9 +381,7 @@ class OverviewController extends BaseController
 
     private function objectName(int $objectId): string
     {
-        $name = $this->objects->getObjects($objectId);
-
-        return is_string($name) ? $name : '';
+        return $this->objects->getObjects($objectId);
     }
 
     private function planetInt(string $key): int

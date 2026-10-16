@@ -145,7 +145,9 @@ abstract class MissionLootCharacterizationTestCase extends TestCase
         $probe = $this->invoke($mission, 'getShipType', 210, 1);
 
         // 202 has rapid fire against 210 (espionage probe) per the config
-        $this->assertSame($combat[202]['sd'][210], $smallCargo->getRfTo($probe));
+        $rapidFire = $combat[202]['sd'] ?? [];
+        $this->assertArrayHasKey(210, $rapidFire);
+        $this->assertSame($rapidFire[210], $smallCargo->getRfTo($probe));
         // no rapid-fire table -> no rapid fire against anything
         $this->assertSame([], $rocketLauncher->getRF());
         $this->assertSame(0, $rocketLauncher->getRfTo($probe));

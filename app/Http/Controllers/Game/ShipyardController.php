@@ -398,8 +398,8 @@ class ShipyardController extends BaseController
             return false;
         }
 
-        return $this->planetInt($this->objectName($itemId)) >= 1
-            || str_contains($this->planetStr('planet_b_hangar_id'), $itemId . ',');
+        return $this->planetInt($this->objectName($itemId)) >= 1 ||
+            str_contains($this->planetStr('planet_b_hangar_id'), $itemId . ',');
     }
 
     private function calculateMissilesAmount(): void
@@ -457,9 +457,7 @@ class ShipyardController extends BaseController
 
     private function objectName(int $itemId): string
     {
-        $name = $this->objects->getObjects($itemId);
-
-        return is_string($name) ? $name : '';
+        return $this->objects->getObjects($itemId);
     }
 
     private function objectMapName(int $itemId): string
@@ -472,21 +470,7 @@ class ShipyardController extends BaseController
      */
     private function objectMap(): array
     {
-        $map = $this->objects->getObjects();
-
-        if (!is_array($map)) {
-            return [];
-        }
-
-        $result = [];
-
-        foreach ($map as $id => $column) {
-            if (is_numeric($id) && is_scalar($column)) {
-                $result[(int) $id] = (string) $column;
-            }
-        }
-
-        return $result;
+        return $this->objects->getObjects();
     }
 
     private function planetInt(string $key): int

@@ -73,7 +73,7 @@ class PremiumController extends BaseController
 
         $officers = $this->objects->getObjectsList('officier');
 
-        if (!is_array($officers) || !in_array($officer, $officers, true) || !in_array($time, ['week', 'month'], true)) {
+        if (!in_array($officer, $officers, true) || !in_array($time, ['week', 'month'], true)) {
             return null;
         }
 
@@ -188,9 +188,7 @@ class PremiumController extends BaseController
 
     private function officerColumn(int $officerId): string
     {
-        $column = $this->objects->getObjects($officerId);
-
-        return is_string($column) ? $column : '';
+        return $this->objects->getObjects($officerId);
     }
 
     private function officerText(int $officerId, string $key): string
@@ -198,11 +196,11 @@ class PremiumController extends BaseController
         $officers = trans('game/officier.officiers');
 
         if (
-            is_array($officers)
-            && isset($officers[$officerId])
-            && is_array($officers[$officerId])
-            && isset($officers[$officerId][$key])
-            && is_scalar($officers[$officerId][$key])
+            is_array($officers) &&
+            isset($officers[$officerId]) &&
+            is_array($officers[$officerId]) &&
+            isset($officers[$officerId][$key]) &&
+            is_scalar($officers[$officerId][$key])
         ) {
             return (string) $officers[$officerId][$key];
         }
