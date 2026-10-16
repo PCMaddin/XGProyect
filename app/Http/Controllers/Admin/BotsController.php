@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\BotsRequest;
+use App\Models\User;
 use App\Services\Admin\BotService;
+use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
 /**
- * Bots module.
- *
- * Currently lets an admin populate the universe with bot planets. The module
- * is designed to grow into full AI players that act on their own; the
- * generation logic lives in {@see BotService} to keep that behaviour layer
- * separate from this controller.
+ * Bots module: populate the universe with bot players and switch their own
+ * play on or off (what they do is {@see \App\Services\Game\Bots\BotPlayerService}).
  */
 class BotsController extends BaseController
 {
     public function __construct(
         private readonly BotService $bots,
+        private readonly SettingsService $settings,
     ) {
     }
 
@@ -31,7 +31,17 @@ class BotsController extends BaseController
             'max_galaxy' => MAX_GALAXY_IN_WORLD,
             'max_system' => MAX_SYSTEM_IN_GALAXY,
             'max_planet' => MAX_PLANET_IN_SYSTEM,
+            'bots_play' => $this->settings->getBool('bots_play'),
+            'bots_count' => User::where('user_is_bot', true)->count(),
         ]);
+    }
+
+    public function play(Request $request): RedirectResponse
+    {
+        $this->settings->write('bots_play', $request->boolean('bots_play') ? 1 : 0);
+        session()->flash('success', __('admin/bots.bo_play_saved'));
+
+        return redirect()->route('admin.bots');
     }
 
     public function generate(BotsRequest $request): RedirectResponse

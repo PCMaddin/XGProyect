@@ -796,6 +796,37 @@ Baseline-Einträge.
   `XGP_UPDATE_CHECK=true` verhält sich alles wie vorher. Tests (aus: nichts
   gesendet; an: neuere Version erkannt); im Browser geprüft, dass das
   Admin-Panel keine Update-Anfrage mehr stellt.
+- ✅ **Bots spielen selbst:** Admin-Bots waren bisher leere Konten mit
+  Startplanet, die nach einem Monat ohne Login von der Aufräumroutine
+  gelöscht wurden. Jetzt:
+  - Bots sind per Spalte markiert (`user_is_bot`, `user_bot_next_action`;
+    Migration `000029`, setzt vorhandene `@bots.local`-Konten nach).
+  - Der Spiel-Tick lässt höchstens einmal pro Minute bis zu 10 fällige Bots
+    handeln; jeder Bot kommt alle 10–20 Minuten dran. Ein Zug macht, was ein
+    Seitenaufruf des Spielers täte (Produktion, fertige Aufträge), und gibt
+    dann Aufträge über dieselben Warteschlangen und Regeln wie Spieler
+    (`BuildingQueueService`, `ResearchQueueService`, Werft-Warteschlange):
+    keine Abkürzungen, alles bezahlt. Fehler eines Zuges werden geloggt und
+    beenden nie den Seitenaufruf.
+  - Strategie (`BotStrategy`): bei Energiemangel nur Solarkraftwerk, sonst
+    Energiepuffer, volle Speicher, zurückliegende Anlagen (Roboterfabrik,
+    Raumschiffwerft, Forschungslabor, Nanitenfabrik nach Metallminenstufe),
+    Kristall zwei und Deuterium vier Stufen hinter Metall, dann Metall; davon
+    das dringendste bezahlbare, sonst wird gespart. Fehlt ein Rohstoff, der
+    nicht produziert wird, kommt zuerst dessen Mine; übersteigt der Preis
+    den Speicher, zuerst der Speicher. Forschung nach einer Eröffnungsliste,
+    danach immer die billigste nützliche Stufe. Ein Viertel der Rohstoffe
+    über dem doppelten Preis des nächsten Gebäudes geht in die beste
+    erlaubte Verteidigung.
+  - Bots fliegen (noch) nicht: keine Flotten, keine Angriffe, kein Handel.
+  - Die Aufräumroutine löscht keine Bots mehr; handelnde Bots sind online.
+  - Admin → Bots: Schalter „Bots spielen selbst“ (`bots_play`, Standard an).
+
+  Tests: Strategie (Unit) und ein Zug auf MariaDB (baut, forscht,
+  verteidigt, bleibt im Plus; Schalter und Minutenabstand; Aufräumen). Mit
+  einer Schnellvorlauf-Simulation abgestimmt (300 Züge à 30 Minuten: Metall
+  13, Kristall 11, Deuterium 9, Energie ausgeglichen, Forschung laufend).
+  Im Browser Schalter und echten Tick geprüft, gecrawlt ohne neue Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
 

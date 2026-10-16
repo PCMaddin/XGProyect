@@ -14,6 +14,7 @@ use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
 use App\Services\Game\AuctionService;
+use App\Services\Game\Bots\BotPlayerService;
 use App\Services\Game\BuildingQueueService;
 use App\Services\Game\Items\ItemService;
 use App\Services\Game\Formulas\OfficerService;
@@ -56,6 +57,7 @@ class UpdatesLibrary
         app(RelocationService::class)->settleDue(time());
         $this->updateStatistics();
         app(AuctionService::class)->settleEnded(time());
+        app(BotPlayerService::class)->playDue(time());
     }
 
     private function cleanUp(): void
@@ -81,7 +83,7 @@ class UpdatesLibrary
                         INNER JOIN `' . PREFERENCES . "` AS p ON p.preference_user_id = u.id
                         WHERE (p.`preference_delete_mode` < '" . $delDeleted . "'
                             AND p.`preference_delete_mode` <> 0)
-                            OR (u.`onlinetime` < '" . $delInactive . "' AND u.`onlinetime` <> 0 AND u.`authlevel` <> 3)"
+                            OR (u.`onlinetime` < '" . $delInactive . "' AND u.`onlinetime` <> 0 AND u.`authlevel` <> 3 AND u.`user_is_bot` = 0)"
                     )
                 )
             );

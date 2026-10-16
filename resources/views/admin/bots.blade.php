@@ -54,5 +54,33 @@
             </div>
         </div>
     </form>
+
+    <form action="{{ route('admin.bots.play') }}" method="POST">
+        @csrf
+        <div class="row">
+            <div class="col-lg-6">
+                <x-admin.card-collapsible id="collapseBotsPlay" :title="__('admin/bots.bo_play_title')" icon="fas fa-chess">
+                    <p class="small text-gray-600">{{ __('admin/bots.bo_play_explanation') }}</p>
+                    <x-admin.settings-table>
+                        <tr>
+                            <td><label for="bots_play">{{ __('admin/bots.bo_play_label') }}</label></td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="bots_play"
+                                        name="bots_play" {{ $bots_play ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="bots_play"></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/bots.bo_play_count') }}</td>
+                            <td>{{ $bots_count }}</td>
+                        </tr>
+                    </x-admin.settings-table>
+                    <button type="submit" class="btn btn-primary btn-sm">{{ __('admin/bots.bo_play_save') }}</button>
+                </x-admin.card-collapsible>
+            </div>
+        </div>
+    </form>
 </div>
 @endsection

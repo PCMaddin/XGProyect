@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'bo_title' => 'Bots',
-    'bo_sub_title' => 'Peuplez l’univers de joueurs robots. Chaque bot est créé comme un utilisateur avec une seule planète mère. À l’avenir, ces bots joueront seuls.',
+    'bo_sub_title' => 'Peuplez l’univers de joueurs bots. Chaque bot est créé comme un utilisateur avec une seule planète mère et joue tout seul.',
     'bo_parameters' => 'Paramètres',
     'bo_range' => 'Plage de galaxies',
     'bo_amount' => 'Nombre de bots à créer',
@@ -14,4 +14,10 @@ return [
     'bo_created' => ':count bot créé avec succès !|:count bots créés avec succès !',
     'bo_partial' => 'Seuls :count bots sur :requested ont pu être créés ; la zone ciblée est presque pleine.',
     'bo_none' => 'Aucun bot n’a pu être créé. La zone choisie est pleine.',
+    'bo_play_title' => 'Les bots jouent seuls',
+    'bo_play_explanation' => 'Toutes les 10 à 20 minutes, chaque bot développe sa planète comme un nouveau joueur prudent : énergie, mines, hangars et installations, recherche sur sa planète mère et défenses avec les ressources restantes. Les bots n’envoient pas de flottes et n’attaquent personne. Les bots restent actifs et ne sont pas supprimés comme comptes inactifs.',
+    'bo_play_label' => 'Les bots jouent',
+    'bo_play_count' => 'Bots dans l’univers',
+    'bo_play_save' => 'Enregistrer',
+    'bo_play_saved' => 'Paramètres des bots enregistrés.',
 ];
