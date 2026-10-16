@@ -117,6 +117,10 @@ class BuddiesController extends BaseController
         $bid = $request->integer('bid');
         $buddy = $this->findBuddy($bid);
 
+        if ($buddy === null) {
+            return redirect(self::REDIRECT_TARGET);
+        }
+
         $target = $this->asInt($buddy->getBuddySender()) !== $this->userId()
             ? $this->asInt($buddy->getBuddySender())
             : $this->asInt($buddy->getBuddyReceiver());
@@ -141,6 +145,11 @@ class BuddiesController extends BaseController
     {
         $bid = $request->integer('bid');
         $buddy = $this->findBuddy($bid);
+
+        // only the receiver can accept
+        if ($buddy === null || $this->asInt($buddy->getBuddyReceiver()) !== $this->userId()) {
+            return redirect(self::REDIRECT_TARGET);
+        }
 
         $this->sendBuddyMessage($this->asInt($buddy->getBuddySender()), 3);
 
@@ -196,14 +205,24 @@ class BuddiesController extends BaseController
         return view('buddies.request', get_object_vars($row));
     }
 
-    private function findBuddy(int $bid): BuddyEntity
+    /**
+     * A buddy request or relation of the current user, null if there is none.
+     *
+     * Bugfix: an unknown id passed `false` to the entity (TypeError), and any
+     * id was accepted, so a user could send "rejected" / "deleted" /
+     * "accepted" messages about other players' requests.
+     */
+    private function findBuddy(int $bid): ?BuddyEntity
     {
         $row = DB::selectOne(
-            $this->prepareSql('SELECT * FROM `' . BUDDY . '` WHERE `buddy_id` = ?;'),
-            [$bid]
+            $this->prepareSql(
+                'SELECT * FROM `' . BUDDY . '`
+                WHERE `buddy_id` = ? AND (`buddy_receiver` = ? OR `buddy_sender` = ?);'
+            ),
+            [$bid, $this->userId(), $this->userId()]
         );
 
-        return new BuddyEntity(is_object($row) ? get_object_vars($row) : false);
+        return is_object($row) ? new BuddyEntity(get_object_vars($row)) : null;
     }
 
     private function relationshipExists(int $target): bool
