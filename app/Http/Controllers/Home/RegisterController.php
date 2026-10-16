@@ -28,6 +28,24 @@ class RegisterController extends BaseController
     }
 
     /**
+     * The welcome message points to the server's forum only when the admin
+     * set one; the game has no tutorial, chat or support pages of its own.
+     */
+    private function welcomeMessage(string $playerName): string
+    {
+        $paragraphs = [str_replace('%s', e($playerName), (string) __('home/register.re_welcome_message_content'))];
+        $forumUrl = $this->settingsService->getString('forum_url');
+
+        if ($forumUrl !== '') {
+            $paragraphs[] = (string) __('home/register.re_welcome_message_forum', ['url' => e($forumUrl)]);
+        }
+
+        $paragraphs[] = (string) __('home/register.re_welcome_message_closing');
+
+        return implode('<br><br>', $paragraphs);
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.StaticAccess")
      */
     public function __invoke(RegisterRequest $request): RedirectResponse
@@ -54,8 +72,6 @@ class RegisterController extends BaseController
 
         // send welcome message
         if ($this->settingsService->getString('reg_welcome_message')) {
-            /** @var string $welcomeContent */
-            $welcomeContent = __('home/register.re_welcome_message_content');
             Functions::sendMessage(
                 $newUser->id,
                 0,
@@ -63,7 +79,7 @@ class RegisterController extends BaseController
                 5,
                 __('home/register.re_welcome_message_from'),
                 __('home/register.re_welcome_message_subject'),
-                str_replace('%s', $newUser->name, $welcomeContent)
+                $this->welcomeMessage($newUser->name)
             );
         }
 

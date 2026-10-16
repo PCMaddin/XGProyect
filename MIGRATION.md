@@ -734,6 +734,24 @@ Baseline-Einträge.
     OGame-Gemeinschaft (小型运输舰, 废墟场, 传感器阵列, 暗物质, 死星 …).
     Satzbausteine und Platzhalter wie beim Japanischen. Mit `zh_CN`
     gecrawlt, ohne neue Fehler.
+- ✅ **Willkommensnachricht ohne tote Links:** Die Nachricht an neue Spieler
+  verlinkte `tutorial`, `irc`, `forum` und `support`, Seiten, die das Spiel
+  nicht hat, und schickte Spieler in einen IRC-Kanal des alten Projekts.
+  Jetzt steht dort der in den Servereinstellungen hinterlegte Forum-Link
+  (`forum_url`), ohne Forum gar kein Link. Der Text ist in drei Schlüssel
+  geteilt (`re_welcome_message_content`, `…_forum`, `…_closing`).
+  Außerdem korrigiert:
+  - Die Nachricht versprach „wird in 24 Stunden gelöscht“, die Bereinigung
+    löscht Nachrichten aber nach einer Woche.
+  - Zeilenumbrüche und `<br>` zusammen ergaben durch `nl2br` doppelte
+    Leerzeilen.
+  - Der Spielername wird escaped eingesetzt.
+  - Das Spanische hatte einen eigenen, veralteten Text; es folgt jetzt den
+    anderen Sprachen. Dabei standen in `es` wörtliche `\u00e1`-Escapes in
+    acht Texten, die als Validierungsmeldung sichtbar wurden.
+
+  Tests (mit und ohne Forum, Escaping); im Browser registriert und die
+  Nachricht geprüft.
 
 ## Smoke-Test gegen eine echte Datenbank
 
