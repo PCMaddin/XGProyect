@@ -135,6 +135,11 @@ class Fleet4Controller extends BaseController
 
     private function buildPage(Request $request): RedirectResponse
     {
+        // a fleet is only sent by the POST of the previous step
+        if (!$request->isMethod('post')) {
+            return redirect('game.php?page=fleet1');
+        }
+
         $this->setInputsData($request);
         $this->getTarget();
 

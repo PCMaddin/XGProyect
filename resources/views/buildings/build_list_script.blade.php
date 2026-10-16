@@ -36,7 +36,7 @@ function t() {
 			if ( m < 10 ) {
 				m = "0" + m;
 			}
-			blc.innerHTML = h + ":" + m + ":" + s + "<br><a href=game.php?page={{ $current_page }}&r={{ $call_program }}&listid=" + pk + "&cmd=" + pm + "&planet=" + pl + ">{{ __('game/buildings.bd_cancel') }}</a>";
+			blc.innerHTML = h + ":" + m + ":" + s + "<br><a data-post href=game.php?page={{ $current_page }}&r={{ $call_program }}&listid=" + pk + "&cmd=" + pm + "&planet=" + pl + ">{{ __('game/buildings.bd_cancel') }}</a>";
 		}
 		pp = pp - 1;
 		if (timeout == 1) {

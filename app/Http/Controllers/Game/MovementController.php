@@ -95,7 +95,8 @@ class MovementController extends BaseController
 
     private function runAction(Request $request): ?RedirectResponse
     {
-        if ($request->query('action') === 'return') {
+        // recalling a fleet only by POST
+        if ($request->query('action') === 'return' && $request->isMethod('post')) {
             return $this->execFleetReturn($request);
         }
 

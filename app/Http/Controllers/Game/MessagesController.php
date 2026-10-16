@@ -59,7 +59,7 @@ class MessagesController extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
 
-        if (in_array($request->input('deletemessages'), self::DELETE_ACTIONS, true)) {
+        if ($request->isMethod('post') && in_array($request->input('deletemessages'), self::DELETE_ACTIONS, true)) {
             return $this->doDelete($request);
         }
 

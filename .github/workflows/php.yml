@@ -31,6 +31,45 @@ jobs:
       - name: Run PHPUnit
         run: composer phpunit
 
+  phpunit-mariadb:
+    name: PHPUnit (MariaDB)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: xgp_test
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, pdo_mysql, opcache, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      # the tests on MySQL/MariaDB (whole game pages, strict SQL mode)
+      - name: Run PHPUnit against MariaDB
+        run: vendor/bin/phpunit --filter Mysql
+        env:
+          MYSQL_TEST_DATABASE: xgp_test
+          MYSQL_TEST_HOST: 127.0.0.1
+          MYSQL_TEST_PORT: 3306
+          MYSQL_TEST_USERNAME: root
+          MYSQL_TEST_PASSWORD: root
+
   php-cs-fixer:
     name: PHP CS Fixer
     runs-on: ubuntu-latest

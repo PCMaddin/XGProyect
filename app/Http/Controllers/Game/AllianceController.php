@@ -117,7 +117,7 @@ class AllianceController extends BaseController
 
     private function adminAllySection(Request $request): View | RedirectResponse
     {
-        if ($request->has('options')) {
+        if ($request->isMethod('post') && $request->has('options')) {
             return $this->saveAllianceSettings($request);
         }
 
@@ -207,6 +207,17 @@ class AllianceController extends BaseController
 
     private function adminExitSection(Request $request): RedirectResponse
     {
+        // a plain link used to disband the alliance at once: ask first, and
+        // only a POST (with the CSRF token) does it
+        if (!$request->isMethod('post')) {
+            Functions::messageBox(
+                (string) __('game/alliance.al_disolve_alliance'),
+                '<br>',
+                'game.php?page=alliance&mode=admin&edit=exit',
+                (string) __('game/alliance.al_go_out_yes')
+            );
+        }
+
         $allianceId = $this->allianceId($request);
 
         DB::transaction(function () use ($allianceId): void {
@@ -286,7 +297,7 @@ class AllianceController extends BaseController
 
     private function handleMemberKick(Request $request): void
     {
-        if (!$request->has('kick') || !$this->alliance->hasAccess(AllianceRanks::KICK)) {
+        if (!$request->isMethod('post') || !$request->has('kick') || !$this->alliance->hasAccess(AllianceRanks::KICK)) {
             return;
         }
 
@@ -306,7 +317,7 @@ class AllianceController extends BaseController
 
     private function handleMemberRankChange(Request $request): void
     {
-        if (!$request->has('newrang') || !$request->has('id')) {
+        if (!$request->isMethod('post') || !$request->has('newrang') || !$request->has('id')) {
             return;
         }
 
@@ -318,9 +329,10 @@ class AllianceController extends BaseController
 
         $newRank = $request->integer('newrang');
 
+        // only members of this alliance (the id came unchecked from the form)
         DB::update(
-            $this->prepareSql('UPDATE `' . USERS . '` SET `ally_rank_id` = ? WHERE `id` = ?;'),
-            [$newRank, $memberId]
+            $this->prepareSql('UPDATE `' . USERS . '` SET `ally_rank_id` = ? WHERE `id` = ? AND `ally_id` = ?;'),
+            [$newRank, $memberId, $this->allianceId($request)]
         );
     }
 
@@ -390,7 +402,7 @@ class AllianceController extends BaseController
     {
         $show = $request->integer('show');
 
-        if ($show !== 0 && ($request->has('accept') || $request->has('cancel'))) {
+        if ($show !== 0 && $request->isMethod('post') && ($request->has('accept') || $request->has('cancel'))) {
             return $this->resolveRequest($request, $show, $request->has('accept'));
         }
 
@@ -464,6 +476,12 @@ class AllianceController extends BaseController
     {
         $ranks = $this->alliance->getCurrentAllianceRankObject();
 
+        if (!$request->isMethod('post')) {
+            return view('alliance.admin.rights', [
+                'list_of_ranks' => $this->buildRanksMatrix($ranks),
+            ]);
+        }
+
         if ($request->has('newrangname')) {
             $ranks->addNew($this->asString($request->input('newrangname')));
             $this->persistRanks($ranks, $request);
@@ -536,7 +554,7 @@ class AllianceController extends BaseController
 
             $list[] = [
                 'rank_id' => $rankId,
-                'rank_delete' => $locked ? '' : '<a href="game.php?page=alliance&mode=admin&edit=rights&d=' . $rankId
+                'rank_delete' => $locked ? '' : '<a data-post href="game.php?page=alliance&mode=admin&edit=rights&d=' . $rankId
                     . '"><img src="' . asset(self::ALLIANCE_ASSET . 'abort.gif') . '" border="0" alt="' . __('game/alliance.al_rank_delete') . '"/></a>',
                 'rank_name' => $details['rank'],
                 'r1' => $rightHand,
@@ -565,9 +583,16 @@ class AllianceController extends BaseController
 
     private function adminTransferSection(Request $request): View | RedirectResponse
     {
-        $newLeader = $request->integer('newleader');
+        // only the founder hands the alliance over, and only to a member of it
+        // with the "right hand" right (as the list below offers); before,
+        // any member with admin rights could make any player the owner
+        if (!$this->alliance->isOwner()) {
+            return redirect('game.php?page=alliance');
+        }
 
-        if ($newLeader !== 0) {
+        $newLeader = $request->isMethod('post') ? $request->integer('newleader') : 0;
+
+        if ($newLeader !== 0 && $this->isRightHand($newLeader, $request)) {
             DB::update(
                 $this->prepareSql(
                     'UPDATE `' . USERS . '` AS u1, `' . ALLIANCE . '` AS a, `' . USERS . '` AS u2
@@ -604,6 +629,26 @@ class AllianceController extends BaseController
         return view('alliance.admin.transfer', ['members' => $members]);
     }
 
+    /**
+     * Whether the player is a member of this alliance with the right hand.
+     */
+    private function isRightHand(int $userId, Request $request): bool
+    {
+        $member = $this->rows(
+            'SELECT `ally_rank_id` FROM `' . USERS . '` WHERE `id` = ? AND `ally_id` = ?;',
+            [$userId, $this->allianceId($request)]
+        )[0] ?? null;
+        $rankId = $member === null ? 0 : $this->asInt($member['ally_rank_id'] ?? 0);
+
+        if ($rankId === 0) {
+            return false;
+        }
+
+        $rights = $this->alliance->getCurrentAllianceRankObject()->getRankById($rankId)['rights'] ?? [];
+
+        return ($rights[AllianceRanks::RIGHT_HAND] ?? 0) === SwitchInt::ON;
+    }
+
     private function adminMemberRankBlock(int $memberId, int $memberRankId, int $requestedRank): string
     {
         if ($requestedRank !== $memberId) {
@@ -633,7 +678,7 @@ class AllianceController extends BaseController
         $changeRank = '';
 
         if ($this->alliance->hasAccess(AllianceRanks::KICK)) {
-            $kick = $this->formatService->link(
+            $kick = $this->formatService->postLink(
                 'game.php?page=alliance&mode=admin&edit=members&kick=' . $memberId,
                 Functions::setImage(asset(self::ALLIANCE_ASSET . 'abort.gif')),
                 '',
@@ -769,7 +814,7 @@ class AllianceController extends BaseController
         $requestText = (string) __('game/alliance.al_request_wait_message');
         $buttonText = (string) __('game/alliance.al_delete_request');
 
-        if ($request->filled('bcancel')) {
+        if ($request->isMethod('post') && $request->filled('bcancel')) {
             DB::update(
                 $this->prepareSql('UPDATE `' . USERS . '` SET `ally_request` = 0 WHERE `id` = ?;'),
                 [$this->userInt('id')]
@@ -951,7 +996,7 @@ class AllianceController extends BaseController
 
         $text = is_string($raw = $request->input('text')) ? $raw : '';
 
-        if ($request->filled('send') && $text !== '') {
+        if ($request->isMethod('post') && $request->filled('send') && $text !== '') {
             // The request text is bound; the legacy code interpolated it.
             DB::update(
                 $this->prepareSql(
@@ -1057,7 +1102,7 @@ class AllianceController extends BaseController
             return redirect('game.php?page=alliance');
         }
 
-        if ($request->integer('sendmail') !== 0) {
+        if ($request->isMethod('post') && $request->integer('sendmail') !== 0) {
             $this->sendCircular($request);
         }
 
@@ -1112,7 +1157,7 @@ class AllianceController extends BaseController
             Functions::message((string) __('game/alliance.al_founder_cant_leave_alliance'), 'game.php?page=alliance', 3);
         }
 
-        if ($request->integer('yes') !== 0) {
+        if ($request->isMethod('post') && $request->integer('yes') !== 0) {
             DB::update(
                 $this->prepareSql('UPDATE `' . USERS . '` SET `ally_id` = 0, `ally_rank_id` = 0 WHERE `id` = ? AND `ally_id` = ?;'),
                 [$this->userInt('id'), $this->allianceId($request)]

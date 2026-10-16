@@ -62,7 +62,8 @@ abstract class BuildingsController extends BaseController
         $user = Users::getInstance()->getUserData();
         $planet = Users::getInstance()->getPlanetData();
 
-        if ($request->query('cmd') !== null) {
+        // actions only by POST, so the CSRF check covers them
+        if ($request->query('cmd') !== null && $request->isMethod('post')) {
             return $this->handleAction($request, $user, $planet);
         }
 
@@ -227,7 +228,7 @@ abstract class BuildingsController extends BaseController
             }
 
             if ($queueLength > 0) {
-                return $this->formatService->link($buildUrl, $this->buildButton('allowed_for_queue'));
+                return $this->formatService->postLink($buildUrl, $this->buildButton('allowed_for_queue'));
             }
         } elseif ($queueLength > 0) {
             return $this->buildCountDownClock($buildingId, $queueData);
@@ -244,7 +245,7 @@ abstract class BuildingsController extends BaseController
             return $this->buildButton('not_allowed');
         }
 
-        return $this->formatService->link($buildUrl, $this->buildButton('allowed'));
+        return $this->formatService->postLink($buildUrl, $this->buildButton('allowed'));
     }
 
     /** @param array{length:int,items:array<int,array<string,mixed>>} $queueData */

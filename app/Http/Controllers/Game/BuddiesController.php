@@ -84,7 +84,14 @@ class BuddiesController extends BaseController
 
     private function runAction(Request $request): View | RedirectResponse | null
     {
-        return match ($this->resolveAction($request->integer('mode'), $request->integer('sm'))) {
+        $action = $this->resolveAction($request->integer('mode'), $request->integer('sm'));
+
+        // removing, accepting and sending change something: only by POST
+        if ($action !== 'form' && !$request->isMethod('post')) {
+            return null;
+        }
+
+        return match ($action) {
             'remove' => $this->removeRequest($request),
             'accept' => $this->acceptRequest($request),
             'send' => $this->sendRequest($request),
@@ -170,6 +177,12 @@ class BuddiesController extends BaseController
     {
         $target = $request->integer('user');
         $text = is_string($raw = $request->input('text')) ? $raw : '';
+
+        // the form offers only other, existing players; the posted id is not
+        // checked by it
+        if (DB::table('users')->where('id', $target)->where('id', '<>', $this->userId())->doesntExist()) {
+            return redirect(self::REDIRECT_TARGET);
+        }
 
         if ($this->relationshipExists($target)) {
             Functions::message(__('game/buddies.bu_request_exists'), self::REDIRECT_TARGET, 3, true);
@@ -363,7 +376,7 @@ class BuddiesController extends BaseController
 
     private function generateUrl(int $buddyId, int $sm, string $text): string
     {
-        return '<a href="game.php?page=buddies&mode=1&sm=' . $sm . '&bid=' . $buddyId . '">' . $text . '</a>';
+        return '<a data-post href="game.php?page=buddies&mode=1&sm=' . $sm . '&bid=' . $buddyId . '">' . $text . '</a>';
     }
 
     private function userId(): int

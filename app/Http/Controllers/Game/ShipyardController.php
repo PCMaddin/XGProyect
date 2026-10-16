@@ -120,7 +120,8 @@ class ShipyardController extends BaseController
     {
         $items = $request->input('fmenge');
 
-        if (!is_array($items)) {
+        // building ships and defenses only by POST
+        if (!$request->isMethod('post') || !is_array($items)) {
             return null;
         }
 

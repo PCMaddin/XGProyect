@@ -89,6 +89,11 @@ class GalaxyController extends BaseController
 
     private function runAction(Request $request): ?Response
     {
+        // sending probes, recyclers or missiles only by POST
+        if (!$request->isMethod('post')) {
+            return null;
+        }
+
         if ($request->query('fleet') === 'true') {
             return $this->sendFleet($request);
         }

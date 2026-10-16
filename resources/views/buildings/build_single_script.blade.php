@@ -16,7 +16,7 @@ function t(){
 		if ( m > 59 ) { h = Math.floor( m / 60 ); m = m - h * 60; }
 		if ( s < 10 ) { s = "0" + s }
 		if ( m < 10 ) { m = "0" + m }
-		brp.innerHTML = h + ':' + m + ':' + s + '<br><a href=game.php?page={{ $call_program }}&cmd=cancel&listid=0>{{ __('game/buildings.bd_cancel') }}</a>';
+		brp.innerHTML = h + ':' + m + ':' + s + '<br><a data-post href=game.php?page={{ $call_program }}&cmd=cancel&listid=0>{{ __('game/buildings.bd_cancel') }}</a>';
 	}
 	window.setTimeout("t();",999);
 }

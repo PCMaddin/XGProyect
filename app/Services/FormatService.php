@@ -195,6 +195,16 @@ class FormatService
         return '<a href="' . $href . '"' . $titleAttr . $attrsStr . '>' . $text . '</a>';
     }
 
+    /**
+     * A link for an action that changes something: it is sent as a POST with
+     * the CSRF token (public/assets/js/post-links.js), so a plain link from
+     * elsewhere cannot trigger it.
+     */
+    public function postLink(string $href, string $text, string $title = '', string $attributes = ''): string
+    {
+        return $this->link($href, $text, $title, trim('data-post ' . $attributes));
+    }
+
     public function prettyCoords(int $galaxy, int $system, int $planet): string
     {
         return $this->link(

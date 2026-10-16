@@ -66,7 +66,8 @@ class ResearchController extends BaseController
         $userData = Users::getInstance()->getUserData();
         $planetData = Users::getInstance()->getPlanetData();
 
-        if ($request->query('cmd') !== null) {
+        // actions only by POST, so the CSRF check covers them
+        if ($request->query('cmd') !== null && $request->isMethod('post')) {
             return $this->handleAction($request, $userData, $planetData);
         }
 
@@ -258,7 +259,7 @@ class ResearchController extends BaseController
                 return '<center>-</center>';
             }
 
-            return $this->formatService->link(
+            return $this->formatService->postLink(
                 'game.php?page=research&cmd=search&tech=' . $techId,
                 $this->formatService->colorGreen(__('game/research.re_research'))
             );
@@ -272,7 +273,7 @@ class ResearchController extends BaseController
             return $this->formatService->colorRed(__('game/research.re_research'));
         }
 
-        return $this->formatService->link(
+        return $this->formatService->postLink(
             'game.php?page=research&cmd=search&tech=' . $techId,
             $this->formatService->colorGreen(__('game/research.re_research'))
         );

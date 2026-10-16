@@ -74,6 +74,11 @@ class FederationController extends BaseController
 
     private function runAction(Request $request): void
     {
+        // inviting, removing, searching and renaming only by POST
+        if (!$request->isMethod('post')) {
+            return;
+        }
+
         $fleetId = $request->integer('fleet');
 
         if ($request->has('add') && $request->has('friends_list')) {

@@ -61,11 +61,12 @@ class PlanetlayerController extends BaseController
 
         $isMoon = $this->int($this->planet, 'planet_type') === PlanetTypesEnumerator::MOON;
 
-        if ($request->has('planetName')) {
+        // renaming and abandoning only by POST
+        if ($request->isMethod('post') && $request->has('planetName')) {
             $this->renamePlanet($request);
         }
 
-        if ($request->has('password') && $hasColonies) {
+        if ($request->isMethod('post') && $request->has('password') && $hasColonies) {
             $this->deletePlanet($request);
         }
 

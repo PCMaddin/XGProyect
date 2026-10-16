@@ -68,6 +68,11 @@ class PremiumController extends BaseController
 
     private function handlePurchase(Request $request): ?RedirectResponse
     {
+        // hiring costs dark matter: only by POST
+        if (!$request->isMethod('post')) {
+            return null;
+        }
+
         $officer = $request->integer('offi');
         $time = is_string($raw = $request->query('time')) ? $raw : '';
 
