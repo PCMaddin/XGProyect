@@ -1,0 +1,1334 @@
+{
+    "rapid fire, seed 1": {
+        "report": "8216f2c06a4d5a2a70daffcd4ac15736",
+        "reportLength": 8957,
+        "rounds": 2,
+        "result": [
+            true,
+            false,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "204": [
+                            387000,
+                            129000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            300000,
+                            0
+                        ],
+                        "402": [
+                            9000,
+                            3000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            1000000,
+                            0
+                        ],
+                        "402": [
+                            30000,
+                            10000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            516000,
+            312000
+        ],
+        "debris": [
+            [
+                116100.0,
+                38700.0
+            ],
+            [
+                309000.0,
+                3000.0
+            ],
+            [
+                425100.0,
+                41700.0
+            ]
+        ],
+        "moonProb": 4,
+        "tech": [
+            {
+                "1": [
+                    10,
+                    8,
+                    9
+                ]
+            },
+            {
+                "2": [
+                    7,
+                    7,
+                    7
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 100% Shields: 80% Armour: 90%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Light Fighter<\/th>\n                                                    <th>Cruiser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>71<\/th>\n                                                    <th>50<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 70% Shields: 70% Armour: 70%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>350<\/th>\n                                                    <th>14<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 70% Shields: 70% Armour: 70%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>350<\/th>\n                                                    <th>14<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 896155243
+    },
+    "rapid fire, seed 2": {
+        "report": "aed10ef4a2196f31099bd616904f3be2",
+        "reportLength": 8957,
+        "rounds": 2,
+        "result": [
+            true,
+            false,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "204": [
+                            402000,
+                            134000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            300000,
+                            0
+                        ],
+                        "402": [
+                            9000,
+                            3000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            1000000,
+                            0
+                        ],
+                        "402": [
+                            30000,
+                            10000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            536000,
+            312000
+        ],
+        "debris": [
+            [
+                120600.0,
+                40200.0
+            ],
+            [
+                309000.0,
+                3000.0
+            ],
+            [
+                429600.0,
+                43200.0
+            ]
+        ],
+        "moonProb": 4,
+        "tech": [
+            {
+                "1": [
+                    10,
+                    8,
+                    9
+                ]
+            },
+            {
+                "2": [
+                    7,
+                    7,
+                    7
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 100% Shields: 80% Armour: 90%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Light Fighter<\/th>\n                                                    <th>Cruiser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>66<\/th>\n                                                    <th>50<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 70% Shields: 70% Armour: 70%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>350<\/th>\n                                                    <th>14<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 70% Shields: 70% Armour: 70%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>350<\/th>\n                                                    <th>14<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 1239759640
+    },
+    "draw": {
+        "report": "993082a3a0b860b71b0fd77e78992a2b",
+        "reportLength": 15705,
+        "rounds": 6,
+        "result": [
+            false,
+            false,
+            true
+        ],
+        "attackersLostUnits": [],
+        "defendersLostUnits": [],
+        "defendersLostUnitsWithoutRepair": [],
+        "totalLost": [
+            0,
+            0
+        ],
+        "debris": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "moonProb": 0,
+        "tech": [
+            {
+                "1": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "2": [
+                    0,
+                    0,
+                    0
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 0% Shields: 0% Armour: 0%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Large Cargo<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 0% Shields: 0% Armour: 0%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Small Shield Dome<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            ""
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 1394026236
+    },
+    "several players, seed 4": {
+        "report": "62690b19e1bec11b33147c1534a3bae8",
+        "reportLength": 40580,
+        "rounds": 6,
+        "result": [
+            false,
+            false,
+            true
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "207": [
+                            1215000,
+                            405000
+                        ]
+                    }
+                },
+                "11": {
+                    "Ship": {
+                        "203": [
+                            240000,
+                            240000
+                        ]
+                    }
+                }
+            },
+            "4": {
+                "12": {
+                    "Ship": {
+                        "205": [
+                            480000,
+                            320000
+                        ],
+                        "211": [
+                            550000,
+                            275000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            178000,
+                            0
+                        ],
+                        "403": [
+                            72000,
+                            24000
+                        ]
+                    }
+                }
+            ],
+            "3": {
+                "20": {
+                    "Ship": {
+                        "206": [
+                            1180000,
+                            413000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            590000,
+                            0
+                        ],
+                        "403": [
+                            234000,
+                            78000
+                        ],
+                        "406": [
+                            50000,
+                            50000
+                        ]
+                    }
+                }
+            ],
+            "3": {
+                "20": {
+                    "Ship": {
+                        "206": [
+                            1180000,
+                            413000
+                        ]
+                    }
+                }
+            }
+        },
+        "totalLost": [
+            3725000,
+            1867000
+        ],
+        "debris": [
+            [
+                745500.0,
+                372000.0
+            ],
+            [
+                616200.0,
+                162300.0
+            ],
+            [
+                1361700.0,
+                534300.0
+            ]
+        ],
+        "moonProb": 18,
+        "tech": [
+            {
+                "1": [
+                    12,
+                    11,
+                    12
+                ],
+                "4": [
+                    9,
+                    9,
+                    10
+                ]
+            },
+            {
+                "2": [
+                    11,
+                    10,
+                    11
+                ],
+                "3": [
+                    10,
+                    10,
+                    10
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 120% Shields: 110% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship<\/th>\n                                                    <th>Reaper<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>3<\/th>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player4 [1:2:4]<br>\n            Weapons: 90% Shields: 90% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Bomber<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>4<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                                    <th>Small Shield Dome<\/th>\n                                                    <th>Large Shield Dome<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>211<\/th>\n                                                    <th>28<\/th>\n                                                    <th>5<\/th>\n                                                    <th>1<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 100% Shields: 100% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Cruiser<\/th>\n                                                    <th>Destroyer<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1<\/th>\n                                                    <th>8<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>206<\/th>\n                                                    <th>27<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1,
+                4
+            ],
+            [
+                2,
+                3
+            ]
+        ],
+        "nextRandom": 1986819936
+    },
+    "several players, seed 5": {
+        "report": "fba485a8f81739397966b593d3d014d5",
+        "reportLength": 40172,
+        "rounds": 6,
+        "result": [
+            false,
+            false,
+            true
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "207": [
+                            1215000,
+                            405000
+                        ]
+                    }
+                },
+                "11": {
+                    "Ship": {
+                        "203": [
+                            240000,
+                            240000
+                        ]
+                    }
+                }
+            },
+            "4": {
+                "12": {
+                    "Ship": {
+                        "205": [
+                            480000,
+                            320000
+                        ],
+                        "211": [
+                            550000,
+                            275000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            180000,
+                            0
+                        ],
+                        "403": [
+                            72000,
+                            24000
+                        ],
+                        "406": [
+                            50000,
+                            50000
+                        ]
+                    }
+                }
+            ],
+            "3": {
+                "20": {
+                    "Ship": {
+                        "206": [
+                            1200000,
+                            420000
+                        ],
+                        "213": [
+                            180000,
+                            150000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            600000,
+                            0
+                        ],
+                        "403": [
+                            240000,
+                            80000
+                        ],
+                        "406": [
+                            100000,
+                            100000
+                        ]
+                    }
+                }
+            ],
+            "3": {
+                "20": {
+                    "Ship": {
+                        "206": [
+                            1200000,
+                            420000
+                        ],
+                        "213": [
+                            180000,
+                            150000
+                        ]
+                    }
+                }
+            }
+        },
+        "totalLost": [
+            3725000,
+            2326000
+        ],
+        "debris": [
+            [
+                745500.0,
+                372000.0
+            ],
+            [
+                696000.0,
+                225000.0
+            ],
+            [
+                1441500.0,
+                597000.0
+            ]
+        ],
+        "moonProb": 20,
+        "tech": [
+            {
+                "1": [
+                    12,
+                    11,
+                    12
+                ],
+                "4": [
+                    9,
+                    9,
+                    10
+                ]
+            },
+            {
+                "2": [
+                    11,
+                    10,
+                    11
+                ],
+                "3": [
+                    10,
+                    10,
+                    10
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 120% Shields: 110% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship<\/th>\n                                                    <th>Reaper<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>3<\/th>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player4 [1:2:4]<br>\n            Weapons: 90% Shields: 90% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Bomber<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>4<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Plasma Turret<\/th>\n                                                    <th>Small Shield Dome<\/th>\n                                                    <th>Large Shield Dome<\/th>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>4<\/th>\n                                                    <th>1<\/th>\n                                                    <th>1<\/th>\n                                                    <th>210<\/th>\n                                                    <th>28<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 100% Shields: 100% Armour: 100%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Destroyer<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>5<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 110% Shields: 100% Armour: 110%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Heavy Laser<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>210<\/th>\n                                                    <th>28<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1,
+                4
+            ],
+            [
+                2,
+                3
+            ]
+        ],
+        "nextRandom": 46706671
+    },
+    "death stars, seed 6": {
+        "report": "bffb29f7210423c346a8546a48c7c82d",
+        "reportLength": 19633,
+        "rounds": 5,
+        "result": [
+            false,
+            true,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "214": [
+                            10000000,
+                            8000000
+                        ],
+                        "213": [
+                            1200000,
+                            1000000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            232000,
+                            0
+                        ],
+                        "402": [
+                            87000,
+                            29000
+                        ],
+                        "404": [
+                            220000,
+                            165000
+                        ],
+                        "405": [
+                            10000,
+                            30000
+                        ],
+                        "406": [
+                            50000,
+                            50000
+                        ]
+                    },
+                    "Ship": {
+                        "207": [
+                            360000,
+                            120000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            772000,
+                            0
+                        ],
+                        "402": [
+                            288000,
+                            96000
+                        ],
+                        "404": [
+                            740000,
+                            555000
+                        ],
+                        "405": [
+                            36000,
+                            108000
+                        ],
+                        "406": [
+                            150000,
+                            150000
+                        ]
+                    },
+                    "Ship": {
+                        "207": [
+                            360000,
+                            120000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            20200000,
+            1353000
+        ],
+        "debris": [
+            [
+                3360000.0,
+                2700000.0
+            ],
+            [
+                703800.0,
+                308700.0
+            ],
+            [
+                4063800.0,
+                3008700.0
+            ]
+        ],
+        "moonProb": 20,
+        "tech": [
+            {
+                "1": [
+                    15,
+                    15,
+                    15
+                ]
+            },
+            {
+                "2": [
+                    12,
+                    12,
+                    12
+                ]
+            }
+        ],
+        "afterBattle": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 120% Shields: 120% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship<\/th>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Ion Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>42<\/th>\n                                                    <th>1884<\/th>\n                                                    <th>942<\/th>\n                                                    <th>189<\/th>\n                                                    <th>95<\/th>\n                                                    <th>19<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 120% Shields: 120% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Ion Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>270<\/th>\n                                                    <th>134<\/th>\n                                                    <th>26<\/th>\n                                                    <th>13<\/th>\n                                                    <th>2<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 1797247518
+    },
+    "death stars, seed 7": {
+        "report": "0aa5d7b4584253d0c674f8c39c9ad728",
+        "reportLength": 19633,
+        "rounds": 5,
+        "result": [
+            false,
+            true,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "214": [
+                            10000000,
+                            8000000
+                        ],
+                        "213": [
+                            1200000,
+                            1000000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            226000,
+                            0
+                        ],
+                        "402": [
+                            84000,
+                            28000
+                        ],
+                        "404": [
+                            220000,
+                            165000
+                        ],
+                        "405": [
+                            10000,
+                            30000
+                        ],
+                        "406": [
+                            50000,
+                            50000
+                        ]
+                    },
+                    "Ship": {
+                        "207": [
+                            405000,
+                            135000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            750000,
+                            0
+                        ],
+                        "402": [
+                            282000,
+                            94000
+                        ],
+                        "404": [
+                            700000,
+                            525000
+                        ],
+                        "405": [
+                            36000,
+                            108000
+                        ],
+                        "406": [
+                            100000,
+                            100000
+                        ]
+                    },
+                    "Ship": {
+                        "207": [
+                            405000,
+                            135000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            20200000,
+            1403000
+        ],
+        "debris": [
+            [
+                3360000.0,
+                2700000.0
+            ],
+            [
+                681900.0,
+                288600.0
+            ],
+            [
+                4041900.0,
+                2988600.0
+            ]
+        ],
+        "moonProb": 20,
+        "tech": [
+            {
+                "1": [
+                    15,
+                    15,
+                    15
+                ]
+            },
+            {
+                "2": [
+                    12,
+                    12,
+                    12
+                ]
+            }
+        ],
+        "afterBattle": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 120% Shields: 120% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship<\/th>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Ion Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>41<\/th>\n                                                    <th>1887<\/th>\n                                                    <th>944<\/th>\n                                                    <th>189<\/th>\n                                                    <th>95<\/th>\n                                                    <th>19<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 120% Shields: 120% Armour: 120%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Ion Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>262<\/th>\n                                                    <th>132<\/th>\n                                                    <th>24<\/th>\n                                                    <th>13<\/th>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 281557958
+    },
+    "probe against nothing": {
+        "report": "875c690dcf2034bffa55ba297f4a5dd8",
+        "reportLength": 3469,
+        "rounds": 0,
+        "result": [
+            true,
+            false,
+            false
+        ],
+        "attackersLostUnits": [],
+        "defendersLostUnits": [],
+        "defendersLostUnitsWithoutRepair": [],
+        "totalLost": [
+            0,
+            0
+        ],
+        "debris": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "moonProb": 0,
+        "tech": [
+            {
+                "1": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "2": [
+                    0,
+                    0,
+                    0
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 0% Shields: 0% Armour: 0%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Espionage Probe<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 0% Shields: 0% Armour: 0%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 0% Shields: 0% Armour: 0%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 1875675361
+    },
+    "defense repair, seed 9": {
+        "report": "7d9b69cf59ce3036290a3f83ca200016",
+        "reportLength": 14661,
+        "rounds": 4,
+        "result": [
+            false,
+            true,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "207": [
+                            4500000,
+                            1500000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            108000,
+                            0
+                        ],
+                        "402": [
+                            16500,
+                            5500
+                        ],
+                        "404": [
+                            20000,
+                            15000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            358000,
+                            0
+                        ],
+                        "402": [
+                            52500,
+                            17500
+                        ],
+                        "404": [
+                            80000,
+                            60000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            6000000,
+            165000
+        ],
+        "debris": [
+            [
+                1350000.0,
+                450000.0
+            ],
+            [
+                147150.0,
+                23250.0
+            ],
+            [
+                1497150.0,
+                473250.0
+            ]
+        ],
+        "moonProb": 19,
+        "tech": [
+            {
+                "1": [
+                    10,
+                    10,
+                    10
+                ]
+            },
+            {
+                "2": [
+                    8,
+                    8,
+                    8
+                ]
+            }
+        ],
+        "afterBattle": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 80% Shields: 80% Armour: 80%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>946<\/th>\n                                                    <th>189<\/th>\n                                                    <th>49<\/th>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 80% Shields: 80% Armour: 80%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>125<\/th>\n                                                    <th>24<\/th>\n                                                    <th>3<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 829953393
+    },
+    "defense repair, seed 10": {
+        "report": "7d9b69cf59ce3036290a3f83ca200016",
+        "reportLength": 14661,
+        "rounds": 4,
+        "result": [
+            false,
+            true,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "207": [
+                            4500000,
+                            1500000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            108000,
+                            0
+                        ],
+                        "402": [
+                            16500,
+                            5500
+                        ],
+                        "404": [
+                            20000,
+                            15000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            358000,
+                            0
+                        ],
+                        "402": [
+                            52500,
+                            17500
+                        ],
+                        "404": [
+                            80000,
+                            60000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            6000000,
+            165000
+        ],
+        "debris": [
+            [
+                1350000.0,
+                450000.0
+            ],
+            [
+                147150.0,
+                23250.0
+            ],
+            [
+                1497150.0,
+                473250.0
+            ]
+        ],
+        "moonProb": 19,
+        "tech": [
+            {
+                "1": [
+                    10,
+                    10,
+                    10
+                ]
+            },
+            {
+                "2": [
+                    8,
+                    8,
+                    8
+                ]
+            }
+        ],
+        "afterBattle": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 80% Shields: 80% Armour: 80%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                                    <th>Plasma Turret<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>946<\/th>\n                                                    <th>189<\/th>\n                                                    <th>49<\/th>\n                                                    <th>10<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 80% Shields: 80% Armour: 80%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                                    <th>Gauss Cannon<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>125<\/th>\n                                                    <th>24<\/th>\n                                                    <th>3<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 1165105158
+    },
+    "large stacks": {
+        "report": "daca5df40cdcfab028d81b5f8abc2790",
+        "reportLength": 12194,
+        "rounds": 3,
+        "result": [
+            true,
+            false,
+            false
+        ],
+        "attackersLostUnits": {
+            "1": {
+                "10": {
+                    "Ship": {
+                        "204": [
+                            1932000,
+                            644000
+                        ],
+                        "202": [
+                            78000,
+                            78000
+                        ]
+                    }
+                }
+            }
+        },
+        "defendersLostUnits": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            1200000,
+                            0
+                        ],
+                        "402": [
+                            360000,
+                            120000
+                        ]
+                    },
+                    "Ship": {
+                        "210": [
+                            0,
+                            50000
+                        ],
+                        "212": [
+                            0,
+                            60000
+                        ]
+                    }
+                }
+            ]
+        },
+        "defendersLostUnitsWithoutRepair": {
+            "2": [
+                {
+                    "Defense": {
+                        "401": [
+                            4000000,
+                            0
+                        ],
+                        "402": [
+                            1200000,
+                            400000
+                        ]
+                    },
+                    "Ship": {
+                        "210": [
+                            0,
+                            50000
+                        ],
+                        "212": [
+                            0,
+                            60000
+                        ]
+                    }
+                }
+            ]
+        },
+        "totalLost": [
+            2732000,
+            1790000
+        ],
+        "debris": [
+            [
+                603000.0,
+                216600.0
+            ],
+            [
+                1560000.0,
+                153000.0
+            ],
+            [
+                2163000.0,
+                369600.0
+            ]
+        ],
+        "moonProb": 20,
+        "tech": [
+            {
+                "1": [
+                    14,
+                    13,
+                    14
+                ]
+            },
+            {
+                "2": [
+                    13,
+                    13,
+                    13
+                ]
+            }
+        ],
+        "afterBattle": [
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 140% Shields: 130% Armour: 140%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Small Cargo<\/th>\n                                                    <th>Light Fighter<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>261<\/th>\n                                                    <th>4356<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 130% Shields: 130% Armour: 130%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1400<\/th>\n                                                    <th>560<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "repaired": [
+            "",
+            "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player2 [1:2:2]<br>\n            Weapons: 130% Shields: 130% Armour: 130%        <\/td>\n    <\/tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher<\/th>\n                                                    <th>Light Laser<\/th>\n                                            <\/tr>\n                <\/thead>\n                <tbody>\n                    <tr>\n                                                    <th>1400<\/th>\n                                                    <th>560<\/th>\n                                            <\/tr>\n                <\/tbody>\n            <\/table>\n        <\/td>\n    <\/tr>\n<\/table>"
+        ],
+        "ids": [
+            [
+                1
+            ],
+            [
+                2
+            ]
+        ],
+        "nextRandom": 644142035
+    }
+}
