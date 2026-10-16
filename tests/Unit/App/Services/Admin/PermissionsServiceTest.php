@@ -8,7 +8,7 @@ use App\Services\Admin\PermissionsService;
 use App\Services\SettingsService;
 use RuntimeException;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 /**
  * @SuppressWarnings("PHPMD.UnusedFormalParameter")

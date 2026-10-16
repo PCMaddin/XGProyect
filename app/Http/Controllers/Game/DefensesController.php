@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
-use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
+use App\Core\Enumerators\DefensesEnumerator as Defenses;
 
 /**
  * Defences and missiles construction. Reuses the shipyard build logic with the

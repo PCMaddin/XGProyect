@@ -12,7 +12,7 @@ use App\Models\Ships;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 #[CoversClass(PlanetLib::class)]
 class PlanetLibTest extends DatabaseTestCase

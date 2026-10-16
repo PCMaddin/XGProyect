@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use ReflectionProperty;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
-use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\ShipsEnumerator as Ships;
 
 #[CoversClass(Fleet4Controller::class)]
 class Fleet4ControllerTest extends TestCase

@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use App\Libraries\Functions;
 use App\Libraries\Users as UsersLibrary;
 

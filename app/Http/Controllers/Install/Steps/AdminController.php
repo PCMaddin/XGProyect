@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator;
 use App\Libraries\PlanetLib;
 
 class AdminController extends BaseController

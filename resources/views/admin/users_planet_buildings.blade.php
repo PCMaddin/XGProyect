@@ -1,5 +1,5 @@
 @php
-    use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+    use App\Core\Enumerators\PlanetTypesEnumerator;
     $is_moon = ($planet_type === PlanetTypesEnumerator::MOON);
     $back_route = $is_moon ? route('admin.users.moons', $user->id) : route('admin.users.planets', $user->id);
     $save_route = $is_moon

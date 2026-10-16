@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Game;
 
 use Xgp\App\Core\Entity\FleetEntity;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 /**
  * Wraps a user's fleet rows into typed entities and indexes them by fleet id.

@@ -9,8 +9,8 @@ use App\Services\Admin\AlliancesService;
 use App\Services\SettingsService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 
 class AlliancesServiceTest extends TestCase
 {

@@ -8,7 +8,7 @@ use App\Http\Controllers\Game\Fleet3Controller;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionMethod;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 #[CoversClass(Fleet3Controller::class)]
 class Fleet3ControllerTest extends TestCase

@@ -19,7 +19,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
 use App\Libraries\Functions;
 use App\Libraries\Users;
 

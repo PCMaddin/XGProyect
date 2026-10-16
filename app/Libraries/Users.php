@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Ranks;
 
 /**

@@ -8,7 +8,7 @@ use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 /**
  * Creates the planet / moon rows for new colonies. Ported from the legacy

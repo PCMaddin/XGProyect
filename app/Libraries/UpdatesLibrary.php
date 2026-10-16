@@ -14,9 +14,9 @@ use App\Services\Game\ResearchQueueService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
+use App\Core\Enumerators\BuildingsEnumerator as Buildings;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib as Developments;
 

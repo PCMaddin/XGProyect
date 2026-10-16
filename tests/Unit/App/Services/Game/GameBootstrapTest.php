@@ -11,7 +11,7 @@ use App\Services\Game\GameBootstrap;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 /**
  * Regression tests: the closed-server and ban checks and the game's time

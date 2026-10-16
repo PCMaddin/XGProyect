@@ -12,7 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
 use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;

@@ -6,8 +6,8 @@ namespace App\Libraries\Alliance;
 
 use InvalidArgumentException;
 use JsonException;
-use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 
 /**
  * The ranks of an alliance (the JSON column `alliance_ranks`): per rank id a

@@ -13,7 +13,7 @@ use App\Services\TimingService;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 class Topnav extends Component
 {

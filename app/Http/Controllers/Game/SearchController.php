@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
 

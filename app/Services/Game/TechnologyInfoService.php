@@ -11,7 +11,7 @@ use App\Libraries\Users;
 use App\Services\FormatService;
 use App\Support\Concerns\ReadsMixedValues;
 use InvalidArgumentException;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
+use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 
 /**
  * The technology details page of a building, research, ship or defense:

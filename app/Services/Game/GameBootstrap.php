@@ -9,8 +9,8 @@ use App\Libraries\UpdatesLibrary;
 use App\Models\User;
 use App\Services\SettingsService;
 use App\Services\TimingService;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 /**
  * What runs before every game page: the player's language, the game's time

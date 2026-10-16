@@ -9,8 +9,8 @@ use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Support\Concerns\ReadsMixedValues;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
-use Xgp\App\Core\Enumerators\ResearchEnumerator as Research;
+use App\Core\Enumerators\BuildingsEnumerator as Buildings;
+use App\Core\Enumerators\ResearchEnumerator as Research;
 use Xgp\App\Helpers\StringsHelper;
 
 /**

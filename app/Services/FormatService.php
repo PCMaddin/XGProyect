@@ -6,7 +6,7 @@ namespace App\Services;
 
 use DateTime;
 use Illuminate\Support\Number;
-use Xgp\App\Core\Enumerators\ImportanceEnumerator as Importance;
+use App\Core\Enumerators\ImportanceEnumerator as Importance;
 
 /**
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")

@@ -13,7 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\BuddyEntity;
-use Xgp\App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
+use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 use App\Libraries\Buddies\Buddy;
 use App\Libraries\Functions;
 use App\Libraries\Users;

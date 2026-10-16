@@ -11,8 +11,8 @@ use App\Models\UsersStatistics;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Support\Concerns\ReadsMixedValues;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
-use Xgp\App\Core\Enumerators\ResearchEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\ResearchEnumerator;
 use App\Libraries\Functions;
 use App\Libraries\StatisticsLibrary;
 

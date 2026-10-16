@@ -8,7 +8,7 @@ use DirectoryIterator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use stdClass;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\StatisticsLibrary;
 
 /**

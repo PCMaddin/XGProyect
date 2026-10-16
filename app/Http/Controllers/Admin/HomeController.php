@@ -16,7 +16,7 @@ use App\Services\FormatService;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")

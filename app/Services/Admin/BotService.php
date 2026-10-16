@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator;
 use App\Libraries\PlanetLib;
 
 /**

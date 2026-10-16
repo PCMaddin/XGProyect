@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Buddies;
 use App\Libraries\Buddies\Buddy;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
+use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 
 #[CoversClass(Buddy::class)]
 class BuddyTest extends TestCase

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Adm;
 
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 /**
  * Admin permission matrix, stored as a JSON string of module -> role -> flag.

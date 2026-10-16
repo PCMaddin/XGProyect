@@ -7,8 +7,8 @@ namespace App\Libraries;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\TimingService;
-use Xgp\App\Core\Enumerators\DefensesEnumerator as Defenses;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\DefensesEnumerator as Defenses;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
 
 /**

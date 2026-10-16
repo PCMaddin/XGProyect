@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator;
 
 class Leftmenu extends Component
 {

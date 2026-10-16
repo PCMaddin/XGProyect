@@ -16,7 +16,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;

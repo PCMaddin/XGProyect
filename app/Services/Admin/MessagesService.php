@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\MessagesSearchRequest;
 use App\Models\Messages;
 use App\Services\TimingService;
 use Illuminate\Database\Eloquent\Collection;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

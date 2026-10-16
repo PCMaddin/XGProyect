@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Messenger;
 
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 
 /**
  * Value object for a single in-game message.

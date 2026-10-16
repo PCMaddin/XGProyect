@@ -11,7 +11,7 @@ use App\Libraries\Messenger\Messenger;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 use Xgp\App\Helpers\StringsHelper;
 
 /**

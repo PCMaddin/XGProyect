@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Services\Game\PlanetService;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator;
 
 /**
  * Creates a new player: the account with its preferences, premium,

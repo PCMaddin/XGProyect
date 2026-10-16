@@ -11,7 +11,7 @@ use App\Services\Game\BuildingQueueService;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator as BuildingsEnum;
+use App\Core\Enumerators\BuildingsEnumerator as BuildingsEnum;
 
 #[CoversClass(BuildingQueueService::class)]
 class BuildingQueueServiceTest extends DatabaseTestCase

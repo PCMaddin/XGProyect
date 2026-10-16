@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Buddies;
 
 use Xgp\App\Core\Entity\BuddyEntity;
-use Xgp\App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
+use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 
 /**
  * Splits a user's buddy rows into confirmed buddies, sent requests and

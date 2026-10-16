@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
+use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 
 #[CoversClass(Fleet2Controller::class)]
 class Fleet2ControllerTest extends TestCase

@@ -6,7 +6,7 @@ namespace Xgp\App\Libraries\Missions;
 
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
-use Xgp\App\Core\Enumerators\MissionsEnumerator;
+use App\Core\Enumerators\MissionsEnumerator;
 use Xgp\App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;

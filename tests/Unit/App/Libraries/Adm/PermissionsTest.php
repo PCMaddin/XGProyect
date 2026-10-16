@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Libraries\Adm;
 use App\Libraries\Adm\Permissions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 #[CoversClass(Permissions::class)]
 class PermissionsTest extends TestCase

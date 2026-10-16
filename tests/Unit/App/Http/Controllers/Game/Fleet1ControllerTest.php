@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
+use App\Core\Enumerators\ShipsEnumerator as Ships;
 
 #[CoversClass(Fleet1Controller::class)]
 class Fleet1ControllerTest extends TestCase

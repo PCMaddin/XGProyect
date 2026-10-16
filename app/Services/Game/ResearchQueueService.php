@@ -13,8 +13,8 @@ use App\Models\UsersStatistics;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Collection;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
-use Xgp\App\Core\Enumerators\ResearchEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\ResearchEnumerator;
 use App\Libraries\StatisticsLibrary;
 
 /**

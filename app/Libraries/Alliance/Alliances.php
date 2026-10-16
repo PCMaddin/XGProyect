@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Alliance;
 
 use Xgp\App\Core\Entity\AllianceEntity;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator;
+use App\Core\Enumerators\SwitchIntEnumerator;
 
 /**
  * Wraps a user's alliance rows into typed entities and answers the

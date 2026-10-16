@@ -8,7 +8,7 @@ use App\Libraries\Game\Fleets;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 use Xgp\App\Core\Entity\FleetEntity;
-use Xgp\App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\MissionsEnumerator as Missions;
 
 #[CoversClass(Fleets::class)]
 class FleetsTest extends TestCase

@@ -8,7 +8,7 @@ use App\Models\Alliance;
 use App\Models\Planets;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
+use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 
 class SearchService
 {

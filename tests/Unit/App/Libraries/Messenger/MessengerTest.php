@@ -9,7 +9,7 @@ use App\Libraries\Messenger\MessagesOptions;
 use App\Models\Messages;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 
 #[CoversClass(Messenger::class)]
 class MessengerTest extends DatabaseTestCase

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use ReflectionMethod;
 use ReflectionProperty;
 use Tests\DatabaseTestCase;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Libraries\Missions\Attack;
 use Xgp\App\Libraries\Missions\Destroy;
 

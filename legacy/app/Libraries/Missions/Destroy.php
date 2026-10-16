@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use App\Libraries\Formulas;
-use Xgp\App\Core\Enumerators\ShipsEnumerator as Ships;
+use App\Core\Enumerators\ShipsEnumerator as Ships;
 use Xgp\App\Libraries\BattleEngine\Core\BattleReport;
 
 /**

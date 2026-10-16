@@ -7,7 +7,7 @@ namespace App\Services\Game;
 use App\Models\Preferences;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Xgp\App\Core\Enumerators\PreferencesEnumerator as PrefEnum;
+use App\Core\Enumerators\PreferencesEnumerator as PrefEnum;
 
 class PreferencesService
 {

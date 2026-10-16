@@ -8,7 +8,7 @@ use App\Libraries\Messenger\MessagesFormat;
 use App\Libraries\Messenger\MessagesOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 
 #[CoversClass(MessagesOptions::class)]
 class MessagesOptionsTest extends TestCase

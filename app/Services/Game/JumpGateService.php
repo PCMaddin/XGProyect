@@ -10,7 +10,7 @@ use App\Services\FormatService;
 use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator as Buildings;
+use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 
 /**
  * The jump gate: moves ships between two moons of a player that both have
