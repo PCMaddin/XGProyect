@@ -137,7 +137,6 @@ class ResearchController extends BaseController
 
         $queue = $userModel->researchQueue()->orderBy('position')->get();
         $activeItem = $queue->firstWhere('position', 1);
-        $isWorking = $activeItem !== null;
         $queueCount = $queue->count();
 
         $labInQueue = $planetModel->buildingQueue()->where('building_id', BuildingsEnumerator::BUILDING_LABORATORY)->exists();
@@ -156,7 +155,7 @@ class ResearchController extends BaseController
         $astrophysicsLevel = self::asInt($userData[$astrophysicsCol] ?? 0);
 
         $workingPlanet = null;
-        if ($isWorking && $activeItem->planet_id !== $planetModel->planet_id) {
+        if ($activeItem !== null && $activeItem->planet_id !== $planetModel->planet_id) {
             $workingPlanet = Planets::find($activeItem->planet_id);
         }
 
@@ -189,15 +188,13 @@ class ResearchController extends BaseController
                 'search_time' => '<br>' . __('game/research.re_time') . $this->formatService->prettyTime($duration),
                 'tech_link' => $this->getActionLink(
                     $techId,
-                    $isWorking,
-                    $queueCount,
-                    $labInQueue,
-                    $isOnVacation,
-                    $commanderActive,
-                    $activeItem,
+                    $currentLevel,
                     $planetModel,
+                    $activeItem,
                     $workingPlanet,
-                    $currentLevel
+                    $commanderActive,
+                    $labInQueue || $isOnVacation,
+                    $queueCount >= ResearchQueueService::MAX_QUEUE_SIZE
                 ),
             ];
         }
@@ -234,28 +231,30 @@ class ResearchController extends BaseController
         return $text;
     }
 
+    /**
+     * @param bool $blocked   the laboratory is being upgraded or the player is on vacation
+     * @param bool $queueFull the research queue has no free slot
+     */
     private function getActionLink(
         int $techId,
-        bool $isWorking,
-        int $queueCount,
-        bool $labInQueue,
-        bool $isOnVacation,
-        bool $commanderActive,
-        ?ResearchQueue $activeItem,
-        Planets $planet,
-        ?Planets $workingPlanet,
         int $currentLevel,
+        Planets $planet,
+        ?ResearchQueue $activeItem,
+        ?Planets $workingPlanet,
+        bool $commanderActive,
+        bool $blocked,
+        bool $queueFull,
     ): string {
-        if ($isWorking && !$commanderActive && $activeItem !== null && $activeItem->tech_id === $techId) {
+        if (!$commanderActive && $activeItem !== null && $activeItem->tech_id === $techId) {
             return $this->buildCountdown($activeItem, $planet, $workingPlanet);
         }
 
-        if ($labInQueue || $isOnVacation) {
+        if ($blocked) {
             return $this->formatService->colorRed(__('game/research.re_research'));
         }
 
-        if ($isWorking) {
-            if (!$commanderActive || $queueCount >= ResearchQueueService::MAX_QUEUE_SIZE) {
+        if ($activeItem !== null) {
+            if (!$commanderActive || $queueFull) {
                 return '<center>-</center>';
             }
 

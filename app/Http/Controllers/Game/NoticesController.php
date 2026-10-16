@@ -68,6 +68,9 @@ class NoticesController extends BaseController
         return redirect('game.php?page=notices');
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     private function createNote(Request $request, User $user): void
     {
         Notes::create([

@@ -52,7 +52,7 @@ class PermissionsService
 
         foreach ($sections as $sectionId => $section) {
             foreach ($modules[$sectionId] as $module) {
-                foreach ($roles as $role => $name) {
+                foreach (array_keys($roles) as $role) {
                     $permissionsList[] = [
                         'module' => $module,
                         'role' => $role,

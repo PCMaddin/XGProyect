@@ -79,6 +79,8 @@ class FleetsController extends BaseController
 
     /**
      * @return array<int, array<string, mixed>>
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function buildFleetMovements(): array
     {

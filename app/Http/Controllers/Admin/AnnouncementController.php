@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Xgp\App\Core\Enumerators\MessagesEnumerator;
@@ -48,11 +47,16 @@ class AnnouncementController extends BaseController
 
     /**
      * @param Collection<int, User> $players
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function sendMessages(AnnouncementRequest $request, Collection $players): void
     {
-        /** @var User $user */
-        $user = Auth::user();
+        $user = $request->user();
+
+        if (!$user instanceof User) {
+            return;
+        }
 
         $pickedColor = (string) $request->string('color-picker');
         $color = $this->isValidColor($pickedColor)

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\App\Http\Controllers\Game;
+namespace Tests\Unit\App\Services\Game;
 
-use App\Http\Controllers\Game\ChangenickController;
+use App\Models\Preferences;
+use App\Services\Game\PreferencesService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
 
-#[CoversClass(ChangenickController::class)]
-class ChangenickControllerTest extends TestCase
+#[CoversClass(PreferencesService::class)]
+class PreferencesServiceTest extends TestCase
 {
     /**
      * @return array<string, array{0: string, 1: bool}>
@@ -35,8 +35,8 @@ class ChangenickControllerTest extends TestCase
      * that ran in other players' browsers.
      */
     #[DataProvider('names')]
-    public function testOnlyAsciiLettersAndDigitsAreValidNames(string $name, bool $valid): void
+    public function testOnlyAsciiLettersAndDigitsAreValidNicknames(string $name, bool $valid): void
     {
-        $this->assertSame($valid, (new ReflectionMethod(ChangenickController::class, 'isValidName'))->invoke(null, $name));
+        $this->assertSame($valid, (new PreferencesService(new Preferences()))->isValidNickname($name));
     }
 }

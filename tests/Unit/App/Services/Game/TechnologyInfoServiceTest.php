@@ -11,16 +11,21 @@ use App\Services\Game\Formulas\FleetsService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
+use App\Services\Game\JumpGateService;
+use App\Services\Game\TearDownService;
 use App\Services\Game\TechnologyInfoService;
+use App\Services\Game\TechnologyTableService;
 use App\Services\SettingsService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use Tests\TestCase;
 
 #[CoversClass(TechnologyInfoService::class)]
+#[CoversClass(JumpGateService::class)]
 class TechnologyInfoServiceTest extends TestCase
 {
     protected function setUp(): void
@@ -99,13 +104,11 @@ class TechnologyInfoServiceTest extends TestCase
         $this->seedOriginMoon();
         $this->seedTargetMoon(planetId: 11, userId: 1);
 
-        $service = $this->buildService();
-        $initializeContext = new ReflectionMethod(TechnologyInfoService::class, 'initializeContext');
-        $initializeContext->invoke($service, 43, $this->userData(), $this->originPlanetData());
+        $service = new JumpGateService(new GameObjectRegistry(), new FormatService());
+        (new ReflectionProperty(JumpGateService::class, 'user'))->setValue($service, $this->userData());
+        (new ReflectionProperty(JumpGateService::class, 'planet'))->setValue($service, $this->originPlanetData());
 
-        $method = new ReflectionMethod(TechnologyInfoService::class, 'findJumpGateDestination');
-
-        $result = $method->invoke($service, 11);
+        $result = (new ReflectionMethod(JumpGateService::class, 'findJumpGateDestination'))->invoke($service, 11);
 
         $this->assertIsArray($result);
         $this->assertSame(11, $result['planet_id']);
@@ -161,15 +164,26 @@ class TechnologyInfoServiceTest extends TestCase
 
     private function buildService(): TechnologyInfoService
     {
+        $registry = new GameObjectRegistry();
+
         return new TechnologyInfoService(
-            registry: new GameObjectRegistry(),
-            productionService: $this->createStub(ProductionService::class),
+            registry: $registry,
             formatService: new FormatService(),
-            officerService: $this->createStub(OfficerService::class),
-            developmentsService: $this->createStub(DevelopmentsService::class),
-            fleetsService: $this->createStub(FleetsService::class),
-            formulasService: $this->createStub(FormulasService::class),
-            settings: $this->createStub(SettingsService::class),
+            tables: new TechnologyTableService(
+                $registry,
+                $this->createStub(ProductionService::class),
+                new FormatService(),
+                $this->createStub(OfficerService::class),
+                $this->createStub(FleetsService::class),
+                $this->createStub(SettingsService::class),
+            ),
+            tearDown: new TearDownService(
+                $registry,
+                new FormatService(),
+                $this->createStub(DevelopmentsService::class),
+                $this->createStub(FormulasService::class),
+            ),
+            jumpGate: new JumpGateService($registry, new FormatService()),
         );
     }
 

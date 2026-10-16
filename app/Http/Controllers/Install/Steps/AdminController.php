@@ -33,6 +33,9 @@ class AdminController extends BaseController
         );
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function doCheck(AdminRequest $request): RedirectResponse
     {
         try {

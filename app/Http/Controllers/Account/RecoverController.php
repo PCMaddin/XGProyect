@@ -31,6 +31,9 @@ class RecoverController extends BaseController
         );
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function recover(RecoverRequest $request): Response
     {
         // The incoming request is valid...

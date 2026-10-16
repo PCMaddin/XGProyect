@@ -85,6 +85,9 @@ class SettingsService
         return false;
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     private function init(): void
     {
         if (!$this->settings) {

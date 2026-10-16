@@ -356,6 +356,51 @@ Zeile), plus Regressionstest.
 
 ---
 
+## `app/`: Baseline auf 0 ✅
+
+**`phpstan-baseline.neon` und `phpmd.baseline.xml` sind leer.** PHPStan
+(Level 9) und PHPMD laufen über `app/` und `legacy/` ohne
+Baseline-Einträge.
+
+- **PHPMD-Regel `StaticAccess`:** Laravel-Facades (`Auth`, `DB`, `Hash`, …)
+  und `Carbon` sind in `phpmd.xml` als Ausnahmen eingetragen, weil sie
+  bewusst statisch sind. Statische Zugriffe auf Eloquent-Modelle und
+  Legacy-Libs sind weiter methodengenau unterdrückt.
+- **Gemischte Werte** (`mixed` aus Legacy-Arrays) liest der Trait
+  `App\Support\Concerns\ReadsMixedValues` (`asInt/asFloat/asString`).
+- **Aufgeteilt:**
+  - `PreferencesController` → `VacationModeService` (Urlaubsmodus) und
+    `AccountUpdateService` (Name/Passwort/E-Mail). Die Sortier-Optionen und
+    das Formular-Parsing liegen im `PreferencesService`.
+  - `RegisterController` → `RegistrationService`.
+  - `TechnologyInfoService` (Komplexität 131) → `JumpGateService`,
+    `TechnologyTableService` (Level-Tabellen) und `TearDownService`. Die
+    Ausgabe ist für alle Objekte auf Stufe 0 und 5, Sprungtor
+    eingeschlossen, byte-identisch zum Stand davor geprüft.
+  - `ResetController` arbeitet über eine Feld→Reset-Tabelle,
+    `ResearchController::getActionLink()` hat 8 statt 10 Parameter, und
+    `BuildingQueueService::add()` ist in Feldprüfung, Auftragsplanung und
+    Bezahlung zerlegt.
+
+**Dabei gefunden und gefixt:**
+
+- 🔴→✅ **XSS-Fix umgehbar über die Einstellungen:** Der Namenswechsel in den
+  Einstellungen prüfte nur die Länge. Die Namensregel aus `Changenick`
+  (ASCII alphanumerisch, 4–20) galt dort nicht, so ließ sich ein Name mit
+  Markup weiter setzen. Beide Seiten nutzen jetzt
+  `PreferencesService::isValidNickname()`. Regressionstest.
+- ✅ **Registrierung nach Fehler:** Scheiterte das Anlegen (z. B. beim
+  Heimatplaneten), wurde zurückgerollt, aber mit dem schon erzeugten
+  User-Objekt weitergemacht: Willkommensnachricht und -mail gingen an einen
+  Spieler, den es nicht gab, und der Fehler wurde verschluckt. Jetzt kommt
+  die Fehlermeldung, und der Fehler wird geloggt (`report()`). Tests für
+  beide Fälle.
+- ✅ **Anzeige `Changenick`:** Ein ungültiger Name stand in der
+  Fehlermeldung doppelt escaped (`&lt;`), weil die Meldung ohnehin mit
+  `{{ }}` ausgegeben wird.
+
+---
+
 ## Prinzipien für jede Migration
 
 1. **Ein Modul = ein PR**, Legacy-Datei am Ende löschen (kein Parallelbetrieb).

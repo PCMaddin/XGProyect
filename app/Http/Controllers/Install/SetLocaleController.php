@@ -11,6 +11,9 @@ use App\Libraries\Functions;
 
 class SetLocaleController extends BaseController
 {
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function __invoke(string $locale): RedirectResponse
     {
         if ($locale === '' && session()->has('locale')) {

@@ -31,6 +31,9 @@ class HomeController extends AdminSettingsController
         parent::__construct($settings);
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function index(): View
     {
         /** @var User $authUser */
