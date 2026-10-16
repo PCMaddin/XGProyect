@@ -849,7 +849,7 @@ Baseline-Einträge.
     mit eigenen Transportern zum Heimatplaneten.
   - Ziele: nur andere Bots, außer der Admin erlaubt Angriffe auf Spieler
     (neuer Schalter „Bots greifen auch Spieler an“, Option
-    `bots_attack_players`, Standard aus). Admins, Spieler im Urlaub und
+    `bots_attack_players`, Standard aus, Migration `000031`). Admins, Spieler im Urlaub und
     Noob-Schutz werden wie bei Spielern geachtet.
   - Werft (`BotShipyard`): ein gewünschtes Kolonieschiff zuerst (dafür wird
     gespart), dann 3 Spionagesonden, Kleine Transporter und Leichte Jäger
@@ -860,7 +860,11 @@ Baseline-Einträge.
   Ein Fehler in einem Bot-Zug wird wie bisher nur gemeldet; die Bot-Tests
   prüfen jetzt aber, dass nichts gemeldet wurde (so fiel ein fehlendes
   Tabellenpräfix in einer Sortierung auf, das jeden Überfall verhindert
-  hätte). Tests: Werft und Kampfwert (Unit), Kolonisieren, Expedition,
+  hätte). Neuer `OptionMigrationsTest`: jede Option aus dem Seeder kommt
+  auch per Update-Migration in bestehende Installationen; sonst scheitert
+  die Seite, die sie liest (so geschehen mit der Bots-Admin-Seite, als die
+  Option nachträglich in die schon ausgeführte Migration `000029` geraten
+  war). Tests: Werft und Kampfwert (Unit), Kolonisieren, Expedition,
   Spionage mit anschließendem Überfall, kein Überfall auf Verteidigte ohne
   Kriegsschiffe, Spieler nur mit Schalter, Transport von der Kolonie
   (MariaDB).
