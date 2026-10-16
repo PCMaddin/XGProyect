@@ -16,7 +16,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 use App\Libraries\Research\Researches;
 use App\Libraries\Users;
@@ -47,7 +47,7 @@ class Fleet3Controller extends BaseController
 
     private Researches $research;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     private int $currentMission = 0;
 
@@ -66,7 +66,7 @@ class Fleet3Controller extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $this->research = new Researches([$this->user]);
 
@@ -97,7 +97,7 @@ class Fleet3Controller extends BaseController
      */
     private function buildFleetBlock(): array
     {
-        $objects = $this->objects->getObjects();
+        $objects = $this->registry->names();
         $planetId = $this->planetInt('planet_id');
 
         $shipsRow = $planetId > 0 ? DB::selectOne(
@@ -139,7 +139,7 @@ class Fleet3Controller extends BaseController
                 'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'capacity' => $this->fleetsService->getMaxStorage(
-                    $this->asInt($this->objects->getPrice($shipId, 'capacity')),
+                    ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
                 ),
                 'ship' => min($requested, $available),

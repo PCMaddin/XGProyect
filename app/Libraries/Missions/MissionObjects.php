@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
-use App\Core\Objects;
+use App\Core\GameObjects\GameObject;
+use App\Core\GameObjects\GameObjectRegistry;
+use App\Core\GameObjects\Officer;
+use App\Core\GameObjects\Ship;
 
 /**
- * The game object config (names, prices, combat specs) by object id, typed
- * for the mission handlers.
- *
- * @SuppressWarnings("PHPMD.StaticAccess")
+ * The game object config (names, prices, combat specs) by object id, in the
+ * array shapes the mission handlers and the battle engine work with.
  */
 final class MissionObjects
 {
@@ -19,57 +20,85 @@ final class MissionObjects
      */
     public static function names(): array
     {
-        $result = [];
-        foreach (self::asArray(Objects::getInstance()->getObjects()) as $key => $value) {
-            if (is_int($key) && is_string($value)) {
-                $result[$key] = $value;
-            }
-        }
-
-        return $result;
+        return self::registry()->names();
     }
 
     /**
+     * Prices and factor; ships also with consumption, speed and capacity,
+     * officers with their dark matter prices and images.
+     *
      * @return array<int, array<string, mixed>>
      */
     public static function prices(): array
     {
-        return self::specs(Objects::getInstance()->getPrice());
-    }
+        $prices = [];
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    public static function combatSpecs(): array
-    {
-        return self::specs(Objects::getInstance()->getCombatSpecs());
-    }
+        foreach (self::registry()->all() as $id => $object) {
+            if ($object instanceof Officer) {
+                $prices[$id] = [
+                    'darkmatter_week' => $object->getDarkmatterWeek(),
+                    'darkmatter_month' => $object->getDarkmatterMonth(),
+                    'img_big' => $object->getImgBig(),
+                    'img_small' => $object->getImgSmall(),
+                ];
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private static function specs(mixed $map): array
-    {
-        $result = [];
-        foreach (self::asArray($map) as $key => $value) {
-            if (!is_int($key) || !is_array($value)) {
                 continue;
             }
 
-            $result[$key] = [];
-            foreach ($value as $field => $spec) {
-                $result[$key][(string) $field] = $spec;
+            if (!$object instanceof GameObject) {
+                continue;
+            }
+
+            $prices[$id] = $object->getPrice()->toArray();
+
+            if ($object instanceof Ship) {
+                $prices[$id] += [
+                    'consumption' => $object->getConsumption(),
+                    'consumption2' => $object->getConsumption2(),
+                    'speed' => $object->getSpeed(),
+                    'speed2' => $object->getSpeed2(),
+                    'capacity' => $object->getCapacity(),
+                ];
             }
         }
 
-        return $result;
+        return $prices;
     }
 
     /**
-     * @return array<mixed>
+     * Shield, attack and rapid fire ('sd': target id => shots) of ships and
+     * defenses; defenses without rapid fire have no 'sd'.
+     *
+     * @return array<int, array{shield: float, attack: float, sd?: array<int, int>}>
      */
-    private static function asArray(mixed $value): array
+    public static function combatSpecs(): array
     {
-        return is_array($value) ? $value : [];
+        $specs = [];
+
+        foreach (self::registry()->ships() as $id => $ship) {
+            $specs[$id] = [
+                'shield' => $ship->getShield(),
+                'attack' => $ship->getAttack(),
+                'sd' => $ship->getRapidFire()->all(),
+            ];
+        }
+
+        foreach (self::registry()->defenses() as $id => $defense) {
+            $specs[$id] = [
+                'shield' => $defense->getShield(),
+                'attack' => $defense->getAttack(),
+            ];
+
+            if ($defense->getRapidFire()->isNotEmpty()) {
+                $specs[$id]['sd'] = $defense->getRapidFire()->all();
+            }
+        }
+
+        return $specs;
+    }
+
+    private static function registry(): GameObjectRegistry
+    {
+        return app(GameObjectRegistry::class);
     }
 }

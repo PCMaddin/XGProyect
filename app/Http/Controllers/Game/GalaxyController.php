@@ -15,7 +15,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
@@ -52,7 +52,7 @@ class GalaxyController extends BaseController
 
     private int $currentSystem = 0;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     private NoobsProtectionLib $noob;
 
@@ -71,7 +71,7 @@ class GalaxyController extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
         $this->noob = new NoobsProtectionLib();
 
         if ($this->userInt('preference_vacation_mode') > 0) {
@@ -816,22 +816,22 @@ class GalaxyController extends BaseController
      */
     private function fleetShipIds(): array
     {
-        return $this->objects->getObjectsList('fleet');
+        return $this->registry->ships()->keys()->all();
     }
 
     private function resourceName(int $itemId): string
     {
-        return $this->objects->getObjects($itemId);
+        return ($this->registry->names()[$itemId] ?? '');
     }
 
     private function shipSpeed(int $itemId): int
     {
-        return $this->asInt($this->objects->getPrice($itemId, 'speed'));
+        return ($this->registry->findShip($itemId)?->getSpeed() ?? 0);
     }
 
     private function shipConsumption(int $itemId): int
     {
-        return $this->asInt($this->objects->getPrice($itemId, 'consumption'));
+        return ($this->registry->findShip($itemId)?->getConsumption() ?? 0);
     }
 
     private function queryInt(Request $request, string $key): int

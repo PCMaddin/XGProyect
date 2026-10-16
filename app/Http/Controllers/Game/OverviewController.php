@@ -13,7 +13,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
@@ -46,7 +46,7 @@ class OverviewController extends BaseController
 
     private NoobsProtectionLib $noob;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     public function __construct(
         private FormatService $formatService,
@@ -62,7 +62,7 @@ class OverviewController extends BaseController
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
         $this->noob = new NoobsProtectionLib();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         return view('overview.view', array_merge(
             [
@@ -381,7 +381,7 @@ class OverviewController extends BaseController
 
     private function objectName(int $objectId): string
     {
-        return $this->objects->getObjects($objectId);
+        return ($this->registry->names()[$objectId] ?? '');
     }
 
     private function planetInt(string $key): int

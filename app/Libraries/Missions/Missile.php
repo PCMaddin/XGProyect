@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Services\FormatService;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 
 /**
@@ -170,7 +170,7 @@ class Missile extends Missions
     private function defenseReport(array $targetData, array $result): string
     {
         $report = '';
-        $defenses = Objects::getInstance()->getObjectsList('defense');
+        $defenses = app(GameObjectRegistry::class)->defenses()->keys()->all();
 
         foreach ($defenses as $defenseId) {
             $column = $this->resource[$defenseId];

@@ -138,6 +138,30 @@ class GameObjectRegistry
     }
 
     /**
+     * The column name of every object by id (e.g. 202 => 'ship_small_cargo_ship').
+     *
+     * @return array<int, string>
+     */
+    public function names(): array
+    {
+        return $this->objects->map(fn (GameObjectInterface $object): string => $object->getName())->all();
+    }
+
+    public function findShip(int $id): ?Ship
+    {
+        $object = $this->objects->get($id);
+
+        return $object instanceof Ship ? $object : null;
+    }
+
+    public function findOfficer(int $id): ?Officer
+    {
+        $object = $this->objects->get($id);
+
+        return $object instanceof Officer ? $object : null;
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
      */
     private function registerBuildings(): void

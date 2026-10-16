@@ -16,7 +16,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
@@ -70,7 +70,7 @@ class ShipyardController extends BaseController
 
     private bool $buildingInProgress = false;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     private Users $userLibrary;
 
@@ -87,7 +87,7 @@ class ShipyardController extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
         $this->userLibrary = new Users();
 
         $this->setUpShipyard();
@@ -450,14 +450,16 @@ class ShipyardController extends BaseController
 
     private function price(int $itemId, string $resource): int
     {
-        $price = $this->objects->getPrice($itemId, $resource);
+        if (!$this->registry->has($itemId)) {
+            return 0;
+        }
 
-        return is_numeric($price) ? (int) $price : 0;
+        return (int) ($this->registry->get($itemId)->getPrice()->toArray()[$resource] ?? 0);
     }
 
     private function objectName(int $itemId): string
     {
-        return $this->objects->getObjects($itemId);
+        return ($this->registry->names()[$itemId] ?? '');
     }
 
     private function objectMapName(int $itemId): string
@@ -470,7 +472,7 @@ class ShipyardController extends BaseController
      */
     private function objectMap(): array
     {
-        return $this->objects->getObjects();
+        return $this->registry->names();
     }
 
     private function planetInt(string $key): int

@@ -16,7 +16,8 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
+use App\Core\GameObjects\ProductionFormula;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
 use App\Libraries\Users;
@@ -50,11 +51,8 @@ class ResourcesettingsController extends BaseController
     /** @var array<int, string> */
     private array $resource = [];
 
-    /** @var array<int, mixed> */
-    private array $prodGrid = [];
-
-    /** @var array<string, mixed> */
-    private array $reslist = [];
+    /** @var array<int, ProductionFormula> */
+    private array $productions = [];
 
     public function __construct(
         private ProductionService $productionService,
@@ -71,10 +69,16 @@ class ResourcesettingsController extends BaseController
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
 
-        $objects = Objects::getInstance();
-        $this->resource = $this->toStringMap($objects->getObjects());
-        $this->prodGrid = $objects->getProduction();
-        $this->reslist = $objects->getObjectsList();
+        $registry = app(GameObjectRegistry::class);
+        $this->resource = $registry->names();
+
+        foreach ($registry->producers() as $prodId => $producer) {
+            $production = $producer->getProduction();
+
+            if ($production !== null) {
+                $this->productions[$prodId] = $production;
+            }
+        }
 
         if ($request->isMethod('post') && !Users::getInstance()->isOnVacations($this->user)) {
             return $this->savePercentages($request);
@@ -172,10 +176,10 @@ class ResourcesettingsController extends BaseController
         $plasmaBoost = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
         $resourceRow = '';
 
-        foreach ($this->prodIds() as $prodId) {
+        foreach (array_keys($this->productions) as $prodId) {
             $name = $this->resource[$prodId] ?? '';
 
-            if ($name === '' || $this->planetInt($name) <= 0 || !isset($this->prodGrid[$prodId])) {
+            if ($name === '' || $this->planetInt($name) <= 0) {
                 continue;
             }
 
@@ -337,21 +341,15 @@ class ResourcesettingsController extends BaseController
 
     private function runFormula(int $prodId, string $resource, int $level, int $factor, int $temp, int $energyTech): float
     {
-        $entry = $this->prodGrid[$prodId] ?? null;
+        $production = $this->productions[$prodId] ?? null;
 
-        if (!is_array($entry) || !isset($entry['formule']) || !is_array($entry['formule'])) {
-            return 0.0;
-        }
-
-        $formula = $entry['formule'][$resource] ?? null;
-
-        if (!is_callable($formula)) {
-            return 0.0;
-        }
-
-        $result = $formula($level, $factor, $temp, $energyTech);
-
-        return is_numeric($result) ? (float) $result : 0.0;
+        return match ($resource) {
+            'metal' => $production?->calculateMetal($level, $factor),
+            'crystal' => $production?->calculateCrystal($level, $factor),
+            'deuterium' => $production?->calculateDeuterium($level, $factor, $temp),
+            'energy' => $production?->calculateEnergy($level, $factor, $temp, $energyTech),
+            default => null,
+        } ?? 0.0;
     }
 
     private function buildPercentageOptions(int $currentPercentage): string
@@ -427,42 +425,6 @@ class ResourcesettingsController extends BaseController
         $rounded = (int) $value;
 
         return $this->formatService->colorNumber($rounded, $this->formatService->prettyNumber($rounded));
-    }
-
-    /**
-     * @return array<int, int>
-     */
-    private function prodIds(): array
-    {
-        $prod = $this->reslist['prod'] ?? null;
-
-        if (!is_array($prod)) {
-            return [];
-        }
-
-        return array_values(array_map(static fn (mixed $id): int => is_numeric($id) ? (int) $id : 0, $prod));
-    }
-
-    /**
-     * @param  mixed  $objects
-     *
-     * @return array<int, string>
-     */
-    private function toStringMap(mixed $objects): array
-    {
-        if (!is_array($objects)) {
-            return [];
-        }
-
-        $map = [];
-
-        foreach ($objects as $id => $name) {
-            if (is_numeric($id) && is_scalar($name)) {
-                $map[(int) $id] = (string) $name;
-            }
-        }
-
-        return $map;
     }
 
     private function planetInt(string $key): int

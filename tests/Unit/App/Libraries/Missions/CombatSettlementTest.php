@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use ReflectionProperty;
 use Tests\TestCase;
-use App\Core\Objects;
+use App\Libraries\Missions\MissionObjects;
 use App\Libraries\BattleEngine\Core\Battle;
 use App\Libraries\BattleEngine\Models\PlayerGroup;
 use App\Libraries\BattleEngine\Utils\LangManager;
@@ -160,7 +160,7 @@ class CombatSettlementTest extends TestCase
         ];
 
         $mission = self::mission($type);
-        LangManager::getInstance()->setImplementation(new AttackLang(Objects::getInstance()->getObjects()));
+        LangManager::getInstance()->setImplementation(new AttackLang(MissionObjects::names()));
 
         $attackers = count($attackRows) > 1
             ? self::invoke($mission, 'fleetsGroup', $attackRows)

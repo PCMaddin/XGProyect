@@ -8,7 +8,7 @@ use App\Services\FormatService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
-use App\Core\Objects;
+use App\Libraries\Missions\MissionObjects;
 use App\Libraries\Missions\Missile;
 
 /**
@@ -70,7 +70,7 @@ class MissileTest extends TestCase
         array $expectedDestroyed,
         string $expectedQuery
     ): void {
-        $resource = Objects::getInstance()->getObjects();
+        $resource = MissionObjects::names();
 
         $targetData = ['research_shielding_technology' => $shielding];
         foreach ([401, 402, 403, 404, 405, 406, 407, 408, 502, 503] as $id) {

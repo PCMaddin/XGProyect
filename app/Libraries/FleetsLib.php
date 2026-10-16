@@ -9,7 +9,7 @@ use App\Services\Game\Formulas\OfficerService;
 use App\Services\TimingService;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 
 /**
  * Presentation helpers for in-flight fleets (event rows, hover popups, coord
@@ -125,7 +125,7 @@ class FleetsLib
      */
     public static function fleetShipsPopup(array $fleetRow, string $text, string $fleetType, array $currentUser): string
     {
-        $objects = (array) Objects::getInstance()->getObjects();
+        $objects = app(GameObjectRegistry::class)->names();
         $ships = self::getFleetShipsArray(self::asString($fleetRow['fleet_array'] ?? ''));
         $isOwn = self::asInt($fleetRow['fleet_owner'] ?? 0) === self::asInt($currentUser['id'] ?? 0);
         $amount = self::asString($fleetRow['fleet_amount'] ?? '');

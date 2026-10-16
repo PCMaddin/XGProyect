@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Entity\FleetEntity;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
@@ -48,7 +48,7 @@ class MovementController extends BaseController
 
     private Premium $premium;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     public function __construct(
         private FormatService $formatService,
@@ -63,7 +63,7 @@ class MovementController extends BaseController
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Fleet));
 
         $this->user = Users::getInstance()->getUserData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $this->setUpFleets();
 
@@ -208,7 +208,7 @@ class MovementController extends BaseController
 
     private function buildShipsBlock(string $fleetArray): string
     {
-        $objects = $this->objects->getObjects();
+        $objects = $this->registry->names();
         $ships = FleetsLib::getFleetShipsArray($fleetArray);
         $tooltips = [];
 

@@ -15,7 +15,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\OfficiersEnumerator as OE;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 use App\Libraries\Users;
 
@@ -39,7 +39,7 @@ class PremiumController extends BaseController
     /** @var array<string, mixed> */
     private array $user = [];
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     public function __construct(
         private FormatService $formatService,
@@ -52,7 +52,7 @@ class PremiumController extends BaseController
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Officers));
 
         $this->user = Users::getInstance()->getUserData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $redirect = $this->handlePurchase($request);
 
@@ -71,7 +71,7 @@ class PremiumController extends BaseController
         $officer = $request->integer('offi');
         $time = is_string($raw = $request->query('time')) ? $raw : '';
 
-        $officers = $this->objects->getObjectsList('officier');
+        $officers = $this->registry->officers()->keys()->all();
 
         if (!in_array($officer, $officers, true) || !in_array($time, ['week', 'month'], true)) {
             return null;
@@ -167,28 +167,40 @@ class PremiumController extends BaseController
 
     private function isOfficerAccessible(int $officer, string $resource): bool
     {
-        $price = $this->objects->getPrice($officer, $resource);
-
-        return is_numeric($price) && (float) $price <= (float) $this->userInt('premium_dark_matter');
+        return $this->officerPrice($officer, $resource) <= $this->userInt('premium_dark_matter');
     }
 
+    /**
+     * @param string $resource 'darkmatter_week' or 'darkmatter_month'
+     */
     private function officerPrice(int $officer, string $resource): int
     {
-        $price = $this->objects->getPrice($officer, $resource);
+        $object = $this->registry->findOfficer($officer);
 
-        return is_numeric($price) ? (int) floor((float) $price) : 0;
+        return match ($resource) {
+            'darkmatter_week' => $object?->getDarkmatterWeek() ?? 0,
+            'darkmatter_month' => $object?->getDarkmatterMonth() ?? 0,
+            default => 0,
+        };
     }
 
+    /**
+     * @param string $type 'img_big' or 'img_small'
+     */
     private function officerImage(int $officer, string $type): string
     {
-        $image = $this->objects->getPrice($officer, $type);
+        $object = $this->registry->findOfficer($officer);
 
-        return is_scalar($image) ? (string) $image : '';
+        return match ($type) {
+            'img_big' => $object?->getImgBig() ?? '',
+            'img_small' => $object?->getImgSmall() ?? '',
+            default => '',
+        };
     }
 
     private function officerColumn(int $officerId): string
     {
-        return $this->objects->getObjects($officerId);
+        return ($this->registry->names()[$officerId] ?? '');
     }
 
     private function officerText(int $officerId, string $key): string

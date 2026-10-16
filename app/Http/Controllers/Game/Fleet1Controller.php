@@ -14,7 +14,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
@@ -44,7 +44,7 @@ class Fleet1Controller extends BaseController
 
     private Premium $premium;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     private int $shipCount = 0;
 
@@ -61,7 +61,7 @@ class Fleet1Controller extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $this->setUpFleets();
 
@@ -120,7 +120,7 @@ class Fleet1Controller extends BaseController
      */
     private function buildListOfShips(): array
     {
-        $objects = $this->objects->getObjects();
+        $objects = $this->registry->names();
         $planetId = $this->planetInt('planet_id');
 
         $shipsRow = $planetId > 0 ? DB::selectOne(
@@ -162,7 +162,7 @@ class Fleet1Controller extends BaseController
                 'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'capacity' => $this->fleetsService->getMaxStorage(
-                    $this->asInt($this->objects->getPrice($shipId, 'capacity')),
+                    ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
                 ),
             ];

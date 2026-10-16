@@ -6,7 +6,7 @@ namespace Tests\Unit\App\Libraries\Missions;
 
 use ReflectionMethod;
 use Tests\TestCase;
-use App\Core\Objects;
+use App\Libraries\Missions\MissionObjects;
 use App\Libraries\BattleEngine\Models\Defense;
 use App\Libraries\BattleEngine\Models\Ship;
 use App\Libraries\Missions\Missions;
@@ -17,7 +17,7 @@ use App\Libraries\Missions\Missions;
  * are typed to PHPStan level 9:
  *
  *  - plunder():     the pure loot-split arithmetic (coercion must not change amounts)
- *  - getShipType(): the Ship/Defense factory wired from the Objects config
+ *  - getShipType(): the Ship/Defense factory wired from the game object config
  *
  * These exercise the real OPBE combat objects and the real game-object config
  * (GameObjectRegistry, no database), so they lock in the observable results the
@@ -111,8 +111,8 @@ abstract class MissionLootCharacterizationTestCase extends TestCase
     public function testGetShipTypeBuildsShipForShipIds(): void
     {
         $mission = $this->makeMission();
-        $price = Objects::getInstance()->getPrice();
-        $combat = Objects::getInstance()->getCombatSpecs();
+        $price = MissionObjects::prices();
+        $combat = MissionObjects::combatSpecs();
 
         /** @var Ship $ship */
         $ship = $this->invoke($mission, 'getShipType', 202, 7);
@@ -133,7 +133,7 @@ abstract class MissionLootCharacterizationTestCase extends TestCase
     public function testGetShipTypeWiresRapidFireAndToleratesMissingTable(): void
     {
         $mission = $this->makeMission();
-        $combat = Objects::getInstance()->getCombatSpecs();
+        $combat = MissionObjects::combatSpecs();
 
         $this->assertArrayNotHasKey('sd', $combat[401], 'precondition: 401 has no rapid-fire table');
 
@@ -156,8 +156,8 @@ abstract class MissionLootCharacterizationTestCase extends TestCase
     public function testGetShipTypeBuildsDefenseForDefenseIds(): void
     {
         $mission = $this->makeMission();
-        $price = Objects::getInstance()->getPrice();
-        $combat = Objects::getInstance()->getCombatSpecs();
+        $price = MissionObjects::prices();
+        $combat = MissionObjects::combatSpecs();
 
         /** @var Defense $defense */
         $defense = $this->invoke($mission, 'getShipType', 401, 3);

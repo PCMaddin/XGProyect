@@ -8,7 +8,13 @@ use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\ResearchEnumerator as Research;
-use App\Core\Objects;
+use App\Core\GameObjects\Building;
+use App\Core\GameObjects\Defense;
+use App\Core\GameObjects\GameObject;
+use App\Core\GameObjects\GameObjectInterface;
+use App\Core\GameObjects\GameObjectRegistry;
+use App\Core\GameObjects\Research as ResearchObject;
+use App\Core\GameObjects\Ship;
 
 /**
  * Development cost / time / price helpers, shared by the native build pages and
@@ -156,7 +162,7 @@ class DevelopmentsLib
     {
         $resource = self::objectNames();
         $pricelist = self::priceList();
-        $reslist = self::objectsList();
+        $object = self::registry()->has($element) ? self::registry()->get($element) : null;
         $time = 1.0;
 
         if ($level === false) {
@@ -167,7 +173,7 @@ class DevelopmentsLib
         $costMetal = Formulas::getDevelopmentCost(self::asInt($pricelist[$element]['metal'] ?? 0), $factor, $level);
         $costCrystal = Formulas::getDevelopmentCost(self::asInt($pricelist[$element]['crystal'] ?? 0), $factor, $level);
 
-        if (self::listContains($reslist, 'build', $element)) {
+        if ($object instanceof Building) {
             $time = Formulas::getBuildingTime(
                 $costMetal,
                 $costCrystal,
@@ -178,11 +184,11 @@ class DevelopmentsLib
             );
         }
 
-        if (self::listContains($reslist, 'tech', $element)) {
+        if ($object instanceof ResearchObject) {
             $time = self::researchTime($currentUser, $currentPlanet, $resource, $costMetal, $costCrystal, $totalLabLevel);
         }
 
-        if (self::listContains($reslist, 'defense', $element) || self::listContains($reslist, 'fleet', $element)) {
+        if ($object instanceof Defense || $object instanceof Ship) {
             $time = Formulas::getShipyardProductionTime(
                 $costMetal,
                 $costCrystal,
@@ -218,13 +224,13 @@ class DevelopmentsLib
     public static function isDevelopmentAllowed(array $currentUser, array $currentPlanet, int $element): bool
     {
         $resource = self::objectNames();
-        $requirements = self::relations();
+        $object = self::registry()->has($element) ? self::registry()->get($element) : null;
 
-        if (!isset($requirements[$element]) || !is_array($requirements[$element])) {
+        if (!$object instanceof GameObject) {
             return true;
         }
 
-        foreach ($requirements[$element] as $reqElement => $eleLevel) {
+        foreach ($object->getRequirements() as $reqElement => $eleLevel) {
             $name = self::asString($resource[self::asInt($reqElement)] ?? '');
             $needed = self::asInt($eleLevel);
 
@@ -326,61 +332,33 @@ class DevelopmentsLib
         return self::asInt($currentPlanet[$name] ?? $currentUser[$name] ?? 0);
     }
 
-    /**
-     * @param array<int|string, mixed> $reslist
-     */
-    private static function listContains(array $reslist, string $group, int $element): bool
+    private static function registry(): GameObjectRegistry
     {
-        return isset($reslist[$group]) && is_array($reslist[$group]) && in_array($element, $reslist[$group]);
+        return app(GameObjectRegistry::class);
     }
 
     private static function objectName(int $id): string
     {
-        return self::asString(Objects::getInstance()->getObjects($id));
+        return self::objectNames()[$id] ?? '';
     }
 
     /**
-     * @return array<int|string, string>
+     * @return array<int, string>
      */
     private static function objectNames(): array
     {
-        /** @var array<int|string, string> $names */
-        $names = (array) Objects::getInstance()->getObjects();
-
-        return $names;
+        return self::registry()->names();
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * Base prices and factor by object id (metal, crystal, deuterium, factor,
+     * energy or energy_max).
+     *
+     * @return array<int, array<string, int|float>>
      */
     private static function priceList(): array
     {
-        /** @var array<int, array<string, mixed>> $prices */
-        $prices = (array) Objects::getInstance()->getPrice();
-
-        return $prices;
-    }
-
-    /**
-     * @return array<int|string, mixed>
-     */
-    private static function objectsList(): array
-    {
-        /** @var array<int|string, mixed> $list */
-        $list = (array) Objects::getInstance()->getObjectsList();
-
-        return $list;
-    }
-
-    /**
-     * @return array<int, mixed>
-     */
-    private static function relations(): array
-    {
-        /** @var array<int, mixed> $relations */
-        $relations = (array) Objects::getInstance()->getRelations();
-
-        return $relations;
+        return self::registry()->all()->map(fn (GameObjectInterface $object): array => $object->getPrice()->toArray())->all();
     }
 
     private static function asInt(mixed $value): int

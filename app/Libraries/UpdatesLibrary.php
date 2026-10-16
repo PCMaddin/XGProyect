@@ -17,7 +17,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ResearchEnumerator as Research;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\DevelopmentsLib as Developments;
 
 /**
@@ -271,8 +271,8 @@ class UpdatesLibrary
      */
     public static function updatePlanetResources(array &$current_user, array &$current_planet, int $UpdateTime, bool $Simul = false): void
     {
-        $resource = Objects::getInstance()->getObjects();
-        $ProdGrid = Objects::getInstance()->getProduction();
+        $registry = app(GameObjectRegistry::class);
+        $resource = $registry->names();
 
         $settings = app(SettingsService::class);
         $productionService = app(ProductionService::class); // Get service from container
@@ -311,7 +311,13 @@ class UpdatesLibrary
         $Caps['planet_energy_max'] = 0;
         $Caps['planet_energy_used'] = 0;
 
-        foreach ($ProdGrid as $ProdID => $formula) {
+        foreach ($registry->producers() as $ProdID => $producer) {
+            $formula = $producer->getProduction();
+
+            if ($formula === null) {
+                continue;
+            }
+
             $BuildLevelFactor = $current_planet['planet_' . $resource[$ProdID] . '_percent'];
             $BuildLevel = $current_planet[$resource[$ProdID]];
             $BuildEnergy = $current_user['research_energy_technology'];
@@ -327,11 +333,13 @@ class UpdatesLibrary
             ) ? ENGINEER_ENERGY : 0));
 
             // PRODUCTION FORMULAS
-            $formulaArgs = [self::num($BuildLevel), self::num($BuildLevelFactor), self::num($BuildTemp), self::num($BuildEnergy)];
-            $metal_prod = ($formula['formule']['metal'])(...$formulaArgs);
-            $crystal_prod = ($formula['formule']['crystal'])(...$formulaArgs);
-            $deuterium_prod = ($formula['formule']['deuterium'])(...$formulaArgs);
-            $energy_prod = ($formula['formule']['energy'])(...$formulaArgs);
+            $level = (int) self::num($BuildLevel);
+            $levelFactor = (float) self::num($BuildLevelFactor);
+            $temperature = (float) self::num($BuildTemp);
+            $metal_prod = $formula->calculateMetal($level, $levelFactor);
+            $crystal_prod = $formula->calculateCrystal($level, $levelFactor);
+            $deuterium_prod = $formula->calculateDeuterium($level, $levelFactor, $temperature);
+            $energy_prod = $formula->calculateEnergy($level, $levelFactor, $temperature, (int) self::num($BuildEnergy));
 
             // PLASMA BOOST
             $metalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'metal');
@@ -571,7 +579,7 @@ class UpdatesLibrary
      */
     private static function updateHangarQueue(array $current_user, array &$current_planet, int $ProductionTime): array
     {
-        $resource = Objects::getInstance()->getObjects();
+        $resource = app(GameObjectRegistry::class)->names();
 
         if (self::str($current_planet['planet_b_hangar_id']) !== '') {
             $Builded = [];

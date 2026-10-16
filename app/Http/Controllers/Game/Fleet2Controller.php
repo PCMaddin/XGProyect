@@ -15,7 +15,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 use App\Libraries\Premium\Premium;
 use App\Libraries\Research\Researches;
@@ -44,7 +44,7 @@ class Fleet2Controller extends BaseController
 
     private Premium $premium;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     /** @var array{fleet_array: array<int, int>, fleet_list: string, amount: int, speed_all: array<int, float>} */
     private array $fleetData = [
@@ -67,7 +67,7 @@ class Fleet2Controller extends BaseController
 
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $this->research = new Researches([$this->user]);
         $this->premium = new Premium([$this->user]);
@@ -107,7 +107,7 @@ class Fleet2Controller extends BaseController
      */
     private function buildFleetBlock(Request $request): array
     {
-        $objects = $this->objects->getObjects();
+        $objects = $this->registry->names();
         $planetId = $this->planetInt('planet_id');
 
         $shipsRow = $planetId > 0 ? DB::selectOne(
@@ -156,7 +156,7 @@ class Fleet2Controller extends BaseController
                 'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace')),
                 'speed' => $speed,
                 'capacity' => $this->fleetsService->getMaxStorage(
-                    $this->asInt($this->objects->getPrice($shipId, 'capacity')),
+                    ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
                 ),
                 'ship' => $amount,

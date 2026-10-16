@@ -18,7 +18,7 @@ use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
@@ -58,7 +58,7 @@ class Fleet4Controller extends BaseController
 
     private Users $userLibrary;
 
-    private Objects $objects;
+    private GameObjectRegistry $registry;
 
     /** @var array<string, int> */
     private array $cleanInput = [];
@@ -115,7 +115,7 @@ class Fleet4Controller extends BaseController
         $this->user = Users::getInstance()->getUserData();
         $this->planet = Users::getInstance()->getPlanetData();
         $this->userLibrary = new Users();
-        $this->objects = new Objects();
+        $this->registry = app(GameObjectRegistry::class);
 
         $userId = $this->userInt('id');
         $rows = $userId > 0 ? array_map(
@@ -294,7 +294,7 @@ class Fleet4Controller extends BaseController
         }
 
         $planetShips = $this->loadPlanetShips();
-        $objects = $this->objects->getObjects();
+        $objects = $this->registry->names();
         $totalShips = 0;
 
         foreach ($fleet as $shipId => $amount) {
@@ -306,7 +306,7 @@ class Fleet4Controller extends BaseController
 
             $totalShips += $amount;
             $this->fleetStorage += $this->fleetsService->getMaxStorage(
-                $this->asInt($this->objects->getPrice($shipId, 'capacity')),
+                ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                 $this->research->getCurrentResearch()->getResearchHyperspaceTechnology()
             ) * $amount;
             $this->fleetShips[$column] = $amount;

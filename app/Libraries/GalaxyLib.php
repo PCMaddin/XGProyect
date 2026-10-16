@@ -10,7 +10,7 @@ use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
-use App\Core\Objects;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Helpers\StringsHelper;
 use App\Helpers\UrlHelper;
 
@@ -35,11 +35,10 @@ class GalaxyLib
 
     private int $planet = 0;
 
-    /** @var array<int|string, string> */
+    /** @var array<int, string> */
     private array $resource;
 
-    /** @var array<int, array<string, mixed>> */
-    private array $pricelist;
+    private int $recyclerCapacity;
 
     private NoobsProtectionLib $noob;
 
@@ -57,12 +56,9 @@ class GalaxyLib
         private int $galaxy = 0,
         private int $system = 0,
     ) {
-        /** @var array<int|string, string> $resource */
-        $resource = (array) Objects::getInstance()->getObjects();
-        $this->resource = $resource;
-        /** @var array<int, array<string, mixed>> $pricelist */
-        $pricelist = (array) Objects::getInstance()->getPrice();
-        $this->pricelist = $pricelist;
+        $registry = app(GameObjectRegistry::class);
+        $this->resource = $registry->names();
+        $this->recyclerCapacity = $registry->findShip(Ships::SHIP_RECYCLER)?->getCapacity() ?? 0;
         $this->noob = new NoobsProtectionLib();
         $this->formatService = app(FormatService::class);
     }
@@ -205,7 +201,7 @@ class GalaxyLib
         }
 
         $recyclerStorage = app(FleetsService::class)->getMaxStorage(
-            self::asInt($this->pricelist[Ships::SHIP_RECYCLER]['capacity'] ?? 0),
+            $this->recyclerCapacity,
             self::asInt($this->user['research_hyperspace_technology'] ?? 0)
         );
         $recyclerStorage = $recyclerStorage === 0 ? 1 : $recyclerStorage;
