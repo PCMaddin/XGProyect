@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'このメニューでは、惑星や月の名前変更、惑星の移転、放棄ができます。',
+    'rename' => '名前変更',
+    'new_planet_name' => '新しい惑星名',
+    'new_moon_name' => '新しい月の名前',
+    'abandon_homeplanet' => '本拠惑星を放棄',
+    'abandon_homeplanet_button' => '本拠惑星を放棄',
+    'abandon_colony' => '植民地を放棄',
+    'abandon_colony_button' => '植民地を放棄',
+    'abandon_moon' => '月を放棄',
+    'abandon_moon_button' => '月を放棄',
+    'abandon_homeplanet_unique' => '他の惑星に植民するまでは本拠惑星を放棄できません。',
+    'abandon_homeplanet_with_colonies' => '本拠惑星を放棄すると、ログイン時に次の植民惑星へ直接移動します。',
+    'abandon_confirm_message' => 'パスワードを入力して、惑星 :coords の削除を確認してください',
+    'abandon_confirm' => '確認',
+    'rename_error' => '特殊文字は使用できません！',
+    'rename_success' => '惑星の名前を :name に変更しました',
+    'wrong_password' => 'パスワードが違います！',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => '艦隊が移動中の惑星は放棄できません',
+    'rp_planet_abandoned' => '惑星を放棄しました',
+    'rp_wrong_pass' => 'パスワードが正しくありません。もう一度入力してください。',
+
+    'rl_title' => '惑星の移転',
+    'rl_description' => '%s ダークマターで、惑星とその月を24時間後に同じ範囲（1-3、4-12、13-15）の空いている座標へ移転します。ダークマターは惑星が移転したときにのみ差し引かれます。それまでの間、惑星と月では建設、研究、造船所での生産ができず、自分の艦隊がそこから出発したり、そこへ向かったりすることもできません。艦船は燃料なしで通常の飛行時間で後を追い、デブリフィールドは元の場所に残り、ジャンプゲートは24時間使用できません。休暇モードにすると移転はキャンセルされます。',
+    'rl_target' => '目的地',
+    'rl_start' => '移転',
+    'rl_running' => '惑星は %s へ %s に移転します。',
+    'rl_cancel' => '移転をキャンセル',
+    'rl_started' => '移転を開始しました。',
+    'rl_cancelled' => '移転をキャンセルしました。',
+    'rl_error_planet' => 'この惑星は移転できません。',
+    'rl_error_running' => 'この惑星はすでに移転中です。',
+    'rl_error_target' => '目的地の座標が無効です。',
+    'rl_error_band' => '目的地は同じ座標範囲（1-3、4-12、13-15）にある必要があります。',
+    'rl_error_taken' => '目的地の座標は使用中または予約済みです。',
+    'rl_error_vacation' => '休暇モード中は移転できません。',
+    'rl_error_dark_matter' => 'ダークマターが足りません。',
+    'rl_error_building' => '惑星または月で建設が行われています。',
+    'rl_error_research' => '惑星または月で研究が行われています。',
+    'rl_error_shipyard' => '惑星または月の造船所に注文があります。',
+    'rl_error_fleets' => '自分の艦隊が惑星または月から出発中、または向かっています。',
+    'rl_error_wreck_field' => '宇宙ドックが艦船を修理中か、艦船が任務への復帰を待っています。',
+    'rl_from' => '管理',
+    'rl_subject' => '移転',
+    'rl_done' => '惑星は %s へ移転しました。艦船が後を追っています。',
+    'rl_failed' => '%s への移転に失敗しました: %s',
+];

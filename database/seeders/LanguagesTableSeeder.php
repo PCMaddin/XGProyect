@@ -18,6 +18,7 @@ class LanguagesTableSeeder extends Seeder
             ['name' => 'Nederlands', 'code' => 'nl'],
             ['name' => 'Italiano', 'code' => 'it'],
             ['name' => 'Polski', 'code' => 'pl'],
+            ['name' => '日本語', 'code' => 'ja'],
         ];
 
         Languages::insert($languages);

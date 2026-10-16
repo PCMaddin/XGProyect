@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'st_player' => 'プレイヤー',
+    'st_alliance' => '同盟',
+    'st_points' => 'ポイント',
+    'st_total' => '合計',
+    'st_economy' => '経済',
+    'st_research' => '研究',
+    'st_military' => '軍事',
+    'st_fleets' => '艦隊',
+    'st_researh' => '研究',
+    'st_buildings' => '施設',
+    'st_defenses' => '防衛',
+    'st_position' => '順位',
+    'st_members' => 'メンバー',
+    'st_per_member' => 'メンバーあたり',
+    'st_statistics' => '統計',
+    'st_show' => '表示',
+    'st_per' => '基準',
+    'st_in_the_positions' => '順位',
+    'st_actions' => '操作',
+    'st_ally_request' => 'この同盟に申請を送る',
+    'st_honour' => '名誉',
+    'st_title_grand_emperor' => '大皇帝',
+    'st_title_emperor' => '皇帝',
+    'st_title_starlord' => 'スターロード',
+    'st_title_bandit_king' => '盗賊王',
+    'st_title_bandit_lord' => '盗賊頭',
+    'st_title_bandit' => '盗賊',
+    'st_military_built' => '建造した軍事力',
+    'st_military_destroyed' => '破壊した軍事力',
+    'st_military_lost' => '失った軍事力',
+];
