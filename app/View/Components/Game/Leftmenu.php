@@ -51,6 +51,7 @@ class Leftmenu extends Component
             ['game.php?page=empire', 'lm_empire', '', '#ffffff', false, '1', '2'],
             ['game.php?page=alliance', 'lm_alliance', '', '#ffffff', false, '1', '13'],
             ['game.php?page=premium', 'lm_officiers', '', '#ff8900', false, '1', '15'],
+            ['game.php?page=items', 'lm_items', '', '#ff8900', false, '1', '15'],
             ['game.php?page=messages', 'lm_messages', '', '#ffffff', false, '1', '18'],
             ['game.php?page=playerprofile', 'lm_playerprofile', '', '#ff8900', false, '2', ''],
             ['game.php?page=highscore', 'lm_statistics', '&range=' . $user->stats->user_statistic_total_rank, '#ffffff', false, '2', '16'],

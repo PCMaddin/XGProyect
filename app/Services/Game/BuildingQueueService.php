@@ -251,6 +251,32 @@ class BuildingQueueService
         return true;
     }
 
+    /**
+     * Shorten the running order and those after it by up to $seconds
+     * (item "kraken"). False when nothing is being built.
+     */
+    public function speedUp(Planets $planet, int $seconds): bool
+    {
+        $queue = $planet->buildingQueue()->orderBy('position')->get();
+        $first = $queue->first();
+
+        if (!$first instanceof BuildingQueue || $first->end_time <= time()) {
+            return false;
+        }
+
+        $cut = min($seconds, $first->end_time - time());
+
+        foreach ($queue as $item) {
+            $item->end_time -= $cut;
+            $item->save();
+        }
+
+        $planet->planet_b_building = $first->end_time;
+        $planet->save();
+
+        return true;
+    }
+
     public function removeAt(Planets $planet, int $position): void
     {
         if ($position <= 1) {

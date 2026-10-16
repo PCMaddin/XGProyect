@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $planet_diameter
  * @property int    $planet_field_current
  * @property int    $planet_field_max
+ * @property int    $planet_item_fields
  * @property int    $planet_temp_min
  * @property int    $planet_temp_max
  * @property int    $planet_metal_perhour

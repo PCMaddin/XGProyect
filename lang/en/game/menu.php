@@ -17,6 +17,7 @@ return [
     'lm_defenses' => 'Defense',
     'lm_officiers' => 'Recruit Officers',
     'lm_trader' => 'Merchant',
+    'lm_items' => 'Items',
     'lm_technology' => 'Technology',
     'lm_messages' => 'Messages',
     'lm_alliance' => 'Alliance',

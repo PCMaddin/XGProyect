@@ -224,6 +224,31 @@ class ResearchQueueService
         }
     }
 
+    /**
+     * Shorten the running research and those after it by up to $seconds
+     * (item "newtron"). False when nothing is being researched.
+     */
+    public function speedUp(int $userId, int $seconds): bool
+    {
+        $queue = ResearchQueue::where('user_id', $userId)->orderBy('position')->get();
+        $first = $queue->first();
+
+        if (!$first instanceof ResearchQueue || $first->end_time <= time()) {
+            return false;
+        }
+
+        $cut = min($seconds, $first->end_time - time());
+
+        foreach ($queue as $item) {
+            $item->end_time -= $cut;
+            $item->save();
+        }
+
+        Planets::where('planet_id', $first->planet_id)->update(['planet_b_tech' => $first->end_time]);
+
+        return true;
+    }
+
     public function labLevel(User $user, Planets $planet): int
     {
         $intergalCol = $this->registry->get(ResearchEnumerator::RESEARCH_INTERGALACTIC_RESEARCH_NETWORK)->getName();

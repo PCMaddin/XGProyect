@@ -17,6 +17,7 @@ return [
     'lm_defenses' => 'Verteidigung',
     'lm_officiers' => 'Offiziere rekrutieren',
     'lm_trader' => 'Händler',
+    'lm_items' => 'Gegenstände',
     'lm_technology' => 'Technik',
     'lm_messages' => 'Nachrichten',
     'lm_alliance' => 'Allianz',

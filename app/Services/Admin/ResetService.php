@@ -73,8 +73,13 @@ class ResetService
         $this->resetBuildingsByType(3);
     }
 
+    /**
+     * Bugfix: the queues live in building_queues since the queue tables;
+     * clearing only the planets' cache columns left them running.
+     */
     public function resetBuildingsQueues(): void
     {
+        DB::table('building_queues')->delete();
         DB::table('planets')->update([
             'planet_b_building' => 0,
             'planet_b_building_id' => '',
@@ -103,8 +108,12 @@ class ResetService
         ]);
     }
 
+    /**
+     * Bugfix: the queue lives in research_queues (see resetBuildingsQueues).
+     */
     public function resetResearchQueues(): void
     {
+        DB::table('research_queues')->delete();
         DB::table('planets')->update([
             'planet_b_tech' => 0,
             'planet_b_tech_id' => 0,
@@ -233,6 +242,25 @@ class ResetService
         DB::table('planets')->where('planet_type', 3)->delete();
     }
 
+    /**
+     * Empty the tables a full reset starts over with. Use DELETE (DML)
+     * instead of TRUNCATE (DDL) so the whole reset can be rolled back; with
+     * the foreign key checks off nothing cascades, so the queues and items
+     * are listed too.
+     */
+    private function clearGameTables(): void
+    {
+        $tables = [
+            'alliance', 'alliance_statistics', 'acs', 'acs_members', 'fleets', 'buddys', 'messages', 'notes', 'reports',
+            'building_queues', 'research_queues', 'planet_boosters', 'user_items',
+            'planets', 'buildings', 'defenses', 'ships', 'preferences', 'premium', 'research', 'sessions',
+        ];
+
+        foreach ($tables as $table) {
+            DB::table($table)->delete();
+        }
+    }
+
     public function resetAll(): void
     {
         // FK checks must live outside the transaction — SET is a session variable,
@@ -241,17 +269,7 @@ class ResetService
 
         try {
             DB::transaction(function () {
-                // Use DELETE (DML) instead of TRUNCATE (DDL) so the whole
-                // operation can be rolled back if anything fails.
-                DB::table('alliance')->delete();
-                DB::table('alliance_statistics')->delete();
-                DB::table('acs')->delete();
-                DB::table('acs_members')->delete();
-                DB::table('fleets')->delete();
-                DB::table('buddys')->delete();
-                DB::table('messages')->delete();
-                DB::table('notes')->delete();
-                DB::table('reports')->delete();
+                $this->clearGameTables();
 
                 DB::table('users_statistics')->update([
                     'user_statistic_buildings_old_rank' => 0,
@@ -274,15 +292,6 @@ class ResetService
                     'user_statistic_technology_points' => 0,
                     'user_statistic_total_points' => 0,
                 ]);
-
-                DB::table('planets')->delete();
-                DB::table('buildings')->delete();
-                DB::table('defenses')->delete();
-                DB::table('ships')->delete();
-                DB::table('preferences')->delete();
-                DB::table('premium')->delete();
-                DB::table('research')->delete();
-                DB::table('sessions')->delete();
 
                 DB::table('users')->update([
                     'lastip' => '',

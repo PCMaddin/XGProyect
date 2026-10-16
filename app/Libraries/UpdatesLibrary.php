@@ -9,6 +9,7 @@ use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
 use App\Services\Game\BuildingQueueService;
+use App\Services\Game\Items\ItemService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
 use App\Services\Game\ResearchQueueService;
@@ -312,6 +313,9 @@ class UpdatesLibrary
         $Caps['planet_energy_max'] = 0;
         $Caps['planet_energy_used'] = 0;
 
+        // the mines' own production, which boosters (items) raise
+        $minePerHour = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+
         foreach ($registry->producers() as $ProdID => $producer) {
             $formula = $producer->getProduction();
 
@@ -362,6 +366,10 @@ class UpdatesLibrary
                 $productionService->productionAmount($deuterium_prod, $geologe_boost, $game_resource_multiplier),
                 $post_percent
             );
+
+            $minePerHour['metal'] += $productionService->currentProduction($productionService->productionAmount($metal_prod, 1, $game_resource_multiplier), $post_percent);
+            $minePerHour['crystal'] += $productionService->currentProduction($productionService->productionAmount($crystal_prod, 1, $game_resource_multiplier), $post_percent);
+            $minePerHour['deuterium'] += $productionService->currentProduction($productionService->productionAmount($deuterium_prod, 1, $game_resource_multiplier), $post_percent);
 
             // PRODUCTION BOOST WITH PLASMA
             $Caps['planet_metal_perhour'] += $productionService->currentProduction(
@@ -418,6 +426,26 @@ class UpdatesLibrary
         }
 
         $ProductionTime = $UpdateTime - self::numInt($current_planet['planet_last_update']);
+
+        // boosters: the per-hour value shows the ones working now, the
+        // resources get each one for the time it worked
+        $boosterPerHour = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+        $boosterProduction = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+
+        if ($current_planet['planet_type'] != PlanetTypesEnumerator::MOON && $current_planet['planet_energy_max'] != 0) {
+            $items = app(ItemService::class);
+            $planetId = self::numInt($current_planet['planet_id']);
+
+            foreach ($items->activeBoosters($planetId, $UpdateTime) as $boosted => $booster) {
+                $boosterPerHour[$boosted] = floor($minePerHour[$boosted] * $booster->percent / 100);
+                $current_planet['planet_' . $boosted . '_perhour'] = self::num($current_planet['planet_' . $boosted . '_perhour']) + $boosterPerHour[$boosted];
+            }
+
+            foreach ($items->boosterShares($planetId, self::numInt($current_planet['planet_last_update']), $UpdateTime) as $boosted => $share) {
+                $boosterProduction[$boosted] = $minePerHour[$boosted] * $share * $ProductionTime / 3600;
+            }
+        }
+
         $current_planet['planet_last_update'] = $UpdateTime;
 
         if ($current_planet['planet_energy_max'] == 0) {
@@ -442,7 +470,8 @@ class UpdatesLibrary
 
         if ($current_planet['planet_metal'] <= $MaxMetalStorage) {
             $MetalProduction = (
-                ($ProductionTime * ($current_planet['planet_metal_perhour'] / 3600))
+                ($ProductionTime * ((self::num($current_planet['planet_metal_perhour']) - $boosterPerHour['metal']) / 3600))
+                + $boosterProduction['metal']
             ) * (0.01 * $production_level);
 
             $MetalBaseProduc = (($ProductionTime * ($game_metal_basic_income / 3600)));
@@ -457,7 +486,8 @@ class UpdatesLibrary
 
         if ($current_planet['planet_crystal'] <= $MaxCristalStorage) {
             $CristalProduction = (
-                ($ProductionTime * ($current_planet['planet_crystal_perhour'] / 3600))
+                ($ProductionTime * ((self::num($current_planet['planet_crystal_perhour']) - $boosterPerHour['crystal']) / 3600))
+                + $boosterProduction['crystal']
             ) * (0.01 * $production_level);
 
             $CristalBaseProduc = (($ProductionTime * ($game_crystal_basic_income / 3600)));
@@ -472,7 +502,8 @@ class UpdatesLibrary
 
         if ($current_planet['planet_deuterium'] <= $MaxDeuteriumStorage) {
             $DeuteriumProduction = (
-                ($ProductionTime * ($current_planet['planet_deuterium_perhour'] / 3600))
+                ($ProductionTime * ((self::num($current_planet['planet_deuterium_perhour']) - $boosterPerHour['deuterium']) / 3600))
+                + $boosterProduction['deuterium']
             ) * (0.01 * $production_level);
 
             $DeuteriumBaseProduc = (($ProductionTime * ($game_deuterium_basic_income / 3600)));

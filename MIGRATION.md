@@ -942,6 +942,31 @@ Nachgezogen:
     (de/en/es).
   - Tests für Belastung, Erholung, Chance und Logbuch, auf MariaDB für die
     ganze Mission; im laufenden Spiel geprüft.
+- ✅ **Gegenstände (Items)** wie im Original ab Version 4.0 (owiki.de,
+  „Items“), Teil 1: Katalog, Inventar, Shop und Wirkungen
+  (`App\Services\Game\Items`, Seite `items` im Menü „Gegenstände“).
+  - **Booster** Metall/Kristall/Deuterium: +10/20/30 % der Minenproduktion
+    des Planeten für eine Woche (2.500/8.500/25.000 DM). Ein gleicher
+    Booster verlängert, ein anderer Prozentsatz geht erst nach Ablauf. Die
+    Rohstoffe bekommen den Booster genau für die Zeit, in der er wirkte; der
+    Stundenwert zeigt ihn, solange er wirkt.
+  - **Planetenfelder** +4/9/15 (75.000/150.000/300.000 DM) und
+    **Mondfelder** +2/4/6 (30.000/50.000/100.000 DM), je einmal pro Planet
+    oder Mond.
+  - **Kraken / Detroid / Newtron** verkürzen den laufenden Gebäude-, Werft-
+    bzw. Forschungsauftrag (und die folgenden) um 30 Min., 2 oder 6 Std.;
+    nicht im Shop, wie im Original (Auktionator, Import/Export,
+    Expeditionen).
+  - Neue Tabellen `user_items`, `planet_boosters`, Spalte
+    `planets.planet_item_fields`.
+  - Tests für Katalog, Kauf, alle Wirkungen und Fehlerfälle; die
+    Booster-Produktion auf MariaDB; im Browser durchgespielt.
+- 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
+  (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
+  `building_queues`/`research_queues` liefen weiter und wurden fertig
+  gebaut. Auch der Komplett-Reset ließ sie (und jetzt Gegenstände und
+  Booster) stehen, weil dort die Fremdschlüssel abgeschaltet sind. Tests mit
+  Gegenprobe; der Komplett-Reset hat jetzt einen MariaDB-Test.
 
 Offen:
 

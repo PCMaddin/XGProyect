@@ -40,6 +40,7 @@ class GameController extends BaseController
         'fleet4' => Game\Fleet4Controller::class,
         'galaxy' => Game\GalaxyController::class,
         'highscore' => Game\HighscoreController::class,
+        'items' => Game\ItemsController::class,
         'logout' => Game\LogoutController::class,
         'messages' => Game\MessagesController::class,
         'movement' => Game\MovementController::class,
