@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\PlayerClassService;
 use App\Support\FleetShips;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
@@ -89,8 +90,9 @@ class Spy extends Missions
      */
     private function espionageLevel(array $user): int
     {
+        // members of a warrior alliance spy with 1 more level
         return $this->officerService->getMaxEspionage(
-            self::int($user['research_espionage_technology']),
+            self::int($user['research_espionage_technology']) + PlayerClassService::bonusesFromRow($user)->espionageBonus(),
             $this->officerService->isOfficerActive(self::int($user['premium_officier_technocrat']), time())
         );
     }

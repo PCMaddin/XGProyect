@@ -96,12 +96,12 @@ class Fleet1Controller extends BaseController
                 'max_fleets' => $this->fleetsService->getMaxFleets(
                     $this->research->getCurrentResearch()->research_computer_technology,
                     $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
-                    app(PlayerClassService::class)->current()
+                    app(PlayerClassService::class)->currentBonuses()
                 ),
                 'expeditions' => $this->fleets->getExpeditionsCount(),
                 'max_expeditions' => $this->fleetsService->getMaxExpeditions(
                     $this->research->getCurrentResearch()->research_astrophysics,
-                    app(PlayerClassService::class)->current()
+                    app(PlayerClassService::class)->currentBonuses()
                 ),
                 'no_slot' => $this->buildNoSlotBlock(),
                 'list_of_ships' => $listOfShips,
@@ -163,13 +163,13 @@ class Fleet1Controller extends BaseController
                 'ships_input' => $this->buildShipsInput($shipId) ?? '-',
                 'ship_id' => $shipId,
                 'max_ships' => $amount,
-                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
-                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
+                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses()),
+                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses()),
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->research_hyperspace_technology,
                     $shipId,
-                    app(PlayerClassService::class)->current()
+                    app(PlayerClassService::class)->currentBonuses()
                 ),
             ];
         }
@@ -180,7 +180,7 @@ class Fleet1Controller extends BaseController
     private function buildShipName(string $shipName, int $shipId): string
     {
         $title = __('game/fleet.fl_speed_title')
-            . $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current());
+            . $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses());
 
         return $this->formatService->link('', (string) __('game/ships.' . $shipName), $title);
     }
@@ -235,7 +235,7 @@ class Fleet1Controller extends BaseController
         return $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
             $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         ) > $this->fleets->getFleetsCount();
     }
 

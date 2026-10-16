@@ -100,9 +100,10 @@ class ResourcesettingsController extends BaseController
 
         $basicIncome = $this->basicIncome($settings);
 
-        $storageMetalMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_METAL] ?? ''));
-        $storageCrystalMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_CRYSTAL] ?? ''));
-        $storageDeuteriumMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_DEUTERIUM] ?? ''));
+        $storageFactor = app(PlayerClassService::class)->currentBonuses()->storageFactor();
+        $storageMetalMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_METAL] ?? ''), $storageFactor);
+        $storageCrystalMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_CRYSTAL] ?? ''), $storageFactor);
+        $storageDeuteriumMax = $this->productionService->maxStorable($this->planetInt($this->resource[self::STORAGE_DEUTERIUM] ?? ''), $storageFactor);
 
         // The current production percentage is based on the planet's stored
         // energy balance before the per-building recomputation below.
@@ -261,7 +262,7 @@ class ResourcesettingsController extends BaseController
     private function classExtras(array $minePerHour, float $energyBase, bool $geologist): array
     {
         $service = app(ClassProductionService::class);
-        $class = app(PlayerClassService::class)->current();
+        $class = app(PlayerClassService::class)->currentBonuses();
         $mineLevels = $this->planetInt('building_metal_mine') + $this->planetInt('building_crystal_mine') + $this->planetInt('building_deuterium_sintetizer');
         $all = $service->extras($minePerHour, $energyBase, $this->planetInt('ship_crawler'), $mineLevels, $this->planetInt('planet_ship_crawler_percent'), $class, $geologist);
         $classOnly = $service->extras($minePerHour, $energyBase, 0, $mineLevels, 0, $class, $geologist);

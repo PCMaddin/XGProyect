@@ -231,6 +231,9 @@ class ScrapMerchantService
         $level = $planet[self::STORAGES[$resource]] ?? 0;
         $stored = $planet['planet_' . $resource] ?? 0;
 
-        return max(0, $this->productionService->maxStorable(is_numeric($level) ? (int) $level : 0) - (int) floor(is_numeric($stored) ? (float) $stored : 0));
+        $owner = $planet['planet_user_id'] ?? 0;
+        $factor = app(PlayerClassService::class)->bonusesOf(is_numeric($owner) ? (int) $owner : 0)->storageFactor();
+
+        return max(0, $this->productionService->maxStorable(is_numeric($level) ? (int) $level : 0, $factor) - (int) floor(is_numeric($stored) ? (float) $stored : 0));
     }
 }

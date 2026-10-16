@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Game\Formulas;
 
-use App\Enums\PlayerClass;
+use App\Support\ClassBonuses;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Enums\Game\DriveType;
@@ -51,12 +51,12 @@ class FleetsService
      *
      * @return array<int, float> Ship ID => effective speed
      */
-    public function fleetMaxSpeed(array $fleet, int $combustion, int $impulse, int $hyperspace, PlayerClass $class = PlayerClass::None): array
+    public function fleetMaxSpeed(array $fleet, int $combustion, int $impulse, int $hyperspace, ClassBonuses $bonuses = new ClassBonuses()): array
     {
         $speeds = [];
 
         foreach ($fleet as $shipId => $count) {
-            $speeds[$shipId] = $this->getShipSpeed($shipId, $combustion, $impulse, $hyperspace, $class);
+            $speeds[$shipId] = $this->getShipSpeed($shipId, $combustion, $impulse, $hyperspace, $bonuses);
         }
 
         return $speeds;
@@ -66,7 +66,7 @@ class FleetsService
      * The speed of a ship with the drives of the player; collectors and
      * generals fly some ships twice as fast (PlayerClass::speedFactor).
      */
-    public function getShipSpeed(int $shipId, int $combustion, int $impulse, int $hyperspace, PlayerClass $class = PlayerClass::None): float
+    public function getShipSpeed(int $shipId, int $combustion, int $impulse, int $hyperspace, ClassBonuses $bonuses = new ClassBonuses()): float
     {
         if ($shipId === 0) {
             return 0.0;
@@ -90,13 +90,13 @@ class FleetsService
 
         $techLevel = $this->techLevelFor($activeDrive, $combustion, $impulse, $hyperspace);
 
-        return ($baseSpeed + ($baseSpeed * $techLevel * $activeDrive->speedBonus())) * $class->speedFactor($shipId);
+        return ($baseSpeed + ($baseSpeed * $techLevel * $activeDrive->speedBonus())) * $bonuses->speedFactor($shipId);
     }
 
     /**
      * The deuterium a ship uses; generals use a quarter less.
      */
-    public function shipConsumption(int $shipId, int $combustion, int $impulse, int $hyperspace, PlayerClass $class = PlayerClass::None): int
+    public function shipConsumption(int $shipId, int $combustion, int $impulse, int $hyperspace, ClassBonuses $bonuses = new ClassBonuses()): int
     {
         /** @var Ship $ship */
         $ship = $this->registry->get($shipId);
@@ -111,7 +111,7 @@ class FleetsService
 
         $consumption = $drive->usesUpgradedSpeed($secondaryTech, $tertiaryTech) ? $ship->getConsumption2() : $ship->getConsumption();
 
-        return (int) round($consumption * $class->consumptionFactor());
+        return (int) round($consumption * $bonuses->consumptionFactor());
     }
 
     private function techLevelFor(DriveType $drive, int $combustion, int $impulse, int $hyperspace): int
@@ -127,14 +127,14 @@ class FleetsService
     /**
      * @param array<int, int> $fleetArray Ship ID => count
      */
-    public function fleetConsumption(array $fleetArray, int $speedFactor, int $missionDuration, int $missionDistance, int $combustion, int $impulse, int $hyperspace, PlayerClass $class = PlayerClass::None): float
+    public function fleetConsumption(array $fleetArray, int $speedFactor, int $missionDuration, int $missionDistance, int $combustion, int $impulse, int $hyperspace, ClassBonuses $bonuses = new ClassBonuses()): float
     {
         $consumption = 0;
 
         foreach ($fleetArray as $shipId => $count) {
             if ($shipId > 0) {
-                $shipSpeed = $this->getShipSpeed($shipId, $combustion, $impulse, $hyperspace, $class);
-                $shipCons = $this->shipConsumption($shipId, $combustion, $impulse, $hyperspace, $class);
+                $shipSpeed = $this->getShipSpeed($shipId, $combustion, $impulse, $hyperspace, $bonuses);
+                $shipCons = $this->shipConsumption($shipId, $combustion, $impulse, $hyperspace, $bonuses);
                 $spd = 35000 / ($missionDuration * $speedFactor - 10) * sqrt($missionDistance * 10 / $shipSpeed);
 
                 $basicConsumption = $spd + $count * $shipCons * pow((($spd / 10) + 1), 2);
@@ -145,14 +145,14 @@ class FleetsService
         return round($consumption);
     }
 
-    public function getMaxFleets(int $computerTech, bool $admiralActive, PlayerClass $class = PlayerClass::None): int
+    public function getMaxFleets(int $computerTech, bool $admiralActive, ClassBonuses $bonuses = new ClassBonuses()): int
     {
-        return 1 + $computerTech + ($admiralActive ? AMIRAL : 0) + $class->extraFleetSlots();
+        return 1 + $computerTech + ($admiralActive ? AMIRAL : 0) + $bonuses->extraFleetSlots();
     }
 
-    public function getMaxExpeditions(int $astrophysicsTech, PlayerClass $class = PlayerClass::None): int
+    public function getMaxExpeditions(int $astrophysicsTech, ClassBonuses $bonuses = new ClassBonuses()): int
     {
-        return (int) floor(sqrt($astrophysicsTech)) + $class->extraExpeditions();
+        return (int) floor(sqrt($astrophysicsTech)) + $bonuses->extraExpeditions();
     }
 
     public function getMaxColonies(int $astrophysicsTech): int
@@ -164,9 +164,9 @@ class FleetsService
      * The cargo of a ship: +5 % per hyperspace technology level, and the
      * class bonus of the ship (PlayerClass::cargoBonus).
      */
-    public function getMaxStorage(int $shipStorage, int $hyperspaceTechLevel, int $shipId = 0, PlayerClass $class = PlayerClass::None): int
+    public function getMaxStorage(int $shipStorage, int $hyperspaceTechLevel, int $shipId = 0, ClassBonuses $bonuses = new ClassBonuses()): int
     {
-        return intval($shipStorage + ($shipStorage * (0.05 * $hyperspaceTechLevel + $class->cargoBonus($shipId))));
+        return intval($shipStorage + ($shipStorage * (0.05 * $hyperspaceTechLevel + $bonuses->cargoBonus($shipId))));
     }
 
     public function isFleetReturning(string | int $fleetMess): bool

@@ -161,11 +161,12 @@ class TechnologyTableService
     {
         $currentBuiltLevel = self::asInt($this->planet[$this->registry->get($this->elementId)->getName()] ?? 0);
         $buildStartLevel = max(1, $currentBuiltLevel - 2);
-        $actualProduction = $this->productionService->maxStorable($currentBuiltLevel);
+        $factor = PlayerClassService::bonusesFromRow($this->user)->storageFactor();
+        $actualProduction = $this->productionService->maxStorable($currentBuiltLevel, $factor);
         $rows = [];
 
         for ($buildLevel = $buildStartLevel; $buildLevel < $buildStartLevel + 15; ++$buildLevel) {
-            $production = $this->productionService->maxStorable($buildLevel);
+            $production = $this->productionService->maxStorable($buildLevel, $factor);
 
             $rows[] = [
                 $currentBuiltLevel === $buildLevel ? '<font color="#ff0000">' . $buildLevel . '</font>' : (string) $buildLevel,

@@ -135,7 +135,7 @@ class Recycle extends Missions
                 self::int($this->pricelist[$id]['capacity']),
                 self::int($fleetRow['research_hyperspace_technology']),
                 (int) $id,
-                app(PlayerClassService::class)->classOf(self::int($fleetRow['fleet_owner']))
+                app(PlayerClassService::class)->bonusesOf(self::int($fleetRow['fleet_owner']))
             );
 
             if ($id == 209) {

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Game;
 
 use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Enums\AllianceClass;
 use App\Enums\PlayerClass;
+use App\Support\ClassBonuses;
 use App\Libraries\Users;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,9 @@ class PlayerClassService
 {
     /** @var array<int, PlayerClass> */
     private array $classes = [];
+
+    /** @var array<int, ClassBonuses> */
+    private array $bonuses = [];
 
     public function __construct(private SettingsService $settings)
     {
@@ -41,6 +46,42 @@ class PlayerClassService
         $user = Users::getInstance()->getUserData();
 
         return PlayerClass::fromInt($user['player_class'] ?? 0);
+    }
+
+    /**
+     * The bonuses of a player's class and of their alliance's class.
+     */
+    public function bonusesOf(int $userId): ClassBonuses
+    {
+        return $this->bonuses[$userId] ??= new ClassBonuses(
+            $this->classOf($userId),
+            AllianceClass::fromInt(
+                DB::table('users AS u')
+                    ->join('alliance AS a', 'a.alliance_id', '=', 'u.ally_id')
+                    ->where('u.id', $userId)
+                    ->value('a.alliance_class')
+            )
+        );
+    }
+
+    /**
+     * The bonuses of the logged-in player.
+     */
+    public function currentBonuses(): ClassBonuses
+    {
+        $user = Users::getInstance()->getUserData();
+
+        return self::bonusesFromRow($user);
+    }
+
+    /**
+     * The bonuses from a user row with player_class and alliance_class.
+     *
+     * @param array<string, mixed> $user
+     */
+    public static function bonusesFromRow(array $user): ClassBonuses
+    {
+        return new ClassBonuses(PlayerClass::fromInt($user['player_class'] ?? 0), AllianceClass::fromInt($user['alliance_class'] ?? 0));
     }
 
     public function changePrice(): int
@@ -76,6 +117,7 @@ class PlayerClassService
             DB::table('users')->where('id', $userId)->update(['player_class' => $class->value]);
             $this->adjustMoonFields($userId, $class->moonFieldBonus() - $current->moonFieldBonus());
             $this->classes[$userId] = $class;
+            unset($this->bonuses[$userId]);
 
             return null;
         });

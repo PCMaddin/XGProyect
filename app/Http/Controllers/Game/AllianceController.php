@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Enums\AllianceClass;
 use App\Enums\Module;
+use App\Services\Game\AllianceClassService;
 use App\Services\Game\AllianceRankService;
 use App\Services\FormatService;
 use App\Services\TimingService;
@@ -40,6 +42,13 @@ class AllianceController extends BaseController
     use PreparesSql;
 
     private const DEFAULT_RANKS = ['founder' => 0, 'newcomer' => 1];
+
+    /** the language keys of each alliance class's bonuses */
+    private const CLASS_BONUSES = [
+        1 => ['al_class_bonus_cargo_speed', 'al_class_bonus_production', 'al_class_bonus_storage'],
+        2 => ['al_class_bonus_planet_size', 'al_class_bonus_expedition_speed'],
+        3 => ['al_class_bonus_ally_speed', 'al_class_bonus_combat_tech', 'al_class_bonus_espionage'],
+    ];
 
     private const ALLIANCE_ASSET = 'assets/upload/skins/xgproyect/alliance/';
 
@@ -88,6 +97,7 @@ class AllianceController extends BaseController
     {
         $sections = [
             'ally' => AllianceRanks::ADMINISTRATION,
+            'class' => AllianceRanks::ADMINISTRATION,
             'exit' => AllianceRanks::DELETE,
             'members' => AllianceRanks::ADMINISTRATION,
             'name' => AllianceRanks::ADMINISTRATION,
@@ -105,6 +115,7 @@ class AllianceController extends BaseController
 
         return match ($edit) {
             'ally' => $this->adminAllySection($request),
+            'class' => $this->adminClassSection($request),
             'exit' => $this->adminExitSection($request),
             'members' => $this->adminMembersSection($request),
             'name' => $this->adminNameSection($request),
@@ -203,6 +214,47 @@ class AllianceController extends BaseController
         );
 
         return redirect('game.php?page=alliance&mode=admin&edit=ally&t=' . $tab);
+    }
+
+    /**
+     * Choose the alliance class (OGame 7): the first choice is free, a
+     * change costs the administrator dark matter.
+     */
+    private function adminClassSection(Request $request): View | RedirectResponse
+    {
+        $classes = app(AllianceClassService::class);
+        $allianceId = $this->userInt('ally_id');
+        $error = '';
+
+        if ($request->isMethod('post')) {
+            $result = $classes->choose($allianceId, $this->userInt('id'), AllianceClass::fromInt($request->integer('class')));
+
+            if ($result === null) {
+                return redirect('game.php?page=alliance&mode=admin&edit=class')->with('alliance_class_success', (string) __('game/alliance.al_class_chosen'));
+            }
+
+            $error = (string) __('game/alliance.' . $result);
+        }
+
+        $current = $classes->classOf($allianceId);
+        $success = session('alliance_class_success');
+
+        return view('alliance.admin.class', [
+            'color' => $error !== '' ? '#ff0000' : (is_string($success) ? 'lime' : ''),
+            'message' => $error !== '' ? $error : (is_string($success) ? $success : ''),
+            'current' => $current->value,
+            'price' => $current === AllianceClass::None
+                ? (string) __('game/alliance.al_class_first_free')
+                : sprintf((string) __('game/alliance.al_class_change_price'), $this->formatService->prettyNumber($classes->changePrice())),
+            'classes' => array_map(fn (AllianceClass $class): array => [
+                'value' => $class->value,
+                'name' => (string) __('game/alliance.' . $class->nameKey()),
+                'bonuses' => array_map(
+                    fn (string $key): string => (string) __('game/alliance.' . $key),
+                    self::CLASS_BONUSES[$class->value]
+                ),
+            ], [AllianceClass::Trader, AllianceClass::Researcher, AllianceClass::Warrior]),
+        ]);
     }
 
     private function adminExitSection(Request $request): RedirectResponse
@@ -837,6 +889,7 @@ class AllianceController extends BaseController
             $this->nameBlock(),
             $this->membersBlock(),
             $this->rankBlock(),
+            $this->classBlock(),
             $this->requestsBlock(),
             $this->circularBlock(),
         ];
@@ -1281,6 +1334,24 @@ class AllianceController extends BaseController
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_members'),
             'detail_content' => $this->asString($this->alliance->getCurrentAlliance()->alliance_members) . $link,
+        ];
+    }
+
+    /**
+     * @return array{detail_title: string, detail_content: string}
+     */
+    private function classBlock(): array
+    {
+        $class = AllianceClass::fromInt($this->alliance->getCurrentAlliance()->alliance_class);
+        $content = e((string) __('game/alliance.' . $class->nameKey()));
+
+        if ($this->alliance->hasAccess(AllianceRanks::ADMINISTRATION)) {
+            $content .= ' (' . $this->formatService->link('game.php?page=alliance&mode=admin&edit=class', (string) __('game/alliance.al_class_choose')) . ')';
+        }
+
+        return [
+            'detail_title' => (string) __('game/alliance.al_class'),
+            'detail_content' => $content,
         ];
     }
 

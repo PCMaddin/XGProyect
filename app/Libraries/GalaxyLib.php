@@ -6,6 +6,7 @@ namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
 use App\Enums\PlayerClass;
+use App\Services\Game\PlayerClassService;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
@@ -206,7 +207,7 @@ class GalaxyLib
             $this->recyclerCapacity,
             self::asInt($this->user['research_hyperspace_technology'] ?? 0),
             Ships::SHIP_RECYCLER,
-            PlayerClass::fromInt($this->user['player_class'] ?? 0)
+            PlayerClassService::bonusesFromRow($this->user)
         );
         $recyclerStorage = $recyclerStorage === 0 ? 1 : $recyclerStorage;
 

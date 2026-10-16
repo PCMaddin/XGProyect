@@ -146,7 +146,7 @@ class Fleet2Controller extends BaseController
             }
 
             $amount = min($requested, $available);
-            $speed = $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current());
+            $speed = $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses());
 
             $this->fleetData['fleet_array'][$shipId] = $amount;
             $this->fleetData['fleet_list'] .= $shipId . ',' . $amount . ';';
@@ -155,13 +155,13 @@ class Fleet2Controller extends BaseController
 
             $list[] = [
                 'ship_id' => $shipId,
-                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
+                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses()),
                 'speed' => $speed,
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->research_hyperspace_technology,
                     $shipId,
-                    app(PlayerClassService::class)->current()
+                    app(PlayerClassService::class)->currentBonuses()
                 ),
                 'ship' => $amount,
             ];

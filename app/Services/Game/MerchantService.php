@@ -176,7 +176,7 @@ class MerchantService
             }
 
             foreach ($amounts as $buy => $amount) {
-                $storage = $this->productionService->maxStorable((int) $row[self::STORAGES[$buy]]);
+                $storage = $this->productionService->maxStorable((int) $row[self::STORAGES[$buy]], app(PlayerClassService::class)->bonusesOf($userId)->storageFactor());
 
                 if ((float) $row['planet_' . $buy] + $amount > $storage) {
                     return ['tr_no_enough_storage_for', $buy];

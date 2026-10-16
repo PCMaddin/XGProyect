@@ -315,7 +315,7 @@ class Fleet4Controller extends BaseController
                 ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                 $this->research->getCurrentResearch()->research_hyperspace_technology,
                 $shipId,
-                app(PlayerClassService::class)->current()
+                app(PlayerClassService::class)->currentBonuses()
             ) * $amount;
             $this->fleetShips[$column] = $amount;
         }
@@ -426,7 +426,7 @@ class Fleet4Controller extends BaseController
     {
         $maxExpeditions = $this->fleetsService->getMaxExpeditions(
             $this->research->getCurrentResearch()->research_astrophysics,
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         );
 
         if ($maxExpeditions <= 0) {
@@ -469,7 +469,7 @@ class Fleet4Controller extends BaseController
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->research->getCurrentResearch()->research_computer_technology,
             $this->officerService->isOfficerActive($this->premium->getCurrentPremium()->premium_officier_admiral, time()),
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         );
 
         if ($maxFleets <= $this->fleets->getFleetsCount()) {
@@ -520,7 +520,7 @@ class Fleet4Controller extends BaseController
     {
         $duration = (int) floor($this->fleetsService->missionDuration(
             $this->sessionInt('speed'),
-            $this->sessionFloat('fleet_speed'),
+            $this->sessionFloat('fleet_speed') * $this->classSpeedFactor(),
             $this->sessionInt('distance'),
             Functions::fleetSpeedFactor()
         ));
@@ -552,6 +552,27 @@ class Fleet4Controller extends BaseController
         $this->fleetData['fleet_end_stay'] = $stayTime;
 
         return true;
+    }
+
+    /**
+     * Alliance classes: researchers fly expeditions 10 % faster, warriors
+     * fly 10 % faster to the planets of their alliance's members.
+     */
+    private function classSpeedFactor(): float
+    {
+        $bonuses = PlayerClassService::bonusesFromRow($this->user);
+
+        if ($this->cleanInput['mission'] === Missions::EXPEDITION) {
+            return $bonuses->expeditionSpeedFactor();
+        }
+
+        $allyId = $this->userInt('ally_id');
+
+        if ($allyId !== 0 && !$this->ownPlanet && $this->asInt($this->targetData['ally_id'] ?? 0) === $allyId) {
+            return $bonuses->allySpeedFactor();
+        }
+
+        return 1.0;
     }
 
     /**

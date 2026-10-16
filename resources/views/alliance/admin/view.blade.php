@@ -13,6 +13,9 @@
         <th colspan="2"><a href="game.php?page=alliance&mode=admin&edit=members">{{ __('game/alliance.al_manage_members') }}</a></th>
     </tr>
     <tr>
+        <th colspan="2"><a href="game.php?page=alliance&mode=admin&edit=class">{{ __('game/alliance.al_class_title') }}</a></th>
+    </tr>
+    <tr>
         <th colspan="2">
             <a href="game.php?page=alliance&mode=admin&edit=tag">
             <img src="{{ asset('assets/upload/skins/xgproyect/alliance/appwiz.gif') }}" border="0" alt="{{ __('game/alliance.al_manage_change_tag') }}"/>

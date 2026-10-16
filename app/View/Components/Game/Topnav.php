@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\View\Components\Game;
 
+use App\Services\Game\PlayerClassService;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\FormatService;
@@ -52,15 +53,17 @@ class Topnav extends Component
             $planet->planet_energy_max + $planet->planet_energy_used
         ) . ' / ' . $this->formatService->prettyNumber($planet->planet_energy_max);
 
-        if ($planet->planet_metal >= $this->productionService->maxStorable((int) ($planet->building_metal_store ?? 0))) {
+        $storageFactor = app(PlayerClassService::class)->bonusesOf($user->id)->storageFactor();
+
+        if ($planet->planet_metal >= $this->productionService->maxStorable((int) ($planet->building_metal_store ?? 0), $storageFactor)) {
             $metal = $this->formatService->colorRed($metal);
         }
 
-        if ($planet->planet_crystal >= $this->productionService->maxStorable((int) ($planet->building_crystal_store ?? 0))) {
+        if ($planet->planet_crystal >= $this->productionService->maxStorable((int) ($planet->building_crystal_store ?? 0), $storageFactor)) {
             $crystal = $this->formatService->colorRed($crystal);
         }
 
-        if ($planet->planet_deuterium >= $this->productionService->maxStorable((int) ($planet->building_deuterium_tank ?? 0))) {
+        if ($planet->planet_deuterium >= $this->productionService->maxStorable((int) ($planet->building_deuterium_tank ?? 0), $storageFactor)) {
             $deuterium = $this->formatService->colorRed($deuterium);
         }
 

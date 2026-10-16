@@ -6,7 +6,7 @@ namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\ClassProductionService;
-use App\Enums\PlayerClass;
+use App\Services\Game\PlayerClassService;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
@@ -294,9 +294,10 @@ class UpdatesLibrary
             $game_deuterium_basic_income = 0;
         }
 
-        $current_planet['planet_metal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[22]]));
-        $current_planet['planet_crystal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[23]]));
-        $current_planet['planet_deuterium_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[24]]));
+        $storageFactor = PlayerClassService::bonusesFromRow($current_user)->storageFactor();
+        $current_planet['planet_metal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[22]]), $storageFactor);
+        $current_planet['planet_crystal_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[23]]), $storageFactor);
+        $current_planet['planet_deuterium_max'] = $productionService->maxStorable(self::numInt($current_planet[$resource[24]]), $storageFactor);
 
         $MaxMetalStorage = self::num($current_planet['planet_metal_max']);
         $MaxCristalStorage = self::num($current_planet['planet_crystal_max']);
@@ -423,7 +424,7 @@ class UpdatesLibrary
             self::numInt($current_planet['ship_crawler'] ?? 0),
             self::numInt($current_planet['building_metal_mine'] ?? 0) + self::numInt($current_planet['building_crystal_mine'] ?? 0) + self::numInt($current_planet['building_deuterium_sintetizer'] ?? 0),
             self::numInt($current_planet['planet_ship_crawler_percent'] ?? 10),
-            PlayerClass::fromInt($current_user['player_class'] ?? 0),
+            PlayerClassService::bonusesFromRow($current_user),
             $officerService->isOfficerActive(self::numInt($current_user['premium_officier_geologist'] ?? 0), time())
         );
         $Caps['planet_metal_perhour'] += $extras['metal'];

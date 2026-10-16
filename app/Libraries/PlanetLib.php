@@ -39,9 +39,10 @@ class PlanetLib
         $formulas = app(FormulasService::class);
         $planet = $formulas->getPlanetSize($position, $main);
 
-        // discoverers colonize 10 % larger planets (fields grow with the area)
+        // discoverers colonize 10 % larger planets, members of a researcher
+        // alliance 5 % larger (fields grow with the area)
         if (!$main) {
-            $factor = app(PlayerClassService::class)->classOf($owner)->planetSizeFactor();
+            $factor = app(PlayerClassService::class)->bonusesOf($owner)->planetSizeFactor();
             $planet['planet_diameter'] = (int) floor($planet['planet_diameter'] * $factor);
             $planet['planet_field_max'] = (int) floor($planet['planet_field_max'] * $factor * $factor);
         }

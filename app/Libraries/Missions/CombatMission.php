@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use App\Services\Game\FleetEventsService;
-use App\Enums\PlayerClass;
+use App\Support\ClassBonuses;
 use App\Support\FleetShips;
 use App\Libraries\Functions;
 use App\Libraries\UpdatesLibrary;
@@ -295,7 +295,7 @@ abstract class CombatMission extends Missions
                         self::int($this->pricelist[$shipId]['capacity']),
                         $this->hyperspaceTechnology[$playerId] ?? 0,
                         (int) $shipId,
-                        $this->playerClasses[$playerId] ?? PlayerClass::None
+                        $this->playerClasses[$playerId] ?? new ClassBonuses()
                     );
                 }
             }
@@ -394,7 +394,7 @@ abstract class CombatMission extends Missions
             self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity,
             self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity,
             self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity,
-            $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? PlayerClass::None)->inactiveLootShare() : 0.5
+            $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? new ClassBonuses())->player->inactiveLootShare() : 0.5
         );
     }
 

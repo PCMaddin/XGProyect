@@ -29,6 +29,7 @@ use App\Libraries\UpdatesLibrary;
  * @SuppressWarnings("PHPMD.TooManyMethods")
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ * @SuppressWarnings("PHPMD.ExcessiveClassLength")
  */
 class Missions
 {
@@ -275,11 +276,13 @@ class Missions
             'SELECT u.*,
                         r.*,
                         pr.*,
-                        pref.preference_vacation_mode
+                        pref.preference_vacation_mode,
+                        a.alliance_class
                     FROM `' . USERS . '` AS u
                     INNER JOIN `' . RESEARCH . '` AS r ON r.research_user_id = u.id
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.premium_user_id = u.id
                     INNER JOIN `' . PREFERENCES . '` AS pref ON pref.preference_user_id = u.id
+                    LEFT JOIN `' . ALLIANCE . '` AS a ON a.alliance_id = u.ally_id
                     WHERE u.`id` = ?
                     LIMIT 1;',
             [$userId]
@@ -390,6 +393,8 @@ class Missions
         return $this->selectRow(
             'SELECT u.name,
                         u.player_class,
+                        u.ally_id,
+                        a.alliance_class,
                         r.research_weapons_technology,
                         r.research_shielding_technology,
                         r.research_armour_technology,
@@ -397,6 +402,7 @@ class Missions
                     FROM ' . USERS . ' AS u
                     INNER JOIN `' . RESEARCH . '` AS r
                         ON r.research_user_id = u.id
+                    LEFT JOIN `' . ALLIANCE . '` AS a ON a.alliance_id = u.ally_id
                     WHERE u.id = ?;',
             [$userId]
         );
@@ -889,11 +895,13 @@ class Missions
                         p.`planet_planet`,
                         u.`name`,
                         r.`research_espionage_technology`,
-                        pr.`premium_officier_technocrat`
+                        pr.`premium_officier_technocrat`,
+                        a.`alliance_class`
                     FROM `' . PLANETS . '` AS p
                     INNER JOIN `' . USERS . '` AS u ON u.`id` = p.`planet_user_id`
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.`premium_user_id` = p.`planet_user_id`
                     INNER JOIN `' . RESEARCH . '` AS r ON r.`research_user_id` = p.`planet_user_id`
+                    LEFT JOIN `' . ALLIANCE . '` AS a ON a.`alliance_id` = u.`ally_id`
                     WHERE p.`planet_galaxy` = ? AND
                         p.`planet_system` = ? AND
                         p.`planet_planet` = ? AND
@@ -922,7 +930,8 @@ class Missions
                         p.`planet_deuterium`,
                         p.`planet_energy_max`,
                         s.*, d.*, b.*, r.*,
-                        pr.`premium_officier_technocrat`
+                        pr.`premium_officier_technocrat`,
+                        a.`alliance_class`
                     FROM `' . PLANETS . '` AS p
                     INNER JOIN `' . SHIPS . '` AS s ON s.`ship_planet_id` = p.`planet_id`
                     INNER JOIN `' . DEFENSES . '` AS d ON d.`defense_planet_id` = p.`planet_id`
@@ -930,6 +939,7 @@ class Missions
                     INNER JOIN `' . USERS . '` AS u ON u.`id` = p.`planet_user_id`
                     INNER JOIN `' . PREMIUM . '` AS pr ON pr.`premium_user_id` = p.`planet_user_id`
                     INNER JOIN `' . RESEARCH . '` AS r ON r.`research_user_id` = p.`planet_user_id`
+                    LEFT JOIN `' . ALLIANCE . '` AS a ON a.`alliance_id` = u.`ally_id`
                     WHERE p.`planet_galaxy` = ? AND
                         p.`planet_system` = ? AND
                         p.`planet_planet` = ? AND

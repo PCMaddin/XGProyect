@@ -128,7 +128,7 @@ class GalaxyController extends BaseController
             'fleetmax' => $this->fleetsService->getMaxFleets(
                 $this->userInt('research_computer_technology'),
                 $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
-                app(PlayerClassService::class)->current()
+                app(PlayerClassService::class)->currentBonuses()
             ),
             'recyclers' => $this->formatService->prettyNumber($this->planetInt('ship_recycler')),
             'spyprobes' => $this->formatService->prettyNumber($this->planetInt('ship_espionage_probe')),
@@ -523,7 +523,7 @@ class GalaxyController extends BaseController
         $maxFleets = $this->fleetsService->getMaxFleets(
             $this->userInt('research_computer_technology'),
             $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), time()),
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         );
 
         if ($maxFleets <= $currentFleets) {
@@ -669,7 +669,7 @@ class GalaxyController extends BaseController
             $this->userInt('research_combustion_drive'),
             $this->userInt('research_impulse_drive'),
             $this->userInt('research_hyperspace_drive'),
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         );
         $minSpeed = $speeds === [] ? 0.0 : (float) min($speeds);
         $duration = (int) $this->fleetsService->missionDuration(10, $minSpeed, $distance, Functions::fleetSpeedFactor());
@@ -840,7 +840,7 @@ class GalaxyController extends BaseController
 
     private function shipConsumption(int $itemId): int
     {
-        return (int) round(($this->registry->findShip($itemId)?->getConsumption() ?? 0) * app(PlayerClassService::class)->current()->consumptionFactor());
+        return (int) round(($this->registry->findShip($itemId)?->getConsumption() ?? 0) * app(PlayerClassService::class)->currentBonuses()->consumptionFactor());
     }
 
     private function queryInt(Request $request, string $key): int

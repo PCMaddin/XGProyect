@@ -7,6 +7,7 @@ namespace App\Libraries\Missions;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Enums\PlayerClass;
+use App\Support\ClassBonuses;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
@@ -36,6 +37,9 @@ class Expedition extends Missions
     /** the class of the fleet's owner */
     private PlayerClass $owner = PlayerClass::None;
 
+    /** the bonuses of the owner's class and alliance class */
+    private ClassBonuses $bonuses;
+
     /** the espionage probe, which reports how busy the area is */
     private const PROBE = 210;
 
@@ -46,6 +50,7 @@ class Expedition extends Missions
         private ExpeditionAreaService $areas,
     ) {
         parent::__construct();
+        $this->bonuses = new ClassBonuses();
     }
 
     /**
@@ -54,7 +59,8 @@ class Expedition extends Missions
     public function expeditionMission(array $fleet): void
     {
         if (parent::canStartMission($fleet)) {
-            $this->owner = app(PlayerClassService::class)->classOf(self::int($fleet['fleet_owner']));
+            $this->bonuses = app(PlayerClassService::class)->bonusesOf(self::int($fleet['fleet_owner']));
+            $this->owner = $this->bonuses->player;
             $this->setExpeditionPoints($fleet);
 
             match ($this->result($fleet)) {
@@ -171,7 +177,7 @@ class Expedition extends Missions
                 $ship->getCapacity(),
                 self::int($fleet['research_hyperspace_technology']),
                 $id,
-                $this->owner
+                $this->bonuses
             ) * $count;
         }
 

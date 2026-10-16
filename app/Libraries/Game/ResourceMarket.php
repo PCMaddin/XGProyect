@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Game;
 
+use App\Services\Game\PlayerClassService;
 use App\Support\Concerns\HydratesModels;
 use App\Services\Game\Formulas\ProductionService;
 use App\Models\Buildings;
@@ -27,6 +28,9 @@ class ResourceMarket
 
     private Buildings $buildings;
 
+    /** traders' alliances store 10 % more */
+    private float $storageFactor;
+
     /**
      * @param  array<string, mixed>  $user
      * @param  array<string, mixed>  $planet
@@ -36,6 +40,7 @@ class ResourceMarket
         $this->premium = self::hydrateRow(Premium::class, $user);
         $this->planet = self::hydrateRow(Planets::class, $planet);
         $this->buildings = self::hydrateRow(Buildings::class, $planet);
+        $this->storageFactor = PlayerClassService::bonusesFromRow($user)->storageFactor();
     }
 
     public function calculateBasePriceToRefill(int $maxStorage, int $baseDm): float
@@ -61,7 +66,7 @@ class ResourceMarket
 
     public function calculateRefillStoragePrice(string $resource, int $percentage, float $currentResources = 0): float
     {
-        $maxStorage = $this->productionService->maxStorable($this->storeLevel($resource));
+        $maxStorage = $this->productionService->maxStorable($this->storeLevel($resource), $this->storageFactor);
         $basePrice = $this->calculateBasePriceToRefill($maxStorage, $this->baseDarkMatter($resource));
 
         if ($maxStorage === 0) {
@@ -88,7 +93,7 @@ class ResourceMarket
 
     public function getProjectedResouces(string $resource, int $percentage): float
     {
-        $amountToFill = $this->productionService->maxStorable($this->storeLevel($resource)) * $percentage / 100;
+        $amountToFill = $this->productionService->maxStorable($this->storeLevel($resource), $this->storageFactor) * $percentage / 100;
 
         if ($percentage !== 100) {
             return $this->planetAmount($resource) + $amountToFill;
@@ -126,7 +131,7 @@ class ResourceMarket
      */
     public function freeStorage(string $resource): float
     {
-        return $this->productionService->maxStorable($this->storeLevel($resource)) - $this->planetAmount($resource);
+        return $this->productionService->maxStorable($this->storeLevel($resource), $this->storageFactor) - $this->planetAmount($resource);
     }
 
     private function isStorageFillable(string $resource, int $percentage): bool
@@ -135,12 +140,12 @@ class ResourceMarket
             return false;
         }
 
-        return $this->productionService->maxStorable($this->storeLevel($resource)) >= $this->getProjectedResouces($resource, $percentage);
+        return $this->productionService->maxStorable($this->storeLevel($resource), $this->storageFactor) >= $this->getProjectedResouces($resource, $percentage);
     }
 
     private function isStorageFull(string $resource): bool
     {
-        return $this->productionService->maxStorable($this->storeLevel($resource)) <= $this->planetAmount($resource);
+        return $this->productionService->maxStorable($this->storeLevel($resource), $this->storageFactor) <= $this->planetAmount($resource);
     }
 
     private function planetAmount(string $resource): float

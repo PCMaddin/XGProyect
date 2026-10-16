@@ -1048,6 +1048,29 @@ Nachgezogen:
     Expeditions-Trümmerfelder (Entdecker; kommt mit den Trümmerfeldern an
     Position 16).
   - Tests für alle Boni, Wahl und Wechsel; im Browser durchgespielt.
+- ✅ **Allianzklassen** (OGame 7; `App\Enums\AllianceClass`,
+  `AllianceClassService`, Allianzverwaltung → „Allianzklasse“): Wer die
+  Allianz verwalten darf, wählt die Klasse für alle Mitglieder; die erste
+  Wahl ist kostenlos, ein Wechsel kostet ihn `class_change_price` Dunkle
+  Materie. Die Klasse steht auf der Allianzseite. Spieler- und
+  Allianzklasse laufen jetzt gemeinsam durch `App\Support\ClassBonuses`
+  (Flotten-Formeln, Produktion, Kampf, Spionage, Kolonisieren).
+  - **Händler**: Transporter +10 % Tempo; +5 % Minen- und
+    Energieproduktion; +10 % Lagerkapazität (Rohstoff-Kappung, Anzeigen,
+    Händler, Schrotthändler, Rohstoffmarkt, Technik-Tabelle).
+  - **Forscher**: neue Kolonien 5 % größer (mit dem Entdecker
+    multipliziert); Expeditionen fliegen 10 % schneller.
+  - **Krieger**: +1 Stufe Waffen/Schild/Panzerung im Kampf (mit dem
+    General +3); +1 Stufe Spionagetechnik (beim Spionieren und beim
+    Abwehren); Flüge zu Planeten von Allianzmitgliedern 10 % schneller.
+  - Der Tempobonus für Expeditionen und Allianzflüge wirkt auf die
+    Flugzeit beim Absenden; die Zeitvorschau in Flotte 3 zeigt die Zeit
+    ohne ihn.
+  - **Nicht übernommen**: System-Phalanx und System-Spionage des Forschers
+    bzw. Kriegers (es gibt keine Systemansicht dafür) sowie die
+    Mindestdauer von 14 Tagen vor der ersten Wahl.
+  - Tests für die Boni, Wahl und Wechsel sowie die Verwaltungsseite; im
+    Browser durchgespielt.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

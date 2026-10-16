@@ -138,13 +138,13 @@ class Fleet3Controller extends BaseController
 
             $list[] = [
                 'ship_id' => $shipId,
-                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
-                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current()),
+                'consumption' => $this->fleetsService->shipConsumption($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses()),
+                'speed' => $this->fleetsService->getShipSpeed($shipId, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses()),
                 'capacity' => $this->fleetsService->getMaxStorage(
                     ($this->registry->findShip($shipId)?->getCapacity() ?? 0),
                     $this->research->getCurrentResearch()->research_hyperspace_technology,
                     $shipId,
-                    app(PlayerClassService::class)->current()
+                    app(PlayerClassService::class)->currentBonuses()
                 ),
                 'ship' => min($requested, $available),
             ];
@@ -305,7 +305,7 @@ class Fleet3Controller extends BaseController
 
         $fleet = $this->sessionShips();
         $speedFactor = Functions::fleetSpeedFactor();
-        $fleetSpeed = $this->fleetsService->fleetMaxSpeed($fleet, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->current());
+        $fleetSpeed = $this->fleetsService->fleetMaxSpeed($fleet, $this->driveLevel('combustion'), $this->driveLevel('impulse'), $this->driveLevel('hyperspace'), app(PlayerClassService::class)->currentBonuses());
         $minSpeed = $fleetSpeed === [] ? 0 : (int) min($fleetSpeed);
 
         $consumption = $this->fleetsService->fleetConsumption(
@@ -316,7 +316,7 @@ class Fleet3Controller extends BaseController
             $this->driveLevel('combustion'),
             $this->driveLevel('impulse'),
             $this->driveLevel('hyperspace'),
-            app(PlayerClassService::class)->current()
+            app(PlayerClassService::class)->currentBonuses()
         );
 
         session([
