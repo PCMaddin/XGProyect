@@ -21,6 +21,7 @@ return [
     'hm_error' => 'Achtung!',
     'hm_warning' => 'Warnung!',
     'hm_ok' => 'Ok!',
+    'hm_debug_mode' => 'Der Debug-Modus ist eingeschaltet (APP_DEBUG=true in .env): Fehlerseiten zeigen jedem Besucher Quelltext, Abfragen und Anfragedaten. Setze auf einem öffentlichen Server APP_DEBUG=false und APP_ENV=production.',
     'hm_install_file_detected' => 'Verzeichnis install/ gefunden. Aus Sicherheitsgründen musst du es umbenennen oder löschen.',
     'hm_config_file_writable' => 'Deine Konfigurationsdatei (xgp-db-config.php) ist für alle beschreibbar. Wir empfehlen dringend, die Berechtigungen auf 640 oder mindestens 644 zu setzen.',
     'hm_errors' => 'Auf deinem Server gibt es Fehler. Du kannst sie <a href="/admin/errors">hier</a> ansehen.',

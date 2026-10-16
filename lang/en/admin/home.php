@@ -21,6 +21,7 @@ return [
     'hm_error' => 'Alert!',
     'hm_warning' => 'Warning!',
     'hm_ok' => 'Ok!',
+    'hm_debug_mode' => 'Debug mode is on (APP_DEBUG=true in .env): error pages show source code, queries and request data to every visitor. On a public server set APP_DEBUG=false and APP_ENV=production.',
     'hm_install_file_detected' => 'install/ directory detected. For safety reasons you must rename or delete it.',
     'hm_config_file_writable' => 'Your config file (xgp-db-config.php) is currently world-writable. We strongly encourage you to change the permissions to 640 or at least to 644.',
     'hm_errors' => 'There are errors in your server. You can view them by clicking <a href="/admin/errors">here</a>',

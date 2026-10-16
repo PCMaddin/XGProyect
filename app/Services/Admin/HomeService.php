@@ -29,6 +29,15 @@ class HomeService
         return file_exists(storage_path('logs/xgproyect.log'));
     }
 
+    /**
+     * Debug mode shows stack traces, queries and request data to every
+     * visitor whose request fails; only for local development.
+     */
+    public function isDebugModeOn(): bool
+    {
+        return (bool) config('app.debug');
+    }
+
     public function isInstallFilePresent(): bool
     {
         return file_exists(public_path('install.php'));

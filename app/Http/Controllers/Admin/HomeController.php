@@ -66,6 +66,7 @@ class HomeController extends AdminSettingsController
                 $this->homeService->isConfigFileWorldWritable() ? (string) __('admin/home.hm_config_file_writable') : null,
                 $this->homeService->hasServerErrors() ? (string) __('admin/home.hm_errors') : null,
                 $this->homeService->isVersionOutdated() ? (string) __('admin/home.hm_old_version') : null,
+                $this->homeService->isDebugModeOn() ? (string) __('admin/home.hm_debug_mode') : null,
                 $this->homeService->isInstallFilePresent() ? (string) __('admin/home.hm_install_file_detected') : null,
                 $this->homeService->hasPendingUpdate() ? (string) __('admin/home.hm_update_required') : null,
             ])

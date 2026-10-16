@@ -497,6 +497,13 @@ Baseline-Einträge.
   Key, sonst startet der Installer nicht). **Bestehende Installationen**
   mit dem öffentlichen Key sollten einmalig `php artisan key:generate`
   ausführen (meldet alle Spieler einmal ab).
+- ✅ **Debug-Modus ab Werk** (gefixt): `.env.example`, aus der das
+  Release-Paket installiert wird, hatte `APP_ENV=local` und `APP_DEBUG=true`.
+  Fehlerseiten zeigten damit jedem Besucher Quelltext, SQL-Abfragen und
+  Anfragedaten. Jetzt `APP_ENV=production` und `APP_DEBUG=false` (README
+  erklärt, wie man es lokal einschaltet), und die Admin-Startseite warnt,
+  solange der Debug-Modus an ist. **Bestehende Installationen** sollten in
+  ihrer `.env` beides umstellen. Test.
 - ✅ **Inline-`@phpstan-ignore`** entfernt: 15 Unterdrückungen außerhalb der
   Baseline, jetzt über `ReadsMixedValues` bzw. korrekte Typen gelöst.
 
