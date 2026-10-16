@@ -72,14 +72,15 @@ class Spy extends Missions
             ],
         ]);
 
-        $levelDifference = abs($this->espionageLevel($currentData) - $this->espionageLevel($targetData));
+        $spyLevel = $this->espionageLevel($currentData);
+        $targetLevel = $this->espionageLevel($targetData);
 
         foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $probes) {
             if ($id != self::ESPIONAGE_PROBE) {
                 continue;
             }
 
-            $this->spyWithProbes($fleetRow, $currentData, $targetData, $probes, $levelDifference);
+            $this->spyWithProbes($fleetRow, $currentData, $targetData, $probes, self::reportDepth($spyLevel, $targetLevel, $probes));
         }
     }
 
@@ -99,7 +100,7 @@ class Spy extends Missions
      * @param array<string, mixed> $currentData
      * @param array<string, mixed> $targetData
      */
-    private function spyWithProbes(array $fleetRow, array $currentData, array $targetData, int $probes, int $levelDifference): void
+    private function spyWithProbes(array $fleetRow, array $currentData, array $targetData, int $probes, int $depth): void
     {
         // the report sections are cumulative: resources, + fleet, + defenses, + buildings, + research
         $sections = [];
@@ -145,7 +146,6 @@ class Spy extends Missions
         $attackLink .= '</a></center>';
         $messageEnd = '<center>' . sprintf(__('game/spy.spy_report_detection'), $targetChances) . '</center>';
 
-        $depth = self::reportDepth($levelDifference, $probes);
         $spyMessage = $depth > 0
             ? implode('', array_slice($sections, 0, $depth)) . '<br>' . $attackLink . $messageEnd
             : '';
@@ -181,15 +181,17 @@ class Spy extends Missions
     /**
      * How many report sections the probes reveal (resources, fleet, defenses,
      * buildings, research): the last section whose probe threshold is met.
+     * A stronger spy needs fewer probes, a stronger target more (by the
+     * square of the level difference).
      *
-     * Legacy behaviour, kept as is: the espionage levels are treated as if the
-     * spy were always the stronger side (the original code overwrote both
-     * levels with fixed values right before comparing them), so the
-     * thresholds only ever drop with a growing level difference.
+     * Bugfix: the original code overwrote both levels with fixed values
+     * (100 / 0) right before comparing them, so the spy always counted as the
+     * stronger side and the target's espionage technology never protected it.
      */
-    private static function reportDepth(int $levelDifference, int $probes): int
+    private static function reportDepth(int $spyLevel, int $targetLevel, int $probes): int
     {
-        $shift = -($levelDifference ** 2);
+        $square = ($spyLevel - $targetLevel) ** 2;
+        $shift = $targetLevel >= $spyLevel ? $square : -$square;
         $thresholds = [1, $shift + 2, $shift + 3, $shift + 5, $shift + 7];
 
         $depth = 0;

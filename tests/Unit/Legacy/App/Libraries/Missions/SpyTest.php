@@ -66,9 +66,9 @@ class SpyTest extends TestCase
 
     /**
      * Verbatim selection logic of the original spyMission(), returning the
-     * number of cumulative sections in the message (0 = no report). The
-     * original overwrote the levels with 100 / 0 right before comparing them;
-     * they are passed in with exactly those values.
+     * number of cumulative sections in the message (0 = no report), with the
+     * real espionage levels (the original overwrote them with 100 / 0 right
+     * before this comparison, which was the bug).
      */
     private static function originalDepth(int $spionage_difference, int $LS, int $CurrentSpyLvl, int $TargetSpyLvl): int
     {
@@ -112,18 +112,34 @@ class SpyTest extends TestCase
         return $depth;
     }
 
-    public function testReportDepthMatchesTheOriginalSelectionLogic(): void
+    public function testReportDepthFollowsTheOriginalRulesWithTheRealLevels(): void
     {
         $ref = new ReflectionMethod(Spy::class, 'reportDepth');
 
-        for ($difference = 0; $difference <= 4; $difference++) {
-            for ($probes = 0; $probes <= 12; $probes++) {
-                $this->assertSame(
-                    self::originalDepth($difference, $probes, 100, 0),
-                    $ref->invoke(null, $difference, $probes),
-                    "level difference {$difference}, {$probes} probes"
-                );
+        for ($spyLevel = 0; $spyLevel <= 4; $spyLevel++) {
+            for ($targetLevel = 0; $targetLevel <= 4; $targetLevel++) {
+                for ($probes = 0; $probes <= 30; $probes++) {
+                    $this->assertSame(
+                        self::originalDepth(abs($spyLevel - $targetLevel), $probes, $spyLevel, $targetLevel),
+                        $ref->invoke(null, $spyLevel, $targetLevel, $probes),
+                        "spy level {$spyLevel}, target level {$targetLevel}, {$probes} probes"
+                    );
+                }
             }
         }
+    }
+
+    public function testAStrongerTargetNeedsMoreProbes(): void
+    {
+        $ref = new ReflectionMethod(Spy::class, 'reportDepth');
+
+        // one probe shows only the resources, at equal levels and against a stronger target
+        $this->assertSame(1, $ref->invoke(null, 5, 5, 1));
+        $this->assertSame(1, $ref->invoke(null, 5, 7, 1));
+        // 7 probes reveal everything at equal levels, but not against a target 2 levels ahead
+        $this->assertSame(5, $ref->invoke(null, 5, 5, 7));
+        $this->assertSame(3, $ref->invoke(null, 5, 7, 7));
+        // a spy 2 levels ahead sees everything but the research with a single probe
+        $this->assertSame(4, $ref->invoke(null, 7, 5, 1));
     }
 }
