@@ -75,9 +75,9 @@ class Fleets
         }
 
         if (
-            $this->asInt($fleet->getFleetStartTime()) <= time()
-            || $this->asInt($fleet->getFleetEndTime()) < time()
-            || $this->asInt($fleet->getFleetMess()) === 1
+            $this->asInt($fleet->getFleetStartTime()) <= time() ||
+            $this->asInt($fleet->getFleetEndTime()) < time() ||
+            $this->asInt($fleet->getFleetMess()) === 1
         ) {
             return null;
         }

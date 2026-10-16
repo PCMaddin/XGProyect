@@ -218,9 +218,9 @@ abstract class Functions
      */
     public static function isCurrentPlanet(array $current, array $target): bool
     {
-        return ($current['planet_galaxy'] ?? null) == ($target['planet_galaxy'] ?? null)
-            && ($current['planet_system'] ?? null) == ($target['planet_system'] ?? null)
-            && ($current['planet_planet'] ?? null) == ($target['planet_planet'] ?? null)
-            && ($current['planet_type'] ?? null) == ($target['planet_type'] ?? null);
+        return ($current['planet_galaxy'] ?? null) == ($target['planet_galaxy'] ?? null) &&
+            ($current['planet_system'] ?? null) == ($target['planet_system'] ?? null) &&
+            ($current['planet_planet'] ?? null) == ($target['planet_planet'] ?? null) &&
+            ($current['planet_type'] ?? null) == ($target['planet_type'] ?? null);
     }
 }

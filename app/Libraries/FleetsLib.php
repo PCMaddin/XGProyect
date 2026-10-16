@@ -165,9 +165,9 @@ class FleetsLib
      */
     public static function hasResources(array $fleet): bool
     {
-        return self::asFloat($fleet['fleet_resource_metal'] ?? 0) !== 0.0
-            || self::asFloat($fleet['fleet_resource_crystal'] ?? 0) !== 0.0
-            || self::asFloat($fleet['fleet_resource_deuterium'] ?? 0) !== 0.0;
+        return self::asFloat($fleet['fleet_resource_metal'] ?? 0) !== 0.0 ||
+            self::asFloat($fleet['fleet_resource_crystal'] ?? 0) !== 0.0 ||
+            self::asFloat($fleet['fleet_resource_deuterium'] ?? 0) !== 0.0;
     }
 
     /**

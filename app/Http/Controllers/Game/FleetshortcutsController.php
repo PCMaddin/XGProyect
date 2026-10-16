@@ -75,11 +75,11 @@ class FleetshortcutsController extends BaseController
         $type = $request->integer('type');
         $action = $request->has('a') ? $request->integer('a') : null;
 
-        $valid = $name !== ''
-            && $this->inRange($galaxy, 1, MAX_GALAXY_IN_WORLD)
-            && $this->inRange($system, 1, MAX_SYSTEM_IN_GALAXY)
-            && $this->inRange($planet, 1, MAX_PLANET_IN_SYSTEM + 1)
-            && $this->inRange($type, 1, 3);
+        $valid = $name !== '' &&
+            $this->inRange($galaxy, 1, MAX_GALAXY_IN_WORLD) &&
+            $this->inRange($system, 1, MAX_SYSTEM_IN_GALAXY) &&
+            $this->inRange($planet, 1, MAX_PLANET_IN_SYSTEM + 1) &&
+            $this->inRange($type, 1, 3);
 
         if ($valid) {
             $this->applyMode($mode, $action, $name, $galaxy, $system, $planet, $type);

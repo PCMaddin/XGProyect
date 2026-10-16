@@ -58,11 +58,11 @@ class PhalanxController extends BaseController
         $planetType = $request->integer('planettype');
 
         if (
-            $system < $lowerSystem
-            || $system > $upperSystem
-            || $galaxy !== $this->planetInt('planet_galaxy')
-            || $planetType !== PlanetTypesEnumerator::PLANET
-            || $this->planetInt('planet_type') !== PlanetTypesEnumerator::MOON
+            $system < $lowerSystem ||
+            $system > $upperSystem ||
+            $galaxy !== $this->planetInt('planet_galaxy') ||
+            $planetType !== PlanetTypesEnumerator::PLANET ||
+            $this->planetInt('planet_type') !== PlanetTypesEnumerator::MOON
         ) {
             return redirect('game.php?page=galaxy');
         }
@@ -220,8 +220,8 @@ class PhalanxController extends BaseController
      */
     private function visibleType(int $planetType, bool $moonDestroyed): bool
     {
-        return $planetType === PlanetTypesEnumerator::PLANET
-            || ($planetType === PlanetTypesEnumerator::MOON && $moonDestroyed);
+        return $planetType === PlanetTypesEnumerator::PLANET ||
+            ($planetType === PlanetTypesEnumerator::MOON && $moonDestroyed);
     }
 
     /**
@@ -241,9 +241,9 @@ class PhalanxController extends BaseController
      */
     private function atCoordinates(array $fleet, string $prefix, int $galaxy, int $system, int $planet): bool
     {
-        return $this->asInt($fleet['fleet_' . $prefix . '_galaxy'] ?? 0) === $galaxy
-            && $this->asInt($fleet['fleet_' . $prefix . '_system'] ?? 0) === $system
-            && $this->asInt($fleet['fleet_' . $prefix . '_planet'] ?? 0) === $planet;
+        return $this->asInt($fleet['fleet_' . $prefix . '_galaxy'] ?? 0) === $galaxy &&
+            $this->asInt($fleet['fleet_' . $prefix . '_system'] ?? 0) === $system &&
+            $this->asInt($fleet['fleet_' . $prefix . '_planet'] ?? 0) === $planet;
     }
 
     /**

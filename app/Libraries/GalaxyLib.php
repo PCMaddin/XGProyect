@@ -523,9 +523,9 @@ class GalaxyLib
 
     private function isMissileActive(): bool
     {
-        if (self::asInt($this->currentPlanet['defense_interplanetary_missile'] ?? 0) !== 0
-            && !$this->isCurrentPlayer()
-            && self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0)) {
+        if (self::asInt($this->currentPlanet['defense_interplanetary_missile'] ?? 0) !== 0 &&
+            !$this->isCurrentPlayer() &&
+            self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0)) {
             return $this->isInRange(Formulas::missileRange(self::asInt($this->user['research_impulse_drive'] ?? 0)));
         }
 
@@ -534,10 +534,10 @@ class GalaxyLib
 
     private function isPhalanxActive(): bool
     {
-        if (self::asInt($this->currentPlanet['building_phalanx'] ?? 0) !== 0
-            && !$this->isCurrentPlayer()
-            && self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0)
-            && self::asInt($this->currentPlanet['planet_type'] ?? 0) === PlanetTypesEnumerator::MOON) {
+        if (self::asInt($this->currentPlanet['building_phalanx'] ?? 0) !== 0 &&
+            !$this->isCurrentPlayer() &&
+            self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0) &&
+            self::asInt($this->currentPlanet['planet_type'] ?? 0) === PlanetTypesEnumerator::MOON) {
             return $this->isInRange(Formulas::phalanxRange(self::asInt($this->currentPlanet['building_phalanx'] ?? 0)));
         }
 
