@@ -78,4 +78,16 @@ return [
     'tr_scrap_phrase_11' => 'Ya oigo la maliciosa burla de la competencia.',
 
     // traderImportExport
+    'tr_ie_explanation' => 'Cada día hay un contenedor con un objeto desconocido. Puedes comprarlo una vez al día pagando con metal, cristal o deuterio.',
+    'tr_ie_container' => 'Contenedor de %s',
+    'tr_ie_buy' => 'Comprar',
+    'tr_ie_swap' => 'Cambiar',
+    'tr_ie_swap_info' => 'Cambiar por otro contenedor del mismo nivel: %s de Materia Oscura (quedan %d)',
+    'tr_ie_no_swaps' => 'Hoy ya no puedes cambiar más.',
+    'tr_ie_content' => 'El contenedor tenía: %s. Está en tu inventario.',
+    'tr_ie_come_back' => 'Mañana habrá un contenedor nuevo.',
+    'tr_ie_bought' => 'Contenedor comprado, el objeto está en tu inventario.',
+    'tr_ie_swapped' => 'Contenedor cambiado.',
+    'tr_ie_already_bought' => 'Ya compraste un contenedor hoy.',
+    'tr_ie_not_enough' => 'No hay suficientes recursos en este planeta.',
 ];

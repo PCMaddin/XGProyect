@@ -78,4 +78,16 @@ return [
     'tr_scrap_phrase_11' => 'Ich höre schon das schadenfrohe Gelächter meiner Konkurrenz.',
 
     // traderImportExport
+    'tr_ie_explanation' => 'Jeden Tag gibt es einen Behälter mit einem unbekannten Gegenstand. Du kannst ihn einmal am Tag kaufen und mit Metall, Kristall oder Deuterium bezahlen.',
+    'tr_ie_container' => 'Behälter %s',
+    'tr_ie_buy' => 'Kaufen',
+    'tr_ie_swap' => 'Tauschen',
+    'tr_ie_swap_info' => 'Gegen einen anderen Behälter gleicher Stufe tauschen: %s Dunkle Materie (noch %d mal)',
+    'tr_ie_no_swaps' => 'Heute kannst du nicht mehr tauschen.',
+    'tr_ie_content' => 'Im Behälter war: %s. Er liegt in deinem Inventar.',
+    'tr_ie_come_back' => 'Morgen gibt es einen neuen Behälter.',
+    'tr_ie_bought' => 'Behälter gekauft, der Gegenstand liegt in deinem Inventar.',
+    'tr_ie_swapped' => 'Behälter getauscht.',
+    'tr_ie_already_bought' => 'Du hast heute schon einen Behälter gekauft.',
+    'tr_ie_not_enough' => 'Auf diesem Planeten sind nicht genug Rohstoffe.',
 ];

@@ -16,6 +16,14 @@
             </a>
         </th>
     </tr>
+    <tr>
+        <th width="50%">
+            <a href="game.php?page=traderImportExport" title="{{ __('game/trader.tr_import_export_title') }}">
+                {{ __('game/trader.tr_import_export') }}
+            </a>
+        </th>
+        <th width="50%"></th>
+    </tr>
 </table>
 
 {!! $currentMode !!}

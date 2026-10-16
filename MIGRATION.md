@@ -865,9 +865,8 @@ Nachgezogen:
   - Verkauf in einer Transaktion mit Sperre, Aktionen nur per POST.
   - Tests für Anteil, Feilschen, Preisstaffel, Speichergrenze, Verkauf und
     Fehlerfälle; im Browser auf MariaDB durchgespielt.
-  - Auktionator und Import/Export bleiben aus: Beide verkaufen
-    Gegenstände (Booster u. Ä.), und ein Gegenstandssystem gibt es im Spiel
-    nicht. Die leeren Platzhalter-Seiten sind entfernt.
+  - Auktionator und Import/Export kamen später mit den Gegenständen
+    (siehe „Gegenstände“).
 
 - 🔴→✅ **Expeditionsergebnis „Schiffe“** neu geregelt
   (`ExpeditionService::getFoundShips`).
@@ -961,6 +960,17 @@ Nachgezogen:
     `planets.planet_item_fields`.
   - Tests für Katalog, Kauf, alle Wirkungen und Fehlerfälle; die
     Booster-Produktion auf MariaDB; im Browser durchgespielt.
+- ✅ **Import/Export** (Teil 2 der Gegenstände, `ImportExportService`,
+  Seite `traderImportExport`) wie im Original (owiki.de, „Import/Export“):
+  - Jeden Tag ein Behälter mit unbekanntem Gegenstand (Booster, Kraken,
+    Detroid, Newtron). Stufe und Preis sind am Tag für alle gleich: Bronze
+    40.000–50.000, Silber 60.000–100.000, Gold 100.000–200.000
+    Metalleinheiten, zahlbar in einem Rohstoff zu 1 : 1,5 : 3.
+  - Ein Kauf am Tag; bis zu zweimal gegen einen anderen Behälter gleicher
+    Stufe tauschen für 500 / 1.500 / 4.500 Dunkle Materie.
+  - Wie oft welche Stufe kommt, nennt das Wiki nicht (nur: Gold seltener
+    als Silber, Silber seltener als Bronze): hier 70 / 25 / 5 %.
+  - Neue Tabelle `import_exports`. Tests; im Browser durchgespielt.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

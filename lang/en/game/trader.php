@@ -78,4 +78,16 @@ return [
     'tr_scrap_phrase_11' => 'I can already hear the gloating jeers of my competitors.',
 
     // traderImportExport
+    'tr_ie_explanation' => 'Every day there is a container with an unknown item. You can buy it once a day, paying with metal, crystal or deuterium.',
+    'tr_ie_container' => '%s container',
+    'tr_ie_buy' => 'Buy',
+    'tr_ie_swap' => 'Swap',
+    'tr_ie_swap_info' => 'Swap for another container of the same tier: %s Dark Matter (%d left)',
+    'tr_ie_no_swaps' => 'You cannot swap any more today.',
+    'tr_ie_content' => 'The container held: %s. It is in your inventory.',
+    'tr_ie_come_back' => 'There is a new container tomorrow.',
+    'tr_ie_bought' => 'Container bought, the item is in your inventory.',
+    'tr_ie_swapped' => 'Container swapped.',
+    'tr_ie_already_bought' => 'You already bought a container today.',
+    'tr_ie_not_enough' => 'There are not enough resources on this planet.',
 ];
