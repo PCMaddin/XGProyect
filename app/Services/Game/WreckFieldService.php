@@ -28,7 +28,8 @@ use Illuminate\Support\Facades\DB;
  *   in the time the shipyard would take, at least 30 minutes, at most 12
  *   hours, for free;
  * - the repaired ships are put back into service by the player, or on
- *   their own 3 days after the repair.
+ *   their own 3 days after the repair; after 30 minutes the player can
+ *   put the ships repaired so far into service, giving up the rest.
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
@@ -298,15 +299,50 @@ class WreckFieldService
                 return 'sd_no_repair';
             }
 
-            if ($field['repair_ends_at'] > $now) {
+            // before the end only after 30 minutes, with the ships repaired so far
+            if ($field['repair_ends_at'] > $now && $now - $field['repair_started_at'] < self::MIN_REPAIR_TIME) {
                 return 'sd_repair_running';
             }
 
-            $this->addShips($planetId, $field['repaired']);
+            $this->addShips($planetId, $this->repairedSoFar($field, $now));
             DB::table('wreck_fields')->where('planet_id', $planetId)->delete();
 
             return null;
         });
+    }
+
+    /**
+     * The ships repaired by $now: the repair works through every type at
+     * the same pace.
+     *
+     * @param array{repair_started_at: int, repair_ends_at: int, repaired: array<int, int>} $field
+     *
+     * @return array<int, int>
+     */
+    public function repairedSoFar(array $field, int $now): array
+    {
+        $duration = $field['repair_ends_at'] - $field['repair_started_at'];
+
+        if ($now >= $field['repair_ends_at'] || $duration <= 0) {
+            return $field['repaired'];
+        }
+
+        $share = max(0, $now - $field['repair_started_at']) / $duration;
+
+        return array_filter(array_map(fn (int $amount): int => (int) floor($amount * $share), $field['repaired']));
+    }
+
+    /**
+     * Whether the ships repaired so far can be put into service before the
+     * repair ends (after 30 minutes; the rest of the repair is given up).
+     *
+     * @param array{repair_started_at: int, repair_ends_at: int} $field
+     */
+    public function canDeployEarly(array $field, int $now): bool
+    {
+        return $field['repair_started_at'] > 0 &&
+            $now < $field['repair_ends_at'] &&
+            $now - $field['repair_started_at'] >= self::MIN_REPAIR_TIME;
     }
 
     /**

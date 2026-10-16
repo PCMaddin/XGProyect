@@ -164,4 +164,5 @@ return [
     'al_class_bonus_ally_speed' => '+10% speed to planets of alliance members',
     'al_class_bonus_combat_tech' => '+1 level of combat research in battle',
     'al_class_bonus_espionage' => '+1 level of espionage technology',
+    'al_class_free_from' => 'The first choice is free from %s (14 days after the founding).',
 ];

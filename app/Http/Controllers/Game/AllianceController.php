@@ -243,9 +243,7 @@ class AllianceController extends BaseController
             'color' => $error !== '' ? '#ff0000' : (is_string($success) ? 'lime' : ''),
             'message' => $error !== '' ? $error : (is_string($success) ? $success : ''),
             'current' => $current->value,
-            'price' => $current === AllianceClass::None
-                ? (string) __('game/alliance.al_class_first_free')
-                : sprintf((string) __('game/alliance.al_class_change_price'), $this->formatService->prettyNumber($classes->changePrice())),
+            'price' => $this->classPriceText($classes, $allianceId, $current),
             'classes' => array_map(fn (AllianceClass $class): array => [
                 'value' => $class->value,
                 'name' => (string) __('game/alliance.' . $class->nameKey()),
@@ -255,6 +253,21 @@ class AllianceController extends BaseController
                 ),
             ], [AllianceClass::Trader, AllianceClass::Researcher, AllianceClass::Warrior]),
         ]);
+    }
+
+    private function classPriceText(AllianceClassService $classes, int $allianceId, AllianceClass $current): string
+    {
+        $price = sprintf((string) __('game/alliance.al_class_change_price'), $this->formatService->prettyNumber($classes->changePrice()));
+
+        if ($current !== AllianceClass::None) {
+            return $price;
+        }
+
+        if ($classes->priceOf($allianceId, time()) === 0) {
+            return (string) __('game/alliance.al_class_first_free');
+        }
+
+        return $price . ' ' . sprintf((string) __('game/alliance.al_class_free_from'), $this->timingService->formatExtendedDate($classes->freeFrom($allianceId)));
     }
 
     private function adminExitSection(Request $request): RedirectResponse

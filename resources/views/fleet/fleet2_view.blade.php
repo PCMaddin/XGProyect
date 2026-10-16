@@ -16,6 +16,45 @@
             return null;
         }
     }
+
+    // alliance classes: researchers fly expeditions, warriors fly to the
+    // planets of their alliance's members 10 % faster (the fuel stays)
+    var classSpeed = @json($class_speed);
+
+    function classSpeedFactor() {
+        var target = document.getElementsByName('galaxy')[0].value + ':' + document.getElementsByName('system')[0].value + ':' + document.getElementsByName('planet')[0].value;
+
+        if (+document.getElementsByName('planet')[0].value === 16) {
+            return +document.getElementsByName('planettype')[0].value === 2 ? 1 : classSpeed.expedition;
+        }
+
+        return classSpeed.allies.indexOf(target) >= 0 ? classSpeed.ally : 1;
+    }
+
+    var baseShortInfo = shortInfo;
+
+    shortInfo = function () {
+        baseShortInfo();
+
+        var factor = classSpeedFactor();
+        var note = document.getElementById('classspeed');
+
+        note.innerHTML = '';
+
+        if (factor <= 1) {
+            return;
+        }
+
+        var seconds = Math.round((35e3 / speed() * Math.sqrt(10 * distance() / (maxspeed() * factor)) + 10) / document.getElementsByName('speedfactor')[0].value);
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
+        var rest = seconds % 60;
+
+        document.getElementById('duration').innerHTML = hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (rest < 10 ? '0' : '') + rest + ' h';
+        note.innerHTML = classSpeed.allies.length > 0 && +document.getElementsByName('planet')[0].value !== 16
+            ? @json(__('game/fleet.fl_class_speed_ally'))
+            : @json(__('game/fleet.fl_class_speed_expedition'));
+    };
 </script>
 <form action="game.php?page=fleet3" method="post" onsubmit='this.submit.disabled = true;' role="form">
     @csrf
@@ -73,7 +112,7 @@
         </tr>
         <tr height="20">
             <th scope="row">{{ __('game/fleet.fl_flying_time') }}</th>
-            <th role="cell"><div id="duration">-</div></th>
+            <th role="cell"><div id="duration">-</div><div id="classspeed" style="color: lime"></div></th>
         </tr>
         <tr height="20">
             <th scope="row">{{ __('game/fleet.fl_fuel_consumption') }}</th>

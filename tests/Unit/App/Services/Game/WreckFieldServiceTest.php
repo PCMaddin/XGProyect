@@ -116,6 +116,31 @@ class WreckFieldServiceTest extends DatabaseTestCase
         $this->assertNull($wrecks->field(70));
     }
 
+    public function testAfter30MinutesTheShipsRepairedSoFarGoIntoService(): void
+    {
+        $wrecks = app(WreckFieldService::class);
+        DB::table('buildings')->where('building_planet_id', 70)->update(['building_space_dock' => 14]);
+        // 14 battleships and 7 cruisers in the field: 7 and 3 are repaired, in 12 hours
+        $wrecks->recordBattle(70, 7, [207 => 20, 206 => 10], [207 => 20, 206 => 10], self::NOW);
+        $this->assertNull($wrecks->startRepair(7, 70, self::NOW));
+        $field = $wrecks->field(70);
+        $this->assertNotNull($field);
+        $this->assertSame([207 => 7, 206 => 3], $field['repaired']);
+        $ends = $field['repair_ends_at'];
+        $half = self::NOW + intdiv($ends - self::NOW, 2);
+
+        $this->assertFalse($wrecks->canDeployEarly($field, self::NOW + 1799));
+        $this->assertSame('sd_repair_running', $wrecks->deploy(7, 70, self::NOW + 1799));
+        $this->assertTrue($wrecks->canDeployEarly($field, $half));
+        $this->assertSame([207 => 3, 206 => 1], $wrecks->repairedSoFar($field, $half));
+        $this->assertSame([207 => 7, 206 => 3], $wrecks->repairedSoFar($field, $ends));
+
+        // half way: the ships repaired so far, the rest is lost
+        $this->assertNull($wrecks->deploy(7, 70, $half));
+        $this->assertSame(2 + 3, $this->battleships());
+        $this->assertNull($wrecks->field(70));
+    }
+
     public function testTheRepairTakesTheShipyardsTimeUpTo12Hours(): void
     {
         $wrecks = app(WreckFieldService::class);

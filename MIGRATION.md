@@ -1064,8 +1064,11 @@ Nachgezogen:
     General +3); +1 Stufe Spionagetechnik (beim Spionieren und beim
     Abwehren); Flüge zu Planeten von Allianzmitgliedern 10 % schneller.
   - Der Tempobonus für Expeditionen und Allianzflüge wirkt auf die
-    Flugzeit beim Absenden; die Zeitvorschau in Flotte 3 zeigt die Zeit
-    ohne ihn.
+    Flugzeit beim Absenden; die Zeitvorschau in Flotte 2 zeigt ihn mit
+    einem Hinweis, wie im Original (der Treibstoff bleibt gleich).
+  - Die erste Wahl ist erst kostenlos, wenn die Allianz 14 Tage besteht;
+    vorher kostet auch sie den Preis des Wechsel-Tokens. Die Seite nennt
+    das Datum.
   - **System-Phalanx** (Forscher, Changelog 8.0): Button in der Galaxie,
     wenn der aktuelle Mond eine Phalanx hat und das System in Reichweite
     liegt. Ein Scan kostet 40.000 Deuterium (`SYSTEM_PHALANX_COST`) und
@@ -1079,8 +1082,6 @@ Nachgezogen:
     Flottenmenü geführt). Noob-Schutz, Urlaubsmodus und geschützte Admins
     gelten wie bei der einzelnen Spionage. Die Optionen bleiben in der
     Sitzung.
-  - **Nicht übernommen**: die Mindestdauer von 14 Tagen vor der ersten
-    Wahl.
   - Tests für die Boni, Wahl und Wechsel sowie die Verwaltungsseite; im
     Browser durchgespielt.
 - ✅ **Raumdock und Wrackfelder** (OGame 7; owiki „Raumdock“;
@@ -1110,8 +1111,11 @@ Nachgezogen:
   - **Galaxieansicht**: Ein Wrackfeld erscheint in der Spalte „TF“ mit
     seinen Schiffen und der Zeit bis zum Verglühen (oder „In Reparatur“),
     für den Besitzer mit Link zum Raumdock des Planeten.
-  - **Nicht übernommen**: schrittweises Indienststellen schon reparierter
-    Schiffe vor dem Ende und Wracks während einer laufenden Reparatur (sie
+  - **Vorzeitig in Dienst stellen**: Nach 30 Minuten Reparatur lassen sich
+    die bis dahin reparierten Schiffe in Dienst stellen (jeder Typ im
+    gleichen Tempo, abgerundet); die übrigen Wracks gehen verloren. Die
+    Seite zeigt, wie viele schon repariert sind.
+  - **Nicht übernommen**: Wracks während einer laufenden Reparatur (sie
     gehen verloren).
   - Rundung: Die Kosten werden wie bei allen Gebäuden gerundet, die
     Energie für Stufe 3 ist also 313 statt 312.

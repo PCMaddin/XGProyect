@@ -25,4 +25,8 @@ return [
     'sd_no_space_dock' => 'You need a space dock on this planet for that.',
     'sd_nothing_to_repair' => 'At this space dock level no ship can be repaired.',
     'sd_wreck_field_notice' => 'There is a wreck field above this planet.',
+    'sd_repaired_so_far' => 'Repaired so far',
+    'sd_deploy_early' => 'Put the ships repaired so far into service',
+    'sd_deploy_early_note' => 'The remaining wrecks are lost.',
+    'sd_deploy_early_from' => 'From %s the ships repaired so far can be put into service early.',
 ];

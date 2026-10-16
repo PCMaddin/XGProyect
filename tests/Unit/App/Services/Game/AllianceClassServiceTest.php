@@ -14,8 +14,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
 
 /**
- * Choosing an alliance class: the first choice is free, a change costs the
- * administrator dark matter; every member gets the bonuses.
+ * Choosing an alliance class: the first choice is free once the alliance
+ * is 14 days old, a change costs the administrator dark matter; every member gets the bonuses.
  */
 #[CoversClass(AllianceClassService::class)]
 class AllianceClassServiceTest extends DatabaseTestCase
@@ -50,6 +50,23 @@ class AllianceClassServiceTest extends DatabaseTestCase
         $this->assertSame('al_class_no_enough_dark_matter', $classes->choose(3, 7, AllianceClass::Researcher));
         $this->assertSame('al_class_unknown', $classes->choose(3, 7, AllianceClass::None));
         $this->assertSame(AllianceClass::Trader, $classes->classOf(3));
+    }
+
+    public function testTheFirstChoiceIsFreeOnlyAfter14Days(): void
+    {
+        $founded = 1_000_000;
+        DB::table('alliance')->where('alliance_id', 3)->update(['alliance_register_time' => $founded]);
+        $classes = app(AllianceClassService::class);
+
+        $this->assertSame($founded + 14 * 86400, $classes->freeFrom(3));
+        $this->assertSame(500000, $classes->priceOf(3, $founded + 14 * 86400 - 1));
+        $this->assertSame(0, $classes->priceOf(3, $founded + 14 * 86400));
+
+        // a young alliance pays for the first choice too
+        $this->assertNull($classes->choose(3, 7, AllianceClass::Trader, $founded + 86400));
+        $this->assertSame(100000, $this->darkMatter());
+        $this->assertSame(500000, $classes->priceOf(3, $founded + 30 * 86400));
+        $this->assertSame('al_class_no_enough_dark_matter', $classes->choose(3, 7, AllianceClass::Warrior, $founded + 30 * 86400));
     }
 
     public function testEveryMemberGetsTheBonuses(): void

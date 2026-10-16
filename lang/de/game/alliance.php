@@ -163,4 +163,5 @@ return [
     'al_class_bonus_ally_speed' => '+10 % Geschwindigkeit zu Planeten von Allianzmitgliedern',
     'al_class_bonus_combat_tech' => '+1 Stufe Kampfforschung im Kampf',
     'al_class_bonus_espionage' => '+1 Stufe Spionagetechnik',
+    'al_class_free_from' => 'Die erste Wahl ist ab dem %s kostenlos (14 Tage nach der Gründung).',
 ];

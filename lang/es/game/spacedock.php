@@ -25,4 +25,8 @@ return [
     'sd_no_space_dock' => 'Para eso necesitas un muelle espacial en este planeta.',
     'sd_nothing_to_repair' => 'Con este nivel del muelle espacial no se puede reparar ninguna nave.',
     'sd_wreck_field_notice' => 'Hay un campo de restos sobre este planeta.',
+    'sd_repaired_so_far' => 'Reparadas hasta ahora',
+    'sd_deploy_early' => 'Poner en servicio las naves ya reparadas',
+    'sd_deploy_early_note' => 'Los restos que quedan se pierden.',
+    'sd_deploy_early_from' => 'A partir del %s se pueden poner en servicio antes las naves ya reparadas.',
 ];

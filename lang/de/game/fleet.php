@@ -107,4 +107,6 @@ return [
     'fl_union_members' => 'Verbandsmitglieder:',
     'fl_search_user_btn' => 'Suchen',
     'fl_save_all' => 'Ok',
+    'fl_class_speed_expedition' => 'Allianzklasse Forscher: +10 % Tempo zum Expeditionsziel',
+    'fl_class_speed_ally' => 'Allianzklasse Krieger: +10 % Tempo zu Allianzmitgliedern',
 ];

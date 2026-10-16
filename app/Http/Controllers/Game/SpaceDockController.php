@@ -95,6 +95,7 @@ class SpaceDockController extends BaseController
     {
         $repairing = $field['repair_started_at'] > 0;
         $ships = $repairing ? $field['repaired'] : $this->wrecks->repairable($field['ships'], $dock);
+        $soFar = $this->wrecks->repairedSoFar($field, $now);
         $rows = [];
 
         foreach (array_keys($field['ships'] + $field['repaired']) as $id) {
@@ -102,6 +103,7 @@ class SpaceDockController extends BaseController
                 'name' => (string) __('game/ships.' . $this->registry->get($id)->getName()),
                 'wrecks' => $this->formatService->prettyNumber($field['ships'][$id] ?? 0),
                 'repaired' => $this->formatService->prettyNumber($ships[$id] ?? 0),
+                'so_far' => $this->formatService->prettyNumber($soFar[$id] ?? 0),
             ];
         }
 
@@ -109,6 +111,8 @@ class SpaceDockController extends BaseController
             'rows' => $rows,
             'repairing' => $repairing,
             'done' => $repairing && $field['repair_ends_at'] <= $now,
+            'early' => $this->wrecks->canDeployEarly($field, $now),
+            'early_from' => $this->timingService->formatExtendedDate($field['repair_started_at'] + WreckFieldService::MIN_REPAIR_TIME),
             'waiting' => !$repairing && $field['repairable_from'] > $now,
             'repairable_from' => $this->timingService->formatExtendedDate($field['repairable_from']),
             'expires' => $this->timingService->formatExtendedDate($field['expires_at']),

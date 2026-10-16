@@ -107,4 +107,6 @@ return [
     'fl_union_members' => 'Union user:',
     'fl_search_user_btn' => 'Search',
     'fl_save_all' => 'Ok',
+    'fl_class_speed_expedition' => 'Researcher alliance class: +10% speed to the expedition destination',
+    'fl_class_speed_ally' => 'Warrior alliance class: +10% speed to alliance members',
 ];

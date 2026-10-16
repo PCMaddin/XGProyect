@@ -305,7 +305,7 @@ class Fleet2Controller extends BaseController
     }
 
     /**
-     * @return array<string, int>
+     * @return array<string, int|array{expedition: float, ally: float, allies: list<string>}>
      */
     private function buildInputVars(Request $request): array
     {
@@ -319,7 +319,38 @@ class Fleet2Controller extends BaseController
             'system_end' => $this->targetInput($request, 'system', 1, MAX_SYSTEM_IN_GALAXY, $this->planetInt('planet_system')),
             'planet_end' => $this->targetInput($request, 'planet', 1, MAX_PLANET_IN_SYSTEM + 1, $this->planetInt('planet_planet')),
             'target_mission' => $request->has('target_mission') ? $request->integer('target_mission') : 0,
+            'class_speed' => $this->classSpeed(),
         ];
+    }
+
+    /**
+     * The speed bonuses of the alliance classes for the flight time shown
+     * (as Fleet4 applies them): researchers fly expeditions 10 % faster,
+     * warriors fly 10 % faster to the planets of their alliance's members.
+     *
+     * @return array{expedition: float, ally: float, allies: list<string>}
+     */
+    private function classSpeed(): array
+    {
+        $bonuses = app(PlayerClassService::class)->currentBonuses();
+        $allyId = $this->userInt('ally_id');
+        $allies = [];
+
+        if ($allyId !== 0 && $bonuses->allySpeedFactor() > 1) {
+            $allies = DB::table('planets AS p')
+                ->join('users AS u', 'u.id', '=', 'p.planet_user_id')
+                ->where('u.ally_id', $allyId)
+                ->where('u.id', '<>', $this->userInt('id'))
+                ->where('p.planet_destroyed', 0)
+                ->get(['p.planet_galaxy', 'p.planet_system', 'p.planet_planet'])
+                ->map(fn (\stdClass $row): string => $row->planet_galaxy . ':' . $row->planet_system . ':' . $row->planet_planet)
+                ->unique()
+                ->values()
+                ->all();
+            $allies = array_values($allies);
+        }
+
+        return ['expedition' => $bonuses->expeditionSpeedFactor(), 'ally' => $bonuses->allySpeedFactor(), 'allies' => $allies];
     }
 
     private function targetInput(Request $request, string $key, int $min, int $max, int $default): int

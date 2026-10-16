@@ -107,4 +107,6 @@ return [
     'fl_union_members' => 'Usuario de la unión:',
     'fl_search_user_btn' => 'Buscar',
     'fl_save_all' => 'Ok',
+    'fl_class_speed_expedition' => 'Clase de alianza investigador: +10% de velocidad al destino de la expedición',
+    'fl_class_speed_ally' => 'Clase de alianza guerrero: +10% de velocidad hacia miembros de la alianza',
 ];

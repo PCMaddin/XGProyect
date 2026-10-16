@@ -164,4 +164,5 @@ return [
     'al_class_bonus_ally_speed' => '+10% de velocidad hacia planetas de miembros de la alianza',
     'al_class_bonus_combat_tech' => '+1 nivel de investigación de combate en batalla',
     'al_class_bonus_espionage' => '+1 nivel de tecnología de espionaje',
+    'al_class_free_from' => 'La primera elección es gratuita a partir del %s (14 días después de la fundación).',
 ];

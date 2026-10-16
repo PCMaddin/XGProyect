@@ -25,4 +25,8 @@ return [
     'sd_no_space_dock' => 'Dafür brauchst du ein Raumdock auf diesem Planeten.',
     'sd_nothing_to_repair' => 'Bei dieser Stufe des Raumdocks lässt sich kein Schiff reparieren.',
     'sd_wreck_field_notice' => 'Über diesem Planeten liegt ein Wrackfeld.',
+    'sd_repaired_so_far' => 'Bereits repariert',
+    'sd_deploy_early' => 'Bereits reparierte Schiffe in Dienst stellen',
+    'sd_deploy_early_note' => 'Die übrigen Wracks gehen dabei verloren.',
+    'sd_deploy_early_from' => 'Ab %s lassen sich die bereits reparierten Schiffe vorzeitig in Dienst stellen.',
 ];
