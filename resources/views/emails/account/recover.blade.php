@@ -12,12 +12,12 @@
             <td>{!! __('emails/recover.re_mail_text_part1') !!}</td>
         </tr>
         <tr>
-            <td>{{ __('emails/recover.re_mail_text_part2') }}: <strong>{{ $userPass }}</strong></td>
+            <td>{{ __('emails/recover.re_mail_text_part2', ['minutes' => $minutes]) }}</td>
         </tr>
         <tr>
             <td>
-                <x-mail::button :url="$gameUrl">
-                    {{ __('emails/recover.we_mail_text_part3') }}
+                <x-mail::button :url="$resetUrl">
+                    {{ __('emails/recover.re_mail_text_part3') }}
                 </x-mail::button>
             </td>
         </tr>

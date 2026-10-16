@@ -5,16 +5,28 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Account;
 
 use App\Http\Requests\RecoverRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Mail\Recover;
 use App\Models\User;
 use App\Services\SettingsService;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Symfony\Component\HttpFoundation\Response;
-use App\Libraries\Functions;
 
+/**
+ * Password recovery: a link with a one-time token goes to the account's
+ * email address, and the password changes only when the player sets a new
+ * one through it.
+ *
+ * Bugfix: the legacy flow replaced the password right away with a random
+ * one mailed in plain text, so anybody who knew a player's email address
+ * could lock them out; and its answer told whether an account existed for
+ * an address.
+ */
 class RecoverController extends BaseController
 {
     public function __construct(private SettingsService $settingsService)
@@ -23,33 +35,55 @@ class RecoverController extends BaseController
 
     public function __invoke(): View | Factory
     {
-        return view(
-            'account.recover',
-            [
-                'gameName' => $this->settingsService->getString('game_name'),
-            ]
+        return view('account.recover', ['gameName' => $this->settingsService->getString('game_name')]);
+    }
+
+    /**
+     * Send the reset link. The answer is the same whether an account exists
+     * for the address or not (and when a link was sent less than a minute ago).
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
+    public function recover(RecoverRequest $request): Response
+    {
+        Password::broker()->sendResetLink(
+            ['email' => $request->validated()['email']],
+            function (CanResetPassword $user, string $token): void {
+                $email = $user->getEmailForPasswordReset();
+
+                Mail::to($email)->send(new Recover(route('account.reset', ['token' => $token, 'email' => $email])));
+            }
         );
+
+        return back()->with('message', __('account/recover.re_sent'));
+    }
+
+    public function showReset(string $token, RecoverRequest $request): View | Factory
+    {
+        return view('account.reset', [
+            'gameName' => $this->settingsService->getString('game_name'),
+            'token' => $token,
+            'email' => $request->validated()['email'],
+        ]);
     }
 
     /**
      * @SuppressWarnings("PHPMD.StaticAccess")
      */
-    public function recover(RecoverRequest $request): Response
+    public function reset(ResetPasswordRequest $request): Response
     {
-        // The incoming request is valid...
-        $email = $request->validated()['email'];
-        $username = User::where(['email' => $email])->first();
+        $status = Password::broker()->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password): void {
+                $user->password = $password; // hashed by the model's mutator
+                $user->save();
+            }
+        );
 
-        if ($username !== null) {
-            $newPassword = Functions::generatePassword();
-
-            Mail::to($email)->send(new Recover($newPassword));
-
-            User::where('email', $email)->update(['password' => Functions::hash($newPassword)]);
-
-            return back()->with('message', __('account/recover.re_sent'));
+        if ($status !== Password::PASSWORD_RESET) {
+            return back()->with('message', __('account/recover.re_reset_invalid'));
         }
 
-        return back()->with('message', __('account/recover.re_error'));
+        return redirect()->route('account.recover')->with('message', __('account/recover.re_reset_done'));
     }
 }

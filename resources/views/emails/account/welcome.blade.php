@@ -18,9 +18,6 @@
             <td>{{ __('emails/welcome.we_mail_text_part3') }}: <strong>{{ $userName }}</strong></td>
         </tr>
         <tr>
-            <td>{{ __('emails/welcome.we_mail_text_part4') }}: <strong>{{ $userPass }}</strong></td>
-        </tr>
-        <tr>
             <td>
                 <x-mail::button :url="$gameUrl">
                     {{ __('emails/welcome.we_mail_text_part5') }}

@@ -68,10 +68,7 @@ class RegisterController extends BaseController
 
         // send welcome email
         if ($this->settingsService->getString('reg_welcome_email')) {
-            Mail::to($newUser->email)->send(new Welcome(
-                $newUser->name,
-                (string) $request->string('password')
-            ));
+            Mail::to($newUser->email)->send(new Welcome($newUser->name));
         }
 
         if (Auth::attempt($request->only('email', 'password'))) {

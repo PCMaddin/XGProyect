@@ -29,6 +29,8 @@ Route::prefix('home/ajax')->group(function () {
 Route::prefix('account')->group(function () {
     Route::get('/recover', RecoverController::class)->name('account.recover');
     Route::post('/recover', [RecoverController::class, 'recover']);
+    Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
+    Route::post('/reset', [RecoverController::class, 'reset'])->name('account.reset.update');
 });
 
 Route::prefix('admin')->group(function () {

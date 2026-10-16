@@ -452,16 +452,41 @@ Baseline-Einträge.
 
 ## Begleitende Audit-Findings (unabhängig von der Welle einplanen)
 
-- 🔴 **Trader-Crash**: `legacy/app/Http/Controllers/Game/TraderLayerController.php` —
-  `getMode()` (Z. 232) ruft dynamisch `build{Mode}Section()` auf, aber nur
-  `buildResourcesSection()` existiert. `?mode=traderAuctioneer|traderScrap|traderImportExport`
-  → Fatal Error. Zusätzlich ist die gesamte Handelslogik (Z. 34–215) auskommentierter toter Code.
-- 🟡 **Mass-Assignment**: `authlevel` liegt in `User::$fillable` — aktuell nicht ausnutzbar
-  (Admin-Pfade nutzen FormRequests), aber härtungswürdig.
-- 🟡 **Admin-Schreibschleifen** (`UserPlanetTrait`, `UserProgressController`) nehmen
-  Request-Feldnamen per Präfix-Whitelist als Spaltennamen — strikte Allowlist wäre robuster.
-- 🟢 **`.env.example`** liefert einen festen `APP_KEY` mit — leeren, um versehentliche
-  Übernahme zu vermeiden.
+- ✅ **Trader-Crash:** erledigt, `TraderLayerController` wurde in Welle 1 als
+  toter Code entfernt.
+- 🔴→✅ **Admin setzt Passwort, Spieler kann sich nicht einloggen** (gefixt):
+  Die Benutzerbearbeitung im Admin hashte das neue Passwort selbst, danach
+  hashte es der Passwort-Mutator des Modells ein zweites Mal. Jetzt hasht nur
+  der Mutator. Test.
+- ✅ **Mass-Assignment `authlevel`** (gehärtet): Der Rang ist nicht mehr
+  `$fillable`; Registrierung, Installer, Bots und Admin setzen ihn explizit.
+  Tests.
+- ✅ **Admin-Schreibschleifen** (gefixt): Planeten-, Gebäude-, Schiffs-,
+  Verteidigungs-, Forschungs- und Premium-Formular schrieben jedes Feld mit
+  passendem Präfix als Spaltennamen. Ein unbekannter Name ließ die Abfrage
+  scheitern, und `planet_user_id`, `research_user_id`,
+  `research_current_research` oder `premium_user_id` ließen sich
+  überschreiben. Jetzt gelten feste Allowlists (Planetenfelder als Liste,
+  der Rest aus der `GameObjectRegistry`). Tests, Gegenprobe schlägt an.
+- 🔴→✅ **Passwort-Reset ohne Token** (gefixt): „Passwort vergessen“ ersetzte
+  das Passwort sofort durch ein zufälliges und schickte es im Klartext. Wer
+  die E-Mail-Adresse eines Spielers kannte, konnte ihn so jederzeit
+  aussperren; außerdem verriet die Antwort, ob es ein Konto zur Adresse gibt.
+  Jetzt läuft es über Laravels Password-Broker: Die Mail enthält einen Link
+  mit Einmal-Token (60 Minuten gültig, höchstens einer pro Minute), das
+  Passwort ändert sich erst beim Setzen eines neuen, und die Antwort ist für
+  jede Adresse gleich. Neue Seite `account/reset/{token}`. Tests.
+- ✅ **Willkommensmail ohne Passwort** (gefixt): Sie schickte das gerade
+  gewählte Passwort im Klartext zurück.
+- ✅ **Öffentlicher `APP_KEY`** (gefixt): Der Installer erzeugte keinen
+  eigenen Key, jede Installation aus dem Release-Paket behielt den Key aus
+  `.env.example`. Der Installer erzeugt am Ende jetzt einen eigenen, falls
+  noch der öffentliche oder keiner gesetzt ist (`.env.example` behält einen
+  Key, sonst startet der Installer nicht). **Bestehende Installationen**
+  mit dem öffentlichen Key sollten einmalig `php artisan key:generate`
+  ausführen (meldet alle Spieler einmal ab).
+- ✅ **Inline-`@phpstan-ignore`** entfernt: 15 Unterdrückungen außerhalb der
+  Baseline, jetzt über `ReadsMixedValues` bzw. korrekte Typen gelöst.
 
 - ✅ **Buddies: fremde Anfragen** (gefixt): `acceptRequest`/`removeRequest`
   luden die Anfrage per `bid` ohne Bezug zum Spieler und schickten die
