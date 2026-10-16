@@ -19,10 +19,14 @@ use Illuminate\Support\Facades\DB;
  * gives 2 * 0.88 / 3 crystal and 1 * 0.88 / 3 deuterium per metal. The
  * offer is kept with the player (premium_merchant_offer) until one exchange
  * uses it, on any planet; received resources must fit into its storage.
+ * An expedition can meet him: then the next call is free.
  */
 class MerchantService
 {
     public const RESOURCES = ['metal', 'crystal', 'deuterium'];
+
+    /** premium_merchant_offer when the next call is free */
+    public const FREE_CALL = '{"free":true}';
 
     private const STORAGES = [
         'metal' => 'building_metal_store',
@@ -59,8 +63,28 @@ class MerchantService
     }
 
     /**
-     * Call the merchant to buy $sell: pays the dark matter and draws the
-     * factor. Error language key, or null when he came.
+     * Whether the player's next call is free (an expedition met him).
+     */
+    public function hasFreeCall(int $userId): bool
+    {
+        return DB::table('premium')->where('premium_user_id', $userId)->value('premium_merchant_offer') === self::FREE_CALL;
+    }
+
+    /**
+     * An expedition met the merchant: the next call is free, unless the
+     * player already has an offer (it is not taken away).
+     */
+    public function grantFreeCall(int $userId): void
+    {
+        DB::table('premium')
+            ->where('premium_user_id', $userId)
+            ->whereNull('premium_merchant_offer')
+            ->update(['premium_merchant_offer' => self::FREE_CALL]);
+    }
+
+    /**
+     * Call the merchant to buy $sell: pays the dark matter (unless the call
+     * is free) and draws the factor. Error language key, or null when he came.
      */
     public function call(int $userId, string $sell): ?string
     {
@@ -69,12 +93,13 @@ class MerchantService
         }
 
         $offer = (string) json_encode(['sell' => $sell, 'factor' => $this->drawFactor()]);
+        $price = $this->hasFreeCall($userId) ? 0 : $this->price();
 
         $updated = DB::table('premium')
             ->where('premium_user_id', $userId)
-            ->where('premium_dark_matter', '>=', $this->price())
+            ->where('premium_dark_matter', '>=', $price)
             ->update([
-                'premium_dark_matter' => DB::raw('premium_dark_matter - ' . $this->price()),
+                'premium_dark_matter' => DB::raw('premium_dark_matter - ' . $price),
                 'premium_merchant_offer' => $offer,
             ]);
 

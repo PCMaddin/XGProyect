@@ -71,7 +71,12 @@ class PhalanxController extends BaseController
         $fleetsTable = '';
         $deuteriumError = (string) __('game/phalanx.px_no_deuterium');
 
-        if ($this->planetInt('planet_deuterium') >= 10000) {
+        // a scan costs deuterium: only by the POST the galaxy view sends
+        if (!$request->isMethod('post')) {
+            return redirect('game.php?page=galaxy');
+        }
+
+        if ($this->planetInt('planet_deuterium') >= PHALANX_COST) {
             [$targetName, $fleetsTable] = $this->scan($galaxy, $system, $planet);
             $deuteriumError = '';
         }
@@ -159,7 +164,8 @@ class PhalanxController extends BaseController
 
         ksort($events);
 
-        return implode("\n", $events) . ($events === [] ? '' : "\n");
+        // every event followed by a line break
+        return implode('', array_map(fn (string $event): string => $event . "\n", $events));
     }
 
     /**

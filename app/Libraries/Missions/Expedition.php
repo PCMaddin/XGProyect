@@ -8,6 +8,7 @@ use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
 use App\Services\FormatService;
+use App\Services\Game\MerchantService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Libraries\FleetsLib;
@@ -45,7 +46,8 @@ class Expedition extends Missions
                 'delay' => $this->resultDelay($fleet),
                 'early' => $this->resultEarly($fleet),
                 'blackHole' => $this->resultBlackHole($fleet),
-                // 'pirates', 'aliens' and 'merchant' are not implemented yet and end like 'nothing'
+                'merchant' => $this->resultMerchant($fleet),
+                // 'pirates' and 'aliens' are not implemented yet and end like 'nothing'
                 default => $this->resultNothing($fleet),
             };
 
@@ -369,6 +371,21 @@ class Expedition extends Missions
     {
         $this->updateLostShipsAndDefensePoints(self::int($fleet['fleet_owner']), $ships);
         parent::removeFleet(self::int($fleet['fleet_id']));
+    }
+
+    /**
+     * A friendly race sends a merchant: the player's next call of the
+     * merchant (trader, exchange resources) is free.
+     *
+     * @param array<string, mixed> $fleet
+     */
+    private function resultMerchant(array $fleet): void
+    {
+        app(MerchantService::class)->grantFreeCall(self::int($fleet['fleet_owner']));
+
+        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_trader')));
+
+        parent::returnFleet(self::int($fleet['fleet_id']));
     }
 
     /**

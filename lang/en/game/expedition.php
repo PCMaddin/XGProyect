@@ -34,7 +34,7 @@ return [
     'exp_advanced_enemy_2' => 'Your expedition fleet had an unfriendly first contact with an unknown species.', // ok
 
     // found trader
-    'exp_trader' => 'Your expedition fleet made contact with a friendly alien race. They announced that they would send a representative with goods to trade to your worlds.', // ok
+    'exp_trader' => 'Your expedition fleet made contact with a friendly alien race. They announced that they would send a representative with goods to trade to your worlds.<br><br>Your next call of the merchant (trader) is free.', // ok
 
     // found dark matter
     'exp_dm_1' => 'The expedition followed some odd signals to an asteroid. In the asteroids core a small amount of Dark Matter was found. The asteroid was taken and the explorers are attempting to extract the Dark Matter.<br><br>%s %s have been captured.', // ok

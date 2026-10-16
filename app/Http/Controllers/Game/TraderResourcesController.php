@@ -192,7 +192,7 @@ class TraderResourcesController extends BaseController
         $offer = $this->merchant->offer($this->int($this->user, 'id'));
 
         if ($offer === null) {
-            return ['offer' => false];
+            return ['offer' => false, 'free' => $this->merchant->hasFreeCall($this->int($this->user, 'id'))];
         }
 
         $sellName = (string) __('game/global.' . $offer['sell']);

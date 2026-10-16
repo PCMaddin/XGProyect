@@ -34,7 +34,7 @@ return [
     'exp_advanced_enemy_2' => 'Deine Expeditionsflotte hatte einen unfreundlichen Erstkontakt mit einer unbekannten Spezies.',
 
     // found trader
-    'exp_trader' => 'Deine Expeditionsflotte hat Kontakt zu einer freundlichen außerirdischen Rasse aufgenommen. Sie kündigten an, einen Vertreter mit Handelswaren zu deinen Welten zu schicken.',
+    'exp_trader' => 'Deine Expeditionsflotte hat Kontakt zu einer freundlichen außerirdischen Rasse aufgenommen. Sie kündigten an, einen Vertreter mit Handelswaren zu deinen Welten zu schicken.<br><br>Dein nächster Ruf des Händlers ist kostenlos.',
 
     // found dark matter
     'exp_dm_1' => 'Die Expedition ist seltsamen Signalen zu einem Asteroiden gefolgt. In seinem Kern wurde eine kleine Menge Dunkle Materie gefunden. Der Asteroid wurde mitgenommen, und die Forscher versuchen, die Dunkle Materie zu extrahieren.<br><br>%s %s wurden erbeutet.',

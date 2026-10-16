@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 950 PHPUnit-Tests (19 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 954 PHPUnit-Tests (20 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
@@ -813,14 +813,24 @@ Nachgezogen:
     Updates ein. Die Updates ab `2026_10_16` prüfen selbst, was sie ändern,
     und laufen danach normal. Mit Test.
 
+- ✅ **Phalanx-Scan nur per POST.** Ein Scan kostet 10.000 Deuterium und
+  lief als GET; ein fremder Link konnte also Deuterium verbrauchen lassen.
+  - Die Galaxieansicht öffnet das Popup jetzt per POST mit Token, ein
+    bloßer Aufruf leitet zur Galaxie um.
+  - Die Gebäudebeschreibung nannte 5k Deuterium, jetzt die tatsächlichen
+    10.000.
+  - Test mit Gegenprobe gegen den alten Code.
+- ✅ **Expeditionsergebnis „Händler“** umgesetzt; es endete bisher wie
+  „nichts gefunden“.
+  - Der nächste Händlerruf des Spielers ist kostenlos, ein schon bezahltes
+    Angebot bleibt erhalten.
+  - Der Bericht und die Händlerseite weisen darauf hin.
+  - Tests für den Freiruf und das Expeditionsergebnis.
+
 Offen:
 
-- 🟡 **Phalanx:** Ein Scan kostet Deuterium und läuft als GET. Der Aufruf
-  öffnet ein Popup, ein fremder Link kann also Deuterium verbrauchen lassen.
-  Der Schaden ist gering, Abhilfe wäre ein POST-Popup.
-- 🟡 **Expeditionsergebnis „Händler“** ist im Code noch nicht umgesetzt
-  und endet wie „nichts gefunden“. Es könnte jetzt einen kostenlosen
-  Händlerruf geben.
+- 🟡 Die Expeditionsergebnisse „Piraten“ und „Aliens“ sind weiterhin nicht
+  umgesetzt und enden wie „nichts gefunden“.
 - ℹ️ Neue Allianzen sind standardmäßig geschlossen
   (`alliance_request_notallow = 0` heißt trotz des Namens „keine
   Bewerbungen“). So ist es durchgängig im Code, also eine

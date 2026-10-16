@@ -105,6 +105,31 @@ class MerchantServiceTest extends DatabaseTestCase
         $this->assertSame(10000, app(ProductionService::class)->maxStorable(0));
     }
 
+    public function testAnExpeditionMakesTheNextCallFree(): void
+    {
+        $this->merchant()->grantFreeCall(self::USER);
+        $this->assertTrue($this->merchant()->hasFreeCall(self::USER));
+        $this->assertNull($this->merchant()->offer(self::USER));
+
+        $this->assertNull($this->merchant()->call(self::USER, 'deuterium'));
+        $this->assertSame(5000, $this->darkMatter());
+        $this->assertSame('deuterium', $this->merchant()->offer(self::USER)['sell'] ?? null);
+        $this->assertFalse($this->merchant()->hasFreeCall(self::USER));
+
+        // the next one costs again
+        $this->assertNull($this->merchant()->call(self::USER, 'metal'));
+        $this->assertSame(1500, $this->darkMatter());
+    }
+
+    public function testAnOfferIsNotTakenAwayByAFreeCall(): void
+    {
+        $this->offer('crystal', 0.8);
+
+        $this->merchant()->grantFreeCall(self::USER);
+
+        $this->assertSame(['sell' => 'crystal', 'factor' => 0.8], $this->merchant()->offer(self::USER));
+    }
+
     private function darkMatter(): int
     {
         $value = DB::table('premium')->where('premium_user_id', self::USER)->value('premium_dark_matter');

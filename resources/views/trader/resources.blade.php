@@ -122,7 +122,11 @@
                             </table>
                         </th>
                         <th width="50%">
+                            @if ($merchant['free'])
+                            <span style="color: lime">{{ __('game/trader.tr_free_call') }}</span><br>
+                            @else
                             {{ sprintf(__('game/trader.tr_price'), $exchangePrice) }}<br>
+                            @endif
                             <input type="submit" name="call" value="{{ __('game/trader.tr_call_button') }}">
                         </th>
                     </tr>

@@ -33,6 +33,7 @@ return [
     'tr_no_enough_dark_matter' => 'There is not enough dark matter available',
     'tr_resource' => 'Resource',
     'tr_free_storage' => 'Free storage',
+    'tr_free_call' => 'The merchant comes for free this time.',
     'tr_exchange_rate' => 'Exchange rate',
     'tr_you_get' => 'You get',
     'tr_you_pay' => 'You pay',

@@ -34,7 +34,7 @@ return [
     'exp_advanced_enemy_2' => 'Tu flota en expedición tuvo un primer contacto poco amistoso con una especie desconocida.', // ok
 
     // found trader
-    'exp_trader' => 'Tu flota en expedición tuvo un corto contacto con una raza de aliens un poco vergonzosa. Estos anunciaron que van a enviar a un representante con bienes de comercio a tus mundos.', // ok
+    'exp_trader' => 'Tu flota en expedición tuvo un corto contacto con una raza de aliens un poco vergonzosa. Estos anunciaron que van a enviar a un representante con bienes de comercio a tus mundos.<br><br>Tu próxima llamada al mercader es gratuita.', // ok
 
     // found dark matter
     'exp_dm_1' => 'La expedición siguió algunas señales fuera de lo común y descrubrió un asteroide. En el núcle del asteroide se encontraba una pequeña cantidad de Materia Oscura. El asteroide fue transportado a bordo y los exploradores intentan extrar la Materia Oscura.<br><br>Se ha capturado %s de %s.', // ok

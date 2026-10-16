@@ -6,6 +6,7 @@ namespace Tests\Unit\App\Http\Game;
 
 use App\Http\Controllers\GameController;
 use App\Libraries\Users;
+use App\Models\Planets;
 use App\Models\User;
 use App\Services\RegistrationService;
 use Database\Seeders\LanguagesTableSeeder;
@@ -111,6 +112,34 @@ class ActionsNeedPostMysqlTest extends MysqlTestCase
         $this->asFounder()->post('/game.php?page=alliance&mode=admin&edit=members&kick=' . $this->member->id);
 
         $this->assertSame(0, User::findOrFail($this->member->id)->ally_id);
+    }
+
+    /**
+     * The phalanx scan costs deuterium: a plain link to it spends nothing,
+     * the POST the galaxy view sends does.
+     */
+    public function testOnlyThePostOfAPhalanxScanCostsDeuterium(): void
+    {
+        $home = DB::table('planets')->where('planet_user_id', $this->founder->id)->first(['planet_galaxy', 'planet_system', 'planet_planet']);
+        $this->assertNotNull($home);
+        $moon = DB::table('planets')->insertGetId([
+            'planet_user_id' => $this->founder->id, 'planet_name' => 'Moon', 'planet_type' => 3, 'planet_deuterium' => 50000,
+            'planet_galaxy' => $home->planet_galaxy, 'planet_system' => $home->planet_system, 'planet_planet' => $home->planet_planet,
+        ], 'planet_id');
+        foreach (['buildings' => 'building', 'defenses' => 'defense', 'ships' => 'ship'] as $table => $prefix) {
+            DB::table($table)->insert([$prefix . '_planet_id' => $moon] + ($table === 'buildings' ? ['building_phalanx' => 1] : []));
+        }
+        DB::table('users')->where('id', $this->founder->id)->update(['current_planet' => $moon]);
+
+        $url = '/game.php?page=phalanx&galaxy=' . $home->planet_galaxy . '&system=' . $home->planet_system . '&planet=' . $home->planet_planet . '&planettype=1';
+
+        $deuterium = fn (): float => (float) Planets::findOrFail($moon)->planet_deuterium;
+
+        $this->asFounder()->get($url);
+        $this->assertSame(50000.0, $deuterium());
+
+        $this->asFounder()->post($url);
+        $this->assertSame(40000.0, $deuterium());
     }
 
     /**

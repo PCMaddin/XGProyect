@@ -7,9 +7,28 @@
         document.getElementById('galaxy_form').submit();
     }
 
+    // the phalanx scan costs deuterium: the popup is opened by a POST with
+    // the CSRF token, so a plain link cannot spend it
     function fenster(target_url, win_name) {
-        var new_win = window.open(target_url, win_name, 'scrollbars=yes,menubar=no,top=0,left=0,toolbar=no,width=550,height=280,resizable=yes');
-        new_win.focus();
+        var name = win_name || 'phalanx';
+        var new_win = window.open('', name, 'scrollbars=yes,menubar=no,top=0,left=0,toolbar=no,width=550,height=280,resizable=yes');
+        var form = document.createElement('form');
+        var token = document.createElement('input');
+
+        form.method = 'post';
+        form.action = target_url;
+        form.target = name;
+        token.type = 'hidden';
+        token.name = '_token';
+        token.value = '{{ csrf_token() }}';
+        form.appendChild(token);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        if (new_win) {
+            new_win.focus();
+        }
     }
 
 
