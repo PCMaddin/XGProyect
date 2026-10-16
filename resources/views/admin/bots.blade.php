@@ -73,6 +73,16 @@
                             </td>
                         </tr>
                         <tr>
+                            <td><label for="bots_attack_players">{{ __('admin/bots.bo_play_attack_players') }}</label></td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="bots_attack_players"
+                                        name="bots_attack_players" {{ $bots_attack_players ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="bots_attack_players"></label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>{{ __('admin/bots.bo_play_count') }}</td>
                             <td>{{ $bots_count }}</td>
                         </tr>

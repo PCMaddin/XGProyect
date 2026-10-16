@@ -89,6 +89,7 @@ class OptionsTableSeeder extends Seeder
             ['name' => 'relocation_price', 'value' => '240000', 'type' => 'int'],
             ['name' => 'bots_play', 'value' => '1', 'type' => 'int'],
             ['name' => 'bots_last_run', 'value' => '0', 'type' => 'int'],
+            ['name' => 'bots_attack_players', 'value' => '0', 'type' => 'int'],
             ['name' => 'registration_dark_matter', 'value' => '0', 'type' => 'int'],
             ['name' => 'mailing_protocol', 'value' => 'smtp', 'type' => 'string'],
             ['name' => 'mailing_smtp_host', 'value' => 'mailpit', 'type' => 'string'],

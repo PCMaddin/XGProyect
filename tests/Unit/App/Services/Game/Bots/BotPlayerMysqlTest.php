@@ -14,6 +14,8 @@ use App\Services\Game\Bots\BotPlayerService;
 use App\Services\SettingsService;
 use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Testing\Fakes\ExceptionHandlerFake;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\MysqlTestCase;
 
@@ -36,6 +38,8 @@ class BotPlayerMysqlTest extends MysqlTestCase
         parent::setUp();
 
         config(['version.files' => '4.0.0']);
+        // a bot turn reports its errors instead of failing: none may occur
+        Exceptions::fake();
         $this->seed(OptionsTableSeeder::class);
 
         $this->assertSame(1, app(BotService::class)->createBots(1, 1, 1));
@@ -43,6 +47,16 @@ class BotPlayerMysqlTest extends MysqlTestCase
         $bot = User::where('user_is_bot', true)->firstOrFail();
         $this->bot = $bot->id;
         $this->planet = $bot->home_planet_id;
+    }
+
+    protected function tearDown(): void
+    {
+        // skipped without MariaDB: nothing was faked
+        if (Exceptions::getFacadeRoot() instanceof ExceptionHandlerFake) {
+            Exceptions::assertNothingReported();
+        }
+
+        parent::tearDown();
     }
 
     public function testABotBuildsResearchesAndDefends(): void

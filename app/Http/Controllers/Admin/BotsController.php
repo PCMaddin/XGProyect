@@ -32,6 +32,7 @@ class BotsController extends BaseController
             'max_system' => MAX_SYSTEM_IN_GALAXY,
             'max_planet' => MAX_PLANET_IN_SYSTEM,
             'bots_play' => $this->settings->getBool('bots_play'),
+            'bots_attack_players' => $this->settings->getBool('bots_attack_players'),
             'bots_count' => User::where('user_is_bot', true)->count(),
         ]);
     }
@@ -39,6 +40,7 @@ class BotsController extends BaseController
     public function play(Request $request): RedirectResponse
     {
         $this->settings->write('bots_play', $request->boolean('bots_play') ? 1 : 0);
+        $this->settings->write('bots_attack_players', $request->boolean('bots_attack_players') ? 1 : 0);
         session()->flash('success', __('admin/bots.bo_play_saved'));
 
         return redirect()->route('admin.bots');

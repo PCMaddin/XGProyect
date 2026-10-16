@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Game\Bots;
 
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
-use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ResearchEnumerator as Research;
 use App\Services\Game\Formulas\DevelopmentsService;
 
@@ -15,8 +14,8 @@ use App\Services\Game\Formulas\DevelopmentsService;
  * mines, then the mines (crystal two, deuterium four levels behind metal);
  * of these the most urgent one it can pay now, so it does not sit on its
  * stock waiting for a scarce resource. Research follows a short opening
- * list and then always takes the cheapest useful step; spare resources go
- * into the best defence the bot can build.
+ * list and then always takes the cheapest useful step. Ships and defences
+ * are {@see BotShipyard}'s.
  *
  * Only decides; checks the game's own rules (requirements, price) through
  * DevelopmentsService so a bot never gets what a player could not.
@@ -32,12 +31,16 @@ class BotStrategy
         [Research::RESEARCH_ESPIONAGE_TECHNOLOGY, 2],
         [Research::RESEARCH_COMPUTER_TECHNOLOGY, 2],
         [Research::RESEARCH_ENERGY_TECHNOLOGY, 3],
+        [Research::RESEARCH_COMBUSTION_DRIVE, 3],
         [Research::RESEARCH_LASER_TECHNOLOGY, 3],
+        [Research::RESEARCH_IMPULSE_DRIVE, 3],
+        [Research::RESEARCH_ESPIONAGE_TECHNOLOGY, 4],
+        [Research::RESEARCH_ASTROPHYSICS, 1],
         [Research::RESEARCH_WEAPONS_TECHNOLOGY, 2],
         [Research::RESEARCH_SHIELDING_TECHNOLOGY, 2],
         [Research::RESEARCH_ARMOUR_TECHNOLOGY, 2],
+        [Research::RESEARCH_ASTROPHYSICS, 3],
         [Research::RESEARCH_LASER_TECHNOLOGY, 6],
-        [Research::RESEARCH_IMPULSE_DRIVE, 2],
         [Research::RESEARCH_IONIC_TECHNOLOGY, 2],
     ];
 
@@ -55,16 +58,7 @@ class BotStrategy
         Research::RESEARCH_COMBUSTION_DRIVE,
         Research::RESEARCH_IMPULSE_DRIVE,
         Research::RESEARCH_HYPERSPACE_TECHNOLOGY,
-    ];
-
-    /** strongest first; the first one the bot may build wins */
-    private const DEFENCES = [
-        Defenses::DEFENSE_PLASMA_TURRET,
-        Defenses::DEFENSE_GAUSS_CANNON,
-        Defenses::DEFENSE_ION_CANNON,
-        Defenses::DEFENSE_HEAVY_LASER,
-        Defenses::DEFENSE_LIGHT_LASER,
-        Defenses::DEFENSE_ROCKET_LAUNCHER,
+        Research::RESEARCH_ASTROPHYSICS,
     ];
 
     private const STORAGES = [
@@ -144,51 +138,6 @@ class BotStrategy
         }
 
         return $cheapest;
-    }
-
-    /**
-     * The best defence the budget pays for and how many, or null.
-     *
-     * @param array<int, int>              $levels
-     * @param array<string, float|int>     $budget metal, crystal, deuterium
-     *
-     * @return array{0: int, 1: int}|null
-     */
-    public function defenceOrder(array $levels, array $budget, int $maxPerOrder): ?array
-    {
-        foreach (self::DEFENCES as $defence) {
-            if (!$this->developments->isDevelopmentAllowed($defence, $levels)) {
-                continue;
-            }
-
-            $amount = min($this->affordable($defence, $budget), $maxPerOrder);
-
-            if ($amount > 0) {
-                return [$defence, $amount];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * What is left for defences: a quarter of the stock above twice the
-     * price of the next building, so the economy keeps growing first.
-     *
-     * @param array<string, float|int> $stock
-     * @param array<string, float|int> $reserve
-     *
-     * @return array<string, float>
-     */
-    public function spareBudget(array $stock, array $reserve): array
-    {
-        $budget = [];
-
-        foreach (['metal', 'crystal', 'deuterium'] as $resource) {
-            $budget[$resource] = max(0.0, ((float) ($stock[$resource] ?? 0) - 2 * (float) ($reserve[$resource] ?? 0)) / 4);
-        }
-
-        return $budget;
     }
 
     /**
@@ -345,22 +294,5 @@ class BotStrategy
         }
 
         return true;
-    }
-
-    /**
-     * @param array<string, float|int> $budget
-     */
-    private function affordable(int $defence, array $budget): int
-    {
-        $price = $this->developments->developmentPrice($defence, 0, false);
-        $amounts = [];
-
-        foreach (['metal', 'crystal', 'deuterium'] as $resource) {
-            if (($price[$resource] ?? 0) > 0) {
-                $amounts[] = (int) floor((float) ($budget[$resource] ?? 0) / $price[$resource]);
-            }
-        }
-
-        return $amounts === [] ? 0 : max(0, min($amounts));
     }
 }

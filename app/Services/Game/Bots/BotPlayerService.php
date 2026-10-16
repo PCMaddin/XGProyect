@@ -24,7 +24,7 @@ use Throwable;
  * planets up to date like a player's page view does, then build, research
  * and order defences through the same queues and rules as players. A bot
  * acts every 10 to 20 minutes; at most a few bots act per tick so no page
- * view gets slow. Bots do not fly fleets (yet).
+ * view gets slow. Their fleets fly as {@see BotFleetPlanner} decides.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -43,6 +43,8 @@ class BotPlayerService
     public function __construct(
         private SettingsService $settings,
         private BotStrategy $strategy,
+        private BotShipyard $shipyard,
+        private BotFleetPlanner $fleetPlanner,
         private BuildingQueueService $buildingQueue,
         private ResearchQueueService $researchQueue,
         private DevelopmentDataService $developmentData,
@@ -116,7 +118,20 @@ class BotPlayerService
 
         $this->build($user, $planetId, $numbers);
         $this->research($user, $planetId);
-        $this->defend($user, $planetId, $numbers);
+
+        $model = Planets::with(['buildings'])->find($planetId);
+
+        if ($model === null) {
+            return;
+        }
+
+        // keep what the next building will cost
+        $levels = $this->developmentData->levelsFromPlanet($model, $user);
+        $next = $this->strategy->nextBuilding($levels, $numbers, false, true);
+        $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
+
+        $this->fleetPlanner->act($user, $this->planetRow($planetId), $reserve, $now);
+        $this->orderShips($user, $planetId, $levels, $reserve);
     }
 
     /**
@@ -176,34 +191,39 @@ class BotPlayerService
     }
 
     /**
-     * Spare resources go into defences, like the shipyard page orders them,
-     * while the shipyard is idle and not being upgraded.
+     * Ships and defences, like the shipyard page orders them, while the
+     * shipyard is idle and not being upgraded.
      *
      * @param array<string, mixed> $user
-     * @param array<string, float> $numbers
+     * @param array<int, int>      $levels
+     * @param array<string, float> $reserve
      */
-    private function defend(array $user, int $planetId, array $numbers): void
+    private function orderShips(array $user, int $planetId, array $levels, array $reserve): void
     {
-        $model = Planets::with(['buildings'])->find($planetId);
+        $model = Planets::find($planetId);
+        $planet = $this->planetRow($planetId);
 
-        if ($model === null || !in_array($model->planet_b_hangar_id, ['', '0', null], true) ||
+        if ($model === null || $planet === [] || !in_array($model->planet_b_hangar_id, ['', '0', null], true) ||
             $model->buildingQueue()->whereIn('building_id', [Buildings::BUILDING_ROBOT_FACTORY, Buildings::BUILDING_NANO_FACTORY, Buildings::BUILDING_HANGAR])->exists()) {
             return;
         }
 
-        $levels = $this->developmentData->levelsFromPlanet($model, $user);
-        $stock = ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium];
-        // keep what the next building will cost
-        $next = $this->strategy->nextBuilding($levels, $numbers, false, true);
-        $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
-        $order = $this->strategy->defenceOrder($levels, $this->strategy->spareBudget($stock, $reserve), MAX_FLEET_OR_DEFS_PER_ROW);
+        $order = $this->shipyard->order(
+            $levels,
+            $this->shipyard->shipsOf($planet),
+            $planetId === self::asInt($user['home_planet_id'] ?? 0),
+            $this->fleetPlanner->wantsColony($user),
+            ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
+            $reserve,
+            MAX_FLEET_OR_DEFS_PER_ROW
+        );
 
         if ($order === null) {
             return;
         }
 
-        [$defence, $amount] = $order;
-        $price = $this->developments->developmentPrice($defence, 0, false);
+        [$unit, $amount] = $order;
+        $price = $this->developments->developmentPrice($unit, 0, false);
 
         DB::update(
             $this->prepareSql(
@@ -215,7 +235,7 @@ class BotPlayerService
                 WHERE `planet_id` = ?;'
             ),
             [
-                $defence . ',' . $amount . ';',
+                $unit . ',' . $amount . ';',
                 ($price['metal'] ?? 0) * $amount,
                 ($price['crystal'] ?? 0) * $amount,
                 ($price['deuterium'] ?? 0) * $amount,

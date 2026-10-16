@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Services\Game\Bots;
 
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
-use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ResearchEnumerator as Research;
 use App\Services\Game\Bots\BotStrategy;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -13,8 +12,7 @@ use Tests\TestCase;
 
 /**
  * The bots' build order: energy, full storages, lagging facilities, then
- * the mines; research along an opening list, then the cheapest step;
- * spare resources into the best allowed defence.
+ * the mines; research along an opening list, then the cheapest step.
  */
 #[CoversClass(BotStrategy::class)]
 class BotStrategyTest extends TestCase
@@ -122,33 +120,19 @@ class BotStrategyTest extends TestCase
         $this->assertSame(Research::RESEARCH_ENERGY_TECHNOLOGY, $this->strategy->nextResearch([Buildings::BUILDING_LABORATORY => 1]));
         $this->assertSame(Research::RESEARCH_COMBUSTION_DRIVE, $this->strategy->nextResearch([Buildings::BUILDING_LABORATORY => 1, Research::RESEARCH_ENERGY_TECHNOLOGY => 1]));
 
-        $done = [Buildings::BUILDING_LABORATORY => 10, Buildings::BUILDING_HANGAR => 5, Research::RESEARCH_ENERGY_TECHNOLOGY => 3, Research::RESEARCH_COMBUSTION_DRIVE => 2,
-            Research::RESEARCH_ESPIONAGE_TECHNOLOGY => 2, Research::RESEARCH_COMPUTER_TECHNOLOGY => 2, Research::RESEARCH_LASER_TECHNOLOGY => 6,
+        // the way to astrophysics: impulse drive and espionage first
+        $towardsAstrophysics = [Buildings::BUILDING_LABORATORY => 3, Research::RESEARCH_ENERGY_TECHNOLOGY => 3, Research::RESEARCH_COMBUSTION_DRIVE => 3,
+            Research::RESEARCH_COMPUTER_TECHNOLOGY => 2, Research::RESEARCH_LASER_TECHNOLOGY => 3,
+            Research::RESEARCH_IMPULSE_DRIVE => 3, Research::RESEARCH_ESPIONAGE_TECHNOLOGY => 4];
+        $this->assertSame(Research::RESEARCH_ASTROPHYSICS, $this->strategy->nextResearch($towardsAstrophysics));
+
+        $done = [Buildings::BUILDING_LABORATORY => 10, Buildings::BUILDING_HANGAR => 5, Research::RESEARCH_ENERGY_TECHNOLOGY => 3, Research::RESEARCH_COMBUSTION_DRIVE => 3,
+            Research::RESEARCH_ESPIONAGE_TECHNOLOGY => 4, Research::RESEARCH_COMPUTER_TECHNOLOGY => 2, Research::RESEARCH_LASER_TECHNOLOGY => 6,
             Research::RESEARCH_WEAPONS_TECHNOLOGY => 2, Research::RESEARCH_SHIELDING_TECHNOLOGY => 2, Research::RESEARCH_ARMOUR_TECHNOLOGY => 2,
-            Research::RESEARCH_IMPULSE_DRIVE => 2, Research::RESEARCH_IONIC_TECHNOLOGY => 2];
+            Research::RESEARCH_IMPULSE_DRIVE => 3, Research::RESEARCH_IONIC_TECHNOLOGY => 2, Research::RESEARCH_ASTROPHYSICS => 3];
 
-        // after the opening: the cheapest next level, shielding 3 (3,200) before combustion drive 3 (4,000)
+        // after the opening: the cheapest next level, shielding 3 (3,200) before computer technology 3 (3,200 too, later in the list)
         $this->assertSame(Research::RESEARCH_SHIELDING_TECHNOLOGY, $this->strategy->nextResearch($done));
-    }
-
-    public function testSpareResourcesBuyTheBestAllowedDefence(): void
-    {
-        $this->assertNull($this->strategy->defenceOrder([], ['metal' => 100000, 'crystal' => 100000], 1000));
-        $this->assertSame([Defenses::DEFENSE_ROCKET_LAUNCHER, 5], $this->strategy->defenceOrder([Buildings::BUILDING_HANGAR => 1], ['metal' => 10000], 1000));
-        $this->assertSame([Defenses::DEFENSE_ROCKET_LAUNCHER, 3], $this->strategy->defenceOrder([Buildings::BUILDING_HANGAR => 1], ['metal' => 10000], 3));
-
-        $lasers = [Buildings::BUILDING_HANGAR => 2, Research::RESEARCH_ENERGY_TECHNOLOGY => 1, Research::RESEARCH_LASER_TECHNOLOGY => 3];
-        $this->assertSame([Defenses::DEFENSE_LIGHT_LASER, 2], $this->strategy->defenceOrder($lasers, ['metal' => 3000, 'crystal' => 1000], 1000));
-        // too little crystal for a laser: rocket launchers instead
-        $this->assertSame([Defenses::DEFENSE_ROCKET_LAUNCHER, 1], $this->strategy->defenceOrder($lasers, ['metal' => 3000, 'crystal' => 100], 1000));
-    }
-
-    public function testOnlyResourcesAboveTheNextBuildingAreSpent(): void
-    {
-        $this->assertSame(
-            ['metal' => 500.0, 'crystal' => 0.0, 'deuterium' => 250.0],
-            $this->strategy->spareBudget(['metal' => 10000, 'crystal' => 1000, 'deuterium' => 1000], ['metal' => 4000, 'crystal' => 2000])
-        );
     }
 
     /**

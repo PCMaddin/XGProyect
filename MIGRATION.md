@@ -818,7 +818,7 @@ Baseline-Einträge.
     danach immer die billigste nützliche Stufe. Ein Viertel der Rohstoffe
     über dem doppelten Preis des nächsten Gebäudes geht in die beste
     erlaubte Verteidigung.
-  - Bots fliegen (noch) nicht: keine Flotten, keine Angriffe, kein Handel.
+  - Bots handeln nicht (Händler, Auktionen) und bilden keine Allianzen.
   - Die Aufräumroutine löscht keine Bots mehr; handelnde Bots sind online.
   - Admin → Bots: Schalter „Bots spielen selbst“ (`bots_play`, Standard an).
 
@@ -827,6 +827,43 @@ Baseline-Einträge.
   einer Schnellvorlauf-Simulation abgestimmt (300 Züge à 30 Minuten: Metall
   13, Kristall 11, Deuterium 9, Energie ausgeglichen, Forschung laufend).
   Im Browser Schalter und echten Tick geprüft, gecrawlt ohne neue Fehler.
+- ✅ **Bots fliegen:** Bots verschicken jetzt Flotten, nach denselben Regeln
+  wie die Flottenseiten (Schiffe auf dem Planeten, freie Flotten- und
+  Expeditionsslots, Laderaum, Treibstoff, Flugzeit mit denselben Formeln;
+  immer volle Geschwindigkeit). Höchstens eine Flotte pro Planet und Zug:
+  - Heimatplanet:
+    - Kolonien gründen, so viele Astrophysik erlaubt, auf der nächsten
+      freien Position (4–12, mittlere zuerst) im eigenen oder einem
+      Nachbarsystem.
+    - Überfälle nach Spionage: Ist die Sonde angekommen, bewertet der Bot
+      das Ziel nach dem, was der Bericht zeigt (Rohstoffe, Schiffe,
+      Verteidigung). Er greift nur an, wenn das Ziel unverteidigt ist oder
+      seine Kriegsschiffe es dreifach übertreffen (grober Kampfwert aus
+      Angriff, Schild und Hülle) und die halbe Beute mindestens 5.000
+      ergibt. Er schickt genug Transporter dafür mit.
+    - Spionage beim nächsten Nachbarn im Umkreis von 10 Systemen, dasselbe
+      Ziel höchstens alle 6 Stunden.
+    - Expeditionen mit der Hälfte der Kleinen Transporter und einer Sonde,
+      eine Stunde Haltezeit.
+  - Kolonien bringen ihre Rohstoffe über der Reserve für das nächste Gebäude
+    mit eigenen Transportern zum Heimatplaneten.
+  - Ziele: nur andere Bots, außer der Admin erlaubt Angriffe auf Spieler
+    (neuer Schalter „Bots greifen auch Spieler an“, Option
+    `bots_attack_players`, Standard aus). Admins, Spieler im Urlaub und
+    Noob-Schutz werden wie bei Spielern geachtet.
+  - Werft (`BotShipyard`): ein gewünschtes Kolonieschiff zuerst (dafür wird
+    gespart), dann 3 Spionagesonden, Kleine Transporter und Leichte Jäger
+    (je bis 2 × Metallminenstufe, höchstens 40/50), dann Verteidigung.
+    Kolonien halten nur Transporter. Forschung um Verbrennungstriebwerk 3,
+    Impulstriebwerk 3, Spionage 4 und Astrophysik 1/3 ergänzt.
+
+  Ein Fehler in einem Bot-Zug wird wie bisher nur gemeldet; die Bot-Tests
+  prüfen jetzt aber, dass nichts gemeldet wurde (so fiel ein fehlendes
+  Tabellenpräfix in einer Sortierung auf, das jeden Überfall verhindert
+  hätte). Tests: Werft und Kampfwert (Unit), Kolonisieren, Expedition,
+  Spionage mit anschließendem Überfall, kein Überfall auf Verteidigte ohne
+  Kriegsschiffe, Spieler nur mit Schalter, Transport von der Kolonie
+  (MariaDB).
 
 ## Smoke-Test gegen eine echte Datenbank
 

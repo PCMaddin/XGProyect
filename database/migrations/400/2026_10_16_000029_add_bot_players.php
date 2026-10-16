@@ -28,6 +28,7 @@ return new class () extends Migration {
 
         Options::firstOrCreate(['name' => 'bots_play'], ['value' => '1', 'type' => 'int']);
         Options::firstOrCreate(['name' => 'bots_last_run'], ['value' => '0', 'type' => 'int']);
+        Options::firstOrCreate(['name' => 'bots_attack_players'], ['value' => '0', 'type' => 'int']);
     }
 
     public function down(): void
@@ -39,6 +40,6 @@ return new class () extends Migration {
             });
         }
 
-        Options::whereIn('name', ['bots_play', 'bots_last_run'])->delete();
+        Options::whereIn('name', ['bots_play', 'bots_last_run', 'bots_attack_players'])->delete();
     }
 };
