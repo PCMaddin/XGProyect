@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => 'Bem-vindo ao XG Proyect',
+    'hm_sub_title' => 'Obrigado por escolher o XG Proyect como seu clone de OGame. Esta tela mostra um resumo das estatísticas do seu servidor. Os links à esquerda permitem controlar todos os aspectos do servidor. Cada página explica como usar suas ferramentas.',
+    'hm_server_statistics' => 'Estatísticas do servidor',
+    'hm_number_users' => 'Número de usuários',
+    'hm_number_alliances' => 'Número de alianças',
+    'hm_number_planets' => 'Número de planetas',
+    'hm_number_moons' => 'Número de luas',
+    'hm_number_fleets' => 'Número de frotas',
+    'hm_number_reports' => 'Número de relatórios',
+    'hm_average_user_points' => 'Média de pontos dos jogadores',
+    'hm_average_alliance_points' => 'Média de pontos das alianças',
+    'hm_database_size' => 'Tamanho do banco de dados',
+    'hm_database_server' => 'Servidor de banco de dados',
+    'hm_php_version' => 'Versão do PHP',
+    'hm_server_version' => 'Versão do XGP',
+    'hm_error' => 'Alerta!',
+    'hm_warning' => 'Atenção!',
+    'hm_ok' => 'OK!',
+    'hm_debug_mode' => 'O modo de depuração está ativo (APP_DEBUG=true no .env): as páginas de erro mostram código-fonte, consultas e dados da requisição a qualquer visitante. Em um servidor público, defina APP_DEBUG=false e APP_ENV=production.',
+    'hm_install_file_detected' => 'Pasta install/ detectada. Por segurança, você precisa renomeá-la ou excluí-la.',
+    'hm_config_file_writable' => 'Seu arquivo de configuração (xgp-db-config.php) pode ser alterado por qualquer usuário. Recomendamos fortemente mudar as permissões para 640 ou pelo menos 644.',
+    'hm_errors' => 'Há erros no seu servidor. Veja-os clicando <a href="/admin/errors">aqui</a>',
+    'hm_old_version' => 'Há uma nova versão disponível. Clique <a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">aqui</a> para baixá-la.',
+    'hm_all_ok' => 'Nenhuma atualização ou alerta',
+    'hm_update_required' => 'As versões do sistema e do banco de dados são diferentes, <a href="/admin/update"><strong>atualize agora!</strong></a> para evitar problemas.',
+    'hm_credits' => 'Créditos',
+    'hm_proyect_leader' => 'Líderes do projeto',
+    'hm_principal_contributors' => 'Principais colaboradores',
+    'hm_extensions' => 'Bibliotecas / extensões',
+    'hm_thanks_to' => 'Agradecimentos especiais a',
+];

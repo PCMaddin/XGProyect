@@ -13,7 +13,7 @@
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
 | Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch, Französisch (Schlüssel und Platzhalter per Test gleich) |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien) (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
@@ -683,6 +683,25 @@ Baseline-Einträge.
     Expeditionsgebiete prüfen Französisch mit; ein Migrationstest prüft die
     neue Zeile. Alle Spiel- und Admin-Seiten mit Französisch als
     Serversprache gecrawlt, ohne neue Fehler.
+- **Weitere Sprachen** (Reihenfolge: Portugiesisch (Brasilien),
+  Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch
+  (vereinfacht)): je Sprache alle 92 Dateien, ein Eintrag im
+  `LanguagesTableSeeder`, eine Update-Migration für bestehende
+  Installationen und die Aufnahme in `LanguageFilesTest`,
+  `AdminObjectNamesTest`, den Test der Expeditionsgebiete und den
+  Migrationstest (jetzt ein Data-Provider über alle nachgerüsteten
+  Sprachen). Sprachordner mit Region heißen wie bei Laravel üblich
+  (`pt_BR`, `zh_CN`); `lang_code` liefert das HTML-Attribut (`pt-BR`).
+  Die Namen der Spielobjekte stehen je Sprache einmal in einer Namensliste,
+  aus der die reinen Namensdateien erzeugt werden. Begriffe folgen dem
+  jeweiligen OGame-Server.
+  - ✅ **Portugiesisch (Brasilien)** (`pt_BR`, Migration `000023`): Anrede
+    „você“, Begriffe des brasilianischen OGame (Cargueiro Pequeno, Campo de
+    Destroços, Sensor Phalanx, Matéria Escura …). Mit `pt_BR` als
+    Serversprache gecrawlt, ohne neue Fehler. Der Crawl meldete einmal
+    `/admin/ajax/update/check` als abgebrochen: Die Seite fragt
+    `updates.xgproyect.org` mit 5 Sekunden Timeout ab, und der Crawler
+    verlässt sie vorher; das hängt nicht an der Sprache.
 
 ## Smoke-Test gegen eine echte Datenbank
 

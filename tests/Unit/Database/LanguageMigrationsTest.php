@@ -8,38 +8,42 @@ use App\Models\Languages;
 use App\Models\Options;
 use Database\Seeders\LanguagesTableSeeder;
 use Illuminate\Database\Migrations\Migration;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\DatabaseTestCase;
 
 /**
- * The update migrations for German: the languages row, and a valid server
+ * The update migrations for the languages: their rows, and a valid server
  * language instead of the "spanish" the installer stored.
  */
 class LanguageMigrationsTest extends DatabaseTestCase
 {
-    public function testGermanIsAddedOnce(): void
+    /**
+     * The migrations that add a language for existing installs.
+     *
+     * @return array<string, array{0: string, 1: string, 2: string}>
+     */
+    public static function addedLanguages(): array
     {
-        $this->seed(LanguagesTableSeeder::class);
-
-        self::migrate('2026_10_16_000001_add_german_language.php');
-        $this->assertSame(1, Languages::where('code', 'de')->count());
-
-        Languages::where('code', 'de')->delete();
-        self::migrate('2026_10_16_000001_add_german_language.php');
-        $this->assertSame(1, Languages::where('code', 'de')->count());
-        $this->assertSame(['es', 'en', 'fr', 'de'], Languages::orderBy('id')->pluck('code')->all());
+        return [
+            'de' => ['2026_10_16_000001_add_german_language.php', 'de', 'Deutsch'],
+            'fr' => ['2026_10_16_000022_add_french_language.php', 'fr', 'Français'],
+            'pt_BR' => ['2026_10_16_000023_add_portuguese_brazil_language.php', 'pt_BR', 'Português (Brasil)'],
+        ];
     }
 
-    public function testFrenchIsAddedOnce(): void
+    #[DataProvider('addedLanguages')]
+    public function testTheLanguageIsAddedOnce(string $file, string $code, string $name): void
     {
         $this->seed(LanguagesTableSeeder::class);
 
-        self::migrate('2026_10_16_000022_add_french_language.php');
-        $this->assertSame(1, Languages::where('code', 'fr')->count());
+        self::migrate($file);
+        $this->assertSame(1, Languages::where('code', $code)->count());
 
-        Languages::where('code', 'fr')->delete();
-        self::migrate('2026_10_16_000022_add_french_language.php');
-        $this->assertSame(['es', 'en', 'de', 'fr'], Languages::orderBy('id')->pluck('code')->all());
-        $this->assertSame('Français', Languages::where('code', 'fr')->value('name'));
+        Languages::where('code', $code)->delete();
+        self::migrate($file);
+        $this->assertSame(1, Languages::where('code', $code)->count());
+        $this->assertSame($name, Languages::where('code', $code)->value('name'));
+        $this->assertSame($code, Languages::orderByDesc('id')->value('code'));
     }
 
     public function testAnUnknownServerLanguageBecomesEnglish(): void
