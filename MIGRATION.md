@@ -1,33 +1,56 @@
-# Migrations-Roadmap: `legacy/` → `app/`
+# Migrations-Roadmap: `legacy/` → `app/`  ✅ abgeschlossen
 
-> Stand des Audits: XG Proyect befindet sich mitten in einem **Strangler-Fig-Umbau**
-> vom alten prozeduralen XGP-Code (`legacy/`) nach modernem Laravel 12 (`app/`).
-> Rund 40 % der Game-Module sind bereits portiert. Dieses Dokument beschreibt den
-> Weg, die Migration **fertigzustellen** — kein Rewrite von Null.
+> XG Proyect war mitten in einem **Strangler-Fig-Umbau** vom alten prozeduralen
+> XGP-Code (`legacy/`) nach Laravel 12 (`app/`). Dieses Dokument beschreibt den
+> Weg dorthin; die Abschnitte unten sind das Protokoll der einzelnen Wellen.
 
-## Ausgangslage
+## Stand
 
-| | Neu (`app/`) | Legacy (`legacy/`) |
-|---|---|---|
-| Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | alle Bibliotheken außer Missions/BattleEngine nach `app/` migriert oder gelöscht | nur noch Missions-Handler, BattleEngine (OPBE), `Objects`, Entities, Enumeratoren, Helpers |
-| Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | typisiert, gebundene SQL-Parameter, Level 9 ohne Baseline |
-| Analyse-Schuld | 36 PHPStan- + 57 PHPMD-Einträge (nur noch `app/`) | **0** |
+| | |
+|---|---|
+| `legacy/` | **gelöscht**, ebenso der `Xgp\`-Autoload-Eintrag |
+| Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
+| Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
+| Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
+| Tests | 707 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
 
-> **Stand:** Alle 38 Spielseiten laufen nativ, der Legacy-Front-Controller ist
-> entfernt (vor jeder Seite läuft `GameBootstrap`). Ausgehend von 1.337 PHPStan- /
-> 682 PHPMD-Einträgen sind noch 36 / 57 übrig, alle in `app/`; `legacy/` hat
-> keinen einzigen Baseline-Eintrag mehr. Jede Änderung ist lokal mit PHPStan
-> Level 9, PHPMD (roh und Gate), php-cs-fixer (Dry-Run über das ganze Repo) und
-> der PHPUnit-Suite (677 Tests) verifiziert.
->
 > **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
 > Ausführung (Actions läuft dort offenbar nicht), die Checks aus
 > `.github/workflows/php.yml` greifen also nur lokal.
 
-**Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
-Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
-Playerprofile, Changenick, Notices, Banned, Changelog, Logout.
+### Abschluss der Migration
+
+1. **Enumeratoren** → `App\Core\Enumerators` (nur Namespace; die Konstanten-
+   klassen bleiben, weil der Spielcode sie durchgehend als Int-Keys und
+   -Werte nutzt).
+2. **Helpers** → `App\Helpers`, **SQL-Concerns** (`PreparesLegacySql`,
+   `BindsLegacyQueries`) → `App\Core\Concerns`.
+3. **Missions, BattleEngine, Entities, `Objects`** → `app/`, Tests von
+   `tests/Unit/Legacy` nach `tests/Unit/App`; `legacy/` und alle
+   `legacy/`-Pfade in PHPStan, PHPMD, php-cs-fixer und CI entfernt.
+4. **`Objects` (deprecated Adapter) entfernt:** Controller, Tick, Galaxie-,
+   Flotten- und Entwicklungs-Bibliothek und die Missions lesen Namen, Preise,
+   Kampfwerte und Produktionsformeln direkt aus der `GameObjectRegistry`
+   (Container-Singleton; die Controller bauten über `new Objects()` pro
+   Request eine eigene Registry). `MissionObjects` liefert die Array-Formen
+   der Kampf-Engine; vor dem Löschen wurde geprüft, dass Arrays und
+   Formelergebnisse identisch sind.
+
+### Bewusst offen (Modernisierung, keine Migration)
+
+- **Entities** (`App\Core\Entity\*`, als deprecated markiert): getippte
+  Lese-Wrapper um DB-Zeilen, genutzt über `Alliances`, `Buddy`, `Fleets`,
+  `AcsFleets`, `Premium`, `Researches`, `ResourceMarket` (128 Aufrufstellen).
+  Eine Umstellung auf Eloquent ist möglich (die Modelle haben passende
+  Casts), aber nicht risikofrei: Die Getter liefern bei fehlenden Werten
+  `0`/`''`, Eloquent `null`, obwohl die Modelle `@property int` deklarieren —
+  PHPStan sieht diese Unterschiede nicht.
+- **Konstantenklassen vs. Enums:** `App\Enums\Game\{BuildingId, ShipId, …}`
+  existieren parallel zu den Enumeratoren, werden aber praktisch nur in Tests
+  genutzt.
+- **Benennung:** `LegacyController`, `routes/legacy.php`, Middleware-Gruppe
+  `legacy`, `config/legacy/constants.php` tragen den Namen noch, sind aber
+  normaler `app/`-Code.
 
 ## Zentraler Befund: der geteilte Berechnungs-Layer
 
