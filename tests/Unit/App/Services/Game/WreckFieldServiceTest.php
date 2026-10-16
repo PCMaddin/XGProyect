@@ -107,12 +107,44 @@ class WreckFieldServiceTest extends DatabaseTestCase
         $this->assertSame([207 => 6], $field['repaired']);
         $this->assertSame(self::NOW + $wrecks->repairTime([207 => 6], 12, 0), $field['repair_ends_at']);
 
-        // a repair in progress keeps its ships, new wrecks are lost
-        $this->assertFalse($wrecks->recordBattle(70, 7, [207 => 10], [207 => 10], self::NOW + 60));
+        // the wrecks are used up; a battle during the repair leaves new ones beside it
+        $this->assertSame([], $field['ships']);
+        $this->assertTrue($wrecks->recordBattle(70, 7, [207 => 10], [207 => 10], self::NOW + 60));
+        $field = $wrecks->field(70);
+        $this->assertNotNull($field);
+        $this->assertSame([207 => 7], $field['ships']);
+        $this->assertSame([207 => 6], $field['repaired']);
+        $this->assertSame(self::NOW + 60 + 3 * 86400, $field['expires_at']);
+        $this->assertSame('sd_repair_running', $wrecks->startRepair(7, 70, self::NOW + 120));
 
         $this->assertSame('sd_repair_running', $wrecks->deploy(7, 70, self::NOW + 60));
         $this->assertNull($wrecks->deploy(7, 70, $field['repair_ends_at']));
         $this->assertSame(8, $this->battleships());
+
+        // the new wrecks are the next field, which the dock repairs in turn
+        $next = $wrecks->field(70);
+        $this->assertNotNull($next);
+        $this->assertSame([207 => 7], $next['ships']);
+        $this->assertSame(0, $next['repair_started_at']);
+        $this->assertNull($wrecks->startRepair(7, 70, $field['repair_ends_at'] + 10));
+        $this->assertSame([207 => 3], $wrecks->field(70)['repaired'] ?? null);
+    }
+
+    public function testWrecksBesideARepairBurnUpAfter3Days(): void
+    {
+        $wrecks = app(WreckFieldService::class);
+        DB::table('buildings')->where('building_planet_id', 70)->update(['building_space_dock' => 1]);
+        $wrecks->recordBattle(70, 7, [207 => 20], [207 => 20], self::NOW);
+        $this->assertNull($wrecks->startRepair(7, 70, self::NOW));
+        $wrecks->recordBattle(70, 7, [207 => 10], [207 => 10], self::NOW + 60);
+
+        $wrecks->settle(70, self::NOW + 60 + 3 * 86400);
+        $field = $wrecks->field(70);
+        $this->assertNotNull($field);
+        $this->assertSame([], $field['ships']);
+
+        // after the repair nothing is left
+        $this->assertNull($wrecks->deploy(7, 70, $field['repair_ends_at'] + 3 * 86400));
         $this->assertNull($wrecks->field(70));
     }
 

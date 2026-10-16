@@ -328,6 +328,9 @@ class GalaxyController extends BaseController
             }
 
             $own = $field['user_id'] === $this->userInt('id');
+            // in a repair: the ships in it, unless new wrecks lie beside it
+            $waiting = $field['ships'] !== [] && $field['expires_at'] > $now;
+            $ships = $waiting || $field['repair_started_at'] === 0 ? $field['ships'] : $field['repaired'];
             $blocks[$slot] = view('galaxy.galaxy_wreck_block', [
                 'galaxy' => $this->currentGalaxy,
                 'system' => $this->currentSystem,
@@ -336,8 +339,8 @@ class GalaxyController extends BaseController
                 'ships' => array_map(fn (int $id, int $amount): array => [
                     'name' => (string) __('game/ships.' . $this->registry->get($id)->getName()),
                     'amount' => $this->formatService->prettyNumber($amount),
-                ], array_keys($field['ships']), $field['ships']),
-                'state' => $field['repair_started_at'] > 0
+                ], array_keys($ships), $ships),
+                'state' => $field['repair_started_at'] > 0 && !$waiting
                     ? (string) __('game/galaxy.gl_wreck_in_repair')
                     : sprintf((string) __('game/galaxy.gl_wreck_burns_up'), $this->formatService->prettyTime(max(0, $field['expires_at'] - $now))),
                 'dock_url' => $own ? 'game.php?page=spacedock&cp=' . $planetId . '&re=0' : '',

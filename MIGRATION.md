@@ -1115,8 +1115,12 @@ Nachgezogen:
     die bis dahin reparierten Schiffe in Dienst stellen (jeder Typ im
     gleichen Tempo, abgerundet); die übrigen Wracks gehen verloren. Die
     Seite zeigt, wie viele schon repariert sind.
-  - **Nicht übernommen**: Wracks während einer laufenden Reparatur (sie
-    gehen verloren).
+  - **Kämpfe während einer Reparatur**: Der Start der Reparatur verbraucht
+    die Wracks (was das Dock nicht repariert, ist verloren). Neue Wracks
+    sammeln sich daneben mit eigenen 3 Tagen; das Raumdock zeigt sie unter
+    „Neue Wracks“, die Galaxie zeigt sie statt der Schiffe in Reparatur.
+    Nach dem Indienststellen sind sie das nächste Wrackfeld und lassen sich
+    reparieren (pro Planet eine Reparatur zur Zeit, wie im Original).
   - Rundung: Die Kosten werden wie bei allen Gebäuden gerundet, die
     Energie für Stufe 3 ist also 313 statt 312.
   - Tests für Kosten, Schwellen, Inhalt, Reparatur, Indienststellung,

@@ -87,6 +87,27 @@ class SpaceDockController extends BaseController
     }
 
     /**
+     * @param array<int, int> $ships
+     *
+     * @return list<array{name: string, wrecks: string}>
+     */
+    private function wreckRows(array $ships): array
+    {
+        $rows = [];
+
+        foreach ($ships as $id => $amount) {
+            $rows[] = ['name' => $this->shipName($id), 'wrecks' => $this->formatService->prettyNumber($amount)];
+        }
+
+        return $rows;
+    }
+
+    private function shipName(int $id): string
+    {
+        return (string) __('game/ships.' . $this->registry->get($id)->getName());
+    }
+
+    /**
      * @param array{planet_id: int, user_id: int, ships: array<int, int>, created_at: int, expires_at: int, repairable_from: int, repair_started_at: int, repair_ends_at: int, repaired: array<int, int>} $field
      *
      * @return array<string, mixed>
@@ -98,9 +119,10 @@ class SpaceDockController extends BaseController
         $soFar = $this->wrecks->repairedSoFar($field, $now);
         $rows = [];
 
-        foreach (array_keys($field['ships'] + $field['repaired']) as $id) {
+        // in a repair the wrecks are used up; the ones of later battles wait
+        foreach (array_keys($repairing ? $field['repaired'] : $field['ships']) as $id) {
             $rows[] = [
-                'name' => (string) __('game/ships.' . $this->registry->get($id)->getName()),
+                'name' => $this->shipName($id),
                 'wrecks' => $this->formatService->prettyNumber($field['ships'][$id] ?? 0),
                 'repaired' => $this->formatService->prettyNumber($ships[$id] ?? 0),
                 'so_far' => $this->formatService->prettyNumber($soFar[$id] ?? 0),
@@ -109,6 +131,7 @@ class SpaceDockController extends BaseController
 
         return [
             'rows' => $rows,
+            'new_wrecks' => $repairing && $field['expires_at'] > $now ? $this->wreckRows($field['ships']) : [],
             'repairing' => $repairing,
             'done' => $repairing && $field['repair_ends_at'] <= $now,
             'early' => $this->wrecks->canDeployEarly($field, $now),

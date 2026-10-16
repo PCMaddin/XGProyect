@@ -23,7 +23,9 @@
     @else
     <tr>
         <td class="c">{{ __('game/spacedock.sd_ship') }}</td>
+        @if (!$field['repairing'])
         <td class="c">{{ __('game/spacedock.sd_wrecks') }}</td>
+        @endif
         <td class="c">{{ $field['repairing'] ? __('game/spacedock.sd_in_repair') : __('game/spacedock.sd_repairable') }}</td>
         @if ($field['repairing'] && !$field['done'])
         <td class="c">{{ __('game/spacedock.sd_repaired_so_far') }}</td>
@@ -32,7 +34,9 @@
     @foreach ($field['rows'] as $row)
     <tr>
         <th>{{ $row['name'] }}</th>
+        @if (!$field['repairing'])
         <th>{{ $row['wrecks'] }}</th>
+        @endif
         <th>{{ $row['repaired'] }}</th>
         @if ($field['repairing'] && !$field['done'])
         <th>{{ $row['so_far'] }}</th>
@@ -75,6 +79,20 @@
             @endif
         </th>
     </tr>
+    @if ($field['new_wrecks'] !== [])
+    <tr>
+        <td class="c" colspan="4">{{ __('game/spacedock.sd_new_wrecks') }}</td>
+    </tr>
+    @foreach ($field['new_wrecks'] as $row)
+    <tr>
+        <th>{{ $row['name'] }}</th>
+        <th colspan="3">{{ $row['wrecks'] }}</th>
+    </tr>
+    @endforeach
+    <tr>
+        <th colspan="4">{{ __('game/spacedock.sd_new_wrecks_note') }} {{ sprintf(__('game/spacedock.sd_burns_up'), $field['expires']) }}</th>
+    </tr>
+    @endif
     @endif
 </table>
 @endsection

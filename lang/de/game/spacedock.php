@@ -29,4 +29,6 @@ return [
     'sd_deploy_early' => 'Bereits reparierte Schiffe in Dienst stellen',
     'sd_deploy_early_note' => 'Die übrigen Wracks gehen dabei verloren.',
     'sd_deploy_early_from' => 'Ab %s lassen sich die bereits reparierten Schiffe vorzeitig in Dienst stellen.',
+    'sd_new_wrecks' => 'Neue Wracks',
+    'sd_new_wrecks_note' => 'Sie lassen sich nach dieser Reparatur reparieren.',
 ];

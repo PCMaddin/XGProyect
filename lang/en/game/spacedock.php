@@ -29,4 +29,6 @@ return [
     'sd_deploy_early' => 'Put the ships repaired so far into service',
     'sd_deploy_early_note' => 'The remaining wrecks are lost.',
     'sd_deploy_early_from' => 'From %s the ships repaired so far can be put into service early.',
+    'sd_new_wrecks' => 'New wrecks',
+    'sd_new_wrecks_note' => 'They can be repaired after this repair.',
 ];

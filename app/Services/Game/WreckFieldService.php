@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\DB;
  *   it. Attacking generals get one at their start planet the same way,
  *   which can be repaired once the fleet is back;
  * - another battle adds to the field and gives it 3 more days; it burns up
- *   when no repair was started within 3 days;
+ *   when no repair was started within 3 days. Starting the repair uses
+ *   the wrecks up; the wrecks of battles during the repair gather beside
+ *   it (with their own 3 days) and are the next field;
  * - the space dock repairs 45 % of the wrecks at level 1 up to 56 % from
  *   level 14 (31,5 % to 39,2 % of the destroyed ships in a 30 % universe),
  *   in the time the shipyard would take, at least 30 minutes, at most 12
@@ -277,7 +279,10 @@ class WreckFieldService
                 return 'sd_nothing_to_repair';
             }
 
+            // the wrecks are used up: what the dock cannot repair is lost;
+            // wrecks of later battles gather in the field again
             DB::table('wreck_fields')->where('planet_id', $planetId)->update([
+                'ships' => '{}',
                 'repair_started_at' => $now,
                 'repair_ends_at' => $now + $this->repairTime($ships, (int) ($levels->building_hangar ?? 0), (int) ($levels->building_nano_factory ?? 0)),
                 'repaired' => json_encode($ships),
@@ -305,7 +310,7 @@ class WreckFieldService
             }
 
             $this->addShips($planetId, $this->repairedSoFar($field, $now));
-            DB::table('wreck_fields')->where('planet_id', $planetId)->delete();
+            $this->endRepair($field, $now);
 
             return null;
         });
@@ -363,9 +368,35 @@ class WreckFieldService
             return;
         }
 
+        // wrecks of a battle during the repair burn up as well
+        if ($field['repair_started_at'] > 0 && $field['ships'] !== [] && $field['expires_at'] <= $now) {
+            DB::table('wreck_fields')->where('planet_id', $planetId)->update(['ships' => '{}']);
+        }
+
         if ($field['repair_started_at'] > 0 && $now >= $field['repair_ends_at'] + self::LIFETIME) {
             $this->deploy($field['user_id'], $planetId, $now);
         }
+    }
+
+    /**
+     * After the repair the field goes, unless a battle during the repair
+     * left new wrecks: they stay as the next field.
+     *
+     * @param array{planet_id: int, ships: array<int, int>, expires_at: int} $field
+     */
+    private function endRepair(array $field, int $now): void
+    {
+        if ($field['ships'] === [] || $field['expires_at'] <= $now) {
+            DB::table('wreck_fields')->where('planet_id', $field['planet_id'])->delete();
+
+            return;
+        }
+
+        DB::table('wreck_fields')->where('planet_id', $field['planet_id'])->update([
+            'repair_started_at' => 0,
+            'repair_ends_at' => 0,
+            'repaired' => null,
+        ]);
     }
 
     /**
@@ -394,12 +425,9 @@ class WreckFieldService
                 return true;
             }
 
-            // a running repair keeps its ships; the new wrecks are lost
-            if ((int) $row->repair_started_at > 0) {
-                return false;
-            }
-
-            $ships = self::decode($row->ships);
+            // during a repair the new wrecks gather beside it, with their
+            // own 3 days; earlier ones that burnt up meanwhile are gone
+            $ships = (int) $row->repair_started_at > 0 && (int) $row->expires_at <= $now ? [] : self::decode($row->ships);
 
             foreach ($wrecks as $id => $amount) {
                 $ships[$id] = ($ships[$id] ?? 0) + $amount;
