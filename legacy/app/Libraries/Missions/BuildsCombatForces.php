@@ -117,7 +117,7 @@ trait BuildsCombatForces
      */
     private function addPlanetForces(PlayerGroup $defenders, array $targetUser, array $targetPlanet, array $fleetRow): void
     {
-        $homeFleet = new HomeFleet(0);
+        $homeFleet = new HomeFleet(self::PLANET_FORCES);
 
         foreach ([[self::DEFENSE_MIN_ID, self::DEFENSE_MAX_ID], [self::SHIP_MIN_ID, self::SHIP_MAX_ID]] as [$fromId, $toId]) {
             for ($id = $fromId; $id <= $toId; $id++) {
@@ -132,8 +132,11 @@ trait BuildsCombatForces
         $targetUserId = self::int($targetUser['id']);
         $defender = $defenders->getPlayer($targetUserId);
 
+        // the planet's forces stay a fleet of their own (id 0), so they can be
+        // told apart from the defender's stationed fleets after the battle
+        // (addDefense() would merge them into the defender's first fleet)
         if ($defender !== false) {
-            $defender->addDefense($homeFleet);
+            $defender->addFleet($homeFleet);
 
             return;
         }

@@ -709,6 +709,19 @@ class Missions
     }
 
     /**
+     * Replace the ships of a fleet that stays where it is.
+     *
+     * @param array{ships: string, amount: int|float, fleet_id: int} $data
+     */
+    protected function updateFleetShipsById(array $data): void
+    {
+        $this->statement(
+            'UPDATE ' . FLEETS . ' SET `fleet_array` = ?, `fleet_amount` = ? WHERE `fleet_id` = ?;',
+            [$data['ships'], $data['amount'], $data['fleet_id']]
+        );
+    }
+
+    /**
      * Replace the ships of a fleet and send it home.
      *
      * @param array{ships: mixed, amount: int|float, fleet_id: mixed} $data

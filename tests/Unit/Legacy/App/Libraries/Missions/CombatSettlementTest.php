@@ -26,7 +26,12 @@ use Xgp\App\Libraries\Missions\Destroy;
  * The expected values (tests/Fixtures/combat_settlement.json) are golden
  * values captured from the original Attack/Destroy implementations, before
  * the shared code was extracted into CombatMission, with the same seeded
- * battles.
+ * battles. Three scenarios were updated on purpose by later game-logic
+ * fixes (see MIGRATION.md): "acs with stationed defender" (the planet's own
+ * forces stay a fleet of their own; stationed fleets are updated instead of
+ * being written to the planet) and "destroy wins" / "destroy wins 3" (only
+ * the death stars are lost when the destruction fails, and they count as
+ * lost units).
  */
 class CombatSettlementTest extends TestCase
 {

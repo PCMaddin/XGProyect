@@ -120,9 +120,9 @@
     "acs with stationed defender": {
         "forces": {
             "attackers": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 10% Shields: 20% Armour: 30%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Cruiser</th>\n                                                    <th>Small Cargo</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>30</th>\n                                                    <th>10</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table><table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 10% Shields: 20% Armour: 30%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Battleship</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>5</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player4 [1:2:4]<br>\n            Weapons: 0% Shields: 10% Armour: 20%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Large Cargo</th>\n                                                    <th>Heavy Fighter</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>15</th>\n                                                    <th>20</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>",
-            "defenders": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 30% Shields: 0% Armour: 10%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Heavy Fighter</th>\n                                                    <th>Light Fighter</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>5</th>\n                                                    <th>10</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             defender [1:2:2]<br>\n            Weapons: 30% Shields: 20% Armour: 40%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Small Cargo</th>\n                                                    <th>Rocket Launcher</th>\n                                                    <th>Cruiser</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>3</th>\n                                                    <th>20</th>\n                                                    <th>4</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>"
+            "defenders": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player3 [1:2:3]<br>\n            Weapons: 30% Shields: 0% Armour: 10%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Heavy Fighter</th>\n                                                    <th>Light Fighter</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>5</th>\n                                                    <th>10</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             defender [1:2:2]<br>\n            Weapons: 30% Shields: 20% Armour: 40%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Small Cargo</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>3</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table><table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             defender [1:2:2]<br>\n            Weapons: 30% Shields: 20% Armour: 40%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher</th>\n                                                    <th>Cruiser</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>20</th>\n                                                    <th>4</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>"
         },
-        "report": "f4fdc225fdeabcd4aad09981ce8a495b",
+        "report": "08ee2539eabc291d4a650da80c5e7742",
         "steal": {
             "metal": 47619.28571428572,
             "crystal": 23809.52380952381,
@@ -171,7 +171,7 @@
             [
                 "updatePlanetLossesById",
                 {
-                    "ships": "`ship_heavy_fighter` = 0, `ship_light_fighter` = 0, `ship_small_cargo_ship` = 0, `defense_rocket_launcher` = 14, `ship_cruiser` = 0, ",
+                    "ships": "`defense_rocket_launcher` = 14, `ship_cruiser` = 0, ",
                     "stolen": {
                         "metal": 47619.28571428572,
                         "crystal": 23809.52380952381,
@@ -182,7 +182,7 @@
             ],
             [
                 "deleteMultipleFleetsByIds",
-                "20"
+                "20,21"
             ],
             [
                 "updateLostShipsAndDefensePoints",
@@ -211,7 +211,13 @@
                 "updateLostShipsAndDefensePoints",
                 2,
                 {
-                    "202": 3,
+                    "202": 3
+                }
+            ],
+            [
+                "updateLostShipsAndDefensePoints",
+                2,
+                {
                     "401": 6,
                     "206": 4
                 }
@@ -286,25 +292,41 @@
             "attackers": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 10% Shields: 20% Armour: 30%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Deathstar</th>\n                                                    <th>Cruiser</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>3</th>\n                                                    <th>10</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>",
             "defenders": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             defender [1:5:7]<br>\n            Weapons: 30% Shields: 20% Armour: 40%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Rocket Launcher</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>10</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>"
         },
-        "report": "7c68e2ad5b33e6836bf965de82a18215",
+        "report": "70a0b97a700513aac19ec045a57787d2",
         "steal": {
-            "metal": 47619.28571428572,
-            "crystal": 23809.52380952381,
-            "deuterium": 9523.809523809523
+            "metal": 126.64703647416414,
+            "crystal": 63.32320162107396,
+            "deuterium": 25.329280648429584
         },
         "calls": [
             [
-                "deleteMultipleFleetsByIds",
-                "10"
+                "updateLostShipsAndDefensePoints",
+                1,
+                {
+                    "214": 3
+                }
+            ],
+            [
+                "updateReturningFleetData",
+                {
+                    "ships": "a:1:{i:206;i:10;}",
+                    "amount": 10,
+                    "stolen": {
+                        "metal": 126.64703647416414,
+                        "crystal": 63.32320162107396,
+                        "deuterium": 25.329280648429584
+                    },
+                    "fleet_id": 10
+                }
             ],
             [
                 "updatePlanetLossesById",
                 {
                     "ships": "`defense_rocket_launcher` = 7, ",
                     "stolen": {
-                        "metal": 47619.28571428572,
-                        "crystal": 23809.52380952381,
-                        "deuterium": 9523.809523809523
+                        "metal": 126.64703647416414,
+                        "crystal": 63.32320162107396,
+                        "deuterium": 25.329280648429584
                     },
                     "planet_id": 99
                 }
@@ -417,13 +439,20 @@
             "attackers": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             player1 [1:2:1]<br>\n            Weapons: 10% Shields: 20% Armour: 30%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                                    <th>Deathstar</th>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                                    <th>2</th>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>",
             "defenders": "        <table class=\"lined widthFull\" style=\"width:100%;border-collapse:collapse;border: 1px #415680 solid;margin-bottom: 10px;\">\n    <tr>\n        <td style=\"text-align:center\">\n             defender [1:5:7]<br>\n            Weapons: 30% Shields: 20% Armour: 40%        </td>\n    </tr>\n    <tr>\n        <td>\n            <table class=\"lined widthFull\" style=\"margin: 0 auto;\">\n                <thead>\n                    <tr>\n                                            </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                                            </tr>\n                </tbody>\n            </table>\n        </td>\n    </tr>\n</table>"
         },
-        "report": "0fa5a5d19e9c0e6ebf532b0369e1efe5",
+        "report": "3cfc9237e945ad8490d643488aab0736",
         "steal": {
-            "metal": 47619.28571428572,
-            "crystal": 23809.52380952381,
-            "deuterium": 9523.809523809523
+            "metal": 0,
+            "crystal": 0,
+            "deuterium": 0
         },
         "calls": [
+            [
+                "updateLostShipsAndDefensePoints",
+                1,
+                {
+                    "214": 2
+                }
+            ],
             [
                 "deleteMultipleFleetsByIds",
                 "10"
@@ -433,9 +462,9 @@
                 {
                     "ships": "",
                     "stolen": {
-                        "metal": 47619.28571428572,
-                        "crystal": 23809.52380952381,
-                        "deuterium": 9523.809523809523
+                        "metal": 0,
+                        "crystal": 0,
+                        "deuterium": 0
                     },
                     "planet_id": 99
                 }

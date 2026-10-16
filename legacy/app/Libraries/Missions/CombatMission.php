@@ -32,6 +32,9 @@ abstract class CombatMission extends Missions
     protected const DEFENSE_MIN_ID = 401;
     protected const DEFENSE_MAX_ID = 408;
 
+    /** the fleet id of the planet's own ships and defenses */
+    protected const PLANET_FORCES = 0;
+
     public function __construct(protected FormatService $formatService)
     {
         parent::__construct();
@@ -52,23 +55,19 @@ abstract class CombatMission extends Missions
     abstract protected function afterBattle(array $fleetRow, BattleReport $report, array $targetPlanet, array $targetUser): void;
 
     /**
-     * Called for every surviving attacking fleet when the attackers won.
+     * Called for every surviving attacking fleet when the attackers won;
+     * returns the ships that fly home (and carry the loot).
      *
      * @param array<string, mixed>  $targetPlanet
      * @param array<int, int|float> $ships surviving ships by id
      *
+     * @return array<int, int|float>
+     *
      * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
-    protected function onAttackerVictory(array $targetPlanet, array $ships): void
+    protected function onAttackerVictory(int $playerId, array $targetPlanet, array $ships): array
     {
-    }
-
-    /**
-     * Whether the surviving attacking fleets fly home (false: they are removed).
-     */
-    protected function survivorsReturn(): bool
-    {
-        return true;
+        return $ships;
     }
 
     /**
@@ -325,12 +324,6 @@ abstract class CombatMission extends Missions
                 }
 
                 $ships = CombatSurvivors::ships($fleet, $survivingFleet);
-                $fleetCapacity = 0;
-
-                foreach ($ships as $shipId => $amount) {
-                    $fleetCapacity += $amount * self::num($this->pricelist[$shipId]['capacity']);
-                }
-
                 $fleetSteal = [
                     'metal' => 0,
                     'crystal' => 0,
@@ -338,24 +331,21 @@ abstract class CombatMission extends Missions
                 ];
 
                 if ($attackersWon) {
-                    $fleetSteal = self::plunder(
-                        $fleetCapacity,
-                        self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity,
-                        self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity,
-                        self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity
-                    );
+                    $returning = $this->onAttackerVictory($playerId, $targetPlanet, $ships);
 
-                    $this->onAttackerVictory($targetPlanet, $ships);
+                    // nothing left to fly home (the mission destroyed the rest)
+                    if ($returning === [] && $ships !== []) {
+                        $emptyFleets[] = $fleetId;
+
+                        continue;
+                    }
+
+                    $ships = $returning;
+                    $fleetSteal = $this->fleetLoot($ships, $capacity, $targetPlanet);
 
                     $steal['metal'] += $fleetSteal['metal'];
                     $steal['crystal'] += $fleetSteal['crystal'];
                     $steal['deuterium'] += $fleetSteal['deuterium'];
-                }
-
-                if (!$this->survivorsReturn()) {
-                    $emptyFleets[] = $fleetId;
-
-                    continue;
                 }
 
                 $this->updateReturningFleetData([
@@ -373,12 +363,37 @@ abstract class CombatMission extends Missions
     }
 
     /**
-     * Write the surviving ships and defenses to the planet, subtract the loot
-     * and remove the destroyed fleets.
+     * The share of the planet's resources a fleet takes home: its part of the
+     * attackers' total cargo capacity, filled by plunder().
      *
-     * Legacy behaviour, kept as is (see MIGRATION.md, open points): the counts
-     * of all defending fleets, also the ones of other players stationed at
-     * the planet, are written to the planet's own ship columns.
+     * @param array<int, int|float> $ships
+     * @param array<string, mixed>  $targetPlanet
+     *
+     * @return Loot
+     */
+    private function fleetLoot(array $ships, int | float $capacity, array $targetPlanet): array
+    {
+        $fleetCapacity = 0;
+
+        foreach ($ships as $shipId => $amount) {
+            $fleetCapacity += $amount * self::num($this->pricelist[$shipId]['capacity']);
+        }
+
+        return self::plunder(
+            $fleetCapacity,
+            self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity,
+            self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity,
+            self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity
+        );
+    }
+
+    /**
+     * Write the planet's surviving ships and defenses and subtract the loot;
+     * update the fleets stationed at the planet, remove the destroyed ones.
+     *
+     * Bugfix: the survivors of every defending fleet, also of the fleets
+     * stationed at the planet, used to be written to the planet's own ship
+     * columns, while the stationed fleets themselves kept all their ships.
      *
      * @param array<string, mixed> $targetPlanet
      * @param Loot                 $steal
@@ -391,16 +406,27 @@ abstract class CombatMission extends Missions
         foreach ($playerGroupBeforeBattle->getIterator() as $playerId => $player) {
             foreach ($player->getIterator() as $fleetId => $fleet) {
                 $survivingFleet = CombatSurvivors::fleet($playerGroupAfterBattle, $playerId, $fleetId);
+                $survivors = CombatSurvivors::ships($fleet, $survivingFleet);
+
+                if ($fleetId === self::PLANET_FORCES) {
+                    foreach (array_keys($fleet->getIterator()) as $shipId) {
+                        $ships .= '`' . $this->resource[$shipId] . '` = ' . ($survivors[$shipId] ?? 0) . ', ';
+                    }
+
+                    continue;
+                }
 
                 if ($survivingFleet === null) {
                     $emptyFleets[] = $fleetId;
+
+                    continue;
                 }
 
-                $survivors = CombatSurvivors::ships($fleet, $survivingFleet);
-
-                foreach (array_keys($fleet->getIterator()) as $shipId) {
-                    $ships .= '`' . $this->resource[$shipId] . '` = ' . ($survivors[$shipId] ?? 0) . ', ';
-                }
+                $this->updateFleetShipsById([
+                    'ships' => FleetsLib::setFleetShipsArray($survivors),
+                    'amount' => array_sum($survivors),
+                    'fleet_id' => $fleetId,
+                ]);
             }
         }
 
@@ -418,11 +444,8 @@ abstract class CombatMission extends Missions
      */
     private function deleteFleets(array $fleetIds): void
     {
-        $idString = implode(',', $fleetIds);
-
-        // the planet's own forces (fleet id 0) alone are no fleet to delete
-        if ($idString !== '' && $idString !== '0') {
-            $this->deleteMultipleFleetsByIds($idString);
+        if ($fleetIds !== []) {
+            $this->deleteMultipleFleetsByIds(implode(',', $fleetIds));
         }
     }
 

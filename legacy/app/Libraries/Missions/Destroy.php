@@ -48,30 +48,36 @@ class Destroy extends CombatMission
     }
 
     /**
-     * Bugfix: when the attackers won but none of their death stars survived,
-     * the death star count was read from a missing key, which raised an
-     * "undefined array key" error. Without death stars there is now simply
-     * no destruction attempt.
+     * The surviving death stars try to destroy the moon. If they are
+     * destroyed instead, only they are lost (and count as lost units); the
+     * rest of the fleet flies home with its share of the loot.
+     *
+     * Bugfix: when no death star survived, their count was read from a
+     * missing key ("undefined array key"); now there is no attempt. And a
+     * destroyed attempt used to remove the whole attacking fleet, without
+     * counting the lost ships.
      *
      * @param array<string, mixed>  $targetPlanet
      * @param array<int, int|float> $ships
+     *
+     * @return array<int, int|float>
      */
-    protected function onAttackerVictory(array $targetPlanet, array $ships): void
+    protected function onAttackerVictory(int $playerId, array $targetPlanet, array $ships): array
     {
         $deathStars = (int) ($ships[Ships::ship_deathstar] ?? 0);
 
         if ($deathStars > 0) {
             $this->tryToDestroyMoon(self::int($targetPlanet['planet_diameter']), $deathStars);
         }
-    }
 
-    /**
-     * Legacy behaviour, kept as is (see MIGRATION.md, open points): when the
-     * death stars are destroyed, the whole attacking fleet is removed.
-     */
-    protected function survivorsReturn(): bool
-    {
-        return $this->destruction['destroyed'] !== 'ds';
+        if ($deathStars === 0 || $this->destruction['destroyed'] !== 'ds') {
+            return $ships;
+        }
+
+        $this->updateLostShipsAndDefensePoints($playerId, [Ships::ship_deathstar => $ships[Ships::ship_deathstar]]);
+        unset($ships[Ships::ship_deathstar]);
+
+        return $ships;
     }
 
     /**

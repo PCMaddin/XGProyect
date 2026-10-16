@@ -40,6 +40,11 @@ trait RecordsCombatWrites
         $this->calls[] = ['updateReturningFleetData', $data];
     }
 
+    protected function updateFleetShipsById(array $data): void
+    {
+        $this->calls[] = ['updateFleetShipsById', $data];
+    }
+
     protected function updatePlanetLossesById(array $data): void
     {
         $this->calls[] = ['updatePlanetLossesById', $data];

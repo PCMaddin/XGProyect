@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Legacy\App\Libraries\Missions;
 
 use App\Libraries\PlanetLib;
+use App\Services\FormatService;
 use App\Models\Planets;
 use Illuminate\Support\Facades\DB;
 use ReflectionMethod;
@@ -21,6 +22,8 @@ use Xgp\App\Libraries\Missions\Destroy;
  *   empty "no moon yet" row ("undefined array key").
  * - Destroy: a won battle without surviving death stars read the death star
  *   count from a missing key ("undefined array key").
+ *
+ * Plus the moon diameter from the battle and the death star losses.
  */
 class CombatMoonTest extends DatabaseTestCase
 {
@@ -52,31 +55,49 @@ class CombatMoonTest extends DatabaseTestCase
         $attack = app(Attack::class);
         $createMoon = new ReflectionMethod(Attack::class, 'createMoonIfMissing');
 
-        $createMoon->invoke($attack, 1, 5, 7, 2);
+        $createMoon->invoke($attack, 1, 5, 7, 2, 7654);
         $this->assertSame(1, self::moons());
 
-        $createMoon->invoke($attack, 1, 5, 7, 2);
+        $createMoon->invoke($attack, 1, 5, 7, 2, 3000);
         $this->assertSame(1, self::moons());
+
+        // the diameter rolled by the battle, not a random one
+        $this->assertSame(7654, Planets::query()
+            ->where(['planet_galaxy' => 1, 'planet_system' => 5, 'planet_planet' => 7, 'planet_type' => PlanetTypesEnumerator::MOON])
+            ->value('planet_diameter'));
     }
 
     public function testDestroyWithoutSurvivingDeathStarsMakesNoAttempt(): void
     {
-        $destroy = app(Destroy::class);
+        $destroy = new RecordingDestroy(app(FormatService::class));
         $onVictory = new ReflectionMethod(Destroy::class, 'onAttackerVictory');
 
-        $onVictory->invoke($destroy, ['planet_diameter' => 8000], [206 => 10]);
-
+        $this->assertSame([206 => 10], $onVictory->invoke($destroy, 1, ['planet_diameter' => 8000], [206 => 10]));
         $this->assertSame(
             ['attempted' => false, 'destroyed' => 'none', 'moonChance' => 0, 'dsChance' => 0],
             self::destruction($destroy)
         );
+        $this->assertSame([], $destroy->recordedCalls());
+    }
 
+    /**
+     * Regression: when the death stars were destroyed, the whole attacking
+     * fleet was removed and the lost ships were not counted.
+     */
+    public function testDestroyedDeathStarsAreTheOnlyLoss(): void
+    {
+        $destroy = new RecordingDestroy(app(FormatService::class));
+        $onVictory = new ReflectionMethod(Destroy::class, 'onAttackerVictory');
+
+        // seed 3: the moon survives, the death stars are destroyed
         mt_srand(3);
-        $onVictory->invoke($destroy, ['planet_diameter' => 8000], [206 => 10, 214 => 2]);
+        $returning = $onVictory->invoke($destroy, 1, ['planet_diameter' => 8000], [206 => 10, 214 => 2]);
 
         $this->assertSame(
             ['attempted' => true, 'destroyed' => 'ds', 'moonChance' => 15, 'dsChance' => 45],
             self::destruction($destroy)
         );
+        $this->assertSame([206 => 10], $returning);
+        $this->assertSame([['updateLostShipsAndDefensePoints', 1, [214 => 2]]], $destroy->recordedCalls());
     }
 }
