@@ -13,6 +13,10 @@ class UpdateCheckController extends BaseController
 {
     public function __invoke(): JsonResponse
     {
+        if (!config('version.update_check')) {
+            return response()->json([]);
+        }
+
         try {
             $response = Http::timeout(5)->get('https://updates.xgproyect.org/latest.json');
 

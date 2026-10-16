@@ -785,6 +785,17 @@ Baseline-Einträge.
   Formen, und jeder `trans_choice`-Schlüssel im Code ist abgedeckt. Im
   Browser auf Deutsch, Polnisch und Japanisch geprüft (Tooltip, Sende-
   Meldung), mit `pl` gecrawlt, ohne neue Fehler.
+- ✅ **Update-Prüfung abgeschaltet:** Das Admin-Panel fragte
+  `updates.xgproyect.org` (Server des Originalprojekts) nach neuen Versionen,
+  einmal per JavaScript auf jeder Admin-Seite (Glocke oben rechts) und einmal
+  serverseitig beim Laden der Startseite. Letzteres blockierte bis zu einer
+  Sekunde, wenn der Server nicht antwortete. Neuer Schalter
+  `XGP_UPDATE_CHECK` (`config('version.update_check')`, Standard aus): aus
+  heißt keine Anfrage nach außen, keine Glocke, kein JavaScript-Aufruf; die
+  Route bleibt bestehen und antwortet leer (verträgt `route:cache`). Mit
+  `XGP_UPDATE_CHECK=true` verhält sich alles wie vorher. Tests (aus: nichts
+  gesendet; an: neuere Version erkannt); im Browser geprüft, dass das
+  Admin-Panel keine Update-Anfrage mehr stellt.
 
 ## Smoke-Test gegen eine echte Datenbank
 
@@ -1390,9 +1401,7 @@ Offen:
 - ℹ️ Erwartete Meldungen im Crawl, keine Fehler:
   `game.php?page=combatreport` ohne Bericht-Id liefert absichtlich 404;
   unter `admin/errors` stehen alte Log-Einträge (Datenbank zeitweise nicht
-  erreichbar, Willkommens-Mail ohne Mailserver in der Testumgebung); die
-  Update-Prüfung im Admin fragt `updates.xgproyect.org` mit 5 Sekunden
-  Timeout ab, der Crawler verlässt die Seite manchmal vorher.
+  erreichbar, Willkommens-Mail ohne Mailserver in der Testumgebung).
 - ℹ️ Neue Allianzen sind standardmäßig geschlossen
   (`alliance_request_notallow = 0` heißt trotz des Namens „keine
   Bewerbungen“). So ist es durchgängig im Code, also eine

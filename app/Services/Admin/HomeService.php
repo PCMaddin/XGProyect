@@ -52,6 +52,10 @@ class HomeService
 
     public function isVersionOutdated(): bool
     {
+        if (!config('version.update_check')) {
+            return false;
+        }
+
         try {
             $response = Http::timeout(1)->get('https://updates.xgproyect.org/latest.json');
 

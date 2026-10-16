@@ -122,6 +122,7 @@
                 $(this).parents('table:eq(0)').find('.form-check-input').attr('checked', this.checked);
             });
 
+            @if (config('version.update_check'))
             // check version
             $('.badge-counter').html('');
             $('.dropdown-list').hide();
@@ -138,6 +139,7 @@
                     });
                 }
             });
+            @endif
         });
 
         function compareversion(version1, version2) {
