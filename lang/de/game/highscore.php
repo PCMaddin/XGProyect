@@ -30,4 +30,7 @@ return [
     'st_title_bandit_king' => 'Banditenkönig',
     'st_title_bandit_lord' => 'Banditenlord',
     'st_title_bandit' => 'Bandit',
+    'st_military_built' => 'Militär gebaut',
+    'st_military_destroyed' => 'Militär zerstört',
+    'st_military_lost' => 'Militär verloren',
 ];

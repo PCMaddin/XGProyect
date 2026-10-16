@@ -56,8 +56,8 @@ class HighscoreController extends BaseController
             $type = 4;
         }
 
-        // honour belongs to the players
-        $mapping = $this->rankingType($who === 2 && $type === 6 ? 1 : $type);
+        // honour and the military built/destroyed/lost belong to the players
+        $mapping = $this->rankingType($who === 2 && $type >= 6 ? 1 : $type);
 
         [$rangeOptions, $header, $values] = $who === 2
             ? $this->buildAllianceRanking($mapping, $range)
@@ -74,6 +74,9 @@ class HighscoreController extends BaseController
                 2 => __('game/highscore.st_economy'),
                 3 => __('game/highscore.st_research'),
                 4 => __('game/highscore.st_military'),
+                7 => __('game/highscore.st_military_built'),
+                8 => __('game/highscore.st_military_destroyed'),
+                9 => __('game/highscore.st_military_lost'),
                 6 => __('game/highscore.st_honour'),
             ], $type),
             'range' => $rangeOptions,
@@ -287,6 +290,12 @@ class HighscoreController extends BaseController
                 'points' => 'military_points',
                 'rank' => 'military_rank',
                 'oldrank' => 'military_old_rank',
+            ],
+            7, 8, 9 => [
+                'order' => 'military_' . ['', 'built', 'destroyed', 'lost'][$type - 6] . '_points',
+                'points' => 'military_' . ['', 'built', 'destroyed', 'lost'][$type - 6] . '_points',
+                'rank' => 'military_' . ['', 'built', 'destroyed', 'lost'][$type - 6] . '_rank',
+                'oldrank' => 'military_' . ['', 'built', 'destroyed', 'lost'][$type - 6] . '_old_rank',
             ],
             6 => [
                 'order' => 'honor_points',

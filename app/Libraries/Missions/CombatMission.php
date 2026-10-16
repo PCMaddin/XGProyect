@@ -425,10 +425,47 @@ abstract class CombatMission extends Missions
     private function updatePoints(BattleReport $report, PlayerGroup $afterBattleAttackers, PlayerGroup $afterBattleDefenders): void
     {
         $attackersBefore = $report->getRound('START')->getAfterBattleAttackers();
-        $this->recordLosses($report->getPlayersLostShips($attackersBefore, $afterBattleAttackers));
+        $attackersLost = $report->getPlayersLostShips($attackersBefore, $afterBattleAttackers);
+        $this->recordLosses($attackersLost);
 
         $defendersBefore = $report->getRound('START')->getAfterBattleDefenders();
-        $this->recordLosses($report->getPlayersLostShips($defendersBefore, $afterBattleDefenders));
+        $defendersLost = $report->getPlayersLostShips($defendersBefore, $afterBattleDefenders);
+        $this->recordLosses($defendersLost);
+
+        // what one side lost, the other destroyed, shared by fleet value
+        $this->creditDestroyed($attackersBefore, $defendersLost);
+        $this->creditDestroyed($defendersBefore, $attackersLost);
+    }
+
+    private function creditDestroyed(PlayerGroup $side, PlayerGroup $enemyLost): void
+    {
+        $destroyed = [];
+
+        foreach ($enemyLost->getIterator() as $player) {
+            foreach ($player->getIterator() as $fleet) {
+                foreach ($fleet->getIterator() as $unitId => $unit) {
+                    $destroyed[(int) $unitId] = ($destroyed[(int) $unitId] ?? 0) + $unit->getCount();
+                }
+            }
+        }
+
+        $values = [];
+
+        foreach ($side->getIterator() as $playerId => $player) {
+            $values[(int) $playerId] = 0.0;
+
+            foreach ($player->getIterator() as $fleet) {
+                foreach ($fleet->getIterator() as $unit) {
+                    $values[(int) $playerId] += array_sum($unit->getCost()) * $unit->getCount();
+                }
+            }
+        }
+
+        $total = array_sum($values);
+
+        foreach ($values as $playerId => $value) {
+            $this->updateDestroyedPoints($playerId, $destroyed, $total > 0 ? $value / $total : 1 / max(1, count($values)));
+        }
     }
 
     private function recordLosses(PlayerGroup $lostShipsAndDefense): void

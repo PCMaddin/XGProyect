@@ -572,6 +572,29 @@ class Missions
     }
 
     /**
+     * Points of enemy units the player destroyed (his share of them).
+     *
+     * @param array<int, int|float> $destroyed unit id => count
+     */
+    protected function updateDestroyedPoints(int $playerId, array $destroyed, float $share): void
+    {
+        $points = 0.0;
+
+        foreach ($destroyed as $unit => $count) {
+            $points += StatisticsLibrary::calculatePoints($unit, 1) * $count * $share;
+        }
+
+        if ($points <= 0) {
+            return;
+        }
+
+        $this->statement(
+            'UPDATE `' . USERS_STATISTICS . '` SET `user_statistic_military_destroyed_points` = `user_statistic_military_destroyed_points` + ? WHERE `user_statistic_user_id` = ?',
+            [$points, $playerId]
+        );
+    }
+
+    /**
      * @param array<int, int|float> $lost lost unit counts by unit id
      */
     protected function updateLostShipsAndDefensePoints(int $playerId, array $lost): void
@@ -594,9 +617,10 @@ class Missions
             'UPDATE `' . USERS_STATISTICS . '` AS us SET
                     us.`user_statistic_ships_points` = us.`user_statistic_ships_points` - ? ,
                     us.`user_statistic_defenses_points` = us.`user_statistic_defenses_points` - ?,
-                    us.`user_statistic_military_points` = us.`user_statistic_military_points` - ?
+                    us.`user_statistic_military_points` = us.`user_statistic_military_points` - ?,
+                    us.`user_statistic_military_lost_points` = us.`user_statistic_military_lost_points` + ?
                 WHERE us.`user_statistic_user_id` = ?',
-            [$shipPoints, $defensePoints, ($shipPoints + $defensePoints), $playerId]
+            [$shipPoints, $defensePoints, ($shipPoints + $defensePoints), ($shipPoints + $defensePoints), $playerId]
         );
     }
 

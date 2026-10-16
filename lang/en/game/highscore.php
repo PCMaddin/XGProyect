@@ -30,4 +30,7 @@ return [
     'st_title_bandit_king' => 'Bandit King',
     'st_title_bandit_lord' => 'Bandit Lord',
     'st_title_bandit' => 'Bandit',
+    'st_military_built' => 'Military built',
+    'st_military_destroyed' => 'Military destroyed',
+    'st_military_lost' => 'Military lost',
 ];

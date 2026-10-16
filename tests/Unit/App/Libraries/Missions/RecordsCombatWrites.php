@@ -55,6 +55,11 @@ trait RecordsCombatWrites
         $this->calls[] = ['deleteMultipleFleetsByIds', $idString];
     }
 
+    protected function updateDestroyedPoints(int $playerId, array $destroyed, float $share): void
+    {
+        // a new ranking; the recorded writes are those of the original
+    }
+
     protected function updateLostShipsAndDefensePoints(int $playerId, array $lost): void
     {
         $this->calls[] = ['updateLostShipsAndDefensePoints', $playerId, $lost];

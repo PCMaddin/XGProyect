@@ -615,6 +615,7 @@ class UpdatesLibrary
                         `user_statistic_ships_points` = `user_statistic_ships_points` + '" . $data['ship_points'] . "',
                         `user_statistic_defenses_points` = `user_statistic_defenses_points`  + '" . $data['defense_points'] . "',
                         `user_statistic_military_points` = `user_statistic_military_points` + '" . ($data['ship_points'] + $data['defense_points']) . "',
+                        `user_statistic_military_built_points` = `user_statistic_military_built_points` + '" . ($data['ship_points'] + $data['defense_points']) . "',
                         {$data['sub_query']}
                         {$data['tech_query']}
                         `planet_b_hangar` = '" . self::str($data['planet']['planet_b_hangar']) . "'

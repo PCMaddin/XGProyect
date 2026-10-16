@@ -235,6 +235,7 @@ class StatisticsLibrary
 
         $this->rebuildAllPoints();
         $this->makeUserRank();
+        $this->makeMilitaryRanks();
         $this->makeAllyRank();
 
         $endtime = microtime(true);
@@ -472,6 +473,34 @@ class StatisticsLibrary
 
         // MEMORY CLEAN UP
         unset($all_stats_data, $build, $defs, $ships, $military, $honor, $tech, $rank, $update_query, $values);
+    }
+
+    /**
+     * The ranks of the military points built, destroyed and lost (the
+     * previous rank becomes the old one).
+     */
+    private function makeMilitaryRanks(): void
+    {
+        $adminLevel = app(SettingsService::class)->getInt('stat_admin_level');
+
+        foreach (['built', 'destroyed', 'lost'] as $kind) {
+            $prefix = 'user_statistic_military_' . $kind;
+            $rows = DB::table('users_statistics AS us')
+                ->join('users AS u', 'u.id', '=', 'us.user_statistic_user_id')
+                ->where('u.authlevel', '<=', $adminLevel)
+                ->orderByDesc($prefix . '_points')
+                ->orderBy('us.user_statistic_user_id')
+                ->get(['us.user_statistic_user_id', 'us.' . $prefix . '_rank']);
+            $rank = 1;
+
+            foreach ($rows as $row) {
+                $values = (array) $row;
+                DB::table('users_statistics')->where('user_statistic_user_id', $values['user_statistic_user_id'])->update([
+                    $prefix . '_old_rank' => $values[$prefix . '_rank'],
+                    $prefix . '_rank' => $rank++,
+                ]);
+            }
+        }
     }
 
     /**

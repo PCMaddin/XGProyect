@@ -1213,6 +1213,13 @@ Nachgezogen:
     Ränge dahinter“.
   - Tests mit echten Angriffen auf MariaDB (ehrenhaft, ehrenlos, Bandit,
     neutral); im Browser geprüft.
+- ✅ **Militär-Ranglisten** wie im Original: „Militär gebaut“ (Punkte
+  fertiger Schiffe und Verteidigung), „Militär zerstört“ (was die
+  Gegenseite im Kampf verlor, geteilt nach dem Wert der eigenen Flotten)
+  und „Militär verloren“; mit Rängen im Statistik-Lauf und eigenen
+  Highscore-Kategorien (nur für Spieler, wie „Ehre“). Die Kategorie
+  „Wirtschaft“ bleibt die Gebäudepunkte. Test mit einem echten Angriff
+  und Statistik-Lauf auf MariaDB.
 
 Offen:
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Libraries\Missions;
 
 use App\Libraries\MissionControlLib;
+use App\Libraries\StatisticsLibrary;
 use App\Libraries\Missions\CombatMission;
 use App\Models\User;
 use App\Services\Game\HonorService;
@@ -96,6 +97,31 @@ class HonourMysqlTest extends MysqlTestCase
         $this->attack([207 => 50, 203 => 300]);
         $this->assertSame([0.0, 0.0], [$this->honour($this->attacker), $this->honour($this->defender)]);
         $this->assertSame(500000.0, $this->metalLooted());
+    }
+
+    public function testTheMilitaryRankingsCountWhatWasDestroyedAndLost(): void
+    {
+        $this->military(10000, 9000);
+        $this->attack([207 => 50, 203 => 300]);
+
+        $stat = fn (User $user, string $column): float => $this->number($user, 'user_statistic_military_' . $column . '_points');
+
+        // 100 light fighters: 400 points at 1.000 resources a point
+        $this->assertSame(400.0, $stat($this->defender, 'lost'));
+        $this->assertSame(400.0, $stat($this->attacker, 'destroyed'));
+        $this->assertSame($stat($this->attacker, 'lost'), $stat($this->defender, 'destroyed'));
+
+        (new StatisticsLibrary())->makeStats();
+        $this->assertSame(1.0, $this->number($this->attacker, 'user_statistic_military_destroyed_rank'));
+        $this->assertSame(1.0, $this->number($this->defender, 'user_statistic_military_lost_rank'));
+    }
+
+    private function number(User $user, string $column): float
+    {
+        $value = DB::table('users_statistics')->where('user_statistic_user_id', $user->id)->value($column);
+        $this->assertIsNumeric($value);
+
+        return (float) $value;
     }
 
     private function military(int $attacker, int $defender): void
