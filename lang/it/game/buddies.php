@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'Esiste già una richiesta a questo giocatore!',
+    'bu_cannot_request_yourself' => 'Non puoi aggiungere te stesso come amico',
+    'bu_request_message' => 'Messaggio della richiesta',
+    'bu_player' => 'Nome',
+    'bu_request_text' => 'Testo della richiesta',
+    'bu_characters' => 'caratteri',
+    'bu_back' => 'Indietro',
+    'bu_send' => 'Invia',
+    'bu_cancel_request' => 'Annulla richiesta',
+    'bu_accept' => 'Accetta',
+    'bu_decline' => 'Rifiuta',
+    'bu_delete' => 'Elimina',
+    'bu_buddy_list' => 'Lista amici',
+    'bu_requests' => 'Richieste',
+    'bu_alliance' => 'Alleanza',
+    'bu_coords' => 'Coordinate',
+    'bu_text' => 'Testo',
+    'bu_action' => 'Azione',
+    'bu_my_requests' => 'Le mie richieste',
+    'bu_partners' => 'I miei amici',
+    'bu_estate' => 'Stato',
+    'bu_deleted_title' => 'Amico perso',
+    'bu_deleted_text' => 'Il giocatore %u ti ha rimosso dalla sua lista amici.',
+    'bu_accepted_title' => 'Richiesta accettata',
+    'bu_accepted_text' => 'Il giocatore %u ha accettato la tua richiesta di amicizia.',
+    'bu_rejected_title' => 'Richiesta rifiutata',
+    'bu_rejected_text' => 'Il giocatore %u ha rifiutato la tua richiesta di amicizia.',
+    'bu_to_accept_title' => 'Nuova richiesta di amicizia',
+    'bu_to_accept_text' => 'Il giocatore %u ti ha inviato una richiesta di amicizia.',
+];

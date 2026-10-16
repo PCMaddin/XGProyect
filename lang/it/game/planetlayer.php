@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'In questo menu puoi rinominare pianeti e lune, spostare pianeti o abbandonarli del tutto.',
+    'rename' => 'Rinomina',
+    'new_planet_name' => 'Nuovo nome del pianeta',
+    'new_moon_name' => 'Nuovo nome della luna',
+    'abandon_homeplanet' => 'Abbandona il pianeta madre',
+    'abandon_homeplanet_button' => 'Abbandona il pianeta madre',
+    'abandon_colony' => 'Abbandona la colonia',
+    'abandon_colony_button' => 'Abbandona la colonia',
+    'abandon_moon' => 'Abbandona la luna',
+    'abandon_moon_button' => 'Abbandona la luna',
+    'abandon_homeplanet_unique' => 'Non puoi abbandonare il pianeta madre finché non hai colonizzato un altro pianeta.',
+    'abandon_homeplanet_with_colonies' => 'Se abbandoni il pianeta madre, all’accesso arriverai direttamente alla tua colonia successiva.',
+    'abandon_confirm_message' => 'Conferma l’eliminazione del pianeta :coords inserendo la tua password',
+    'abandon_confirm' => 'Conferma',
+    'rename_error' => 'I caratteri speciali non sono ammessi!',
+    'rename_success' => 'Il pianeta è stato rinominato in: :name',
+    'wrong_password' => 'Password errata!',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => 'Non puoi abbandonare un pianeta con flotte in movimento',
+    'rp_planet_abandoned' => 'Pianeta abbandonato',
+    'rp_wrong_pass' => 'Password errata, inseriscila di nuovo.',
+
+    'rl_title' => 'Sposta pianeta',
+    'rl_description' => 'Per %s di materia oscura il pianeta e la sua luna si spostano in 24 ore in una posizione libera della stessa fascia (1-3, 4-12, 13-15). La materia oscura viene addebitata solo al momento dello spostamento. Fino ad allora su pianeta e luna non si può costruire, ricercare o produrre nel cantiere, e nessuna flotta propria può partire da lì o dirigersi lì. Le navi seguono senza carburante con il normale tempo di volo, il campo detriti resta indietro e il portale iperspaziale resta inattivo per 24 ore. La modalità vacanza annulla lo spostamento.',
+    'rl_target' => 'Destinazione',
+    'rl_start' => 'Sposta',
+    'rl_running' => 'Il pianeta si sposta in %s il %s.',
+    'rl_cancel' => 'Annulla spostamento',
+    'rl_started' => 'Lo spostamento è iniziato.',
+    'rl_cancelled' => 'Lo spostamento è stato annullato.',
+    'rl_error_planet' => 'Questo pianeta non può essere spostato.',
+    'rl_error_running' => 'Il pianeta è già in fase di spostamento.',
+    'rl_error_target' => 'Posizione di destinazione non valida.',
+    'rl_error_band' => 'La destinazione deve trovarsi nella stessa fascia di posizioni (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'La posizione di destinazione è occupata o riservata.',
+    'rl_error_vacation' => 'In modalità vacanza non puoi spostare pianeti.',
+    'rl_error_dark_matter' => 'Non hai abbastanza materia oscura.',
+    'rl_error_building' => 'Sul pianeta o sulla luna si sta costruendo.',
+    'rl_error_research' => 'Sul pianeta o sulla luna è in corso una ricerca.',
+    'rl_error_shipyard' => 'Il cantiere del pianeta o della luna ha ordini.',
+    'rl_error_fleets' => 'Flotte proprie sono in volo da o verso il pianeta o la luna.',
+    'rl_error_wreck_field' => 'Il molo spaziale sta riparando navi oppure attendono di tornare in servizio.',
+    'rl_from' => 'Amministrazione',
+    'rl_subject' => 'Spostamento',
+    'rl_done' => 'Il pianeta si è spostato in %s. Le navi lo seguono.',
+    'rl_failed' => 'Lo spostamento in %s non è riuscito: %s',
+];
