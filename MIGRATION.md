@@ -314,3 +314,27 @@ und neu baselined. Sie verschwinden mit der Handler-Typisierung.
   Request-Feldnamen per Präfix-Whitelist als Spaltennamen — strikte Allowlist wäre robuster.
 - 🟢 **`.env.example`** liefert einen festen `APP_KEY` mit — leeren, um versehentliche
   Übernahme zu vermeiden.
+
+## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
+
+Abgleich aller Sprachdateien (Stand Welle 6). **Wichtig:** ein *fehlender*
+Schlüssel fällt auf Englisch zurück (`fallback_locale = en`), ein *leerer*
+String (`''`) aber nicht: der Spieler bekommt eine leere Meldung.
+
+- 🟡 **`es/game/expedition.php` — leer und im Spiel genutzt** (spanische
+  Spieler sehen leere Expeditionsberichte): `exp_new_ships_5`,
+  `exp_new_resources_3/4`, `exp_dm_2..5`, `exp_delay_2..5`, `exp_faster_1/2`,
+  `exp_nothing_4..6`, `exp_lost_1`.
+- 🟢 **`es/game/expedition.php` — leer, derzeit ungenutzt** (für noch nicht
+  implementierte Expeditions-Ergebnisse bzw. höhere Varianten-Nummern):
+  `exp_new_ships_6/7`, `exp_primitive_enemy_5/6/8`, `exp_advanced_enemy_2`,
+  `exp_found_object_1/2`, `exp_nothing_7` und `exp_nothing_9..16`.
+- 🟢 **`en/game/expedition.php`**: `exp_nothing_8` leer, `exp_primitive_enemy_7`
+  fehlt (beide ungenutzt).
+- 🟢 **Fehlen in `es`** (Fallback auf Englisch, also nur unübersetzt):
+  `admin/global.gn_info_title`, `game/planetlayer.rp_wrong_pass`,
+  `install/install.admin_create_success`, `install/install.admin_create_fail`.
+
+Vorschlag: die leeren Strings entweder übersetzen oder entfernen (dann greift
+der englische Fallback), und einen Test ergänzen, der beide Sprachen auf gleiche
+Schlüssel und keine leeren Werte prüft.
