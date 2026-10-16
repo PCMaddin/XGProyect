@@ -15,7 +15,7 @@ use Tests\DatabaseTestCase;
  * The merchant: one call costs dark matter and fixes the rates (base rates
  * 3/2/1 times a factor drawn between the minimum and maximum), one exchange
  * uses the offer up; resources sold must be there, resources bought must fit
- * into the storage.
+ * into the storage. An expedition brings a free offer or a better rate.
  */
 #[CoversClass(MerchantService::class)]
 class MerchantServiceTest extends DatabaseTestCase
@@ -105,29 +105,31 @@ class MerchantServiceTest extends DatabaseTestCase
         $this->assertSame(10000, app(ProductionService::class)->maxStorable(0));
     }
 
-    public function testAnExpeditionMakesTheNextCallFree(): void
+    public function testAnExpeditionBringsAFreeOffer(): void
     {
-        $this->merchant()->grantFreeCall(self::USER);
-        $this->assertTrue($this->merchant()->hasFreeCall(self::USER));
-        $this->assertNull($this->merchant()->offer(self::USER));
+        $this->merchant()->grantExpeditionOffer(self::USER);
 
-        $this->assertNull($this->merchant()->call(self::USER, 'deuterium'));
+        $offer = $this->merchant()->offer(self::USER);
+        $this->assertNotNull($offer);
+        $this->assertContains($offer['sell'], MerchantService::RESOURCES);
+        $this->assertGreaterThanOrEqual(0.7, $offer['factor']);
+        $this->assertLessThanOrEqual(1.0, $offer['factor']);
         $this->assertSame(5000, $this->darkMatter());
-        $this->assertSame('deuterium', $this->merchant()->offer(self::USER)['sell'] ?? null);
-        $this->assertFalse($this->merchant()->hasFreeCall(self::USER));
-
-        // the next one costs again
-        $this->assertNull($this->merchant()->call(self::USER, 'metal'));
-        $this->assertSame(1500, $this->darkMatter());
     }
 
-    public function testAnOfferIsNotTakenAwayByAFreeCall(): void
+    public function testAnExpeditionNeverWorsensTheCurrentOffer(): void
     {
         $this->offer('crystal', 0.8);
 
-        $this->merchant()->grantFreeCall(self::USER);
+        for ($i = 0; $i < 20; $i++) {
+            $before = $this->merchant()->offer(self::USER)['factor'] ?? 0.0;
+            $this->merchant()->grantExpeditionOffer(self::USER);
+            $offer = $this->merchant()->offer(self::USER);
 
-        $this->assertSame(['sell' => 'crystal', 'factor' => 0.8], $this->merchant()->offer(self::USER));
+            $this->assertNotNull($offer);
+            $this->assertSame('crystal', $offer['sell']);
+            $this->assertGreaterThanOrEqual($before, $offer['factor']);
+        }
     }
 
     private function darkMatter(): int

@@ -33,7 +33,6 @@ return [
     'tr_no_enough_dark_matter' => 'Es ist nicht genügend Dunkle Materie vorhanden',
     'tr_resource' => 'Rohstoff',
     'tr_free_storage' => 'Freier Speicher',
-    'tr_free_call' => 'Diesmal kommt der Händler kostenlos.',
     'tr_exchange_rate' => 'Kurs',
     'tr_you_get' => 'Du erhältst',
     'tr_you_pay' => 'Du zahlst',

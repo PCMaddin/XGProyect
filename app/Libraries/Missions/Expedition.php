@@ -20,6 +20,7 @@ use App\Libraries\Functions;
 class Expedition extends Missions
 {
     private int $resourceExpeditionPoints = 0;
+    private int $shipExpeditionPoints = 0;
     private int $fleetCapacity = 0;
 
     public function __construct(
@@ -108,7 +109,7 @@ class Expedition extends Missions
 
             $price = $ship->getPrice();
 
-            if (in_array($id, $this->expeditionService->getPossibleShips(), true)) {
+            if ($this->expeditionService->countsForExpeditionPoints($id)) {
                 $expeditionPoints += $this->expeditionService->calculateExpeditionPoints(
                     $price->getMetal() + $price->getCrystal()
                 ) * $count;
@@ -123,7 +124,8 @@ class Expedition extends Missions
         $topPlayerPoints = (float) self::num(UsersStatistics::max('user_statistic_total_points'));
 
         // limit the amount of resources and of ships that can be found
-        $this->resourceExpeditionPoints = min($expeditionPoints, $this->expeditionService->getMaxExpeditionPoints($topPlayerPoints));
+        $this->resourceExpeditionPoints = $this->expeditionService->getResourceFindPoints($expeditionPoints, $topPlayerPoints);
+        $this->shipExpeditionPoints = min($expeditionPoints, $this->expeditionService->getMaxShipFindPoints($topPlayerPoints));
     }
 
     /**
@@ -150,9 +152,10 @@ class Expedition extends Missions
     }
 
     /**
-     * The fleet finds ships worth half of what it would find in resources
-     * (structure points: metal and crystal), see
-     * ExpeditionService::getFoundShips; with none found it is a "nothing".
+     * The fleet finds ships: a factor (normal, large or huge find) times its
+     * expedition points (at most the cap for ship finds) in structure points
+     * (metal and crystal), see ExpeditionService::getFoundShips; with none
+     * found it is a "nothing".
      *
      * @param array<string, mixed> $fleet
      */
@@ -160,8 +163,8 @@ class Expedition extends Missions
     {
         $currentFleet = FleetShips::decode(self::str($fleet['fleet_array']));
         $budget = $this->expeditionService->calculateShipFoundAmount(
-            $this->expeditionService->getResourceSourceSizeMultChances($this->expeditionService->calculateResourceSourceSize()),
-            $this->resourceExpeditionPoints
+            $this->expeditionService->getShipSourceSizeMultChances($this->expeditionService->calculateResourceSourceSize()),
+            $this->shipExpeditionPoints
         );
         $found = $this->expeditionService->getFoundShips($currentFleet, $budget, $this->shipStructures());
 
@@ -203,13 +206,18 @@ class Expedition extends Missions
     }
 
     /**
+     * One resource (frequency 3:2:1 by default): a factor (normal, large or
+     * huge find) times the expedition points, halved for crystal and divided
+     * by three for deuterium; the fleet loads what fits into its effective
+     * capacity (the free capacity less half of the fuel).
+     *
      * @param array<string, mixed> $fleet
      */
     private function resultResources(array $fleet): void
     {
         // fleet capacity
         $fleetUsedStorage = self::int($fleet['fleet_resource_metal']) + self::int($fleet['fleet_resource_crystal']) + self::int($fleet['fleet_resource_deuterium']);
-        $fleetMaxCapacity = $this->fleetCapacity - $fleetUsedStorage;
+        $fleetMaxCapacity = max(0, $this->fleetCapacity - $fleetUsedStorage - intdiv(self::int($fleet['fleet_fuel'] ?? 0), 2));
 
         // expedition resources obtained calculations
         $typeObtained = $this->expeditionService->calculateResourceTypeObtained();
@@ -237,19 +245,19 @@ class Expedition extends Missions
     }
 
     /**
-     * The return flight is extended by 2, 3 or 5 times its duration
+     * The return flight is extended by 2, 3 or 5 times the holding time
      * (weights in the settings).
+     *
+     * Fix: this extended it by a multiple of the return flight, not of the
+     * holding time as in the original.
      *
      * @param array<string, mixed> $fleet
      */
     private function resultDelay(array $fleet): void
     {
-        $fleetDelayMultiplier = $this->expeditionService->getFleetDeplay();
-        $returnTime = self::int($fleet['fleet_end_time']) - self::int($fleet['fleet_end_stay']);
-
         $this->updateFleetEndTime(
             self::int($fleet['fleet_id']),
-            (self::int($fleet['fleet_end_time']) + ($returnTime * $fleetDelayMultiplier))
+            self::int($fleet['fleet_end_time']) + self::holdingTime($fleet) * $this->expeditionService->getFleetDeplay()
         );
 
         $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_delay_' . mt_rand(1, 5))));
@@ -258,7 +266,10 @@ class Expedition extends Missions
     }
 
     /**
-     * The fleet comes back after half of its return flight.
+     * The return flight is shortened by a third of the holding time times
+     * 2, 3 or 5 (the weights of the delay), but takes at least a second.
+     *
+     * Fix: this halved the return flight instead.
      *
      * @param array<string, mixed> $fleet
      */
@@ -266,7 +277,12 @@ class Expedition extends Missions
     {
         $this->updateFleetEndTime(
             self::int($fleet['fleet_id']),
-            self::earlyReturnEndTime(self::int($fleet['fleet_end_time']), self::int($fleet['fleet_end_stay']))
+            self::earlyReturnEndTime(
+                self::int($fleet['fleet_end_time']),
+                self::int($fleet['fleet_end_stay']),
+                self::holdingTime($fleet),
+                $this->expeditionService->getFleetDeplay()
+            )
         );
 
         // bugfix: the messages are exp_faster_1/2, the former exp_early_1..5 keys do not exist
@@ -276,87 +292,34 @@ class Expedition extends Missions
     }
 
     /**
-     * The fleet comes back after half of its normal return time.
-     *
-     * Bugfix: this used `$returnTime / 2`, which is a float for odd return
-     * times and made updateFleetEndTime(int) throw a TypeError.
+     * The end of the return flight shortened by a third of the holding time
+     * times the factor; the flight takes at least a second.
      */
-    private static function earlyReturnEndTime(int $endTime, int $endStay): int
+    private static function earlyReturnEndTime(int $endTime, int $endStay, int $holdingTime, int $factor): int
     {
-        return $endTime - intdiv($endTime - $endStay, 2);
+        return max($endStay + 1, $endTime - intdiv($holdingTime * $factor, 3));
     }
 
     /**
-     * The fleet is lost completely (25 %) or loses 1 %, 34 % or 67 % of each
-     * ship type; the rest returns home.
+     * How long the fleet held at the expedition position, in seconds.
+     *
+     * @param array<string, mixed> $fleet
+     */
+    private static function holdingTime(array $fleet): int
+    {
+        return max(0, self::int($fleet['fleet_end_stay']) - self::int($fleet['fleet_start_time']));
+    }
+
+    /**
+     * The fleet is lost completely, as in the original (the partial losses
+     * of 1, 34 or 67 % were an addition of this game).
      *
      * @param array<string, mixed> $fleet
      */
     private function resultBlackHole(array $fleet): void
     {
-        $lostChances = (mt_rand(0, 3) * 33 + 1) / 100;
-        $ships = FleetShips::decode(self::str($fleet['fleet_array']));
-
-        if ($lostChances == 1) {
-            $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_lost_1')));
-            $this->loseFleet($fleet, $ships);
-
-            return;
-        }
-
-        $losses = self::blackHoleLosses($ships, $lostChances);
-
-        // too few ships of each type to lose even one
-        if ($losses['lost'] === []) {
-            $this->resultNothing($fleet);
-
-            return;
-        }
-
-        $lostShips = '';
-        foreach ($losses['lost'] as $ship => $count) {
-            $lostShips .= self::str(__('game/ships.' . $this->resource[$ship])) . ': ' . $count . '<br>';
-        }
-
-        $this->expeditionMessage($fleet, sprintf(self::str(__('game/expedition.exp_lost_partial')), $lostShips));
-
-        $this->updateLostShipsAndDefensePoints(self::int($fleet['fleet_owner']), $losses['lost']);
-        $this->updateFleetArrayById([
-            'ships' => FleetShips::encode($losses['remaining']),
-            'amount' => array_sum($losses['remaining']),
-            'fleet_id' => $fleet['fleet_id'],
-        ]);
-    }
-
-    /**
-     * Ships lost to a black hole and the ships left, by ship id.
-     *
-     * Bugfix: the original kept only the ship types that lost units (the
-     * others vanished from the fleet), and when no type lost a unit it
-     * destroyed the whole fleet.
-     *
-     * @param array<int, int> $ships
-     *
-     * @return array{lost: array<int, int>, remaining: array<int, int>}
-     */
-    private static function blackHoleLosses(array $ships, float $lostChances): array
-    {
-        $lost = [];
-        $remaining = [];
-
-        foreach ($ships as $ship => $amount) {
-            $lostAmount = (int) floor($amount * $lostChances);
-
-            if ($lostAmount > 0) {
-                $lost[$ship] = $lostAmount;
-            }
-
-            if ($amount > $lostAmount) {
-                $remaining[$ship] = $amount - $lostAmount;
-            }
-        }
-
-        return ['lost' => $lost, 'remaining' => $remaining];
+        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_lost_1')));
+        $this->loseFleet($fleet, FleetShips::decode(self::str($fleet['fleet_array'])));
     }
 
     /**
@@ -387,14 +350,14 @@ class Expedition extends Missions
     }
 
     /**
-     * A friendly race sends a merchant: the player's next call of the
-     * merchant (trader, exchange resources) is free.
+     * The expedition meets a merchant: the player gets his offer (trader,
+     * exchange resources) for free, or a better rate for the current one.
      *
      * @param array<string, mixed> $fleet
      */
     private function resultMerchant(array $fleet): void
     {
-        app(MerchantService::class)->grantFreeCall(self::int($fleet['fleet_owner']));
+        app(MerchantService::class)->grantExpeditionOffer(self::int($fleet['fleet_owner']));
 
         $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_trader')));
 

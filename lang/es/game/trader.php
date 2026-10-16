@@ -33,7 +33,6 @@ return [
     'tr_no_enough_dark_matter' => 'No hay suficiente materia oscura disponible',
     'tr_resource' => 'Recurso',
     'tr_free_storage' => 'Almacenamiento libre',
-    'tr_free_call' => 'Esta vez el mercader viene gratis.',
     'tr_exchange_rate' => 'Tasa de cambio',
     'tr_you_get' => 'Recibes',
     'tr_you_pay' => 'Pagas',

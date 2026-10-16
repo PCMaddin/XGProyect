@@ -81,7 +81,6 @@ return [
 
     // lost ships
     'exp_lost_1' => 'Das Einzige, was von der Expedition übrig blieb, war folgender Funkspruch: Zzzrrt Oh nein! Krrrzzzzt Das zrrrtrzt sieht krgzzzz aus wie ... AHH! Krzzzzzzzztzzzz...<br><br><br><br><br><br>Übertragung beendet',
-    'exp_lost_partial' => 'Deine Expedition ist einem Schwarzen Loch zu nahe gekommen. Einige Schiffe konnten seiner Anziehung nicht entkommen und gingen verloren. Der Rest der Flotte kehrt nach Hause zurück.<br><br>Verlorene Schiffe:<br>%s',
 
     // exploration status
     'exp_status_fresh_1' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Dieser Teil des Universums scheint noch nicht erforscht zu sein.',

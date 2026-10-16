@@ -10,57 +10,40 @@ use Tests\TestCase;
 use App\Libraries\Missions\Expedition;
 
 /**
- * - earlyReturnEndTime(): regression for the TypeError on odd return times.
- * - blackHoleLosses(): only the lost ships leave the fleet.
+ * earlyReturnEndTime(): as in the original, the return flight is shortened
+ * by a third of the holding time times the factor, but takes at least a
+ * second (it halved the return flight before).
  */
 class ExpeditionTest extends TestCase
 {
     /**
-     * @return array<string, array{0: int, 1: int, 2: int}>
+     * @return array<string, array{0: int, 1: int, 2: int, 3: int, 4: int}>
      */
     public static function earlyReturnCases(): array
     {
         return [
-            'even return time' => [1000, 800, 900],
-            'odd return time' => [1001, 800, 901],
-            'no return time' => [800, 800, 800],
+            // 1 hour held, return flight 2 hours: 2 / 3 hours earlier
+            'factor 2' => [17200, 10000, 3600, 2, 17200 - 2400],
+            'factor 5' => [17200, 10000, 3600, 5, 17200 - 6000],
+            'odd thirds round down' => [17200, 10000, 1000, 2, 17200 - 666],
+            // 9 hours held, short flight: back one second after the stay
+            'at least a second' => [11000, 10000, 32400, 3, 10001],
         ];
     }
 
     #[DataProvider('earlyReturnCases')]
-    public function testEarlyReturnEndTimeHalvesTheReturnTime(int $endTime, int $endStay, int $expected): void
+    public function testEarlyReturnShortensTheFlightByAThirdOfTheHoldingTimeTimesTheFactor(int $endTime, int $endStay, int $holdingTime, int $factor, int $expected): void
     {
         $ref = new ReflectionMethod(Expedition::class, 'earlyReturnEndTime');
 
-        $this->assertSame($expected, $ref->invoke(null, $endTime, $endStay));
+        $this->assertSame($expected, $ref->invoke(null, $endTime, $endStay, $holdingTime, $factor));
     }
 
-    /**
-     * @return array<string, array{0: array<int, int>, 1: float, 2: array<int, int>, 3: array<int, int>}>
-     */
-    public static function blackHoleCases(): array
+    public function testTheHoldingTimeIsTheStayAtThePosition(): void
     {
-        return [
-            'too few ships to lose any' => [[202 => 50, 210 => 3], 0.01, [], [202 => 50, 210 => 3]],
-            'only some types lose ships' => [[202 => 150, 210 => 2], 0.34, [202 => 51], [202 => 99, 210 => 2]],
-            'every type loses ships' => [[203 => 1000, 207 => 333, 215 => 12], 0.67, [203 => 670, 207 => 223, 215 => 8], [203 => 330, 207 => 110, 215 => 4]],
-            'a single ship survives 67 %' => [[204 => 1, 205 => 1], 0.67, [], [204 => 1, 205 => 1]],
-        ];
-    }
+        $ref = new ReflectionMethod(Expedition::class, 'holdingTime');
 
-    /**
-     * Regression: ship types without losses used to vanish from the fleet,
-     * and a fleet without any loss was destroyed completely.
-     *
-     * @param array<int, int> $ships
-     * @param array<int, int> $lost
-     * @param array<int, int> $remaining
-     */
-    #[DataProvider('blackHoleCases')]
-    public function testBlackHoleLosesOnlyTheLostShips(array $ships, float $lostChances, array $lost, array $remaining): void
-    {
-        $ref = new ReflectionMethod(Expedition::class, 'blackHoleLosses');
-
-        $this->assertSame(['lost' => $lost, 'remaining' => $remaining], $ref->invoke(null, $ships, $lostChances));
+        $this->assertSame(3600, $ref->invoke(null, ['fleet_start_time' => 10000, 'fleet_end_stay' => 13600]));
+        $this->assertSame(0, $ref->invoke(null, ['fleet_start_time' => 10000, 'fleet_end_stay' => 9000]));
     }
 }

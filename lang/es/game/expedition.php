@@ -81,7 +81,6 @@ return [
 
     // lost ships
     'exp_lost_1' => 'Lo único que quedó de la expedición fue la siguiente transmisión de radio: Zzzrrt ¡Oh no! Krrrzzzzt Eso zrrrtrzt parece krgzzzz ... ¡AHH! Krzzzzzzzztzzzz...<br><br><br><br><br><br>Transmisión terminada', // ok
-    'exp_lost_partial' => 'Tu expedición se acercó demasiado a un agujero negro. Algunas naves no pudieron escapar de su atracción y se perdieron. El resto de la flota regresa a casa.<br><br>Naves perdidas:<br>%s',
 
     // exploration status
     'exp_status_fresh_1' => 'Registro en el diario de navegación del oficial de comunicación: Parece como si esta parte del universo no hubiera sido explorada hasta ahora.', // ok

@@ -17,10 +17,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\MysqlTestCase;
 
 /**
- * An expedition that finds ships: the found ships join the fleet, which
- * flies home, and the report lists them. Regression: a deathstar in the
- * fleet stopped the mission (undefined chance) or brought a free one, and
- * the finds were several times the fleet.
+ * An expedition that finds ships, as in the original: the found ships join
+ * the fleet, which flies home, and the report lists them. Regression: a
+ * deathstar in the fleet stopped the mission (undefined chance) or brought
+ * a free one, and the finds were several times the fleet.
  */
 #[CoversClass(Expedition::class)]
 class ExpeditionShipsMysqlTest extends MysqlTestCase
@@ -38,16 +38,26 @@ class ExpeditionShipsMysqlTest extends MysqlTestCase
         $this->assertInstanceOf(User::class, $player);
         $this->player = $player;
 
-        // always ships, from a normal source with the multiplier 50
+        // always ships, from a normal source with the factor 50; the draws:
+        // normal source; heavy fighter, 3; large cargo, 2; small cargo, 1;
+        // then three draws the rest (4.500) does not pay for
         $this->app->instance(ExpeditionService::class, new class (app(SettingsService::class)) extends ExpeditionService {
+            /** @var list<int> */
+            private array $randoms = [1, 4, 3, 3, 2, 1, 1, 3, 4, 3];
+
             public function getExpeditionResult(): string
             {
                 return 'ships';
             }
 
-            public function getResourceSourceSizeMultChances(string $discoveryType): int
+            public function getShipSourceSizeMultChances(string $discoveryType): int
             {
                 return 50;
+            }
+
+            protected function random(int $min, int $max): int
+            {
+                return max($min, min($max, array_shift($this->randoms) ?? $min));
             }
         });
     }
@@ -58,12 +68,13 @@ class ExpeditionShipsMysqlTest extends MysqlTestCase
 
         app(Expedition::class)->expeditionMission($this->fleetRow($fleetId));
 
-        // 100 large cargos: 6000 points, capped at 2500 (top player below
-        // 100.000 points), budget 50 * 2500 / 2 = 62500 structure points
+        // 100 large cargos and a deathstar: 51.000 points, for ship finds
+        // capped at 1.250 (top player below 100.000 points): 62.500
+        // structure points; findable up to the heavy fighter
         $fleet = Fleets::findOrFail($fleetId);
         $ships = FleetShips::decode($fleet->fleet_array);
         $this->assertSame(1, $fleet->fleet_mess);
-        $this->assertSame([202 => 1, 203 => 100, 204 => 1, 205 => 3, 210 => 6, 214 => 1], $this->sorted($ships));
+        $this->assertSame([202 => 1, 203 => 102, 205 => 3, 214 => 1], $this->sorted($ships));
         $this->assertSame(array_sum($ships), $fleet->fleet_amount);
 
         $message = DB::table('messages')->where('message_receiver', $this->player->id)->value('message_text');

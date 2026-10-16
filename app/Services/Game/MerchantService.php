@@ -19,14 +19,12 @@ use Illuminate\Support\Facades\DB;
  * gives 2 * 0.88 / 3 crystal and 1 * 0.88 / 3 deuterium per metal. The
  * offer is kept with the player (premium_merchant_offer) until one exchange
  * uses it, on any planet; received resources must fit into its storage.
- * An expedition can meet him: then the next call is free.
+ * An expedition can meet him: then he comes for free with a random
+ * resource, or improves the rate of the current offer (never worsens it).
  */
 class MerchantService
 {
     public const RESOURCES = ['metal', 'crystal', 'deuterium'];
-
-    /** premium_merchant_offer when the next call is free */
-    public const FREE_CALL = '{"free":true}';
 
     private const STORAGES = [
         'metal' => 'building_metal_store',
@@ -63,28 +61,26 @@ class MerchantService
     }
 
     /**
-     * Whether the player's next call is free (an expedition met him).
+     * An expedition met the merchant: he comes for free to buy a random
+     * resource; when the player already has an offer, he keeps its resource
+     * and the better of both rates.
      */
-    public function hasFreeCall(int $userId): bool
+    public function grantExpeditionOffer(int $userId): void
     {
-        return DB::table('premium')->where('premium_user_id', $userId)->value('premium_merchant_offer') === self::FREE_CALL;
-    }
+        $current = $this->offer($userId);
+        $factor = $this->drawFactor();
+        $offer = $current === null
+            ? ['sell' => self::RESOURCES[array_rand(self::RESOURCES)], 'factor' => $factor]
+            : ['sell' => $current['sell'], 'factor' => max($current['factor'], $factor)];
 
-    /**
-     * An expedition met the merchant: the next call is free, unless the
-     * player already has an offer (it is not taken away).
-     */
-    public function grantFreeCall(int $userId): void
-    {
         DB::table('premium')
             ->where('premium_user_id', $userId)
-            ->whereNull('premium_merchant_offer')
-            ->update(['premium_merchant_offer' => self::FREE_CALL]);
+            ->update(['premium_merchant_offer' => json_encode($offer)]);
     }
 
     /**
-     * Call the merchant to buy $sell: pays the dark matter (unless the call
-     * is free) and draws the factor. Error language key, or null when he came.
+     * Call the merchant to buy $sell: pays the dark matter and draws the
+     * factor. Error language key, or null when he came.
      */
     public function call(int $userId, string $sell): ?string
     {
@@ -93,7 +89,7 @@ class MerchantService
         }
 
         $offer = (string) json_encode(['sell' => $sell, 'factor' => $this->drawFactor()]);
-        $price = $this->hasFreeCall($userId) ? 0 : $this->price();
+        $price = $this->price();
 
         $updated = DB::table('premium')
             ->where('premium_user_id', $userId)

@@ -827,10 +827,10 @@ Nachgezogen:
   - Test mit Gegenprobe gegen den alten Code.
 - ✅ **Expeditionsergebnis „Händler“** umgesetzt; es endete bisher wie
   „nichts gefunden“.
-  - Der nächste Händlerruf des Spielers ist kostenlos, ein schon bezahltes
-    Angebot bleibt erhalten.
-  - Der Bericht und die Händlerseite weisen darauf hin.
-  - Tests für den Freiruf und das Expeditionsergebnis.
+  - Wie im Original kommt der Händler kostenlos, mit zufälligem Rohstoff
+    und Kurs. Hat der Spieler schon ein Angebot, behält es seinen Rohstoff
+    und den besseren der beiden Kurse.
+  - Tests für das Angebot, die Kursverbesserung und das Expeditionsergebnis.
 
 - ✅ **Expeditionsergebnisse „Piraten“ und „Aliens“** umgesetzt; beide
   endeten bisher wie „nichts gefunden“ (`ExpeditionBattle`).
@@ -876,13 +876,7 @@ Nachgezogen:
     es davon ein Gratis-Exemplar.
   - Fehler 2: Die Fundmenge war ein Anteil jeder Schiffsart mal Punkte je
     Schiff plus eins. Aus 100 Großen Transportern wurden so 701.
-  - Neue Regel: Die gefundenen Schiffe sind halb so viel wert wie ein
-    Rohstofffund (Struktur = Metall + Kristall; Fundgröße normal/groß/riesig
-    wie bei Rohstoffen). Es gibt nur auffindbare Typen und keinen, der
-    größer ist als das größte auffindbare Schiff der Flotte; das Budget wird
-    nach den vorhandenen Fundchancen verteilt. Wird nichts gefunden, ist es
-    ein „nichts gefunden“.
-  - Die ungenutzte Obergrenze `getMaxShipsExpeditionPoints` ist entfernt.
+  - Neue Regel wie im Original, siehe „Abgleich mit dem Original“ unten.
   - Tests für die Regel und auf MariaDB für die ganze Mission, mit
     Gegenprobe gegen den alten Code.
 - ✅ **Rohstofffund ohne große Funde** (gefixt): Statt der Fundgröße wurde
@@ -893,10 +887,48 @@ Nachgezogen:
   passende Spielfunktion bleiben die Texte für Gegenstände
   (`exp_found_object_*`) und für unerforschte Sektoren
   (`exp_status_fresh_*`) ungenutzt.
-- ✅ **`@todo`s**: keine mehr in `app/`. Die Regeln für Dunkle Materie,
-  Verspätung und frühe Rückkehr sind jetzt dokumentiert, statt mit „not
-  100 % like the original“ markiert; sie sind nicht gegen das
-  Original-Spiel geprüft. Ein toter Kommentarblock im Menü ist entfernt.
+- ✅ **`@todo`s**: keine mehr in `app/`. Ein toter Kommentarblock im Menü
+  ist entfernt.
+- ✅ **Abgleich mit dem Original.** Expeditionen folgen jetzt dem OGame-Wiki
+  (owiki.de, „Expedition“), der Schrotthändler dem Gameforge-Tutorial
+  „Premium features“ (2019).
+  - **Expeditionspunkte**: Auch Recycler, Kolonieschiffe und Todessterne
+    zählen (nur Solarsatelliten nicht). Obergrenze bei Platz 1 unter
+    100.000 Punkten: 2.400 statt 2.500. Schiffsfunde haben eigene, halb so
+    hohe Grenzen (1.250 bis 12.500).
+  - **Rohstofffund**: Metall, Kristall und Deuterium im Verhältnis 3:2:1
+    (bisher 68,5/24/7,5 %; die Update-Migration ändert nur unveränderte
+    Gewichte). Faktoren gerade 10–50, 50–100, 100–200; mindestens 200
+    Expeditionspunkte; die Flotte lädt nur ihre freie Ladekapazität
+    abzüglich der Hälfte des Treibstoffs.
+  - **Schiffsfund**: Strukturpunkte = Faktor (10–50, gerade 52–100, gerade
+    102–200) × Expeditionspunkte, mindestens 10.000. Findbar sind die Typen
+    bis eine Stufe über dem schwersten Schiff der Flotte (Spio, KT, LJ, GT,
+    SJ, Kreuzer, SS, Bomber, Zerstörer, Reaper; einen Schlachtkreuzer gibt
+    es nicht). Recycler, Kolonieschiffe und Todessterne finden allein
+    nichts. Gezogen wird immer wieder ein Typ, jeder gleich
+    wahrscheinlich, und eine Anzahl zwischen 1 und dem, was das Restbudget
+    bezahlt; Schluss nach drei Zügen ohne Schiff.
+  - **Verspätung**: + 2/3/5 × Haltezeit (bisher × Rückflugzeit).
+  - **Verfrühung**: − Haltezeit / 3 × 2/3/5, Rückflug mindestens eine
+    Sekunde (bisher halbe Rückflugzeit).
+  - **Piraten/Aliens**: Anteil je Schiffstyp schwankt um ein Zehntel,
+    Piraten runden ab, Aliens auf. Dazu kommen 5 LJ / 3 Kreuzer / 2 SS bei
+    Piraten und 5 SJ / 3 SS (statt der fehlenden Schlachtkreuzer) / 2
+    Zerstörer bei Aliens.
+  - **Schwarzes Loch**: immer Totalverlust. Die Teilverluste von 1/34/67 %
+    waren eine Zutat dieses Spiels.
+  - **Unverändert, weil schon wie im Original**: Wahrscheinlichkeiten der
+    Ergebnisse, Dunkle Materie (300–400 / 500–700 / ab 1.000), Größen
+    89/10/1 %, Technik der Gegner ±3 Stufen, Kampf ohne Trümmerfeld,
+    Händlerkurse und -preis.
+  - **Nicht übernommen**: Im Original wird „nichts gefunden“
+    wahrscheinlicher, je öfter ein Gebiet angeflogen wird (Erholung ca. 10
+    Expeditionen am Tag), und eine Spionagesonde meldet das. Das fehlt hier
+    weiter, ebenso Gegenstände; ihre Texte (`exp_status_fresh_*`,
+    `exp_found_object_*`) bleiben ungenutzt.
+  - Tests mit festgelegten Zufallszahlen für alle Regeln, der Schiffsfund
+    auf MariaDB; alle Ergebnisse im laufenden Spiel ausgelöst und geprüft.
 
 Offen:
 
