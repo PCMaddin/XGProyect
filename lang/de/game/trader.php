@@ -49,6 +49,23 @@ return [
     'tr_no_enough_storage_for' => 'Nicht genug Speicherkapazität für %s.',
 
     // traderAuctioneer
+    'tr_au_explanation' => 'Von 6 bis 23 Uhr beginnt zu jeder vollen Stunde eine Auktion, die nach 30 bis 45 Minuten endet. Geboten wird mit Rohstoffen dieses Planeten (Metall 1, Kristall 1,5, Deuterium 3 Metalleinheiten). Gebotene Rohstoffe werden nie zurückerstattet; ein Gebot kann erhöht werden.',
+    'tr_au_item' => 'Versteigert wird',
+    'tr_au_time_left' => 'Endet in etwa %s Minuten',
+    'tr_au_ended' => 'Die Auktion ist beendet.',
+    'tr_au_highest' => 'Höchstgebot: %s Metalleinheiten von %s',
+    'tr_au_no_bids' => 'Noch keine Gebote.',
+    'tr_au_your_bid' => 'Dein Gebot: %s Metalleinheiten',
+    'tr_au_winner' => 'Gewonnen hat %s.',
+    'tr_au_next' => 'Die nächste Auktion beginnt um %s Uhr.',
+    'tr_au_bid' => 'Bieten',
+    'tr_au_amount' => 'Menge',
+    'tr_au_placed' => 'Dein Gebot ist abgegeben.',
+    'tr_au_invalid_bid' => 'Gib eine Menge eines Rohstoffs an.',
+    'tr_au_no_auction' => 'Gerade läuft keine Auktion.',
+    'tr_au_too_low' => 'Dein Gebot muss das Höchstgebot übertreffen.',
+    'tr_au_won_subject' => 'Auktion gewonnen',
+    'tr_au_won' => 'Du hast die Auktion gewonnen: %s liegt in deinem Inventar.',
 
     // traderScrap
     'tr_scrap_hello' => 'Dann wollen wir mal sehen, was du loswerden willst.',

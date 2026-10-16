@@ -22,7 +22,11 @@
                 {{ __('game/trader.tr_import_export') }}
             </a>
         </th>
-        <th width="50%"></th>
+        <th width="50%">
+            <a href="game.php?page=traderAuctioneer" title="{{ __('game/trader.tr_auctioneer_title') }}">
+                {{ __('game/trader.tr_auctioneer') }}
+            </a>
+        </th>
     </tr>
 </table>
 

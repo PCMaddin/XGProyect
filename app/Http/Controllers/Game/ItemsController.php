@@ -11,6 +11,7 @@ use App\Services\FormatService;
 use App\Services\Game\Items\Item;
 use App\Services\Game\Items\ItemCatalog;
 use App\Services\Game\Items\ItemService;
+use App\Services\Game\Items\ItemTexts;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ class ItemsController extends BaseController
     public function __construct(
         private ItemService $items,
         private ItemCatalog $catalog,
+        private ItemTexts $texts,
         private FormatService $formatService,
     ) {
     }
@@ -52,7 +54,7 @@ class ItemsController extends BaseController
             if ($result === null) {
                 return redirect(self::REDIRECT_TARGET)->with(
                     'items_success',
-                    sprintf((string) __('game/items.' . ($request->has('buy') ? 'it_bought' : 'it_used')), $this->name($key))
+                    sprintf((string) __('game/items.' . ($request->has('buy') ? 'it_bought' : 'it_used')), $this->texts->name($key))
                 );
             }
 
@@ -116,30 +118,12 @@ class ItemsController extends BaseController
      */
     private function describe(Item $item): array
     {
-        $value = match ($item->type) {
-            Item::KRAKEN, Item::DETROID, Item::NEWTRON => $this->formatService->prettyTime($item->value),
-            default => (string) $item->value,
-        };
-
         return [
             'key' => $item->key,
-            'name' => $this->name($item->key),
+            'name' => $this->texts->name($item->key),
             'tier' => $item->tier,
-            'description' => sprintf(
-                (string) __('game/items.it_desc_' . $item->type),
-                $value,
-                $item->resource !== null ? __('game/global.' . $item->resource) : ''
-            ),
+            'description' => $this->texts->description($item->key),
         ];
-    }
-
-    private function name(string $key): string
-    {
-        $item = $this->catalog->get($key);
-
-        return $item === null
-            ? ''
-            : __('game/items.' . $item->nameKey()) . ' ' . __('game/items.it_' . $item->tier);
     }
 
     /**

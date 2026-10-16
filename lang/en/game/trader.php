@@ -49,6 +49,23 @@ return [
     'tr_no_enough_storage_for' => 'Not enough storage capacity for %s.',
 
     // traderAuctioneer
+    'tr_au_explanation' => 'From 6 to 23 o\'clock an auction starts every full hour and ends after 30 to 45 minutes. You bid resources of this planet (metal 1, crystal 1.5, deuterium 3 metal units). Resources bid are never refunded; a bid can be raised.',
+    'tr_au_item' => 'Up for auction',
+    'tr_au_time_left' => 'Ends in about %s minutes',
+    'tr_au_ended' => 'The auction is over.',
+    'tr_au_highest' => 'Highest bid: %s metal units by %s',
+    'tr_au_no_bids' => 'No bids yet.',
+    'tr_au_your_bid' => 'Your bid: %s metal units',
+    'tr_au_winner' => '%s won.',
+    'tr_au_next' => 'The next auction starts at %s.',
+    'tr_au_bid' => 'Bid',
+    'tr_au_amount' => 'Amount',
+    'tr_au_placed' => 'Your bid is placed.',
+    'tr_au_invalid_bid' => 'Enter an amount of a resource.',
+    'tr_au_no_auction' => 'There is no auction right now.',
+    'tr_au_too_low' => 'Your bid must top the highest bid.',
+    'tr_au_won_subject' => 'Auction won',
+    'tr_au_won' => 'You won the auction: %s is in your inventory.',
 
     // traderScrap
     'tr_scrap_hello' => 'Then let\'s see what you\'re willing to give out.',

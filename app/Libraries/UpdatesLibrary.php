@@ -8,6 +8,7 @@ use App\Services\Game\Formulas\FormulasService;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
+use App\Services\Game\AuctionService;
 use App\Services\Game\BuildingQueueService;
 use App\Services\Game\Items\ItemService;
 use App\Services\Game\Formulas\OfficerService;
@@ -48,6 +49,7 @@ class UpdatesLibrary
         // Updates
         $this->updateFleets();
         $this->updateStatistics();
+        app(AuctionService::class)->settleEnded(time());
     }
 
     private function cleanUp(): void

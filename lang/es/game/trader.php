@@ -49,6 +49,23 @@ return [
     'tr_no_enough_storage_for' => 'No hay suficiente capacidad de almacenamiento para %s.',
 
     // traderAuctioneer
+    'tr_au_explanation' => 'De 6 a 23 horas empieza una subasta cada hora en punto, que termina tras 30 a 45 minutos. Se puja con recursos de este planeta (metal 1, cristal 1,5, deuterio 3 unidades de metal). Los recursos pujados nunca se devuelven; una puja se puede aumentar.',
+    'tr_au_item' => 'Se subasta',
+    'tr_au_time_left' => 'Termina en unos %s minutos',
+    'tr_au_ended' => 'La subasta ha terminado.',
+    'tr_au_highest' => 'Puja más alta: %s unidades de metal de %s',
+    'tr_au_no_bids' => 'Todavía no hay pujas.',
+    'tr_au_your_bid' => 'Tu puja: %s unidades de metal',
+    'tr_au_winner' => 'Ha ganado %s.',
+    'tr_au_next' => 'La próxima subasta empieza a las %s.',
+    'tr_au_bid' => 'Pujar',
+    'tr_au_amount' => 'Cantidad',
+    'tr_au_placed' => 'Tu puja está hecha.',
+    'tr_au_invalid_bid' => 'Indica una cantidad de un recurso.',
+    'tr_au_no_auction' => 'Ahora no hay ninguna subasta.',
+    'tr_au_too_low' => 'Tu puja debe superar la puja más alta.',
+    'tr_au_won_subject' => 'Subasta ganada',
+    'tr_au_won' => 'Has ganado la subasta: %s está en tu inventario.',
 
     // traderScrap
     'tr_scrap_hello' => 'Veamos entonces qué está dispuesto a pagar.',

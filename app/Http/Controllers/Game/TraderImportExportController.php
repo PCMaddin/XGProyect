@@ -9,7 +9,7 @@ use App\Libraries\Functions;
 use App\Libraries\Users;
 use App\Services\FormatService;
 use App\Services\Game\ImportExportService;
-use App\Services\Game\Items\ItemCatalog;
+use App\Services\Game\Items\ItemTexts;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class TraderImportExportController extends BaseController
 
     public function __construct(
         private ImportExportService $importExport,
-        private ItemCatalog $catalog,
+        private ItemTexts $texts,
         private FormatService $formatService,
     ) {
     }
@@ -70,7 +70,6 @@ class TraderImportExportController extends BaseController
     {
         $container = $this->importExport->container($day);
         $state = $this->importExport->state($userId, $day);
-        $item = $state['bought'] ? $this->catalog->get($state['item']) : null;
         $costs = [];
 
         foreach (array_keys(ImportExportService::RATES) as $resource) {
@@ -82,7 +81,7 @@ class TraderImportExportController extends BaseController
             'tierName' => __('game/items.it_' . $container['tier']),
             'costs' => $costs,
             'bought' => $state['bought'],
-            'boughtItem' => $item === null ? '' : __('game/items.' . $item->nameKey()) . ' ' . __('game/items.it_' . $item->tier),
+            'boughtItem' => $state['bought'] ? $this->texts->name($state['item']) : '',
             'swapsLeft' => ImportExportService::MAX_SWAPS - $state['swaps'],
             'swapPrice' => $this->formatService->prettyNumber($this->importExport->swapPrice($container['tier'])),
         ];

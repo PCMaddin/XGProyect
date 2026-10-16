@@ -971,6 +971,19 @@ Nachgezogen:
   - Wie oft welche Stufe kommt, nennt das Wiki nicht (nur: Gold seltener
     als Silber, Silber seltener als Bronze): hier 70 / 25 / 5 %.
   - Neue Tabelle `import_exports`. Tests; im Browser durchgespielt.
+- ✅ **Auktionator** (Teil 3 der Gegenstände, `AuctionService`, Seite
+  `traderAuctioneer`) wie im Original (owiki.de, „Auktionator“):
+  - Von 6 bis 23 Uhr zu jeder vollen Stunde eine Auktion eines Gegenstands
+    (alle außer Feldern), Ende nach 30–45 Minuten ±30 Sekunden; angezeigt
+    wird die Restzeit in 5-Minuten-Schritten.
+  - Gebote in Rohstoffen des Planeten, gezählt in Metalleinheiten
+    (1 : 1,5 : 3), nie erstattet, erhöhbar; ein neues Gebot muss das
+    Höchstgebot der anderen übertreffen.
+  - Der Tick gibt dem Höchstbietenden nach dem Ende den Gegenstand und
+    schickt ihm eine Nachricht.
+  - Ehrenpunkte als Zahlungsmittel gibt es im Spiel nicht.
+  - Neue Tabellen `auctions`, `auction_bids`. Tests; im Browser bis zum
+    Gewinn durchgespielt.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

@@ -63,6 +63,7 @@ class GameController extends BaseController
         'traderResources' => Game\TraderResourcesController::class,
         'traderScrap' => Game\TraderScrapController::class,
         'traderImportExport' => Game\TraderImportExportController::class,
+        'traderAuctioneer' => Game\TraderAuctioneerController::class,
     ];
 
     public function __invoke(Request $request, GameBootstrap $bootstrap): BaseResponse
