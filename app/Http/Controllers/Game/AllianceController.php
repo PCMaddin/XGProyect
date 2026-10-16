@@ -500,7 +500,7 @@ class AllianceController extends BaseController
         }
 
         return view('alliance.admin.applications', array_merge($requestForm, [
-            'pending_message' => strtr((string) __('game/alliance.al_no_request_pending'), ['%n' => count($requests)]),
+            'pending_message' => trans_choice('game/alliance.al_no_request_pending', count($requests), ['count' => count($requests)]),
             'requestsList' => $requestsList,
             'noRequests' => $requests === [],
             'showForm' => $requestForm !== [],
@@ -1403,7 +1403,7 @@ class AllianceController extends BaseController
         if ($this->alliance->hasAccess(AllianceRanks::APPLICATION_MANAGEMENT) && $count !== 0) {
             $content = $this->formatService->link(
                 'game.php?page=alliance&mode=admin&edit=requests',
-                $count . ' ' . __('game/alliance.al_new_requests')
+                trans_choice('game/alliance.al_new_requests', $count, ['count' => $count])
             );
         }
 

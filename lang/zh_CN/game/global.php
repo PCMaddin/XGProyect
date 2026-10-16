@@ -45,21 +45,4 @@ return [
     'online' => '在线',
     'minutes' => '15 分钟',
     'offline' => '离线',
-
-    'timing' => [
-        'year' => '年',
-        'years' => '年',
-        'month' => '个月',
-        'months' => '个月',
-        'week' => '周',
-        'weeks' => '周',
-        'day' => '天',
-        'days' => '天',
-        'hour' => '小时',
-        'hours' => '小时',
-        'minute' => '分钟',
-        'minutes' => '分钟',
-        'second' => '秒',
-        'seconds' => '秒',
-    ],
 ];

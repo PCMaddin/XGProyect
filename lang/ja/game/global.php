@@ -45,21 +45,4 @@ return [
     'online' => 'オンライン',
     'minutes' => '15分',
     'offline' => 'オフライン',
-
-    'timing' => [
-        'year' => '年',
-        'years' => '年',
-        'month' => 'ヶ月',
-        'months' => 'ヶ月',
-        'week' => '週間',
-        'weeks' => '週間',
-        'day' => '日',
-        'days' => '日',
-        'hour' => '時間',
-        'hours' => '時間',
-        'minute' => '分',
-        'minutes' => '分',
-        'second' => '秒',
-        'seconds' => '秒',
-    ],
 ];

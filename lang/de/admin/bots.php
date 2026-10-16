@@ -11,7 +11,7 @@ return [
     'bo_galaxy_from' => 'Von Galaxie',
     'bo_galaxy_to' => 'Bis Galaxie',
     'bo_generate' => 'Bots erstellen',
-    'bo_created' => ':count Bot(s) erfolgreich erstellt!',
+    'bo_created' => ':count Bot erfolgreich erstellt!|:count Bots erfolgreich erstellt!',
     'bo_partial' => 'Nur :count von :requested Bots konnten erstellt werden, der gewählte Bereich ist fast voll.',
     'bo_none' => 'Es konnten keine Bots erstellt werden. Der gewählte Bereich ist voll.',
 ];

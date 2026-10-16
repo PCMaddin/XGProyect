@@ -752,6 +752,39 @@ Baseline-Einträge.
 
   Tests (mit und ohne Forum, Escaping); im Browser registriert und die
   Nachricht geprüft.
+- ✅ **Pluralformen über `trans_choice`:** Das Spiel klebte Endungen an
+  („member“ + „s“, „ship“ + „s“, „rocket(s)“, „application/s“). Das
+  passt nur fürs Englische und Spanische. Alle gezählten Texte laufen jetzt
+  über `trans_choice`, damit jede Sprache ihre Regel nutzt: eine Form im
+  Japanischen und Chinesischen, drei im Polnischen (1 statek, 2 statki,
+  5 statków), „0 und 1“ als Singular im Französischen:
+  - Galaxie: Mitgliederzahl im Allianz-Tooltip (`gl_alliance_members`).
+  - Flottenereignisse: anfliegende Schiffe (`ev_ships_count`).
+  - Raketenangriff: abgefangene Raketen (`mis_some_destroyed`).
+  - Allianz: offene Bewerbungen (`al_no_request_pending`, vorher `%n`) und
+    der Link „neue Bewerbungen“ (`al_new_requests`).
+  - Admin: erstellte Bots (`bo_created`); die polnischen Texte für Fehler,
+    Vorkommen und gesperrte Spieler nutzen jetzt auch drei Formen.
+
+  Die zwei Meldungen, die die Galaxie in JavaScript zusammensetzt („Sende
+  3 Schiffe nach …“, „nur N Schiffe gesendet“), haben keinen Zugriff auf
+  `trans_choice`; sie sind jetzt ohne Plural formuliert („Sende Schiffe (3)
+  nach 1:1:9 …“) und kommen als ein Text mit `:count`/`:target`.
+  Mitbehoben:
+  - Die Galaxie fragte `gl_not_enought_storage` ab (Tippfehler im Schlüssel);
+    Spieler sahen den Schlüssel statt der Meldung.
+  - Die JavaScript-Meldungen der Galaxie kommen per `@json` statt `{{ }}`,
+    sonst wurde ein Apostroph (`doesn't`) zu `&#039;`.
+  - Unbenutzte Texte entfernt: das `timing`-Array (Jahr/Jahre … Sekunden)
+    in `game/global.php` und `mg_result_count`.
+
+  Der Sprachtest vergleicht benannte Platzhalter (`:count`) jetzt als Menge,
+  weil jede Pluralform sie wiederholt; `sprintf`-Platzhalter zählt er weiter
+  genau. Neuer `PluralTranslationsTest`: jede Sprache liefert für jede
+  Zahl genau eine Form mit der Zahl darin, Polnisch die richtige der drei
+  Formen, und jeder `trans_choice`-Schlüssel im Code ist abgedeckt. Im
+  Browser auf Deutsch, Polnisch und Japanisch geprüft (Tooltip, Sende-
+  Meldung), mit `pl` gecrawlt, ohne neue Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
 

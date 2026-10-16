@@ -11,7 +11,7 @@ return [
     'bo_galaxy_from' => 'From galaxy',
     'bo_galaxy_to' => 'To galaxy',
     'bo_generate' => 'Generate bots',
-    'bo_created' => ':count bot(s) created successfully!',
+    'bo_created' => ':count bot created successfully!|:count bots created successfully!',
     'bo_partial' => 'Only :count of :requested bots could be created; the targeted area is almost full.',
     'bo_none' => 'No bots could be created. The selected area is full.',
 ];

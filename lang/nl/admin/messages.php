@@ -33,7 +33,6 @@ return [
     'mg_private_content' => 'Privébericht — inhoud verborgen',
     'mg_delete_this' => 'Dit bericht verwijderen',
     'mg_delete_ok' => 'Berichten verwijderd',
-    'mg_result_count' => ':count bericht(en) gevonden',
     'mg_types' => [
         0 => 'Spionagerapporten',
         1 => 'Gevechtsrapporten',

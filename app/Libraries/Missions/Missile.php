@@ -106,7 +106,7 @@ class Missile extends Missions
 
         if ($antiBallistic > 0) {
             $result[502] = $antiBallistic;
-            $message = $antiBallistic . self::text(__('game/missile.mis_some_destroyed')) . ' <br>';
+            $message = trans_choice('game/missile.mis_some_destroyed', $antiBallistic, ['count' => $antiBallistic]) . ' <br>';
         }
 
         $attack = floor(

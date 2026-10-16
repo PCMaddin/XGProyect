@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'ev_no_fleet_data' => 'Aucune donnée de flotte',
     'ev_aproaching' => 'Approchent ',
-    'ev_ships' => ' vaisseaux',
+    'ev_ships_count' => ':count vaisseau|:count vaisseaux',
     'ev_from_the_planet' => 'depuis la planète ',
     'ev_from_the_moon' => 'de la lune ',
     'ev_the_planet' => 'la planète ',

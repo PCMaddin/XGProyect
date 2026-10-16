@@ -33,7 +33,6 @@ return [
     'mg_private_content' => 'Private Nachricht, Inhalt ausgeblendet',
     'mg_delete_this' => 'Diese Nachricht löschen',
     'mg_delete_ok' => 'Nachrichten erfolgreich gelöscht',
-    'mg_result_count' => ':count Nachricht(en) gefunden',
     'mg_types' => [
         0 => 'Spionageberichte',
         1 => 'Kampfberichte',

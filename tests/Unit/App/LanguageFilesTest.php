@@ -120,8 +120,11 @@ class LanguageFilesTest extends TestCase
      */
     private static function placeholders(string $text): array
     {
-        preg_match_all('/%(?:\d+\$)?[sdfu]|%\d+%|%[a-z]+%|%[tmn]\b|:[a-z_]+\b/i', $text, $matches);
-        $placeholders = $matches[0];
+        // positional ones must match in number, sprintf fails on a missing one
+        preg_match_all('/%(?:\d+\$)?[sdfu]|%\d+%|%[a-z]+%|%[tmn]\b/i', $text, $positional);
+        // named ones may repeat, a plural text has one per form
+        preg_match_all('/:[a-z_]+\b/i', $text, $named);
+        $placeholders = array_merge($positional[0], array_values(array_unique($named[0])));
         sort($placeholders);
 
         return $placeholders;

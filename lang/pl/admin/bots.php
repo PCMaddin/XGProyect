@@ -11,7 +11,7 @@ return [
     'bo_galaxy_from' => 'Od galaktyki',
     'bo_galaxy_to' => 'Do galaktyki',
     'bo_generate' => 'Generuj boty',
-    'bo_created' => 'Utworzone boty: :count!',
+    'bo_created' => 'Utworzono :count bota!|Utworzono :count boty!|Utworzono :count botów!',
     'bo_partial' => 'Udało się utworzyć tylko :count z :requested botów; wybrany obszar jest prawie pełny.',
     'bo_none' => 'Nie udało się utworzyć żadnego bota. Wybrany obszar jest pełny.',
 ];

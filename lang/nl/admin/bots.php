@@ -11,7 +11,7 @@ return [
     'bo_galaxy_from' => 'Van melkweg',
     'bo_galaxy_to' => 'Tot melkweg',
     'bo_generate' => 'Bots maken',
-    'bo_created' => ':count bot(s) aangemaakt!',
+    'bo_created' => ':count bot succesvol aangemaakt!|:count bots succesvol aangemaakt!',
     'bo_partial' => 'Er konden maar :count van de :requested bots worden aangemaakt; het gekozen gebied is bijna vol.',
     'bo_none' => 'Er konden geen bots worden aangemaakt. Het gekozen gebied is vol.',
 ];

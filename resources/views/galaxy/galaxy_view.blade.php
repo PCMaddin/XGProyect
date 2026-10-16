@@ -100,49 +100,49 @@
         // each case gets a different table entry, no language file used :P
         switch (parseInt(retVals[0])) {
             case 600:
-                addToTable("{{ __('game/galaxy.gl_success') }}", "success");
+                addToTable(@json(__('game/galaxy.gl_success')), "success");
                 break;
             case 601:
-                addToTable("{{ __('game/galaxy.gl_error') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_error')), "error");
                 break;
             case 602:
-                addToTable("{{ __('game/galaxy.gl_no_moon') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_moon')), "error");
                 break;
             case 603:
-                addToTable("{{ __('game/galaxy.gl_noob_protection') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_noob_protection')), "error");
                 break;
             case 604:
-                addToTable("{{ __('game/galaxy.gl_too_strong') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_too_strong')), "error");
                 break;
             case 605:
-                addToTable("{{ __('game/galaxy.gl_vacation_mode') }}", "vacation");
+                addToTable(@json(__('game/galaxy.gl_vacation_mode')), "vacation");
                 break;
             case 610:
-                addToTable("{{ __('game/galaxy.gl_only_amount_ships_1') }} " + retVals[1] + " {{ __('game/galaxy.gl_only_amount_ships_2') }}", "notice");
+                addToTable(@json(__('game/galaxy.gl_only_some_sent')).replace(':count', retVals[1]), "notice");
                 break;
             case 611:
-                addToTable("{{ __('game/galaxy.gl_no_ships') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_ships')), "error");
                 break;
             case 612:
-                addToTable("{{ __('game/galaxy.gl_no_slots') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_slots')), "error");
                 break;
             case 613:
-                addToTable("{{ __('game/galaxy.gl_no_deuterium') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_deuterium')), "error");
                 break;
             case 614:
-                addToTable("{{ __('game/galaxy.gl_no_planet') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_planet')), "error");
                 break;
             case 615:
-                addToTable("{{ __('game/galaxy.gl_not_enought_storage') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_not_enough_storage')), "error");
                 break;
             case 616:
-                addToTable("{{ __('game/galaxy.gl_multi_alarm') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_multi_alarm')), "error");
                 break;
         }
     }
 
     function doit(order, galaxy, system, planet, planettype, shipcount) {
-        strInfo = "{{ __('game/galaxy.gl_send') }} " + shipcount + " {{ __('game/galaxy.gl_ship') }}" + (shipcount != 1 ? "{{ __('game/galaxy.gl_ships') }}" : "") + " {{ __('game/galaxy.gl_to') }}  " + galaxy + ":" + system + ":" + planet + "...";
+        strInfo = @json(__('game/galaxy.gl_sending')).replace(':count', shipcount).replace(':target', galaxy + ":" + system + ":" + planet);
         ajax.requestFile = "game.php?page=galaxy&fleet=true&action=send";
 
         // no longer needed, since we don't want to write the cryptic

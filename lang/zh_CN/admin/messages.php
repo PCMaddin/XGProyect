@@ -33,7 +33,6 @@ return [
     'mg_private_content' => '私人消息 — 内容已隐藏',
     'mg_delete_this' => '删除此消息',
     'mg_delete_ok' => '消息已删除',
-    'mg_result_count' => '找到 :count 条消息',
     'mg_types' => [
         0 => '间谍报告',
         1 => '战斗报告',

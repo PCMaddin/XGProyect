@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'ev_no_fleet_data' => 'Geen vlootgegevens',
     'ev_aproaching' => 'Er naderen ',
-    'ev_ships' => ' schepen',
+    'ev_ships_count' => ':count schip|:count schepen',
     'ev_from_the_planet' => 'van planeet ',
     'ev_from_the_moon' => 'van de maan ',
     'ev_the_planet' => 'planeet ',

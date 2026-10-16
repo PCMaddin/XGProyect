@@ -8,6 +8,6 @@ return [
     'er_export' => 'Eksportuj',
     'er_delete_all' => 'Usuń wszystkie',
     'er_error_list' => 'Lista błędów',
-    'er_errors' => '{0} Brak błędów|{1} :count błąd|[2,*] Błędy: :count',
-    'er_occurrences' => '{1} :count wystąpienie|[2,*] Wystąpienia: :count',
+    'er_errors' => ':count błąd|:count błędy|:count błędów|{0} Brak błędów',
+    'er_occurrences' => ':count wystąpienie|:count wystąpienia|:count wystąpień',
 ];

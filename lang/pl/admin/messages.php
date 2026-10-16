@@ -33,7 +33,6 @@ return [
     'mg_private_content' => 'Wiadomość prywatna — treść ukryta',
     'mg_delete_this' => 'Usuń tę wiadomość',
     'mg_delete_ok' => 'Wiadomości zostały usunięte',
-    'mg_result_count' => 'Znalezione wiadomości: :count',
     'mg_types' => [
         0 => 'Raporty szpiegowskie',
         1 => 'Raporty wojenne',

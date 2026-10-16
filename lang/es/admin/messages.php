@@ -33,7 +33,6 @@ return [
     'mg_private_content' => 'Mensaje privado — contenido oculto',
     'mg_delete_this' => 'Borrar este mensaje',
     'mg_delete_ok' => 'Mensajes borrados correctamente',
-    'mg_result_count' => ':count mensaje(s) encontrado(s)',
     'mg_types' => [
         0 => 'Reportes de espionaje',
         1 => 'Reportes de Batalla',

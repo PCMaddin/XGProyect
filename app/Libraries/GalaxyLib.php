@@ -373,7 +373,6 @@ class GalaxyLib
         $parse = [
             'alliance_name' => '',
             'ally_members' => '',
-            'add' => '',
             'ally_id' => '',
             'web' => '',
             'tag' => '',
@@ -384,8 +383,8 @@ class GalaxyLib
         }
 
         $parse['alliance_name'] = str_replace("'", "\'", htmlspecialchars(self::asString($this->rowData['alliance_name'] ?? ''), ENT_COMPAT));
-        $parse['ally_members'] = self::asInt($this->rowData['ally_members'] ?? 0);
-        $parse['add'] = self::asInt($this->rowData['ally_members'] ?? 0) > 1 ? (string) __('game/galaxy.gl_member_add') : '';
+        $members = self::asInt($this->rowData['ally_members'] ?? 0);
+        $parse['ally_members'] = trans_choice('game/galaxy.gl_alliance_members', $members, ['count' => $members]);
         $parse['ally_id'] = self::asInt($this->rowData['ally_id'] ?? 0);
 
         if (self::asString($this->rowData['alliance_web'] ?? '') !== '') {

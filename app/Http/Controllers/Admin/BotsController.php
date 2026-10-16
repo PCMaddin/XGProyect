@@ -58,7 +58,7 @@ class BotsController extends BaseController
             return redirect()->route('admin.bots');
         }
 
-        session()->flash('success', __('admin/bots.bo_created', ['count' => $created]));
+        session()->flash('success', trans_choice('admin/bots.bo_created', $created, ['count' => $created]));
 
         return redirect()->route('admin.bots');
     }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'ev_no_fleet_data' => '艦隊データがありません',
     'ev_aproaching' => '接近中: ',
-    'ev_ships' => ' 隻',
+    'ev_ships_count' => ':count 隻',
     'ev_from_the_planet' => '出発元 惑星 ',
     'ev_from_the_moon' => '出発元 月 ',
     'ev_the_planet' => '惑星 ',

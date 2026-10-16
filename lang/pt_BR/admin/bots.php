@@ -11,7 +11,7 @@ return [
     'bo_galaxy_from' => 'Da galáxia',
     'bo_galaxy_to' => 'Até a galáxia',
     'bo_generate' => 'Gerar bots',
-    'bo_created' => ':count bot(s) criado(s) com sucesso!',
+    'bo_created' => ':count bot criado com sucesso!|:count bots criados com sucesso!',
     'bo_partial' => 'Só foi possível criar :count de :requested bots; a área escolhida está quase cheia.',
     'bo_none' => 'Nenhum bot pôde ser criado. A área escolhida está cheia.',
 ];

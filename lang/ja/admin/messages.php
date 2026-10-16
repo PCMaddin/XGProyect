@@ -33,7 +33,6 @@ return [
     'mg_private_content' => '個人メッセージ — 内容は非表示',
     'mg_delete_this' => 'このメッセージを削除',
     'mg_delete_ok' => 'メッセージを削除しました',
-    'mg_result_count' => ':count 件のメッセージが見つかりました',
     'mg_types' => [
         0 => '偵察レポート',
         1 => '戦闘レポート',

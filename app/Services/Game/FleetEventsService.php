@@ -114,6 +114,11 @@ class FleetEventsService
             . "');\" onmouseout=\"return nd();\" class=\"" . $fleetType . '">' . $text . '</a>';
     }
 
+    private function shipCount(string $amount): string
+    {
+        return trans_choice('game/events.ev_ships_count', (int) $amount, ['count' => $amount]);
+    }
+
     /**
      * @param array<int, int> $ships
      * @param array<int|string, mixed> $objects
@@ -125,7 +130,7 @@ class FleetEventsService
         }
 
         if (!$isOwn && $espionage < 4) {
-            return '<tr><td width=50% align=left><font color=white>' . __('game/events.ev_aproaching') . $amount . __('game/events.ev_ships') . '</font></td></tr>';
+            return '<tr><td width=50% align=left><font color=white>' . __('game/events.ev_aproaching') . $this->shipCount($amount) . '</font></td></tr>';
         }
 
         return $this->shipsPopupRows($ships, $objects, $isOwn, $espionage, $amount);
@@ -193,7 +198,7 @@ class FleetEventsService
         $rows = '';
 
         if (!$isOwn) {
-            $rows .= '<tr><td width=100% align=left><font color=white>' . __('game/events.ev_aproaching') . $amount . __('game/events.ev_ships') . ':</font></td></tr>';
+            $rows .= '<tr><td width=100% align=left><font color=white>' . __('game/events.ev_aproaching') . $this->shipCount($amount) . ':</font></td></tr>';
         }
 
         foreach ($ships as $ship => $count) {
