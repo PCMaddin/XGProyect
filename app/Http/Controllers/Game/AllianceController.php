@@ -16,7 +16,7 @@ use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Alliances;
-use Xgp\App\Libraries\Alliance\Ranks;
+use App\Libraries\Alliance\Ranks;
 use App\Libraries\BBCodeLib;
 use Xgp\App\Helpers\UrlHelper;
 use App\Libraries\Functions;
@@ -517,12 +517,7 @@ class AllianceController extends BaseController
         $list = [];
 
         foreach ($ranks->getAllRanksAsArray() as $rankId => $details) {
-            if (!is_array($details)) {
-                continue;
-            }
-
-            $rankId = $this->asInt($rankId);
-            $rights = is_array($details['rights'] ?? null) ? $details['rights'] : [];
+            $rights = $details['rights'];
             $locked = $rankId === self::DEFAULT_RANKS['founder'] || $rankId === self::DEFAULT_RANKS['newcomer'];
             $disabled = $locked ? ' disabled="disabled"' : '';
 
@@ -537,7 +532,7 @@ class AllianceController extends BaseController
                 'rank_id' => $rankId,
                 'rank_delete' => $locked ? '' : '<a href="game.php?page=alliance&mode=admin&edit=rights&d=' . $rankId
                     . '"><img src="' . asset(self::ALLIANCE_ASSET . 'abort.gif') . '" border="0" alt="' . __('game/alliance.al_rank_delete') . '"/></a>',
-                'rank_name' => $this->asString($details['rank'] ?? ''),
+                'rank_name' => $details['rank'],
                 'r1' => $rightHand,
                 'checked_r2' => $this->rightChecked($rights, AllianceRanks::KICK),
                 'checked_r3' => $this->rightChecked($rights, AllianceRanks::APPLICATIONS),
@@ -589,8 +584,7 @@ class AllianceController extends BaseController
                 continue;
             }
 
-            $rank = $ranks->getRankById($rankId);
-            $rights = is_array($rank['rights'] ?? null) ? $rank['rights'] : [];
+            $rights = $ranks->getRankById($rankId)['rights'] ?? [];
 
             if (($rights[AllianceRanks::RIGHT_HAND] ?? 0) === SwitchInt::on) {
                 $members[] = [
@@ -613,14 +607,10 @@ class AllianceController extends BaseController
         $options = [];
 
         foreach ($this->alliance->getCurrentAllianceRankObject()->getAllRanksAsArray() as $id => $rank) {
-            if (!is_array($rank)) {
-                continue;
-            }
-
             $options[] = [
-                'id' => $this->asInt($id),
-                'rank' => $this->asString($rank['rank'] ?? ''),
-                'selected' => $memberRankId === $this->asInt($id) ? ' selected=selected' : '',
+                'id' => $id,
+                'rank' => $rank['rank'],
+                'selected' => $memberRankId === $id ? ' selected=selected' : '',
             ];
         }
 
@@ -657,9 +647,7 @@ class AllianceController extends BaseController
 
     private function rankName(Ranks $ranks, int $rankId): string
     {
-        $rank = $ranks->getRankById($rankId);
-
-        return isset($rank['rank']) && is_scalar($rank['rank']) ? (string) $rank['rank'] : '';
+        return $ranks->getRankById($rankId)['rank'] ?? '';
     }
 
     private function validUrl(mixed $value): string
@@ -1034,9 +1022,7 @@ class AllianceController extends BaseController
         $ranks = [];
 
         foreach ($this->alliance->getCurrentAllianceRankObject()->getAllRanksAsArray() as $id => $rank) {
-            if (is_array($rank) && isset($rank['rank']) && is_scalar($rank['rank'])) {
-                $ranks[] = ['value' => $this->asInt($id) + 1, 'name' => (string) $rank['rank']];
-            }
+            $ranks[] = ['value' => $id + 1, 'name' => $rank['rank']];
         }
 
         return view('alliance.circular', ['ranks_list' => $ranks]);
@@ -1144,9 +1130,9 @@ class AllianceController extends BaseController
     private function publicRequestsBlock(): string
     {
         if (
-            $this->userInt('ally_id') === 0
-            && $this->userInt('ally_request') === 0
-            && $this->alliance->getCurrentAlliance()->getAllianceRequestNotAllow() !== 0
+            $this->userInt('ally_id') === 0 &&
+            $this->userInt('ally_request') === 0 &&
+            $this->alliance->getCurrentAlliance()->getAllianceRequestNotAllow() !== 0
         ) {
             $url = $this->formatService->link(
                 'game.php?page=alliance&mode=apply&allyid=' . $this->alliance->getCurrentAlliance()->getAllianceId(),
@@ -1304,8 +1290,8 @@ class AllianceController extends BaseController
     {
         $rank = $this->alliance->getCurrentAllianceRankObject()->getRankById($memberRankId);
 
-        if (isset($rank['rank']) && is_scalar($rank['rank'])) {
-            return (string) $rank['rank'];
+        if ($rank !== null) {
+            return $rank['rank'];
         }
 
         return $this->alliance->getCurrentAlliance()->getAllianceOwner() === $memberId

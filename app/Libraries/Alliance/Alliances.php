@@ -6,15 +6,13 @@ namespace App\Libraries\Alliance;
 
 use Xgp\App\Core\Entity\AllianceEntity;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator;
-use Xgp\App\Libraries\Alliance\Ranks;
 
 /**
  * Wraps a user's alliance rows into typed entities and answers the
  * owner/rank permission questions for the alliance UI.
  *
- * Ranks still lives in the legacy namespace (it is also used by the legacy
- * Users library), so it is referenced from there for now. getCurrentAlliance()
- * returns an empty entity instead of indexing [0] on an empty set.
+ * getCurrentAlliance() returns an empty entity instead of indexing [0] on an
+ * empty set.
  */
 class Alliances
 {
@@ -71,10 +69,7 @@ class Alliances
             return false;
         }
 
-        $rankData = $ranks->getRankById($this->currentUserRankId);
-        $rights = isset($rankData['rights']) && is_array($rankData['rights'])
-            ? $rankData['rights']
-            : [];
+        $rights = $ranks->getRankById($this->currentUserRankId)['rights'] ?? [];
 
         return ($rights[$rank] ?? null) == SwitchIntEnumerator::on;
     }

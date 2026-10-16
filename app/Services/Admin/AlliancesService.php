@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
-use Xgp\App\Libraries\Alliance\Ranks;
+use App\Libraries\Alliance\Ranks;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")

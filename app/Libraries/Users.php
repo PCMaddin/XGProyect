@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
-use Xgp\App\Libraries\Alliance\Ranks;
+use App\Libraries\Alliance\Ranks;
 
 /**
  * Session-backed current-user/-planet singleton. On construction it validates
@@ -146,10 +146,8 @@ class Users
     private function findRightHandRank(Ranks $ranks): ?int
     {
         foreach ($ranks->getAllRanksAsArray() as $id => $rank) {
-            $rights = is_array($rank) && isset($rank['rights']) && is_array($rank['rights']) ? $rank['rights'] : [];
-
-            if (($rights[AllianceRanks::RIGHT_HAND] ?? null) == SwitchInt::on) {
-                return self::asInt($id);
+            if (($rank['rights'][AllianceRanks::RIGHT_HAND] ?? null) == SwitchInt::on) {
+                return $id;
             }
         }
 

@@ -15,7 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Libraries\Alliance\Ranks;
+use App\Libraries\Alliance\Ranks;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
