@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries\BattleEngine\Utils;
 
-use Exception;
-use RecursiveArrayIterator;
-use RecursiveIteratorIterator;
-
 /**
  *  OPBE
  *  Copyright (C) 2013  Jstar
@@ -39,81 +35,14 @@ use RecursiveIteratorIterator;
  */
 abstract class Math
 {
-    public static function divide(Number $num, Number $denum, bool $real = false): Number
-    {
-        if (!$real) {
-            return new Number($num->result / $denum->result);
-        }
-
-        if ($denum->result == 0) {
-            throw new Exception('denum is zero');
-        }
-
-        $shots = (int) floor($num->result / $denum->result);
-        $rest = Math::rest($num->result, $denum->result);
-
-        return new Number($shots, $rest);
-    }
-
-    public static function multiple(Number $first, Number $second, bool $real = false): Number
+    /**
+     * The product as whole part (result) plus fractional rest.
+     */
+    public static function multiple(Number $first, Number $second): Number
     {
         $result = $first->result * $second->result;
-        if ($real) {
-            $wholeResult = (int) floor($result);
-            return new Number($wholeResult, $result - $wholeResult);
-        }
-        return new Number($result);
-    }
+        $wholeResult = (int) floor($result);
 
-    public static function heaviside(int | float $x, int | float $y): int
-    {
-        if ($x >= $y) {
-            return 1;
-        }
-        return 0;
+        return new Number($wholeResult, $result - $wholeResult);
     }
-
-    public static function rest(int | float $dividendo, int | float $divisore, bool $real = true): int | float
-    {
-        while ($divisore < 1) {
-            $divisore *= 10;
-            $dividendo *= 10;
-        }
-        if (!$real) {
-            $decimal = (int) $dividendo - $dividendo;
-            return (int) $divisore % (int) $dividendo + $decimal;
-        }
-        return (int) $dividendo % (int) $divisore;
-    }
-
-    public static function tryEvent(int | float $probability, callable $callback, mixed $callbackParam): mixed
-    {
-        if (mt_rand(0, 99) < $probability) {
-            return call_user_func($callback, $callbackParam);
-        }
-        return false;
-    }
-
-    /**
-     * @param array<int|string, mixed> $array
-     */
-    public static function recursive_sum(array $array): int | float
-    {
-        $sum = 0;
-        $array_obj = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
-        foreach ($array_obj as $value) {
-            $sum += is_numeric($value) ? $value : 0;
-        }
-        return $sum;
-    }
-    /*
-      public static function matrix_scalar_moltiplication($matrix, $scalar)
-      {
-      $func = function ($value)
-      {
-      return $value * $scalar;
-      }
-      ;
-      return array_map($func, $matrix);
-      } */
 }

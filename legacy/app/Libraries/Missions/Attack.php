@@ -44,7 +44,7 @@ class Attack extends CombatMission
             self::int($fleetRow['fleet_end_system']),
             self::int($fleetRow['fleet_end_planet']),
             self::int($targetUser['id']),
-            self::int($moon['size'] ?? 0)
+            $moon['size']
         );
     }
 

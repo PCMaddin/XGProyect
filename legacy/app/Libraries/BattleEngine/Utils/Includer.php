@@ -38,5 +38,4 @@ if (!defined('OPBEPATH')) {
     define('OPBEPATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 
     require OPBEPATH . 'Constants' . DIRECTORY_SEPARATOR . 'BattleConstants.php';
-    require OPBEPATH . 'Utils' . DIRECTORY_SEPARATOR . 'Functions.php';
 }

@@ -134,7 +134,7 @@ trait BuildsCombatForces
 
         // the planet's forces stay a fleet of their own (id 0), so they can be
         // told apart from the defender's stationed fleets after the battle
-        // (addDefense() would merge them into the defender's first fleet)
+        // (OPBE's addDefense() merged them into the defender's first fleet)
         if ($defender !== false) {
             $defender->addFleet($homeFleet);
 

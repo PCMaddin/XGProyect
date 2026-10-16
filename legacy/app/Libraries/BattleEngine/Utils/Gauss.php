@@ -44,9 +44,9 @@ class Gauss
      */
     public static function getNext(): float
     {
-        $x = (float) mt_rand() / (float) mt_getrandmax();
-        $y = (float) mt_rand() / (float) mt_getrandmax();
-        return sqrt(-2 * log($x)) * cos(2 * pi() * $y);
+        $first = (float) mt_rand() / (float) mt_getrandmax();
+        $second = (float) mt_rand() / (float) mt_getrandmax();
+        return sqrt(-2 * log($first)) * cos(2 * pi() * $second);
     }
 
     /**
@@ -55,9 +55,9 @@ class Gauss
      *
      *
      */
-    public static function getNextMs(float $m, float $s): float
+    public static function getNextMs(float $mean, float $deviation): float
     {
-        return self::getNext() * $s + $m;
+        return self::getNext() * $deviation + $mean;
     }
 
     /**
@@ -67,58 +67,20 @@ class Gauss
      *
      *
      */
-    public static function getNextMsBetween(float $m, float $s, float $min, float $max): float | int
+    public static function getNextMsBetween(float $mean, float $deviation, float $min, float $max): float | int
     {
-        $i = 0;
-        if ($min > $m || $max < $m) {
+        if ($min > $mean || $max < $mean) {
             throw new Exception('Mean is not bounded by min and max');
         }
-        while (true) {
-            $n = self::getNextMs($m, $s);
-            if ($n >= $min && $n <= $max) {
-                return $n;
-            }
-            $i++;
-            if ($i > 10) {
-                return mt_rand(intval($min), intval($max));
+
+        // up to 11 tries, then a uniform pick
+        for ($try = 0; $try <= 10; $try++) {
+            $next = self::getNextMs($mean, $deviation);
+            if ($next >= $min && $next <= $max) {
+                return $next;
             }
         }
+
+        return mt_rand(intval($min), intval($max));
     }
 }
-
-/**
-
- * //--------------------------- testing -----------------------
-
- * //--------edit only these!----------
- * define('MEAN', 55);
- * define('DEV', sqrt(7));
- * define('SIMULATIONS', 1000);
- * //----------------------------------
-
-
- * $a = array();
- * for ($i = 0; $i < SIMULATIONS; $i++)
- * {
- *     $a[] = Gauss::getNextMs(MEAN, DEV);
- * }
-
- * $l = array();
- * foreach ($a as $v)
- * {
- *     if (isset($l[$v]))
- *         $l[$v]++;
- *     else
- *         $l[$v] = 1;
- * }
- * ksort($l);
- * foreach ($l as $id => $v)
- * {
- *     $s = '';
- *     for ($i = 0; $i < $v; $i++)
- *     {
- *         $s .= '-';
- *     }
- *     echo $s . $id . '(' . $v . ')' . '<br>';
- * }
- */

@@ -146,7 +146,7 @@ class BattleOutcomeTest extends TestCase
             'result' => [$report->attackerHasWin(), $report->defenderHasWin(), $report->isAdraw()],
             'attackersLostUnits' => $report->getAttackersLostUnits(),
             'defendersLostUnits' => $report->getDefendersLostUnits(),
-            'defendersLostUnitsWithoutRepair' => $report->getDefendersLostUnits(false),
+            'defendersLostUnitsWithoutRepair' => $report->getDefendersDestroyedUnits(),
             'totalLost' => [$report->getTotalAttackersLostUnits(), $report->getTotalDefendersLostUnits()],
             'debris' => [$report->getAttackerDebris(), $report->getDefenderDebris(), $report->getDebris()],
             'moonProb' => $report->getMoonProb(),
@@ -165,6 +165,9 @@ class BattleOutcomeTest extends TestCase
     #[DataProvider('battles')]
     public function testBattleOutcomeIsUnchanged(int $seed, array $attackers, array $defenders): void
     {
+        // the engine's debug output used to be swallowed by an output buffer
+        $this->expectOutputString('');
+
         $json = file_get_contents(dirname(__DIR__, 5) . '/Fixtures/battle_outcomes.json');
         $this->assertIsString($json);
         $expected = json_decode($json, true, 512, JSON_THROW_ON_ERROR);

@@ -48,7 +48,7 @@ class FireManager extends IterableUtil
     public function getAttackerTotalShots(): int | float
     {
         $tmp = 0;
-        foreach ($this->array as $id => $fire) {
+        foreach ($this->array as $fire) {
             $tmp += $fire->getAttackerTotalShots();
         }
         return $tmp;
@@ -57,7 +57,7 @@ class FireManager extends IterableUtil
     public function getAttackerTotalFire(): int | float
     {
         $tmp = 0;
-        foreach ($this->array as $id => $fire) {
+        foreach ($this->array as $fire) {
             $tmp += $fire->getAttackerTotalFire();
         }
         return $tmp;

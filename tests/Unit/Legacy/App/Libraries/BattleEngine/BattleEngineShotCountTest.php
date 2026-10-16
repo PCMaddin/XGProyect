@@ -25,7 +25,7 @@ class BattleEngineShotCountTest extends TestCase
 
     public function testRealShotMathReturnsIntegerWholeResult(): void
     {
-        $shots = Math::multiple(new Number(1 / 22), new Number(1000), true);
+        $shots = Math::multiple(new Number(1 / 22), new Number(1000));
 
         $this->assertSame(45, $shots->result);
     }
@@ -57,7 +57,7 @@ class BattleEngineShotCountTest extends TestCase
         ]);
 
         $battle = new Battle($attackers, $defenders);
-        $battle->startBattle(false);
+        $battle->startBattle();
         $report = $battle->getReport();
         $reportContent = (string) $report;
 

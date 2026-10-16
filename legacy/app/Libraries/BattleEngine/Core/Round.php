@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries\BattleEngine\Core;
 
+use Xgp\App\Libraries\BattleEngine\CombatObject\PhysicShot;
+use Xgp\App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
+use Xgp\App\Libraries\BattleEngine\Utils\RendersView;
 use Xgp\App\Libraries\BattleEngine\CombatObject\Fire;
 use Xgp\App\Libraries\BattleEngine\CombatObject\FireManager;
 use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
@@ -47,17 +50,19 @@ use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
  */
 class Round
 {
+    use RendersView;
+
     private PlayerGroup $attackers; // PlayerGroup attackers , will be updated when round start
     private PlayerGroup $defenders; // PlayerGroup defenders, will be updated when round start
-    private FireManager $fire_a; // a fire manager that rappresent all fires from attackers to defenders
-    private FireManager $fire_d; // a fire manager that rappresent all fires from defenders to attackers
-    /** @var array<int, mixed> */
+    private FireManager $attackersFire; // a fire manager that rappresent all fires from attackers to defenders
+    private FireManager $defendersFire; // a fire manager that rappresent all fires from defenders to attackers
+    /** @var array<int, array<int, array<int, list<PhysicShot>>>> */
     private array $physicShotsToDefenders = [];
-    /** @var array<int, mixed> */
+    /** @var array<int, array<int, array<int, list<PhysicShot>>>> */
     private array $physicShotsToAttachers = [];
-    /** @var array<int, mixed> */
+    /** @var list<array<int, array<int, ShipsCleaner>>> */
     private array $attacherShipsCleaner = [];
-    /** @var array<int, mixed> */
+    /** @var list<array<int, array<int, ShipsCleaner>>> */
     private array $defenderShipsCleaner = [];
     private int $number; // this round number
 
@@ -67,8 +72,8 @@ class Round
     public function __construct(PlayerGroup $attackers, PlayerGroup $defenders, int $number)
     {
         $this->number = $number;
-        $this->fire_a = new FireManager();
-        $this->fire_d = new FireManager();
+        $this->attackersFire = new FireManager();
+        $this->defendersFire = new FireManager();
 
         $this->attackers = $attackers->cloneMe();
         $this->defenders = $defenders->cloneMe();
@@ -79,7 +84,6 @@ class Round
      */
     public function startRound(): void
     {
-        echo '--- Round ' . $this->number . ' ---<br><br>';
         //---------------------- Generating the fire -------------------------------//
         //note that we don't need to check the order of fire, because we will order when splitting the fire later
         // here we add to fire manager each fire shotted from an attacker's ShipType to all defenders
@@ -87,7 +91,7 @@ class Round
         foreach ($this->attackers->getIterator() as $idPlayer => $player) {
             foreach ($player->getIterator() as $idFleet => $fleet) {
                 foreach ($fleet->getIterator() as $idShipType => $shipType) {
-                    $this->fire_a->add(new Fire($shipType, $defendersMerged));
+                    $this->attackersFire->add(new Fire($shipType, $defendersMerged));
                 }
             }
         }
@@ -96,16 +100,14 @@ class Round
         foreach ($this->defenders->getIterator() as $idPlayer => $player) {
             foreach ($player->getIterator() as $idFleet => $fleet) {
                 foreach ($fleet->getIterator() as $idShipType => $shipType) {
-                    $this->fire_d->add(new Fire($shipType, $attackersMerged));
+                    $this->defendersFire->add(new Fire($shipType, $attackersMerged));
                 }
             }
         }
         //--------------------------------------------------------------------------//
         //------------------------- Sending the fire -------------------------------//
-        echo '***** firing to defenders *****<br>';
-        $this->physicShotsToDefenders = $this->defenders->inflictDamage($this->fire_a);
-        echo '***** firing to attackers *****<br>';
-        $this->physicShotsToAttachers = $this->attackers->inflictDamage($this->fire_d);
+        $this->physicShotsToDefenders = $this->defenders->inflictDamage($this->attackersFire);
+        $this->physicShotsToAttachers = $this->attackers->inflictDamage($this->defendersFire);
         //--------------------------------------------------------------------------//
         //------------------------- Cleaning ships ---------------------------------//
         $this->defenderShipsCleaner = $this->defenders->cleanShips();
@@ -125,7 +127,7 @@ class Round
      */
     public function getAttackersFire(): FireManager
     {
-        return $this->fire_a;
+        return $this->attackersFire;
     }
 
     /**
@@ -136,14 +138,14 @@ class Round
      */
     public function getDefendersFire(): FireManager
     {
-        return $this->fire_d;
+        return $this->defendersFire;
     }
 
     /**
      * Round::getAttachersPhysicShots()
      * Return an array of attacker PhysicShots (multidimensional)
      *
-     * @return array<int, mixed>
+     * @return array<int, array<int, array<int, list<PhysicShot>>>>
      */
     public function getAttachersPhysicShots(): array
     {
@@ -154,7 +156,7 @@ class Round
      * Round::getDefendersPhysicShots()
      * Return an array of defender PhysicShots (multidimensional)
      *
-     * @return array<int, mixed>
+     * @return array<int, array<int, array<int, list<PhysicShot>>>>
      */
     public function getDefendersPhysicShots(): array
     {
@@ -165,7 +167,7 @@ class Round
      * Round::getAttachersShipsCleaner()
      * Return an array of attacker ShipsCleaner (multidimensional)
      *
-     * @return array<int, mixed>
+     * @return list<array<int, array<int, ShipsCleaner>>>
      */
     public function getAttachersShipsCleaner(): array
     {
@@ -176,7 +178,7 @@ class Round
      * Round::getDefendersShipsCleaner()
      * Return an array of defender ShipsCleaner (multidimensional)
      *
-     * @return array<int, mixed>
+     * @return list<array<int, array<int, ShipsCleaner>>>
      */
     public function getDefendersShipsCleaner(): array
     {
@@ -213,11 +215,7 @@ class Round
      */
     public function __toString(): string
     {
-        ob_start();
-        $_round = $this;
-        $_i = $this->number;
-        require OPBEPATH . 'Views/round.html';
-        return (string) ob_get_clean();
+        return $this->renderView('round.html', ['_round' => $this, '_i' => $this->number]);
     }
 
     /**
@@ -264,14 +262,14 @@ class Round
     }
 
     /**
-     * @param array<int, mixed> $playerGroupPS
+     * @param array<int, array<int, array<int, list<PhysicShot>>>> $playerGroupPS
      */
     private function getPlayersAssorbedDamage(array $playerGroupPS): int | float
     {
         $ass = 0;
-        foreach ($playerGroupPS as $idPlayer => $playerPs) {
-            foreach ($playerPs as $idFleet => $fleetPS) {
-                foreach ($fleetPS as $idTypeD => $typeDPS) {
+        foreach ($playerGroupPS as $playerPs) {
+            foreach ($playerPs as $fleetPS) {
+                foreach ($fleetPS as $typeDPS) {
                     foreach ($typeDPS as $typeAPS) {
                         $ass += $typeAPS->getAssorbedDamage();
                     }

@@ -45,25 +45,19 @@ use Xgp\App\Libraries\BattleEngine\Utils\Number;
  *
  * This class rappresent the fire shotted by attackers to defenders or viceversa.
  * Using probabilistic theory, this class will help you in RF(Rapid Fire) calculation with O(1) time and memory functions.
- * Sometime i think that SpeedSim's RF calculation is bugged, so you can choose if return its result or not setting "SPEEDSIM" constant to true/false.
+ */
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class Fire
 {
     private ShipType $attackerShipType;
     private Fleet $defenderFleet;
-
-    /* old way
-      const SPEEDSIM = true;
-      const RAPIDFIRE = true;
-      private $shots = null;
-      private $power = null;
-     */
     private int | float $shots = 0;
     private int | float $power = 0;
 
     public function __construct(ShipType $attackerShipType, Fleet $defenderFleet)
     {
-        log_comment('calculating fire from attacker ' . $attackerShipType->getId());
         $this->attackerShipType = $attackerShipType;
         $this->defenderFleet = $defenderFleet;
         $this->calculateTotal();
@@ -81,10 +75,7 @@ class Fire
     //----------- SENDED FIRE -------------
 
     /**
-     * Fire::getAttackerTotalFire()
-     * Return the total fire
-     *
-     * @return int|float
+     * The total fire power.
      */
     public function getAttackerTotalFire(): int | float
     {
@@ -92,10 +83,7 @@ class Fire
     }
 
     /**
-     * Fire::getAttackerTotalShots()
-     * Return the total shots
-     *
-     * @return int|float
+     * The total amount of shots.
      */
     public function getAttackerTotalShots(): int | float
     {
@@ -103,124 +91,52 @@ class Fire
     }
 
     /**
-     * Fire::calculateTotal()
-     * Calculate the total power and shots amount of attacker, including RF and standart fire
-     *
-     * @return void
+     * The total power and shots of the attacker: one shot per ship plus the
+     * rapid fire shots.
      */
-    private function calculateTotal()
+    private function calculateTotal(): void
     {
         $this->shots += $this->attackerShipType->getCount();
         $this->power += $this->getNormalPower();
 
-        if (USE_RF) {
-            $this->calculateRf();
-        }
-        log_var('$this->shots', $this->shots);
-        /*  old way
-          $this->shots = 0;
-          $this->power = 0;
-          if (self::RAPIDFIRE)
-          {
-          $this->calculateRf();
-          }
-          if (!self::SPEEDSIM || !self::RAPIDFIRE)
-          {
-          $this->shots += $this->attackerShipType->getCount();
-          $this->power += $this->getNormalPower();
-          }
-         */
+        $rapidFireShots = (int) round($this->getShotsFromOneAttackerShipOfType($this->attackerShipType) * $this->attackerShipType->getCount());
+        $this->power += $rapidFireShots * $this->attackerShipType->getPower();
+        $this->shots += $rapidFireShots;
     }
 
     /**
-     * Fire::calculateRf()
-     * This function implement the RF component of above function
-     *
-     * @return void
+     * The rapid fire shots of one ship of the type at the whole defending
+     * fleet: the mean of the geometric distribution, randomly varied by up to
+     * MAX_RF_BUFF / MAX_RF_NERF.
      */
-    private function calculateRf()
+    private function getShotsFromOneAttackerShipOfType(ShipType $shipType): int
     {
-        //rapid fire
-        $tmpshots = (int) round($this->getShotsFromOneAttackerShipOfType($this->attackerShipType) * $this->attackerShipType->getCount());
-        log_var('$tmpshots', $tmpshots);
-        $this->power += $tmpshots * $this->attackerShipType->getPower();
-        $this->shots += $tmpshots;
+        $probability = $this->getProbabilityToShotAgainForAttackerShipOfType($shipType);
+        $meanShots = GeometricDistribution::getMeanFromProbability(1 - $probability) - 1;
+        $max = $meanShots * (1 + MAX_RF_BUFF);
+        $min = $meanShots * (1 - MAX_RF_NERF);
 
-        /* old way
-          $tmpshots = round($this->getShotsFromOneAttackerShipOfType($this->attackerShipType) * $this->attackerShipType->getCount());
-          if (self::SPEEDSIM && $tmpshots == 0)
-          {
-          $tmpshots = $this->attackerShipType->getCount();
-          }
-          $this->power += $tmpshots * $this->attackerShipType->getPower();
-          $this->shots += $tmpshots;
-         */
+        return (int) Gauss::getNextMsBetween($meanShots, GeometricDistribution::getStandardDeviationFromProbability(1 - $probability), $min, $max);
     }
 
     /**
-     * Fire::getShotsFromOneAttackerShipOfType()
-     * This function return the number of shots caused by RF from one ShipType to all defenders
-     *
-     * @param ShipType $shipType_A
-     *
-     * @return int
+     * The probability of a ship of the type to shoot again thanks to rapid
+     * fire, weighted by the share of each defending ship type.
      */
-    private function getShotsFromOneAttackerShipOfType(ShipType $shipType_A)
+    private function getProbabilityToShotAgainForAttackerShipOfType(ShipType $shipType): float
     {
-        $p = $this->getProbabilityToShotAgainForAttackerShipOfType($shipType_A);
-        $meanShots = GeometricDistribution::getMeanFromProbability(1 - $p) - 1;
-        if (USE_RANDOMIC_RF) {
-            $max = $meanShots * (1 + MAX_RF_BUFF);
-            $min = $meanShots * (1 - MAX_RF_NERF);
-            log_var('$max', $max);
-            log_var('$min', $min);
-            log_var('$mean', $meanShots);
-            return (int) Gauss::getNextMsBetween($meanShots, GeometricDistribution::getStandardDeviationFromProbability(1 - $p), $min, $max);
+        $probability = 0.0;
+        foreach ($this->defenderFleet->getIterator() as $defender) {
+            $rapidFire = $shipType->getRfTo($defender);
+            $probabilityToShotAgain = 1 - GeometricDistribution::getProbabilityFromMean($rapidFire);
+            $probabilityToHitThisType = $defender->getCount() / $this->defenderFleet->getTotalCount();
+            $probability += $probabilityToShotAgain * $probabilityToHitThisType;
         }
-        return (int) $meanShots;
+        return $probability;
     }
 
     /**
-     * Fire::getProbabilityToShotAgainForAttackerShipOfType()
-     * This function return the probability of a ShipType to shot thanks RF
-     *
-     * @param ShipType $shipType_A
-     *
-     * @return float
-     */
-    private function getProbabilityToShotAgainForAttackerShipOfType(ShipType $shipType_A)
-    {
-        $p = 0.0;
-        foreach ($this->defenderFleet->getIterator() as $idFleet => $shipType_D) {
-            $RF = $shipType_A->getRfTo($shipType_D);
-            $probabilityToShotAgain = 1 - GeometricDistribution::getProbabilityFromMean($RF);
-            $probabilityToHitThisType = $shipType_D->getCount() / $this->defenderFleet->getTotalCount();
-            $p += $probabilityToShotAgain * $probabilityToHitThisType;
-        }
-        return $p;
-
-        /* old way
-          $p = 0;
-          foreach ($this->defenderFleet->getIterator() as $idFleet => $shipType_D)
-          {
-          $RF = $shipType_A->getRfTo($shipType_D);
-          if (!self::SPEEDSIM)
-          {
-          $RF = max(0, $RF - 1);
-          }
-          $probabilityToShotAgain = ($RF != 0) ? 1 - GeometricDistribution::getProbabilityFromMean($RF) : 0;
-          $probabilityToHitThisType = $shipType_D->getCount() / $this->defenderFleet->getTotalCount();
-          $p += $probabilityToShotAgain * $probabilityToHitThisType;
-          }
-          return $p;
-         */
-    }
-
-    /**
-     * Fire::getNormalPower()
-     * Return the total fire shotted from attacker ShipType to all defenders without RF
-     *
-     * @return int|float
+     * The total fire of the attacker ship type without rapid fire.
      */
     private function getNormalPower(): int | float
     {
@@ -229,39 +145,16 @@ class Fire
 
     //------- INCOMING FIRE------------
 
-    public function getShotsFiredByAttackerTypeToDefenderType(ShipType $shipType_A, ShipType $shipType_D, bool $real = false): Number
+    /**
+     * The shots this attacker ship type fires at the given defender ship type
+     * (its share of the defending fleet): whole shots plus the fractional rest.
+     */
+    public function getShotsFiredByAllToDefenderType(ShipType $defender): Number
     {
-        $first = $this->getShotsFiredByAttackerToOne($shipType_A);
-        $second = new Number($shipType_D->getCount());
-        return Math::multiple($first, $second, $real);
-    }
-
-    public function getShotsFiredByAttackerToOne(ShipType $shipType_A, bool $real = false): Number
-    {
-        $num = $this->getShotsFiredByAttackerToAll($shipType_A);
-        $denum = new Number($this->defenderFleet->getTotalCount());
-        return Math::divide($num, $denum, $real);
-    }
-
-    public function getShotsFiredByAllToDefenderType(ShipType $shipType_D, bool $real = false): Number
-    {
-        $first = $this->getShotsFiredByAllToOne();
-        $second = new Number($shipType_D->getCount());
-        return Math::multiple($first, $second, $real);
-    }
-
-    public function getShotsFiredByAttackerToAll(ShipType $shipType_A, bool $real = false): Number
-    {
-        $num = new Number($this->getAttackerTotalShots() * $shipType_A->getCount());
-        $denum = new Number($this->attackerShipType->getCount());
-        return Math::divide($num, $denum, $real);
-    }
-
-    public function getShotsFiredByAllToOne(bool $real = false): Number
-    {
-        $num = new Number($this->getAttackerTotalShots());
-        $denum = new Number($this->defenderFleet->getTotalCount());
-        return Math::divide($num, $denum, $real);
+        return Math::multiple(
+            new Number($this->getAttackerTotalShots() / $this->defenderFleet->getTotalCount()),
+            new Number($defender->getCount())
+        );
     }
 
     /**
@@ -269,32 +162,6 @@ class Fire
      */
     public function __toString(): string
     {
-        //global $resource;
-        //        $shots = $this->getAttackerTotalShots();
-        //        $power = $this->getAttackerTotalFire();
-        //        $iter = $this->attackerShipType->getIterator();
-        //        $page = "<center><table bgcolor='#ADC9F4' border='1' ><body><tr><tr><td colspan='" . count($iter) . "'><center><font color='red'>Attackers</font></center></td></tr>";
-        //        foreach ($iter as $attacher)
-        //            $page .= "<td>" . $resource[$attacher->getId()] . "</td>";
-        //        $page .= "</tr><tr>";
-        //        foreach ($iter as $attacher)
-        //            $page .= "<td><center>" . $attacher->getCount() . "</center></td>";
-        //        $iter = $this->defenderFleet->getIterator();
-        //        $page .= "</tr></body></table><br><table bgcolor='#ADC9F4' border='1'><body><tr><td colspan='" . count($iter) . "'><center><font color='red'>Defenders</font></center></td></tr></tr>";
-        //        foreach ($iter as $defender)
-        //            $page .= "<td>" . $resource[$defender->getId()] . "</td>";
-        //        $page .= "<tr>";
-        //        foreach ($iter as $defender)
-        //            $page .= "<td><center>" . $defender->getCount() . "</center></td>";
-        //        $page .= "</tr></body></table><br>";
-        //        $page .= "The attacking fleet fires a total of $shots times with the power of $power upon the defenders.<br>";
-        //        $page .= "</center>";
-        //        return $page;
         return $this->getAttackerTotalFire() . '';
-    }
-
-    public function cloneMe(): self
-    {
-        return new Fire($this->attackerShipType, $this->defenderFleet);
     }
 }

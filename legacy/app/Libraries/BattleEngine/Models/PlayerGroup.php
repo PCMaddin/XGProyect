@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries\BattleEngine\Models;
 
+use Xgp\App\Libraries\BattleEngine\CombatObject\PhysicShot;
+use Xgp\App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
+use Xgp\App\Libraries\BattleEngine\Utils\RendersView;
 use Xgp\App\Libraries\BattleEngine\CombatObject\FireManager;
 use Xgp\App\Libraries\BattleEngine\Utils\IterableUtil;
 use Exception;
@@ -42,8 +45,10 @@ use Exception;
  */
 class PlayerGroup extends IterableUtil
 {
+    use RendersView;
+
     public ?int $battleResult = null;
-    private static int $id_count = 0;
+    private static int $idCount = 0;
     private int $id;
 
     /**
@@ -51,7 +56,7 @@ class PlayerGroup extends IterableUtil
      */
     public function __construct(array $players = [])
     {
-        $this->id = ++self::$id_count;
+        $this->id = ++self::$idCount;
         foreach ($players as $player) {
             $this->addPlayer($player);
         }
@@ -88,20 +93,9 @@ class PlayerGroup extends IterableUtil
         $this->array[$player->getId()] = $player->cloneMe(); //avoid collateral effects: when the object or array is an argument && it's saved in a structure
     }
 
-    /**
-     * @param Fleet[] $fleets
-     */
-    public function createPlayerIfNotExist(int $id, array $fleets, ?int $militaryTech, ?int $shieldTech, ?int $defenceTech): Player | false
-    {
-        if (!$this->existPlayer($id)) {
-            $this->addPlayer(new Player($id, $fleets, $militaryTech, $shieldTech, $defenceTech));
-        }
-        return $this->getPlayer($id);
-    }
-
     public function isEmpty(): bool
     {
-        foreach ($this->array as $id => $player) {
+        foreach ($this->array as $player) {
             if (!$player->isEmpty()) {
                 return false;
             }
@@ -111,21 +105,16 @@ class PlayerGroup extends IterableUtil
 
     public function __toString(): string
     {
-        ob_start();
-        $_playerGroup = $this;
-        $_st = '';
-        require OPBEPATH . 'Views/playerGroup.html';
-        return (string) ob_get_clean();
+        return $this->renderView('playerGroup.html', ['_playerGroup' => $this, '_st' => '']);
     }
 
     /**
-     * @return array<int, mixed>
+     * @return array<int, array<int, array<int, list<PhysicShot>>>> the physic shots by player, fleet and ship type
      */
     public function inflictDamage(FireManager $fire): array
     {
         $physicShots = [];
         foreach ($this->array as $idPlayer => $player) {
-            echo "---------** firing to player with ID = $idPlayer **---------- <br>";
             $ps = $player->inflictDamage($fire);
             $physicShots[$idPlayer] = $ps;
         }
@@ -133,13 +122,12 @@ class PlayerGroup extends IterableUtil
     }
 
     /**
-     * @return array<int, mixed>
+     * @return list<array<int, array<int, ShipsCleaner>>>
      */
     public function cleanShips(): array
     {
         $shipsCleaners = [];
         foreach ($this->array as $idPlayer => $player) {
-            echo "---------** cleanShips to player with ID = $idPlayer **---------- <br>";
             $sc = $player->cleanShips();
             $shipsCleaners[] = $sc;
             if ($player->isEmpty()) {
@@ -151,7 +139,7 @@ class PlayerGroup extends IterableUtil
 
     public function repairShields(): void
     {
-        foreach ($this->array as $idPlayer => $player) {
+        foreach ($this->array as $player) {
             $player->repairShields();
         }
     }
@@ -159,7 +147,7 @@ class PlayerGroup extends IterableUtil
     public function getEquivalentFleetContent(): Fleet
     {
         $merged = new Fleet(-1);
-        foreach ($this->array as $idPlayer => $player) { // cloning don't have any sense because we don't touch the array,maybe php bug :(
+        foreach ($this->array as $player) { // cloning don't have any sense because we don't touch the array,maybe php bug :(
             $merged->mergeFleet($player->getEquivalentFleetContent());
         }
         return $merged;
@@ -168,25 +156,11 @@ class PlayerGroup extends IterableUtil
     public function getTotalCount(): int | float
     {
         $amount = 0;
-        foreach ($this->array as $idPlayer => $player) {
+        foreach ($this->array as $player) {
             $amount += $player->getTotalCount();
         }
         return $amount;
     }
-    /*
-      public function getFleet($idFleet)
-      {
-      foreach ($this->array as $idPlayer => $player)
-      {
-      $fleet = $player->getFleet($idFleet);
-      if ($fleet !== false)
-      {
-      return $fleet;
-      }
-      }
-      return false;
-      }
-     */
 
     public function cloneMe(): self
     {
@@ -194,7 +168,7 @@ class PlayerGroup extends IterableUtil
         $tmp = new PlayerGroup($players);
         $tmp->battleResult = $this->battleResult;
         $tmp->id = $this->id;
-        self::$id_count--;
+        self::$idCount--;
         return $tmp;
     }
 }

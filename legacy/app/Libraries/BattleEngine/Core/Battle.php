@@ -53,27 +53,19 @@ class Battle
     /**
      * Battle::startBattle()
      */
-    public function startBattle(bool $debug = false): ?bool
+    public function startBattle(): ?bool
     {
-        if (!$debug) {
-            ob_start();
-        }
         $this->battleStarted = true;
         //only for initial fleets presentation
-        log_var('attackers', $this->attackers);
-        log_var('defenders', $this->defenders);
         $round = new Round($this->attackers, $this->defenders, 0);
         $this->report->addRound($round);
         for ($i = 1; $i <= ROUNDS; $i++) {
-            $att_lose = $this->attackers->isEmpty();
-            $deff_lose = $this->defenders->isEmpty();
+            $attackersLost = $this->attackers->isEmpty();
+            $defendersLost = $this->defenders->isEmpty();
             //if one of they are empty then battle is ended, so update the status
-            if ($att_lose || $deff_lose) {
-                $this->checkWhoWon($att_lose, $deff_lose);
+            if ($attackersLost || $defendersLost) {
+                $this->checkWhoWon($attackersLost, $defendersLost);
                 $this->report->setBattleResult($this->attackers->battleResult, $this->defenders->battleResult);
-                if (!$debug) {
-                    ob_get_clean();
-                }
                 return null;
             }
             //initialize the round
@@ -81,34 +73,25 @@ class Battle
             $round->startRound();
             //add the round to the combatReport
             $this->report->addRound($round);
-            //if($i==2) die('Round: '.$this->report->getRound(0)->getNumber()); // ERRORE
             //update the attackers and defenders after round
             $this->attackers = $round->getAfterBattleAttackers();
             $this->defenders = $round->getAfterBattleDefenders();
         }
         //check status after all rounds
         $this->checkWhoWon($this->attackers->isEmpty(), $this->defenders->isEmpty());
-        if (!$debug) {
-            ob_get_clean();
-        }
         return true;
     }
 
     /**
      * Assign to groups the status win,lose or draw
      */
-    private function checkWhoWon(bool $att_lose, bool $deff_lose): void
+    private function checkWhoWon(bool $attackersLost, bool $defendersLost): void
     {
-        if ($att_lose && !$deff_lose) {
-            $this->attackers->battleResult = BATTLE_LOSE;
-            $this->defenders->battleResult = BATTLE_WIN;
-        } elseif (!$att_lose && $deff_lose) {
-            $this->attackers->battleResult = BATTLE_WIN;
-            $this->defenders->battleResult = BATTLE_LOSE;
-        } else {
-            $this->attackers->battleResult = BATTLE_DRAW;
-            $this->defenders->battleResult = BATTLE_DRAW;
-        }
+        [$this->attackers->battleResult, $this->defenders->battleResult] = match (true) {
+            $attackersLost && !$defendersLost => [BATTLE_LOSE, BATTLE_WIN],
+            !$attackersLost && $defendersLost => [BATTLE_WIN, BATTLE_LOSE],
+            default => [BATTLE_DRAW, BATTLE_DRAW],
+        };
     }
 
     public function __toString(): string

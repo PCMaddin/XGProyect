@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries\BattleEngine\Models;
 
+use Xgp\App\Libraries\BattleEngine\Utils\RendersView;
+
 /**
  *  OPBE
  *  Copyright (C) 2013  Jstar
@@ -35,6 +37,8 @@ namespace Xgp\App\Libraries\BattleEngine\Models;
  */
 class Type
 {
+    use RendersView;
+
     private int $id;
     private int | float $count;
 
@@ -71,10 +75,7 @@ class Type
 
     public function __toString(): string
     {
-        ob_start();
-        $_type = $this;
-        require OPBEPATH . 'Views/type.html';
-        return (string) ob_get_clean();
+        return $this->renderView('type.html', ['_type' => $this]);
     }
 
     public function isEmpty(): bool

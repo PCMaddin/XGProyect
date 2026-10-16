@@ -47,8 +47,6 @@ class PhysicShot
 
     public function __construct(ShipType $shipType, int | float $damage, int $count)
     {
-        log_var('damage', $damage);
-        log_var('count', $count);
         if ($damage < 0) {
             throw new Exception('Negative damage');
         }
@@ -136,10 +134,8 @@ class PhysicShot
         $damage = $this->damage;
         $shieldCellValue = $this->fighters->getShieldCellValue();
         $unbauncedDamage = $this->clamp($damage, $shieldCellValue);
-        $currentShield = $this->fighters->getCurrentShield();
-        if (USE_HITSHIP_LIMITATION) {
-            $currentShield = $currentShield * $this->getHitShips() / $this->fighters->getCount();
-        }
+        // only the shields of the ships that are hit absorb damage
+        $currentShield = $this->fighters->getCurrentShield() * $this->getHitShips() / $this->fighters->getCount();
         $this->assorbedDamage = min($unbauncedDamage * $count, $currentShield);
     }
 
@@ -155,12 +151,12 @@ class PhysicShot
     }
 
     /**
-     * Return $a if greater than $b, zero otherwise
+     * Return $value if greater than $threshold, zero otherwise
      */
-    private function clamp(int | float $a, int | float $b): int | float
+    private function clamp(int | float $value, int | float $threshold): int | float
     {
-        if ($a > $b) {
-            return $a;
+        if ($value > $threshold) {
+            return $value;
         }
         return 0;
     }

@@ -179,7 +179,7 @@ ist.
 
 ---
 
-## Welle 6 — Missions-/BattleEngine (OPBE) 🟡 laufend
+## Welle 6 — Missions-/BattleEngine (OPBE) ✅ abgeschlossen
 
 Die vendorte GPL-Kampf-Engine (OPBE, Jstar 2013) und die Missions-Handler sind
 tief verkettet (Vererbung, gegenseitige Referenzen) und **ungetestet**. Auf
@@ -274,6 +274,55 @@ und neu baselined. Sie verschwinden mit der Handler-Typisierung.
 | Expedition | ✅ getippt | **Crash gefixt:** `resultEarly()` berechnete die neue Rückkehrzeit als `end_time - returnTime / 2`. Bei ungerader Rückflugzeit ist das ein Float, und `updateFleetEndTime(int)` warf unter `strict_types` einen `TypeError` (in etwa jedem zweiten „frühe Rückkehr“-Ergebnis). Jetzt `intdiv()` in `earlyReturnEndTime()`, mit Regressionstest. Das `switch` ist ein `match`, die leeren Stubs `resultPirates`/`resultAliens`/`resultMerchant` sind entfernt (sie endeten schon vorher wie „nothing“). Die sieben duplizierten Nachrichten-Aufrufe laufen über `expeditionMessage($fleet, $message)`. Die Verlustberechnung im Schwarzen Loch ist als `blackHoleLosses()` herausgezogen und für alle drei Teilverlust-Quoten gegen eine **wörtliche Kopie des Original-Loops** geprüft. 16 PHPStan- + 8 PHPMD-Einträge abgebaut. **Spiel-Logik korrigiert (nach Entscheidung):** 1) Verlor beim Teilverlust *kein* Schiffstyp eine Einheit (z. B. 50 Kleine Transporter bei 1 %), wurde die **ganze Flotte** zerstört. Jetzt passiert nichts (Ergebnis wie „nothing“). 2) Schiffstypen ohne Verlust fielen aus der Restflotte heraus und verschwanden. Jetzt verlassen nur die verlorenen Schiffe die Flotte. Der Teilverlust hat einen eigenen Text `exp_lost_partial` (en/es) mit der Liste der verlorenen Schiffe, statt des Totalverlust-Funkspruchs. `updateFleetArrayById()` schreibt jetzt auch `fleet_amount` (vorher blieb die Stückzahl nach Fund oder Verlust veraltet). **Anzeige-Bugs gefixt:** Die „frühe Rückkehr“ nutzte die nicht existierenden Schlüssel `exp_early_1..5` (der Spieler sah den Rohschlüssel), jetzt `exp_faster_1/2`. Die Texte für Dunkle Materie und Ressourcen zeigten ein unausgefülltes `%s`, jetzt mit Menge und Ressource |
 | Attack + Destroy | ✅ getippt | Die beiden Handler waren zu ~90 % Kopien voneinander. Der gemeinsame Kampf-Ablauf steckt jetzt in der abstrakten `CombatMission` (Kräfte aufbauen, Kampf, Überlebende/Beute/Planetenverluste/Punkte/Trümmer schreiben, Bericht), mit den Traits `BuildsCombatForces` (Spieler/Flotten/Einheiten aus DB-Zeilen) und `SendsCombatReports` sowie dem Helfer `CombatSurvivors`. `Attack`/`Destroy` enthalten nur noch ihre Unterschiede über Hooks (`afterBattle`, `onAttackerVictory`, `survivorsReturn`, `reportTitle`, `reportAppendix`). **Charakterisierung vor dem Umbau:** 8 Kampf-Szenarien (Sieg, Niederlage, ACS mit stationierter Fremdflotte, leerer Planet, 4× Mondzerstörung) mit festem Seed gegen den **Original-Code** gefahren und als Golden-Fixture (`tests/Fixtures/combat_settlement.json`) festgehalten: aufgebaute Kräfte, Bericht-Hash, Beute, **jeder DB-Schreibaufruf mit Argumenten**, Zerstörungs-Zustand, Bericht-Anhang und Link. Der umgebaute Code liefert identische Werte (Mutationsprobe: der Test schlägt an). **Crash gefixt (Attack):** Wenn aus den Trümmern ein Mond entstehen sollte, las der Code `planet_id` aus der *leeren* „noch kein Mond“-Zeile (`ErrorException`). Der Kampf war zu diesem Zeitpunkt schon gespeichert, aber Bericht und Mond fehlten. Regressionstest gegen die echte DB (`CombatMoonTest`). **Crash gefixt (Destroy):** Gewannen die Angreifer, aber kein Todesstern überlebte, wurde die Todesstern-Anzahl aus einem fehlenden Schlüssel gelesen (`ErrorException`). Ohne Todesstern gibt es jetzt keinen Zerstörungsversuch (vorher war der Ausgang undefiniert, da Absturz). `getCapacity()` war `: int` deklariert, liefert aber bei Bruch-Stückzahlen `float` (`TypeError`-Risiko), jetzt `int\|float`. Toter Code entfernt: die `planet_id == $playerId`-Zweige in der Spielergruppe (Benutzerzeilen haben keine `planet_id`, die Bedingung war nie wahr) und `extract($moon)`. Reihenfolge: bei Destroy laufen die Folge-Updates nach einer Mondzerstörung jetzt vor dem Speichern des Berichts statt danach (reine DB-Schreibvorgänge ohne gegenseitige Abhängigkeit). 108 PHPStan- + 47 PHPMD-Einträge abgebaut. **Spiel-Logik korrigiert (nach Entscheidung):** 1) Wurden bei Destroy die Todessterne zerstört, wurde die **ganze angreifende Flotte** gelöscht, ohne die Schiffe als Verlust zu zählen. Jetzt gehen nur die Todessterne verloren (wie es auch der Spieltext `des_result_ds` beschreibt) und werden als Verlust gebucht. Der Rest fliegt mit seinem eigenen Beuteanteil heim, der Anteil der Todessterne bleibt auf dem Planeten. 2) Die Überlebenden *aller* verteidigenden Flotten, auch stationierter Fremdflotten, wurden in die Schiffs-Spalten des Planeten geschrieben, während die stationierten Flotten alle Schiffe behielten. Jetzt bekommt der Planet nur seine eigenen Schiffe und Verteidigungsanlagen, stationierte Flotten werden aktualisiert (`updateFleetShipsById()`, ohne ihren Auftrag zu ändern) bzw. bei Totalverlust gelöscht. Dafür bleiben die Planetenkräfte im Kampf eine eigene Flotte (Id 0): `addDefense()` hätte sie mit einer stationierten Flotte des Verteidigers verschmolzen (genau dafür war der tote `Fleet(-1)`-Platzhalter des Originals gedacht). 3) Die Mondgröße aus dem Kampf wurde ignoriert (zufällig 2000–6000). Jetzt bekommt der Mond den im Kampf gewürfelten Durchmesser (mehr Trümmer, größerer Mond). Er startet weiter mit 1 Feld, das `fields` des Kampf-Events ist die Planeten-Formel und gilt nicht für Monde. In der Golden-Fixture sind dafür drei Szenarien bewusst neu gesetzt (ACS mit stationierter Flotte, zwei Todesstern-Szenarien), die anderen fünf sind unverändert |
 | Missions-Basis (Rest) | ✅ | `storeResources()` wurde nie mit `true` aufgerufen, das Bool-Flag entfällt. `restoreFleet($row, $start)` ist geteilt in `restoreFleet()` (Startplanet) und `restoreFleetAtTarget()` (nur Deploy, inkl. halber Treibstoff-Rückgabe). `$combat_caps` heißt `$combatCaps`. Die Konfig-Konverter liegen in `MissionObjects` (die Klasse war knapp über dem `ExcessiveClassLength`-Limit). Damit ist **das gesamte `Missions/`-Verzeichnis PHPMD-roh verletzungsfrei** und ohne PHPStan-Baseline-Einträge |
+
+### BattleEngine-Abschluss: Baseline auf 0
+
+Sicherheitsnetz zuerst: `BattleOutcomeTest` fährt 11 komplette, geseedete
+Kämpfe (Rapid Fire, Unentschieden, mehrere Spieler je Seite, Todessterne,
+Verteidigungs-Reparatur, große Stapel, Sonde gegen leeren Planeten) und
+vergleicht gegen eine vor dem Umbau aufgenommene Fixture: kompletter
+Kampfbericht, Sieger, Runden, Verluste mit/ohne Reparatur, Trümmer,
+Mondchance, Techs, Überlebende, Reparierte, Ids **und die nächste
+Zufallszahl** (die Engine muss Zufallszahlen exakt wie vorher verbrauchen).
+Alle Werte sind nach dem Umbau identisch.
+
+- **Debug-Ballast entfernt:** `log_var()`/`log_comment()` (OPBEs
+  `Utils/Functions.php`) und `echo`-Zeilen in `Round`/`Player`/`PlayerGroup`
+  schrieben in einen Ausgabepuffer, den `startBattle()` danach verwarf. Das
+  war reine Rechenzeit (u. a. `print_r` aller Flotten pro Kampf). Puffer und
+  `$debug`-Flag sind mit entfernt. Ein Test stellt sicher, dass ein Kampf
+  keine Ausgabe erzeugt.
+- **`DebugManager` entfernt:** `runDebugged()` ersetzte für die Dauer des
+  Kampfs den Laravel-Error-Handler. Jede PHP-Warnung im Kampf schrieb eine
+  Dump-Datei nach `BattleEngine/errors/` (mit `mkdir 0777` im Quellbaum)
+  und beendete den Request per `die()`. Jetzt greift Laravels normales
+  Fehler-Handling (Exception + Log).
+- **Immer aktive Schalter inline:** `USE_RF`, `USE_RANDOMIC_RF`,
+  `USE_HITSHIP_LIMITATION`, `USE_EXPLODED_LIMITATION`,
+  `USE_BIEXPLOSION_SYSTEM`, `ONLY_FIRST_AND_LAST_ROUND`, `REPAIRED_DO_DEBRIS`
+  waren fest gesetzte Konstanten („do not edit“); die toten Zweige (Quelle der
+  „always true/false“-Meldungen) sind weg, ebenso auskommentierter Alt-Code.
+- **Toter Code entfernt:** vier der fünf `Fire::getShotsFired*`-Methoden,
+  `Math::divide/rest/heaviside/tryEvent`, `Player::addDefense/
+  mergePlayerFleets/getOrderedItereator`, `PlayerGroup::createPlayerIfNotExist`,
+  `Fleet::getTypeCount`, `Fire::cloneMe`, `BattleReport::$css`.
+- **Struktur:** Die Verlust-/Reparatur-/Trümmerrechnung ist aus
+  `BattleReport` (Komplexität 84) in `BattleLosses` gezogen; doppelte
+  Angreifer/Verteidiger-Varianten teilen sich je eine Implementierung. Das
+  View-Rendering der sechs `__toString()` läuft über den Trait `RendersView`
+  (mit `finally`, damit ein Fehler keinen offenen Ausgabepuffer hinterlässt).
+  `ShipType` fasst die drei Tech-Level in einem Array zusammen und lagert die
+  Rundungsfehler-Korrektur aus (NPath). Die Physic-Shot-/Ships-Cleaner-
+  Strukturen sind bis in `Round` präzise getippt, `BattleReport::$steal` ist
+  ein Array (vorher `0`, ein Rendern ohne `setSteal()` crashte), `tryMoon()`
+  würfelt direkt.
+- Bool-Flags/Namen: `getDefendersLostUnits(false)` heißt
+  `getDefendersDestroyedUnits()`, `Events::event_moon` → `eventMoon`,
+  `Math::recursive_sum` → `BattleLosses::total`, snake_case-Properties
+  camelCase, kurze Variablennamen ausgeschrieben.
+
+11 PHPStan- + 68 PHPMD-Einträge abgebaut. **Damit sind `Missions/` und
+`BattleEngine/` vollständig ohne Baseline-Einträge.**
 
 > **Lehre aus dem Baseline-Audit:** Die Baseline enthält nicht nur Typ-Unschärfen,
 > sondern auch **echte Laufzeit-Crashes**: `strict_types` macht falsche Return-

@@ -12,7 +12,6 @@ use App\Services\Game\Formulas\FleetsService;
 use Xgp\App\Libraries\BattleEngine\Core\Battle;
 use Xgp\App\Libraries\BattleEngine\Core\BattleReport;
 use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
-use Xgp\App\Libraries\BattleEngine\Utils\DebugManager;
 
 /**
  * The battle shared by the attack and the moon destruction missions: build
@@ -142,7 +141,7 @@ abstract class CombatMission extends Missions
         $this->addPlanetForces($defenders, $targetUser, $targetPlanet, $fleetRow);
 
         $battle = new Battle($attackers, $defenders);
-        DebugManager::runDebugged([$battle, 'startBattle'])();
+        $battle->startBattle();
 
         $report = $battle->getReport();
         $this->settleBattle($fleetRow, $report, $targetPlanet);

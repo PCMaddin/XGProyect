@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Xgp\App\Libraries\BattleEngine\Models;
 
-use Exception;
+use Xgp\App\Libraries\BattleEngine\CombatObject\PhysicShot;
+use Xgp\App\Libraries\BattleEngine\Utils\RendersView;
 use Xgp\App\Libraries\BattleEngine\CombatObject\FireManager;
 use Xgp\App\Libraries\BattleEngine\CombatObject\ShipsCleaner;
 use Xgp\App\Libraries\BattleEngine\Utils\IterableUtil;
@@ -43,12 +44,14 @@ use Xgp\App\Libraries\BattleEngine\Utils\IterableUtil;
  */
 class Fleet extends IterableUtil
 {
+    use RendersView;
+
     private int | float $count = 0;
     private int $id;
     // added but only used in report templates
-    private int $weapons_tech = 0;
-    private int $shields_tech = 0;
-    private int $armour_tech = 0;
+    private int $weaponsTech = 0;
+    private int $shieldsTech = 0;
+    private int $armourTech = 0;
     private string $name;
     private ?int $galaxy = null;
     private ?int $system = null;
@@ -57,13 +60,13 @@ class Fleet extends IterableUtil
     /**
      * @param ShipType[] $shipTypes
      */
-    public function __construct(int $id, array $shipTypes = [], ?int $weapons_tech = null, ?int $shields_tech = null, ?int $armour_tech = null, string $name = '', ?int $galaxy = null, ?int $system = null, ?int $planet = null)
+    public function __construct(int $id, array $shipTypes = [], ?int $weaponsTech = null, ?int $shieldsTech = null, ?int $armourTech = null, string $name = '', ?int $galaxy = null, ?int $system = null, ?int $planet = null)
     {
         $this->id = $id;
         $this->count = 0;
         $this->name = $name;
         if ($this->id != -1) {
-            $this->setTech($weapons_tech, $shields_tech, $armour_tech);
+            $this->setTech($weaponsTech, $shieldsTech, $armourTech);
             $this->setCoords($galaxy, $system, $planet);
         }
         foreach ($shipTypes as $shipType) {
@@ -88,19 +91,19 @@ class Fleet extends IterableUtil
 
     public function setTech(?int $weapons = null, ?int $shields = null, ?int $armour = null): void
     {
-        foreach ($this->array as $id => $shipType) {
+        foreach ($this->array as $shipType) {
             $shipType->setWeaponsTech($weapons);
             $shipType->setShieldsTech($shields);
             $shipType->setArmourTech($armour);
         }
         if (is_numeric($weapons)) {
-            $this->weapons_tech = intval($weapons);
+            $this->weaponsTech = intval($weapons);
         }
         if (is_numeric($shields)) {
-            $this->shields_tech = intval($shields);
+            $this->shieldsTech = intval($shields);
         }
         if (is_numeric($armour)) {
-            $this->armour_tech = intval($armour);
+            $this->armourTech = intval($armour);
         }
     }
 
@@ -115,15 +118,18 @@ class Fleet extends IterableUtil
     {
         if (isset($this->array[$shipType->getId()])) {
             $this->array[$shipType->getId()]->increment($shipType->getCount());
-        } else {
-            $shipType = $shipType->cloneMe(); //avoid collateral effects
-            if ($this->id != -1) {
-                $shipType->setWeaponsTech($this->weapons_tech);
-                $shipType->setShieldsTech($this->shields_tech);
-                $shipType->setArmourTech($this->armour_tech);
-            }
-            $this->array[$shipType->getId()] = $shipType;
+            $this->count += $shipType->getCount();
+
+            return;
         }
+
+        $shipType = $shipType->cloneMe(); //avoid collateral effects
+        if ($this->id != -1) {
+            $shipType->setWeaponsTech($this->weaponsTech);
+            $shipType->setShieldsTech($this->shieldsTech);
+            $shipType->setArmourTech($this->armourTech);
+        }
+        $this->array[$shipType->getId()] = $shipType;
         $this->count += $shipType->getCount();
     }
 
@@ -138,7 +144,7 @@ class Fleet extends IterableUtil
 
     public function mergeFleet(Fleet $other): void
     {
-        foreach ($other->getIterator() as $idShipType => $shipType) {
+        foreach ($other->getIterator() as $shipType) {
             $this->addShipType($shipType);
         }
     }
@@ -153,11 +159,6 @@ class Fleet extends IterableUtil
         return isset($this->array[$id]);
     }
 
-    public function getTypeCount(int $type): int | float
-    {
-        return $this->array[$type]->getCount();
-    }
-
     public function getTotalCount(): int | float
     {
         return $this->count;
@@ -165,15 +166,11 @@ class Fleet extends IterableUtil
 
     public function __toString(): string
     {
-        ob_start();
-        $_fleet = $this;
-        $_st = '';
-        require OPBEPATH . 'Views/fleet.html';
-        return (string) ob_get_clean();
+        return $this->renderView('fleet.html', ['_fleet' => $this, '_st' => '']);
     }
 
     /**
-     * @return array<int, mixed>
+     * @return array<int, list<PhysicShot>> the physic shots by ship type
      */
     public function inflictDamage(FireManager $fires): array
     {
@@ -182,30 +179,27 @@ class Fleet extends IterableUtil
         foreach ($fires->getIterator() as $fire) {
             $tmp = [];
             foreach ($this->getOrderedIterator() as $idShipTypeDefender => $shipTypeDefender) {
-                $idShipTypeAttacker = $fire->getId();
-                log_comment("---- firing from $idShipTypeAttacker to $idShipTypeDefender ----");
-                $xs = $fire->getShotsFiredByAllToDefenderType($shipTypeDefender, true);
+                $xs = $fire->getShotsFiredByAllToDefenderType($shipTypeDefender);
                 $ps = $shipTypeDefender->inflictDamage($fire->getPower(), $xs->result);
-                log_var('$xs', $xs);
                 $tmp[$idShipTypeDefender] = $xs->rest;
-                if ($ps != null) {
+                if ($ps !== null) {
                     $physicShots[$idShipTypeDefender][] = $ps;
                 }
             }
-            log_var('$tmp', $tmp);
             // assign the last shot to the more likely shitType
-            $m = 0;
-            $f = 0;
-            foreach ($tmp as $k => $v) {
-                if ($v > $m) {
-                    $m = $v;
-                    $f = $k;
+            $maxRest = 0;
+            $lastShotTarget = 0;
+            foreach ($tmp as $shipTypeId => $rest) {
+                if ($rest > $maxRest) {
+                    $maxRest = $rest;
+                    $lastShotTarget = $shipTypeId;
                 }
             }
-            if ($f != 0) {
-                log_comment('adding 1 shot');
-                $ps = $this->getShipType($f)->inflictDamage($fire->getPower(), 1);
-                $physicShots[$f][] = $ps;
+            if ($lastShotTarget != 0) {
+                $ps = $this->getShipType($lastShotTarget)->inflictDamage($fire->getPower(), 1);
+                if ($ps !== null) {
+                    $physicShots[$lastShotTarget][] = $ps;
+                }
             }
         }
         return $physicShots;
@@ -216,9 +210,8 @@ class Fleet extends IterableUtil
      */
     public function getOrderedIterator(): array
     {
-        if (!ksort($this->array)) {
-            throw new Exception('Unable to order types');
-        }
+        ksort($this->array);
+
         return $this->array;
     }
 
@@ -229,7 +222,6 @@ class Fleet extends IterableUtil
     {
         $shipsCleaners = [];
         foreach ($this->array as $id => $shipType) {
-            log_comment("---- exploding $id ----");
             $sc = $shipType->cleanShips();
             $this->count -= $sc->getExplodedShips();
             if ($shipType->isEmpty()) {
@@ -242,14 +234,14 @@ class Fleet extends IterableUtil
 
     public function repairShields(): void
     {
-        foreach ($this->array as $id => $shipTypeDefender) {
+        foreach ($this->array as $shipTypeDefender) {
             $shipTypeDefender->repairShields();
         }
     }
 
     public function isEmpty(): bool
     {
-        foreach ($this->array as $id => $shipType) {
+        foreach ($this->array as $shipType) {
             if (!$shipType->isEmpty()) {
                 return false;
             }
@@ -259,17 +251,17 @@ class Fleet extends IterableUtil
 
     public function getWeaponsTech(): int
     {
-        return $this->weapons_tech;
+        return $this->weaponsTech;
     }
 
     public function getShieldsTech(): int
     {
-        return $this->shields_tech;
+        return $this->shieldsTech;
     }
 
     public function getArmourTech(): int
     {
-        return $this->armour_tech;
+        return $this->armourTech;
     }
 
     public function getGalaxy(): ?int
@@ -291,6 +283,6 @@ class Fleet extends IterableUtil
     {
         $types = array_values($this->array);
         $class = get_class($this);
-        return new $class($this->id, $types, $this->weapons_tech, $this->shields_tech, $this->armour_tech, $this->name, $this->galaxy, $this->system, $this->planet);
+        return new $class($this->id, $types, $this->weaponsTech, $this->shieldsTech, $this->armourTech, $this->name, $this->galaxy, $this->system, $this->planet);
     }
 }

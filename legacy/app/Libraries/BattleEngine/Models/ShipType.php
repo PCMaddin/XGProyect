@@ -51,9 +51,8 @@ class ShipType extends Type
     private int | float $fullPower = 0;
     protected int | float $currentShield = 0;
     protected int | float $currentLife = 0;
-    private int $weapons_tech = 0;
-    private int $shields_tech = 0;
-    private int $armour_tech = 0;
+    /** @var array{weapons: int, shields: int, armour: int} the technology levels */
+    private array $techs = ['weapons' => 0, 'shields' => 0, 'armour' => 0];
     /** @var array<int, int> */
     private array $rf;
     protected int | float $lastShots = 0;
@@ -65,7 +64,7 @@ class ShipType extends Type
      * @param array<int, int> $rf
      * @param array<int, int> $cost
      */
-    public function __construct(int $id, int | float $count, array $rf, int | float $shield, array $cost, int | float $power, ?int $weapons_tech = null, ?int $shields_tech = null, ?int $armour_tech = null)
+    public function __construct(int $id, int | float $count, array $rf, int | float $shield, array $cost, int | float $power, ?int $weaponsTech = null, ?int $shieldsTech = null, ?int $armourTech = null)
     {
         parent::__construct($id, 0);
 
@@ -82,9 +81,9 @@ class ShipType extends Type
         $this->singlePower = $power;
 
         $this->increment($count);
-        $this->setWeaponsTech($weapons_tech);
-        $this->setArmourTech($armour_tech);
-        $this->setShieldsTech($shields_tech);
+        $this->setWeaponsTech($weaponsTech);
+        $this->setArmourTech($armourTech);
+        $this->setShieldsTech($shieldsTech);
     }
 
     /**
@@ -98,11 +97,11 @@ class ShipType extends Type
         if (!is_numeric($level)) {
             return;
         }
-        $diff = $level - $this->weapons_tech;
+        $diff = $level - $this->techs['weapons'];
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
         }
-        $this->weapons_tech = $level;
+        $this->techs['weapons'] = $level;
         $incr = 1 + WEAPONS_TECH_INCREMENT_FACTOR * $diff;
         $this->singlePower *= $incr;
         $this->fullPower *= $incr;
@@ -119,11 +118,11 @@ class ShipType extends Type
         if (!is_numeric($level)) {
             return;
         }
-        $diff = $level - $this->shields_tech;
+        $diff = $level - $this->techs['shields'];
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
         }
-        $this->shields_tech = $level;
+        $this->techs['shields'] = $level;
         $incr = 1 + SHIELDS_TECH_INCREMENT_FACTOR * $diff;
         $this->singleShield *= $incr;
         $this->fullShield *= $incr;
@@ -141,11 +140,11 @@ class ShipType extends Type
         if (!is_numeric($level)) {
             return;
         }
-        $diff = $level - $this->armour_tech;
+        $diff = $level - $this->techs['armour'];
         if ($diff < 0) {
             throw new Exception('Trying to decrease tech');
         }
-        $this->armour_tech = $level;
+        $this->techs['armour'] = $level;
         $incr = 1 + ARMOUR_TECH_INCREMENT_FACTOR * $diff;
         $this->singleLife *= $incr;
         $this->fullLife *= $incr;
@@ -238,7 +237,7 @@ class ShipType extends Type
      */
     public function getWeaponsTech(): int
     {
-        return $this->weapons_tech;
+        return $this->techs['weapons'];
     }
 
     /**
@@ -247,7 +246,7 @@ class ShipType extends Type
      */
     public function getShieldsTech(): int
     {
-        return $this->shields_tech;
+        return $this->techs['shields'];
     }
 
     /**
@@ -256,7 +255,7 @@ class ShipType extends Type
      */
     public function getArmourTech(): int
     {
-        return $this->armour_tech;
+        return $this->techs['armour'];
     }
 
     /**
@@ -358,41 +357,25 @@ class ShipType extends Type
             throw new Exception('Negative amount of shotsToThisShipType!');
         }
 
-        log_var('Defender single hull', $this->singleLife);
-        log_var('Defender count', $this->getCount());
-        log_var('currentShield before', $this->currentShield);
-        log_var('currentLife before', $this->currentLife);
-
         $this->lastShots += $shotsToThisShipType;
         $ps = new PhysicShot($this, $damage, (int) $shotsToThisShipType);
         $ps->start();
-        log_var('$ps->getAssorbedDamage()', $ps->getAssorbedDamage());
-        $this->currentShield -= $ps->getAssorbedDamage();
-        if ($this->currentShield < 0 && $this->currentShield > -EPSILON) {
-            log_comment('fixing double number currentshield');
-            $this->currentShield = 0;
-        }
-        $this->currentLife -= $ps->getHullDamage();
-        if ($this->currentLife < 0 && $this->currentLife > -EPSILON) {
-            log_comment('fixing double number currentlife');
-            $this->currentLife = 0;
-        }
-        log_var('currentShield after', $this->currentShield);
-        log_var('currentLife after', $this->currentLife);
+        $this->currentShield = self::withoutRoundingError($this->currentShield - $ps->getAssorbedDamage());
+        $this->currentLife = self::withoutRoundingError($this->currentLife - $ps->getHullDamage());
         $this->lastShipHit += $ps->getHitShips();
-        log_var('lastShipHit after', $this->lastShipHit);
-        log_var('lastShots after', $this->lastShots);
 
-        if ($this->currentLife < 0) {
-            throw new Exception('Negative currentLife!');
-        }
-        if ($this->currentShield < 0) {
-            throw new Exception('Negative currentShield!');
-        }
-        if ($this->lastShipHit < 0) {
-            throw new Exception('Negative lastShipHit!');
+        if ($this->currentLife < 0 || $this->currentShield < 0 || $this->lastShipHit < 0) {
+            throw new Exception('Negative currentLife, currentShield or lastShipHit!');
         }
         return $ps; //for web
+    }
+
+    /**
+     * A tiny negative value left by floating point arithmetic is zero.
+     */
+    private static function withoutRoundingError(int | float $value): int | float
+    {
+        return $value < 0 && $value > -EPSILON ? 0 : $value;
     }
 
     /**
@@ -401,16 +384,11 @@ class ShipType extends Type
      */
     public function cleanShips(): ShipsCleaner
     {
-        log_var('lastShipHit after', $this->lastShipHit);
-        log_var('lastShots after', $this->lastShots);
-        log_var('currentLife before', $this->currentLife);
-
         $sc = new ShipsCleaner($this, (int) $this->lastShipHit, (int) $this->lastShots);
         $sc->start();
         $this->decrement($sc->getExplodedShips(), $sc->getRemainLife(), 0);
         $this->lastShipHit = 0;
         $this->lastShots = 0;
-        log_var('currentLife after', $this->currentLife);
         return $sc;
     }
 
@@ -428,9 +406,7 @@ class ShipType extends Type
      */
     public function __toString(): string
     {
-        $return = parent::__toString();
-        //$return .= "hull:" . $this->hull . "<br>Shield:" . $this->shield . "<br>CurrentLife:" . $this->currentLife . "<br>CurrentShield:" . $this->currentShield;
-        return $return;
+        return parent::__toString();
     }
 
     /**
@@ -454,7 +430,7 @@ class ShipType extends Type
     public function cloneMe(): ShipType
     {
         $class = get_class($this);
-        $tmp = new $class($this->getId(), $this->getCount(), $this->rf, $this->originalShield, $this->cost, $this->originalPower, $this->weapons_tech, $this->shields_tech, $this->armour_tech);
+        $tmp = new $class($this->getId(), $this->getCount(), $this->rf, $this->originalShield, $this->cost, $this->originalPower, $this->techs['weapons'], $this->techs['shields'], $this->techs['armour']);
         $tmp->currentShield = $this->currentShield;
         $tmp->currentLife = $this->currentLife;
         $tmp->lastShots = $this->lastShots;

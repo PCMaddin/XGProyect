@@ -40,12 +40,12 @@ abstract class GeometricDistribution
      *
      *
      */
-    public static function getProbabilityFromMean(float $m): float
+    public static function getProbabilityFromMean(float $mean): float
     {
-        if ($m <= 1) {
+        if ($mean <= 1) {
             return 1;
         }
-        return 1 / $m;
+        return 1 / $mean;
     }
 
     /**
@@ -53,12 +53,12 @@ abstract class GeometricDistribution
      *
      *
      */
-    public static function getMeanFromProbability(float $p): float
+    public static function getMeanFromProbability(float $probability): float
     {
-        if ($p == 0) {
+        if ($probability == 0) {
             return INF;
         }
-        return 1 / $p;
+        return 1 / $probability;
     }
 
     /**
@@ -66,12 +66,12 @@ abstract class GeometricDistribution
      *
      *
      */
-    public static function getVarianceFromProbability(float $p): float
+    public static function getVarianceFromProbability(float $probability): float
     {
-        if ($p == 0) {
+        if ($probability == 0) {
             return INF;
         }
-        return (1 - $p) / ($p * $p);
+        return (1 - $probability) / ($probability * $probability);
     }
 
     /**
@@ -79,8 +79,8 @@ abstract class GeometricDistribution
      *
      *
      */
-    public static function getStandardDeviationFromProbability(float $p): float
+    public static function getStandardDeviationFromProbability(float $probability): float
     {
-        return sqrt(self::getVarianceFromProbability($p));
+        return sqrt(self::getVarianceFromProbability($probability));
     }
 }

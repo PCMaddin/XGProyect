@@ -72,38 +72,20 @@ class ShipsCleaner
         if ($prob < 0) {
             throw new Exception('Negative prob');
         }
-        //if most of ships are hitten,then we can apply the more realistic way
-        if (USE_BIEXPLOSION_SYSTEM && $this->lastShipHit >= $this->fighters->getCount() / PROB_TO_REAL_MAGIC) {
-            log_comment('lastShipHit bigger than getCount()/magic');
-            if ($prob < MIN_PROB_TO_EXPLODE) {
-                $probToExplode = 0;
-            } else {
-                $probToExplode = $prob;
-            }
-        }
-        //otherwise  statistically:
-        else {
-            log_comment('lastShipHit smaller than getCount()/magic');
-            $probToExplode = $prob * (1 - MIN_PROB_TO_EXPLODE);
+        // statistically, unless most of the ships are hit: then the more realistic way applies
+        $probToExplode = $prob * (1 - MIN_PROB_TO_EXPLODE);
+        if ($this->lastShipHit >= $this->fighters->getCount() / PROB_TO_REAL_MAGIC) {
+            $probToExplode = $prob < MIN_PROB_TO_EXPLODE ? 0 : $prob;
         }
 
         /*         * * calculating the amount of exploded ships ** */
 
-        $teoricExploded = (int) round($this->fighters->getCount() * $probToExplode);
-        if (USE_EXPLODED_LIMITATION) {
-            $teoricExploded = min($teoricExploded, $this->lastShots);
-        }
-        $this->exploded = $teoricExploded; //bounded by the total shots fired to simulate a real combat :)
+        // bounded by the total shots fired to simulate a real combat
+        $this->exploded = min((int) round($this->fighters->getCount() * $probToExplode), $this->lastShots);
 
         /*         * * calculating the life of destroyed ships ** */
 
-        //$this->remainLife = $this->exploded * (1 - $prob) * ($this->fighters->getCurrentLife() / $this->fighters->getCount());
         $this->remainLife = $this->fighters->getCurrentLife() / $this->fighters->getCount();
-        log_var('prob', $prob);
-        log_var('probToExplode', $probToExplode);
-        log_var('teoricExploded', $teoricExploded);
-        log_var('exploded', $this->exploded);
-        log_var('remainLife', $this->remainLife);
     }
 
     public function getExplodedShips(): int
