@@ -11,11 +11,6 @@ use Xgp\App\Core\Entity;
  */
 class ResearchEntity extends Entity
 {
-    public function __construct(array $data)
-    {
-        parent::__construct($data);
-    }
-
     public function getResearchId(): int
     {
         return (int) $this->data['research_id'];

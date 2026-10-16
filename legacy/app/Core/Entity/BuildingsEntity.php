@@ -11,11 +11,6 @@ use Xgp\App\Core\Entity;
  */
 class BuildingsEntity extends Entity
 {
-    public function __construct($data)
-    {
-        parent::__construct($data);
-    }
-
     /**
      * Return the building id
      *

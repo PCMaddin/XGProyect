@@ -7,15 +7,12 @@ namespace Xgp\App\Core\Entity;
 use Xgp\App\Core\Entity;
 
 /**
+ * @phpstan-import-type Column from Entity
+ *
  * @deprecated v4.0.0 use laravel instead
  */
 class AllianceEntity extends Entity
 {
-    public function __construct($data)
-    {
-        parent::__construct($data);
-    }
-
     public function getAllianceId(): int
     {
         return (int) $this->data['alliance_id'];
@@ -79,7 +76,7 @@ class AllianceEntity extends Entity
     /**
      * Return the alliance members
      *
-     * @return string
+     * @return Column
      */
     public function getAllianceMembers()
     {

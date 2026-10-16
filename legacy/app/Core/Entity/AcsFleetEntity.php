@@ -7,19 +7,16 @@ namespace Xgp\App\Core\Entity;
 use Xgp\App\Core\Entity;
 
 /**
+ * @phpstan-import-type Column from Entity
+ *
  * @deprecated v4.0.0 use laravel instead
  */
 class AcsFleetEntity extends Entity
 {
-    public function __construct($data)
-    {
-        parent::__construct($data);
-    }
-
     /**
      * Get the acs id
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetId()
     {
@@ -29,7 +26,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs name
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetName()
     {
@@ -39,7 +36,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs owner
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetOwner()
     {
@@ -49,7 +46,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs galaxy
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetGalaxy()
     {
@@ -59,7 +56,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs system
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetSystem()
     {
@@ -69,7 +66,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs planet
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetPlanet()
     {
@@ -79,7 +76,7 @@ class AcsFleetEntity extends Entity
     /**
      * Get the acs planet type
      *
-     * @return string
+     * @return Column
      */
     public function getAcsFleetPlanetType()
     {

@@ -11,11 +11,6 @@ use Xgp\App\Core\Entity;
  */
 class PremiumEntity extends Entity
 {
-    public function __construct(array $data)
-    {
-        parent::__construct($data);
-    }
-
     public function getPremiumUserId(): int
     {
         return (int) $this->data['premium_user_id'];

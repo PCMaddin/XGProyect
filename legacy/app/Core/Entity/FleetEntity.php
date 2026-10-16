@@ -7,19 +7,16 @@ namespace Xgp\App\Core\Entity;
 use Xgp\App\Core\Entity;
 
 /**
+ * @phpstan-import-type Column from Entity
+ *
  * @deprecated v4.0.0 use laravel instead
  */
 class FleetEntity extends Entity
 {
-    public function __construct($data)
-    {
-        parent::__construct($data);
-    }
-
     /**
      * Get the fleet id
      *
-     * @return string
+     * @return Column
      */
     public function getFleetId()
     {
@@ -29,7 +26,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet owner
      *
-     * @return string
+     * @return Column
      */
     public function getFleetOwner()
     {
@@ -39,7 +36,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet mission
      *
-     * @return string
+     * @return Column
      */
     public function getFleetMission()
     {
@@ -49,7 +46,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet amount
      *
-     * @return string
+     * @return Column
      */
     public function getFleetAmount()
     {
@@ -59,7 +56,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet array
      *
-     * @return string
+     * @return Column
      */
     public function getFleetArray()
     {
@@ -69,7 +66,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet start time
      *
-     * @return string
+     * @return Column
      */
     public function getFleetStartTime()
     {
@@ -79,7 +76,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet start galaxy
      *
-     * @return string
+     * @return Column
      */
     public function getFleetStartGalaxy()
     {
@@ -89,7 +86,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet start system
      *
-     * @return string
+     * @return Column
      */
     public function getFleetStartSystem()
     {
@@ -99,7 +96,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet start planet
      *
-     * @return string
+     * @return Column
      */
     public function getFleetStartPlanet()
     {
@@ -109,7 +106,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet start type
      *
-     * @return string
+     * @return Column
      */
     public function getFleetStartType()
     {
@@ -119,7 +116,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end time
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndTime()
     {
@@ -129,7 +126,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end stay
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndStay()
     {
@@ -139,7 +136,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end galaxy
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndGalaxy()
     {
@@ -149,7 +146,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end system
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndSystem()
     {
@@ -159,7 +156,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end planet
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndPlanet()
     {
@@ -169,7 +166,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet end type
      *
-     * @return string
+     * @return Column
      */
     public function getFleetEndType()
     {
@@ -179,7 +176,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet target obj
      *
-     * @return string
+     * @return Column
      */
     public function getFleetTargetObj()
     {
@@ -189,7 +186,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet resource metal
      *
-     * @return string
+     * @return Column
      */
     public function getFleetResourceMetal()
     {
@@ -199,7 +196,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet resource crystal
      *
-     * @return string
+     * @return Column
      */
     public function getFleetResourceCrystal()
     {
@@ -209,7 +206,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet resource deuterium
      *
-     * @return string
+     * @return Column
      */
     public function getFleetResourceDeuterium()
     {
@@ -219,7 +216,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet fuel
      *
-     * @return string
+     * @return Column
      */
     public function getFleetFuel()
     {
@@ -229,7 +226,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet target owner
      *
-     * @return string
+     * @return Column
      */
     public function getFleetTargetOwner()
     {
@@ -239,7 +236,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet group
      *
-     * @return string
+     * @return Column
      */
     public function getFleetGroup()
     {
@@ -249,7 +246,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet mess
      *
-     * @return string
+     * @return Column
      */
     public function getFleetMess()
     {
@@ -259,7 +256,7 @@ class FleetEntity extends Entity
     /**
      * Get the fleet creation
      *
-     * @return string
+     * @return Column
      */
     public function getFleetCreation()
     {

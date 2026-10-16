@@ -171,6 +171,7 @@ Löschung sauber.
 | Combatreport\Report, Entity\{Report,Notes,Preferences,Ships,User}Entity, ReportStatusEnumerator, Helpers\ArraysHelper, `resources/views/legacy_NotInUse/` | 🗑️ gelöscht (tot) | 0 Referenzen (der Kampfbericht läuft nativ über `CombatreportController`; die Views wurden nur in auskommentiertem Code erwähnt, der mit entfernt ist). 22 PHPStan- + 9 PHPMD-Einträge abgebaut |
 | Core\Objects (deprecated Objekt-Konfig) | ✅ getippt | die überladenen Getter (`getObjects($id = null)` usw.) behalten ihre API, liefern aber über **bedingte Rückgabetypen** präzise Typen (`($objectId is int ? string : array<int, string>)`); Properties mit Shapes (`CombatSpec`, `ProductionSpec` inkl. Formel-Closures). Collections über `all()` statt `toArray()`. In 11 Aufrufern (Fleet1–4, Galaxy, Movement, Overview, Premium, Resourcesettings, Shipyard, Missile) fallen die `is_array`/`is_string`/`is_numeric`-Schutzabfragen weg. `UpdatesLibrary` normalisiert die Formel-Argumente vor dem Aufruf. 12 PHPStan- + 1 PHPMD-Eintrag abgebaut |
 | Core\Template (Blade-Helfer) | ✅ migriert | nach `App\Libraries\Template` (4 native Aufrufer). `legacyView()` ist `never`, `render()` liefert immer `string`. **Bug gefixt:** bei fehlender View kam `null` zurück, `jsReady(Template::render(...))` (FleetsLib-Popup) warf dann einen `TypeError`. `LegacyView` nimmt jetzt das View-Interface (`View::make()` liefert dieses). 3 Tests; 6 PHPStan- + 2 PHPMD-Einträge abgebaut |
+| Core\Entity + 8 Entities | ✅ getippt | `Entity` normalisiert die DB-Zeile auf `array<string, int\|float\|string\|bool\|null>` (Alias `Column`); die Unterklassen-Konstruktoren riefen nur `parent::__construct()` auf und sind weg. Die Roh-Getter deklarierten `@return string`, lieferten aber den DB-Wert (meist `int`); jetzt ehrlich `Column`. 11 PHPStan-Einträge abgebaut |
 | Users\Notes, Game\Preferences, Planet\Ships | 🗑️ gelöscht (tot) | 0 Referenzen (Ships-„Aufrufer" im Scan waren False-Matches auf den `ShipsEnumerator as Ships`-Alias); Notes/Preferences durch Eloquent-Modelle ersetzt; latente Bugs (null statt Entity, `[0]` auf leerer Menge) mit-entfernt |
 | Buildings/ (Building, Queue, QueueElements) + QueueTest | 🗑️ gelöscht (tot) | String-basierte Alt-Bau-Queue, in Produktion durch `BuildingQueue`-Modell + `BuildingQueueService` ersetzt (0 Referenzen). `QueueTest` testete nur die tote String-Logik; die moderne Sequenzierung deckt bereits `QueueSequenceServiceTest` ab — kein Verlust an Live-Coverage. 29 Baseline-Einträge abgebaut |
 | _Nachtrag:_ `BuildingQueueService` | ✅ getestet | Der dokumentierte Test-Gap ist geschlossen: neue **DB-Test-Infrastruktur** (In-Memory-SQLite + Install-Migrationen via `DatabaseTestCase`) + 6 Charakterisierungs-Tests (add/Charge, Positions-Increment, Queue-Cap, cancelFirst/Refund, getQueueData) |
@@ -376,6 +377,14 @@ Zeile), plus Regressionstest.
   Request-Feldnamen per Präfix-Whitelist als Spaltennamen — strikte Allowlist wäre robuster.
 - 🟢 **`.env.example`** liefert einen festen `APP_KEY` mit — leeren, um versehentliche
   Übernahme zu vermeiden.
+
+- ✅ **Buddies: fremde Anfragen** (gefixt): `acceptRequest`/`removeRequest`
+  luden die Anfrage per `bid` ohne Bezug zum Spieler und schickten die
+  Benachrichtigung („angenommen“/„abgelehnt“/„gelöscht“) **vor** der
+  Berechtigungsprüfung an den Absender. Mit beliebigen Ids ließen sich so
+  Nachrichten über fremde Anfragen auslösen; eine unbekannte Id crashte
+  (`false` an den Entity-Konstruktor → `TypeError`). `findBuddy()` sucht jetzt
+  nur Anfragen des Spielers, annehmen darf nur der Empfänger. 3 DB-Tests.
 
 ## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
 

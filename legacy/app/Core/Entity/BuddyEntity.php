@@ -7,19 +7,16 @@ namespace Xgp\App\Core\Entity;
 use Xgp\App\Core\Entity;
 
 /**
+ * @phpstan-import-type Column from Entity
+ *
  * @deprecated v4.0.0 use laravel instead
  */
 class BuddyEntity extends Entity
 {
-    public function __construct($data)
-    {
-        parent::__construct($data);
-    }
-
     /**
      * Return the buddy id
      *
-     * @return string
+     * @return Column
      */
     public function getBuddyId()
     {
@@ -29,7 +26,7 @@ class BuddyEntity extends Entity
     /**
      * Return the buddy sender
      *
-     * @return string
+     * @return Column
      */
     public function getBuddySender()
     {
@@ -39,7 +36,7 @@ class BuddyEntity extends Entity
     /**
      * Return the buddy receiver
      *
-     * @return string
+     * @return Column
      */
     public function getBuddyReceiver()
     {
@@ -49,7 +46,7 @@ class BuddyEntity extends Entity
     /**
      * Return the buddy status
      *
-     * @return string
+     * @return Column
      */
     public function getBuddyStatus()
     {
@@ -59,7 +56,7 @@ class BuddyEntity extends Entity
     /**
      * Return the buddy request text
      *
-     * @return string
+     * @return Column
      */
     public function getRequestText()
     {
