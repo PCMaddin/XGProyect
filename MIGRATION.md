@@ -424,6 +424,22 @@ Zeile), plus Regressionstest.
   Zeilenumbrüchen ein wörtliches `\n` (auch in Systemtexten wie den
   Expeditionsberichten und in Flotten-Shortcut-Namen). Bereits gespeicherte
   Nachrichten bleiben unverändert. Tests: Chat (DB), Namensregeln.
+- 🔴→✅ **Sprungtor-Seite crashte ab Stufe 2** (gefixt): Die Wartezeit
+  `3600 * (1 / Stufe)` ist ab Stufe 2 ein float, und `Functions::chronoApplet()`
+  (natives `int`) warf dann während der Abklingzeit einen `TypeError`: Die
+  Technologie-Detailseite des Sprungtors war nicht aufrufbar. Die Wartezeit
+  ist jetzt ganzzahlig (`intdiv`). Regressionstest plus Test, dass ein Sprung
+  während der Abklingzeit abgelehnt wird. Beim Typisieren liest
+  `TechnologyInfoService` Preise, Kampfwerte, Rapid Fire und
+  Produktionsformeln direkt aus der `GameObjectRegistry` statt aus
+  untypisierten Legacy-Arrays. Die Ausgabe ist für alle Objekte auf Stufe 0
+  und 5 byte-identisch geprüft.
+- 🟡 **Offen (Balancing, Entscheidung nötig): Intergalaktisches
+  Forschungsnetzwerk.** `ResearchQueueService::labLevel()` summiert per
+  `SUM(...) ... ORDER BY ... LIMIT Stufe+1`. `LIMIT` wirkt aber erst auf das
+  eine Ergebnis der Aggregation, also zählen **alle** Labore des Spielers statt
+  der Stufe+1 besten (Forschung damit schneller als vorgesehen). Der Fehler
+  stammt aus dem Upstream-Code.
 - 🟡 **Offen: weiterer XSS-Audit nötig.** `BBCodeLib` escaped kein HTML
   (Allianz-Beschreibung/-Text, Bewerbungstext `ally_request_text`), und viele
   Game-Views geben Werte mit `{!! !!}` aus. Ob dort HTML gewollt ist, muss pro

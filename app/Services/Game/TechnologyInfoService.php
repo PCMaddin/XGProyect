@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Game;
 
 use App\Core\GameObjects\Building;
-use App\Core\GameObjects\GameObject;
+use App\Core\GameObjects\Defense;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Core\GameObjects\Officer;
+use App\Core\GameObjects\ProductionFormula;
 use App\Core\GameObjects\Ship;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
@@ -15,6 +15,7 @@ use App\Services\Game\Formulas\FleetsService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
 use App\Services\SettingsService;
+use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Xgp\App\Core\Concerns\PreparesLegacySql;
@@ -26,12 +27,23 @@ use App\Libraries\Functions;
 use App\Libraries\Users;
 
 /**
+ * @phpstan-type JumpGateSection array{
+ *     action: string,
+ *     startMoonLink: string,
+ *     destinations: array<int, array{id: int, label: string}>,
+ *     ships: array<int, array{id: int, name: string, max: string, availability: string, tabIndex: int}>,
+ *     countdownScriptHead: string,
+ *     waitTimeHtml: string,
+ *     countdownScriptTail: string,
+ * }
+ *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.TooManyMethods")
  */
 class TechnologyInfoService
 {
     use PreparesLegacySql;
+    use ReadsMixedValues;
 
     /** @var array<string, mixed> */
     private array $user = [];
@@ -41,15 +53,6 @@ class TechnologyInfoService
 
     /** @var array<int, string> */
     private array $resource = [];
-
-    /** @var array<int, array<string, mixed>> */
-    private array $priceList = [];
-
-    /** @var array<int, array<string, mixed>> */
-    private array $combatCaps = [];
-
-    /** @var array<int, array<string, mixed>> */
-    private array $productionGrid = [];
 
     private int $elementId = 0;
 
@@ -69,7 +72,7 @@ class TechnologyInfoService
      * @param array<string, mixed>|null $userData
      * @param array<string, mixed>|null $planetData
      *
-     * @return array<string, mixed>
+     * @return array{summary: array<string, mixed>, detailTable: array<string, mixed>|null, jumpGate: JumpGateSection|null, tearDown: array<string, mixed>|null}
      */
     public function buildViewData(int $elementId, ?array $userData = null, ?array $planetData = null): array
     {
@@ -115,9 +118,6 @@ class TechnologyInfoService
         $this->planet = $planetData ?? Users::getInstance()->getPlanetData();
 
         $this->resource = $this->buildResourceMap();
-        $this->priceList = $this->buildPriceList();
-        $this->combatCaps = $this->buildCombatCaps();
-        $this->productionGrid = $this->buildProductionGrid();
         $this->elementId = $elementId;
     }
 
@@ -136,101 +136,25 @@ class TechnologyInfoService
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * The production formula of a building or ship (null for anything else).
      */
-    private function buildPriceList(): array
+    private function productionFormula(int $elementId): ?ProductionFormula
     {
-        $priceList = [];
+        $object = $this->registry->has($elementId) ? $this->registry->get($elementId) : null;
 
-        foreach ($this->registry->all() as $id => $object) {
-            if ($object instanceof Officer) {
-                $priceList[$id] = [
-                    'darkmatter_week' => $object->getDarkmatterWeek(),
-                    'darkmatter_month' => $object->getDarkmatterMonth(),
-                    'img_big' => $object->getImgBig(),
-                    'img_small' => $object->getImgSmall(),
-                ];
-
-                continue;
-            }
-
-            if (!$object instanceof GameObject) {
-                continue;
-            }
-
-            $priceList[$id] = $object->getPrice()->toArray();
-
-            if ($object instanceof Ship) {
-                $priceList[$id]['consumption'] = $object->getConsumption();
-                $priceList[$id]['consumption2'] = $object->getConsumption2();
-                $priceList[$id]['speed'] = $object->getSpeed();
-                $priceList[$id]['speed2'] = $object->getSpeed2();
-                $priceList[$id]['capacity'] = $object->getCapacity();
-            }
-        }
-
-        return $priceList;
+        return $object instanceof Building || $object instanceof Ship ? $object->getProduction() : null;
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * Rapid fire of a ship or defense: target id => shots.
+     *
+     * @return array<int, int>
      */
-    private function buildCombatCaps(): array
+    private function rapidFire(int $elementId): array
     {
-        $combatCaps = [];
+        $object = $this->registry->has($elementId) ? $this->registry->get($elementId) : null;
 
-        foreach ($this->registry->ships() as $id => $ship) {
-            $combatCaps[$id] = [
-                'shield' => $ship->getShield(),
-                'attack' => $ship->getAttack(),
-                'sd' => $ship->getRapidFire()->toArray(),
-            ];
-        }
-
-        foreach ($this->registry->defenses() as $id => $defense) {
-            $combatCaps[$id] = [
-                'shield' => $defense->getShield(),
-                'attack' => $defense->getAttack(),
-            ];
-
-            if ($defense->getRapidFire()->isNotEmpty()) {
-                $combatCaps[$id]['sd'] = $defense->getRapidFire()->toArray();
-            }
-        }
-
-        return $combatCaps;
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function buildProductionGrid(): array
-    {
-        $productionGrid = [];
-
-        foreach ($this->registry->producers() as $id => $object) {
-            $production = $object instanceof Building || $object instanceof Ship
-                ? $object->getProduction()
-                : null;
-
-            if ($production === null) {
-                continue;
-            }
-
-            $productionGrid[$id] = $production->toLegacyArray();
-            $productionGrid[$id]['formule'] = [
-                'metal' => fn (int $level, float $levelFactor, float $planetTemp, int $energyTech): float
-                    => $production->calculateMetal($level, $levelFactor),
-                'crystal' => fn (int $level, float $levelFactor, float $planetTemp, int $energyTech): float
-                    => $production->calculateCrystal($level, $levelFactor),
-                'deuterium' => fn (int $level, float $levelFactor, float $planetTemp, int $energyTech): float
-                    => $production->calculateDeuterium($level, $levelFactor, $planetTemp),
-                'energy' => fn (int $level, float $levelFactor, float $planetTemp, int $energyTech): float
-                    => $production->calculateEnergy($level, $levelFactor, $planetTemp, $energyTech),
-            ];
-        }
-
-        return $productionGrid;
+        return $object instanceof Ship || $object instanceof Defense ? $object->getRapidFire()->all() : [];
     }
 
     /**
@@ -267,44 +191,27 @@ class TechnologyInfoService
             $rapidFireItems = array_merge($this->buildRapidFireAgainstItems(), $this->buildRapidFireFromItems());
         }
 
+        $object = $this->registry->get($this->elementId);
+        $price = $object->getPrice();
+        $isUnit = $object instanceof Ship || $object instanceof Defense;
+
         $stats = [
             [
                 'label' => __('game/technologydetails.in_struct_pt'),
-                'value' => $this->formatService->prettyNumber(($this->priceList[$this->elementId]['metal'] ?? 0) + ($this->priceList[$this->elementId]['crystal'] ?? 0)),
+                'value' => $this->formatService->prettyNumber($price->getMetal() + $price->getCrystal()),
             ],
             [
                 'label' => __('game/technologydetails.in_shield_pt'),
-                'value' => $this->formatService->prettyNumber((int) ($this->combatCaps[$this->elementId]['shield'] ?? 0)),
+                'value' => $this->formatService->prettyNumber($isUnit ? (int) $object->getShield() : 0),
             ],
             [
                 'label' => __('game/technologydetails.in_attack_pt'),
-                'value' => $this->formatService->prettyNumber((int) ($this->combatCaps[$this->elementId]['attack'] ?? 0)),
+                'value' => $this->formatService->prettyNumber($isUnit ? (int) $object->getAttack() : 0),
             ],
         ];
 
-        if ($isShip) {
-            $updatedSpeed = '';
-            $updatedConsumption = '';
-
-            if ($this->elementId === 202) {
-                $updatedSpeed = ' <font color="yellow">(' . $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['speed2'] ?? 0)) . ')</font>';
-                $updatedConsumption = ' <font color="yellow">(' . $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['consumption2'] ?? 0)) . ')</font>';
-            } elseif ($this->elementId === 211) {
-                $updatedSpeed = ' <font color="yellow">(' . $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['speed2'] ?? 0)) . ')</font>';
-            }
-
-            $stats[] = [
-                'label' => __('game/technologydetails.in_base_speed'),
-                'value' => $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['speed'] ?? 0)) . $updatedSpeed,
-            ];
-            $stats[] = [
-                'label' => __('game/technologydetails.in_capacity'),
-                'value' => $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['capacity'] ?? 0)) . '&nbsp;' . __('game/technologydetails.in_units'),
-            ];
-            $stats[] = [
-                'label' => __('game/technologydetails.in_consumption'),
-                'value' => $this->formatService->prettyNumber((int) ($this->priceList[$this->elementId]['consumption'] ?? 0)) . $updatedConsumption,
-            ];
+        if ($isShip && $object instanceof Ship) {
+            $stats = [...$stats, ...$this->shipStats($object)];
         }
 
         return [
@@ -316,6 +223,40 @@ class TechnologyInfoService
             'description' => $this->getElementDescription($this->elementId),
             'rapidFireItems' => $rapidFireItems,
             'stats' => $stats,
+        ];
+    }
+
+    /**
+     * Speed, capacity and consumption; in yellow the values after the drive
+     * upgrade of the small cargo (speed and consumption) and the bomber (speed).
+     *
+     * @return list<array{label: string, value: string}>
+     */
+    private function shipStats(Ship $ship): array
+    {
+        $updatedSpeed = '';
+        $updatedConsumption = '';
+
+        if ($this->elementId === 202) {
+            $updatedSpeed = ' <font color="yellow">(' . $this->formatService->prettyNumber($ship->getSpeed2()) . ')</font>';
+            $updatedConsumption = ' <font color="yellow">(' . $this->formatService->prettyNumber($ship->getConsumption2()) . ')</font>';
+        } elseif ($this->elementId === 211) {
+            $updatedSpeed = ' <font color="yellow">(' . $this->formatService->prettyNumber($ship->getSpeed2()) . ')</font>';
+        }
+
+        return [
+            [
+                'label' => self::asString(__('game/technologydetails.in_base_speed')),
+                'value' => $this->formatService->prettyNumber($ship->getSpeed()) . $updatedSpeed,
+            ],
+            [
+                'label' => self::asString(__('game/technologydetails.in_capacity')),
+                'value' => $this->formatService->prettyNumber($ship->getCapacity()) . '&nbsp;' . self::asString(__('game/technologydetails.in_units')),
+            ],
+            [
+                'label' => self::asString(__('game/technologydetails.in_consumption')),
+                'value' => $this->formatService->prettyNumber($ship->getConsumption()) . $updatedConsumption,
+            ],
         ];
     }
 
@@ -414,7 +355,7 @@ class TechnologyInfoService
      */
     private function buildStorageRows(): array
     {
-        $currentBuiltLevel = (int) ($this->planet[$this->resource[$this->elementId]] ?? 0);
+        $currentBuiltLevel = self::asInt($this->planet[$this->resource[$this->elementId]] ?? 0);
         $buildStartLevel = max(1, $currentBuiltLevel - 2);
         $actualProduction = $this->productionService->maxStorable($currentBuiltLevel);
         $rows = [];
@@ -437,7 +378,7 @@ class TechnologyInfoService
      */
     private function buildAstrophysicsRows(): array
     {
-        $currentBuiltLevel = (int) ($this->user[$this->resource[$this->elementId]] ?? 0);
+        $currentBuiltLevel = self::asInt($this->user[$this->resource[$this->elementId]] ?? 0);
         $buildStartLevel = max(1, $currentBuiltLevel - 2);
         $rows = [];
 
@@ -457,7 +398,7 @@ class TechnologyInfoService
      */
     private function buildRangeRows(): array
     {
-        $currentBuiltLevel = (int) ($this->planet[$this->resource[$this->elementId]] ?? 0);
+        $currentBuiltLevel = self::asInt($this->planet[$this->resource[$this->elementId]] ?? 0);
         $buildStartLevel = max(1, $currentBuiltLevel - 2);
         $rows = [];
 
@@ -477,18 +418,19 @@ class TechnologyInfoService
     private function buildProductionRows(bool $simple): array
     {
         $resourceKey = $this->resource[$this->elementId];
-        $buildLevelFactor = (int) ($this->planet['planet_' . $resourceKey . '_percent'] ?? 0);
-        $buildTemp = (int) ($this->planet['planet_temp_max'] ?? 0);
-        $currentBuiltLevel = (int) ($this->planet[$resourceKey] ?? 0);
+        $buildLevelFactor = self::asInt($this->planet['planet_' . $resourceKey . '_percent'] ?? 0);
+        $buildTemp = self::asInt($this->planet['planet_temp_max'] ?? 0);
+        $currentBuiltLevel = self::asInt($this->planet[$resourceKey] ?? 0);
         $effectiveLevel = $currentBuiltLevel > 0 ? $currentBuiltLevel : 1;
-        $buildEnergy = (int) ($this->user['research_energy_technology'] ?? 0);
+        $buildEnergy = self::asInt($this->user['research_energy_technology'] ?? 0);
         $resourceMultiplier = $this->settings->getInt('resource_multiplier');
 
-        $geologistBoost = 1 + (1 * ($this->officerService->isOfficerActive((int) ($this->user['premium_officier_geologist'] ?? 0), time()) ? GEOLOGUE : 0));
-        $engineerBoost = 1 + (1 * ($this->officerService->isOfficerActive((int) ($this->user['premium_officier_engineer'] ?? 0), time()) ? ENGINEER_ENERGY : 0));
+        $geologistBoost = 1 + (1 * ($this->officerService->isOfficerActive(self::asInt($this->user['premium_officier_geologist'] ?? 0), time()) ? GEOLOGUE : 0));
+        $engineerBoost = 1 + (1 * ($this->officerService->isOfficerActive(self::asInt($this->user['premium_officier_engineer'] ?? 0), time()) ? ENGINEER_ENERGY : 0));
 
         $baseline = $this->productionValues($effectiveLevel, $buildLevelFactor, $buildTemp, $buildEnergy, $resourceMultiplier, $geologistBoost, $engineerBoost);
-        $actualProduction = $this->elementId >= 4 ? floor($baseline[4]) : floor($baseline[$this->elementId]);
+        $own = $this->ownProductionIndex();
+        $actualProduction = floor($baseline[$own]);
         $actualNeed = $this->elementId !== 12 ? floor($baseline[4]) : floor($baseline[3]);
         $buildStartLevel = max(1, $currentBuiltLevel - 2);
         $firstProduction = 0;
@@ -499,9 +441,7 @@ class TechnologyInfoService
             $levelLabel = $currentBuiltLevel === $buildLevel ? $this->formatService->colorRed((string) $buildLevel) : (string) $buildLevel;
 
             if ($firstProduction > 0) {
-                $levelDiff = $this->elementId !== 12
-                    ? $this->formatService->prettyNumber(floor($production[$this->elementId] - $firstProduction))
-                    : $this->formatService->prettyNumber(floor($production[4] - $firstProduction));
+                $levelDiff = $this->formatService->prettyNumber(floor($production[$own] - $firstProduction));
             } else {
                 $levelDiff = 0;
 
@@ -511,7 +451,7 @@ class TechnologyInfoService
             }
 
             if ($this->elementId !== 12) {
-                $productionDiff = floor($production[$this->elementId] - $actualProduction);
+                $productionDiff = floor($production[$own] - $actualProduction);
 
                 if ($currentBuiltLevel === 0) {
                     $productionDiff = $this->elementId >= 4 ? $production[4] : $production[3];
@@ -519,7 +459,7 @@ class TechnologyInfoService
 
                 $row = [
                     $levelLabel,
-                    $this->formatService->prettyNumber(floor($production[$this->elementId])),
+                    $this->formatService->prettyNumber(floor($production[$own])),
                     $this->formatService->colorNumber($productionDiff, $this->formatService->prettyNumber((int) $productionDiff)),
                     $this->formatService->colorGreen((string) $levelDiff),
                 ];
@@ -549,10 +489,26 @@ class TechnologyInfoService
                 ];
             }
 
-            $firstProduction = $this->elementId !== 12 ? floor($production[$this->elementId]) : floor($production[4]);
+            $firstProduction = floor($production[$own]);
         }
 
         return $rows;
+    }
+
+    /**
+     * The production row index of this element: its own resource for the
+     * mines (1-3), the energy (4) for the power plants.
+     *
+     * @return 1|2|3|4
+     */
+    private function ownProductionIndex(): int
+    {
+        return match ($this->elementId) {
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            default => 4,
+        };
     }
 
     /**
@@ -560,10 +516,11 @@ class TechnologyInfoService
      */
     private function productionValues(int $buildLevel, int $buildLevelFactor, int $buildTemp, int $buildEnergy, int $resourceMultiplier, float | int $geologistBoost, float | int $engineerBoost): array
     {
-        $metalProduction = ($this->productionGrid[$this->elementId]['formule']['metal'])($buildLevel, $buildLevelFactor, $buildTemp, $buildEnergy);
-        $crystalProduction = ($this->productionGrid[$this->elementId]['formule']['crystal'])($buildLevel, $buildLevelFactor, $buildTemp, $buildEnergy);
-        $deuteriumProduction = ($this->productionGrid[$this->elementId]['formule']['deuterium'])($buildLevel, $buildLevelFactor, $buildTemp, $buildEnergy);
-        $energyProduction = ($this->productionGrid[$this->elementId]['formule']['energy'])($buildLevel, $buildLevelFactor, $buildTemp, $buildEnergy);
+        $formula = $this->productionFormula($this->elementId);
+        $metalProduction = $formula?->calculateMetal($buildLevel, $buildLevelFactor) ?? 0.0;
+        $crystalProduction = $formula?->calculateCrystal($buildLevel, $buildLevelFactor) ?? 0.0;
+        $deuteriumProduction = $formula?->calculateDeuterium($buildLevel, $buildLevelFactor, $buildTemp) ?? 0.0;
+        $energyProduction = $formula?->calculateEnergy($buildLevel, $buildLevelFactor, $buildTemp, $buildEnergy) ?? 0.0;
 
         return [
             1 => $this->productionService->productionAmount($metalProduction, $geologistBoost, $resourceMultiplier),
@@ -579,11 +536,11 @@ class TechnologyInfoService
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return JumpGateSection|null
      */
     private function buildJumpGateSection(): ?array
     {
-        if ($this->elementId !== 43 || (int) ($this->planet[$this->resource[43]] ?? 0) <= 0) {
+        if ($this->elementId !== 43 || self::asInt($this->planet[$this->resource[43]] ?? 0) <= 0) {
             return null;
         }
 
@@ -620,7 +577,7 @@ class TechnologyInfoService
                     FROM `' . PLANETS . '` AS m
                     INNER JOIN `' . BUILDINGS . "` AS b ON b.building_planet_id = m.planet_id
                     WHERE m.`planet_type` = '3'
-                        AND m.`planet_user_id` = '" . ((int) $this->user['id']) . "';"
+                        AND m.`planet_user_id` = '" . (self::asInt($this->user['id'])) . "';"
                 )
             )
         );
@@ -628,7 +585,7 @@ class TechnologyInfoService
         $destinations = [];
 
         foreach ($moonList as $currentMoon) {
-            if ((int) ($currentMoon['planet_id'] ?? 0) === (int) ($this->planet['planet_id'] ?? 0)) {
+            if (self::asInt($currentMoon['planet_id'] ?? 0) === self::asInt($this->planet['planet_id'] ?? 0)) {
                 continue;
             }
 
@@ -657,14 +614,14 @@ class TechnologyInfoService
         for ($ship = 200; $ship < 250; $ship++) {
             $resourceKey = $this->resource[$ship] ?? '';
 
-            if ($resourceKey === '' || (int) ($this->planet[$resourceKey] ?? 0) <= 0) {
+            if ($resourceKey === '' || self::asInt($this->planet[$resourceKey] ?? 0) <= 0) {
                 continue;
             }
 
             $ships[] = [
                 'id' => $ship,
                 'name' => (string) __('game/ships.' . $resourceKey),
-                'max' => $this->formatService->prettyNumber((int) ($this->planet[$resourceKey] ?? 0)),
+                'max' => $this->formatService->prettyNumber(self::asInt($this->planet[$resourceKey] ?? 0)),
                 'availability' => __('game/technologydetails.in_jump_gate_available'),
                 'tabIndex' => $currentIndex,
             ];
@@ -685,12 +642,12 @@ class TechnologyInfoService
 
         $resourceKey = $this->resource[$this->elementId] ?? null;
 
-        if (!is_string($resourceKey) || (int) ($this->planet[$resourceKey] ?? 0) <= 0) {
+        if (!is_string($resourceKey) || self::asInt($this->planet[$resourceKey] ?? 0) <= 0) {
             return null;
         }
 
         $techBonus = '';
-        $ionTechnologyLevel = (int) ($this->user[$this->resource[Research::RESEARCH_IONIC_TECHNOLOGY]] ?? 0);
+        $ionTechnologyLevel = self::asInt($this->user[$this->resource[Research::RESEARCH_IONIC_TECHNOLOGY]] ?? 0);
         $ionTechnologyPercentage = $this->formulasService->getIonTechnologyBonus($ionTechnologyLevel) * 100;
 
         if ($ionTechnologyPercentage > 0) {
@@ -702,16 +659,16 @@ class TechnologyInfoService
 
         $tearDownResources = $this->developmentsService->developmentPrice(
             $this->elementId,
-            (int) ($this->planet[$resourceKey] ?? 0),
+            self::asInt($this->planet[$resourceKey] ?? 0),
             true,
             true,
             $ionTechnologyLevel
         );
         $tearDownTime = $this->developmentsService->tearDownTime(
             $this->elementId,
-            (int) ($this->planet[$resourceKey] ?? 0),
-            (int) ($this->planet[$this->resource[Buildings::BUILDING_ROBOT_FACTORY]] ?? 0),
-            (int) ($this->planet[$this->resource[Buildings::BUILDING_NANO_FACTORY]] ?? 0)
+            self::asInt($this->planet[$resourceKey] ?? 0),
+            self::asInt($this->planet[$this->resource[Buildings::BUILDING_ROBOT_FACTORY]] ?? 0),
+            self::asInt($this->planet[$this->resource[Buildings::BUILDING_NANO_FACTORY]] ?? 0)
         );
 
         return [
@@ -739,14 +696,14 @@ class TechnologyInfoService
      */
     private function getNextJumpWaitTime(array $moon): array
     {
-        $jumpGateLevel = (int) ($moon[$this->resource[43]] ?? 0);
-        $lastJumpTime = (int) ($moon['planet_last_jump_time'] ?? 0);
+        $jumpGateLevel = self::asInt($moon[$this->resource[43]] ?? 0);
+        $lastJumpTime = self::asInt($moon['planet_last_jump_time'] ?? 0);
 
         if ($jumpGateLevel <= 0) {
             return ['string' => '', 'value' => 0];
         }
 
-        $waitBetweenJump = (60 * 60) * (1 / $jumpGateLevel);
+        $waitBetweenJump = intdiv(60 * 60, $jumpGateLevel);
         $nextJumpTime = $lastJumpTime + $waitBetweenJump;
 
         if ($nextJumpTime < time()) {
@@ -768,7 +725,7 @@ class TechnologyInfoService
      */
     private function processJumpGate(int $targetPlanet, array $ships): array
     {
-        if ($this->elementId !== 43 || (int) ($this->planet[$this->resource[43]] ?? 0) <= 0) {
+        if ($this->elementId !== 43 || self::asInt($this->planet[$this->resource[43]] ?? 0) <= 0) {
             return [
                 'success' => false,
                 'message' => __('game/technologydetails.in_jump_gate_error_data'),
@@ -816,7 +773,7 @@ class TechnologyInfoService
                 continue;
             }
 
-            $availableShips = (int) ($this->planet[$resourceKey] ?? 0);
+            $availableShips = self::asInt($this->planet[$resourceKey] ?? 0);
             $shipsToMove = min(max(0, $shipCount), $availableShips);
 
             if ($shipsToMove <= 0) {
@@ -842,10 +799,10 @@ class TechnologyInfoService
                     'UPDATE `' . PLANETS . '`, `' . USERS . '`, `' . SHIPS . "` SET
                         $subQueryOrigin
                         `planet_last_jump_time` = '" . $jumpTime . "',
-                        `current_planet` = '" . ((int) $targetGate['planet_id']) . "'
-                    WHERE `planet_id` = '" . ((int) $this->planet['planet_id']) . "'
-                        AND `ship_planet_id` = '" . ((int) $this->planet['planet_id']) . "'
-                        AND `id` = '" . ((int) $this->user['id']) . "';"
+                        `current_planet` = '" . (self::asInt($targetGate['planet_id'])) . "'
+                    WHERE `planet_id` = '" . (self::asInt($this->planet['planet_id'])) . "'
+                        AND `ship_planet_id` = '" . (self::asInt($this->planet['planet_id'])) . "'
+                        AND `id` = '" . (self::asInt($this->user['id'])) . "';"
                 )
             );
 
@@ -854,8 +811,8 @@ class TechnologyInfoService
                     'UPDATE `' . PLANETS . '`, `' . SHIPS . "` SET
                         $subQueryDestination
                         `planet_last_jump_time` = '" . $jumpTime . "'
-                    WHERE `planet_id` = '" . ((int) $targetGate['planet_id']) . "'
-                        AND `ship_planet_id` = '" . ((int) $targetGate['planet_id']) . "';"
+                    WHERE `planet_id` = '" . (self::asInt($targetGate['planet_id'])) . "'
+                        AND `ship_planet_id` = '" . (self::asInt($targetGate['planet_id'])) . "';"
                 )
             );
         });
@@ -876,7 +833,7 @@ class TechnologyInfoService
     {
         if (
             $targetPlanet <= 0 ||
-            $targetPlanet === (int) ($this->planet['planet_id'] ?? 0)
+            $targetPlanet === self::asInt($this->planet['planet_id'] ?? 0)
         ) {
             return null;
         }
@@ -892,7 +849,7 @@ class TechnologyInfoService
                     ON b.`building_planet_id` = p.`planet_id`
                 WHERE p.`planet_id` = '" . $targetPlanet . "'
                     AND p.`planet_type` = '3'
-                    AND p.`planet_user_id` = '" . ((int) ($this->user['id'] ?? 0)) . "';"
+                    AND p.`planet_user_id` = '" . (self::asInt($this->user['id'] ?? 0)) . "';"
             )
         );
 
@@ -903,7 +860,7 @@ class TechnologyInfoService
         /** @var array<string, mixed> $targetGate */
         $targetGate = (array) $gateRow;
 
-        return (int) ($targetGate['building_jump_gate'] ?? 0) > 0 ? $targetGate : null;
+        return self::asInt($targetGate['building_jump_gate'] ?? 0) > 0 ? $targetGate : null;
     }
 
     /**
@@ -914,7 +871,7 @@ class TechnologyInfoService
         $items = [];
 
         for ($type = 200; $type < 500; $type++) {
-            $shots = (int) ($this->combatCaps[$this->elementId]['sd'][$type] ?? 0);
+            $shots = $this->rapidFire($this->elementId)[$type] ?? 0;
 
             if ($shots <= 1) {
                 continue;
@@ -934,7 +891,7 @@ class TechnologyInfoService
         $items = [];
 
         for ($type = 200; $type < 500; $type++) {
-            $shots = (int) ($this->combatCaps[$type]['sd'][$this->elementId] ?? 0);
+            $shots = $this->rapidFire($type)[$this->elementId] ?? 0;
 
             if ($shots <= 1) {
                 continue;
@@ -971,7 +928,11 @@ class TechnologyInfoService
      */
     private function planetLink(array $currentPlanet): string
     {
-        return '<a href="game.php?page=galaxy&mode=3&galaxy=' . $currentPlanet['planet_galaxy'] . '&system=' . $currentPlanet['planet_system'] . '">[' . $currentPlanet['planet_galaxy'] . ':' . $currentPlanet['planet_system'] . ':' . $currentPlanet['planet_planet'] . ']</a>';
+        $galaxy = self::asInt($currentPlanet['planet_galaxy'] ?? 0);
+        $system = self::asInt($currentPlanet['planet_system'] ?? 0);
+        $planet = self::asInt($currentPlanet['planet_planet'] ?? 0);
+
+        return '<a href="game.php?page=galaxy&mode=3&galaxy=' . $galaxy . '&system=' . $system . '">[' . $galaxy . ':' . $system . ':' . $planet . ']</a>';
     }
 
     private function getElementName(int $elementId): string
