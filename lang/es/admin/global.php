@@ -13,6 +13,7 @@ return [
     'gn_danger_title' => '¡Alerta!',
     'gn_warning_title' => '¡Advertencia!',
     'gn_success_title' => '¡Ok!',
+    'gn_info_title' => '¡Información!',
     'ge_yes' => 'SI',
     'ge_no' => 'NO',
     'gn_enabled' => 'Activado',

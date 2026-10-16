@@ -13,7 +13,7 @@ return [
     'al_name_invalid' => 'The alliance name contains invalid characters',
     'al_name_already_exists' => 'The alliance name "%s" already exists.',
     'al_tag_already_exists' => 'The alliance tag "%s" already exists.',
-    'al_created' => 'The alliance %s was created',
+    'al_created' => 'The alliance %s [%d] was created',
     'al_continue' => 'continue',
     'al_alliance_closed' => 'This alliance does not support more members',
     'al_request_confirmation_message' => 'Application registered. Will receive a message when your application is approved / rejected. <br><a href="game.php?page=alliance">back</a>',

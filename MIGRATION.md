@@ -592,26 +592,19 @@ Baseline-Einträge.
   ``SELECT alliance_id, alliance_name, alliance_tag FROM alliance WHERE CONCAT(alliance_name, alliance_tag) REGEXP '[<>"\'&]'``
   (analog `users.name`).
 
-## TODO: Übersetzungslücken (`lang/en` ↔ `lang/es`)
+## Übersetzungslücken (`lang/en` ↔ `lang/es`) ✅ geschlossen
 
-Abgleich aller Sprachdateien (Stand Welle 6). **Wichtig:** ein *fehlender*
-Schlüssel fällt auf Englisch zurück (`fallback_locale = en`), ein *leerer*
-String (`''`) aber nicht: der Spieler bekommt eine leere Meldung.
-
-- 🟡 **`es/game/expedition.php` — leer und im Spiel genutzt** (spanische
-  Spieler sehen leere Expeditionsberichte): `exp_new_ships_5`,
-  `exp_new_resources_3/4`, `exp_dm_2..5`, `exp_delay_2..5`, `exp_faster_1/2`,
-  `exp_nothing_4..6`, `exp_lost_1`.
-- 🟢 **`es/game/expedition.php` — leer, derzeit ungenutzt** (für noch nicht
-  implementierte Expeditions-Ergebnisse bzw. höhere Varianten-Nummern):
-  `exp_new_ships_6/7`, `exp_primitive_enemy_5/6/8`, `exp_advanced_enemy_2`,
-  `exp_found_object_1/2`, `exp_nothing_7` und `exp_nothing_9..16`.
-- 🟢 **`en/game/expedition.php`**: `exp_nothing_8` leer, `exp_primitive_enemy_7`
-  fehlt (beide ungenutzt).
-- 🟢 **Fehlen in `es`** (Fallback auf Englisch, also nur unübersetzt):
-  `admin/global.gn_info_title`, `game/planetlayer.rp_wrong_pass`,
-  `install/install.admin_create_success`, `install/install.admin_create_fail`.
-
-Vorschlag: die leeren Strings entweder übersetzen oder entfernen (dann greift
-der englische Fallback), und einen Test ergänzen, der beide Sprachen auf gleiche
-Schlüssel und keine leeren Werte prüft.
+- **Spanische Expeditionsberichte:** 34 leere Texte übersetzt, darunter alle,
+  die das Spiel auswählt (neue Schiffe 5, Ressourcen 3/4, Dunkle Materie 2–5,
+  Verzögerung 2–5, schnellere Rückkehr 1/2, nichts gefunden 4–6, Flotte
+  verloren). Spanische Spieler bekamen dort bisher leere Berichte.
+- **Englisch:** `exp_nothing_8` aus dem vorhandenen spanischen Text übersetzt.
+  `exp_lost_2` und `exp_primitive_enemy_7` entfernt (in keiner Sprache ein
+  Text, nirgends benutzt).
+- **Fehlende spanische Texte ergänzt:** `admin/global.gn_info_title` (auch
+  englisch war leer), `game/planetlayer.rp_wrong_pass`,
+  `install/install.admin_create_success/fail`.
+- **Platzhalter angeglichen:** Die englischen Dunkle-Materie-Texte nutzen wie
+  die spanischen Menge und Name (`%s %s`), `al_created` nennt auch den Tag.
+- **`LanguageFilesTest`:** prüft für jede Sprachdatei gleiche Schlüssel,
+  keine leeren Texte und gleiche Platzhalter in beiden Sprachen.

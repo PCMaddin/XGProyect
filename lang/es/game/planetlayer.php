@@ -24,4 +24,5 @@ return [
     //old lines
     'rp_abandon_planet_not_possible' => 'No es posible abandonar un planeta cuando hay flotas moviendose',
     'rp_planet_abandoned' => 'Planeta abandonado con éxito.',
+    'rp_wrong_pass' => 'Contraseña incorrecta, introdúcela de nuevo.',
 ];

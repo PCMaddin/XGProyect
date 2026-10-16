@@ -82,6 +82,8 @@ return [
     'admin_username_help' => 'Este es tu nombre de usuario público.',
     'admin_password' => 'Contraseña del administrador',
     'admin_password_confirm' => 'Confirmar contraseña del administrador',
+    'admin_create_success' => '¡Administrador creado con éxito!',
+    'admin_create_fail' => 'No se pudo crear el administrador. ¡Revisa los datos e inténtalo de nuevo!',
     'random_password' => 'Genera una contraseña aleatoria súper segura por mí',
     'create_admin' => 'Crear administrador',
     'db_connect_success' => '¡Administrador creado con éxito!',
