@@ -6,7 +6,7 @@ namespace App\Libraries;
 
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 
 /**
  * Noob-protection rules: whether an attacker is too weak or too strong to hit a

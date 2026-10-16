@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Core\Entity\FleetEntity;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use Xgp\App\Core\Objects;

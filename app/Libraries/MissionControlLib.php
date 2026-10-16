@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use Xgp\App\Libraries\Missions\Acs;
 use Xgp\App\Libraries\Missions\Attack;
 use Xgp\App\Libraries\Missions\Colonize;

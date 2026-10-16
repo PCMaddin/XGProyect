@@ -8,7 +8,7 @@ use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Ranks;

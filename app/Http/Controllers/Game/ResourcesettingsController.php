@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use Xgp\App\Core\Objects;
 use App\Services\Game\Formulas\FormulasService;

@@ -11,7 +11,7 @@ use App\Services\Game\Formulas\FormulasService;
 use App\Support\Concerns\ReadsMixedValues;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\ResearchEnumerator as Research;
-use Xgp\App\Helpers\StringsHelper;
+use App\Helpers\StringsHelper;
 
 /**
  * The tear down part of the technology details of a building.

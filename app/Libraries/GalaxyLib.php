@@ -11,8 +11,8 @@ use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use Xgp\App\Core\Objects;
-use Xgp\App\Helpers\StringsHelper;
-use Xgp\App\Helpers\UrlHelper;
+use App\Helpers\StringsHelper;
+use App\Helpers\UrlHelper;
 
 /**
  * Renders a single galaxy-view row (planet / moon / debris / player columns and
@@ -376,7 +376,7 @@ class GalaxyLib
 
         if (self::asString($this->rowData['alliance_web'] ?? '') !== '') {
             $webUrl = $this->formatService->link(
-                UrlHelper::prepUrl(self::asString($this->rowData['alliance_web'] ?? '')),
+                e(UrlHelper::prepUrl(self::asString($this->rowData['alliance_web'] ?? ''))),
                 (string) __('game/galaxy.gl_alliance_web_page'),
                 '',
                 'target="_new"'

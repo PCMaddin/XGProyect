@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Core\Concerns;
+namespace App\Core\Concerns;
 
 use Illuminate\Support\Facades\DB;
 

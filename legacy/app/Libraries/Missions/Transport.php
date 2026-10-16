@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use App\Services\FormatService;
-use Xgp\App\Helpers\StringsHelper;
+use App\Helpers\StringsHelper;
 use App\Libraries\FleetsLib as Fleets;
 use App\Libraries\Functions;
 

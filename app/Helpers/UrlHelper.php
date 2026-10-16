@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Helpers;
+namespace App\Helpers;
 
 /**
  * @deprecated v4.0.0 use FormatService::link() or any laravel helper instead

@@ -16,7 +16,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use PDO;
-use Xgp\App\Helpers\StringsHelper;
+use App\Helpers\StringsHelper;
 
 class DatabaseController extends BaseController
 {

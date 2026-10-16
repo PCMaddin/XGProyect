@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Xgp\App\Libraries\Missions;
 
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\BindsLegacyQueries;
+use App\Core\Concerns\BindsLegacyQueries;
 use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
 use App\Libraries\UpdatesLibrary;

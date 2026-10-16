@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\Functions;
 use App\Libraries\Users;

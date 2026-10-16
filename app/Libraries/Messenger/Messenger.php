@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Messenger;
 
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 
 /**
  * Writes an in-game message row. Every field is now bound; the legacy version

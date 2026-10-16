@@ -12,7 +12,7 @@ use App\Services\SettingsService;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use App\Core\Enumerators\MessagesEnumerator;
-use Xgp\App\Helpers\StringsHelper;
+use App\Helpers\StringsHelper;
 
 /**
  * Grab-bag of static helpers shared by the native controllers and the

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Xgp\App\Helpers;
+namespace App\Helpers;
 
 use Exception;
 

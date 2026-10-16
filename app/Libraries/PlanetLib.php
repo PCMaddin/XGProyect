@@ -7,7 +7,7 @@ namespace App\Libraries;
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 
 /**

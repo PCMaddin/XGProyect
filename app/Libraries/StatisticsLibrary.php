@@ -8,7 +8,7 @@ use App\Core\GameObjects\GameObjectInterface;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 
 /**
  * Rebuilds the per-user and per-alliance statistics points and ranks. The two

@@ -9,7 +9,7 @@ use App\Libraries\Functions;
 use App\Services\FormatService;
 use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 
 /**

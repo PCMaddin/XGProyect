@@ -13,7 +13,7 @@ use App\Services\Game\Formulas\ProductionService;
 use App\Services\Game\ResearchQueueService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesLegacySql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ResearchEnumerator as Research;
