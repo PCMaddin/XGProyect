@@ -145,7 +145,11 @@ class Expedition extends Missions
             $this->expeditionService->calculateDarkMatterSourceSize()
         );
 
-        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_dm_' . mt_rand(1, 5))));
+        $this->expeditionMessage($fleet, sprintf(
+            self::str(__('game/expedition.exp_dm_' . mt_rand(1, 5))),
+            $this->formatService->prettyNumber($darkMatterFound),
+            self::str(__('game/global.darkmatter'))
+        ));
 
         $this->updateDarkMatter(self::int($fleet['fleet_owner']), $darkMatterFound);
 
@@ -191,6 +195,7 @@ class Expedition extends Missions
 
         $this->updateFleetArrayById([
             'ships' => FleetsLib::setFleetShipsArray($newShips),
+            'amount' => array_sum($newShips),
             'fleet_id' => $fleet['fleet_id'],
         ]);
 
@@ -221,13 +226,15 @@ class Expedition extends Missions
             $typeObtained
         );
 
-        $this->updateFleetResourcesById(
-            self::int($fleet['fleet_id']),
-            $typeObtained,
-            min($foundAmount, $fleetMaxCapacity)
-        );
+        $loaded = min($foundAmount, $fleetMaxCapacity);
 
-        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_new_resources_' . mt_rand(1, 4))));
+        $this->updateFleetResourcesById(self::int($fleet['fleet_id']), $typeObtained, $loaded);
+
+        $this->expeditionMessage($fleet, sprintf(
+            self::str(__('game/expedition.exp_new_resources_' . mt_rand(1, 4))),
+            $this->formatService->prettyNumber($loaded),
+            self::str(__('game/global.' . $typeObtained))
+        ));
 
         parent::returnFleet(self::int($fleet['fleet_id']));
     }
@@ -264,7 +271,8 @@ class Expedition extends Missions
             self::earlyReturnEndTime(self::int($fleet['fleet_end_time']), self::int($fleet['fleet_end_stay']))
         );
 
-        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_early_' . mt_rand(1, 5))));
+        // bugfix: the messages are exp_faster_1/2, the former exp_early_1..5 keys do not exist
+        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_faster_' . mt_rand(1, 2))));
 
         parent::returnFleet(self::int($fleet['fleet_id']));
     }
@@ -281,7 +289,8 @@ class Expedition extends Missions
     }
 
     /**
-     * @todo probably not 100% like the original game
+     * The fleet is lost completely (25 %) or loses 1 %, 34 % or 67 % of each
+     * ship type; the rest returns home.
      *
      * @param array<string, mixed> $fleet
      */
@@ -290,9 +299,8 @@ class Expedition extends Missions
         $lostChances = (mt_rand(0, 3) * 33 + 1) / 100;
         $ships = FleetsLib::getFleetShipsArray(self::str($fleet['fleet_array']));
 
-        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_lost_1')));
-
         if ($lostChances == 1) {
+            $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_lost_1')));
             $this->loseFleet($fleet, $ships);
 
             return;
@@ -300,30 +308,38 @@ class Expedition extends Missions
 
         $losses = self::blackHoleLosses($ships, $lostChances);
 
-        if ($losses['lostAll']) {
-            $this->loseFleet($fleet, $ships);
+        // too few ships of each type to lose even one
+        if ($losses['lost'] === []) {
+            $this->resultNothing($fleet);
 
             return;
         }
 
+        $lostShips = '';
+        foreach ($losses['lost'] as $ship => $count) {
+            $lostShips .= self::str(__('game/ships.' . $this->resource[$ship])) . ': ' . $count . '<br>';
+        }
+
+        $this->expeditionMessage($fleet, sprintf(self::str(__('game/expedition.exp_lost_partial')), $lostShips));
+
         $this->updateLostShipsAndDefensePoints(self::int($fleet['fleet_owner']), $losses['lost']);
         $this->updateFleetArrayById([
             'ships' => FleetsLib::setFleetShipsArray($losses['remaining']),
+            'amount' => array_sum($losses['remaining']),
             'fleet_id' => $fleet['fleet_id'],
         ]);
     }
 
     /**
-     * Ships lost to a black hole, by ship id.
+     * Ships lost to a black hole and the ships left, by ship id.
      *
-     * Legacy behaviour, kept as is (see MIGRATION.md, open points): ship types
-     * that lose no unit are left out of `remaining` (they vanish from the
-     * fleet), and when no ship type loses a unit at all, `lostAll` is true and
-     * the whole fleet is destroyed.
+     * Bugfix: the original kept only the ship types that lost units (the
+     * others vanished from the fleet), and when no type lost a unit it
+     * destroyed the whole fleet.
      *
      * @param array<int, int> $ships
      *
-     * @return array{lost: array<int, float>, remaining: array<int, float>, lostAll: bool}
+     * @return array{lost: array<int, int>, remaining: array<int, int>}
      */
     private static function blackHoleLosses(array $ships, float $lostChances): array
     {
@@ -331,15 +347,18 @@ class Expedition extends Missions
         $remaining = [];
 
         foreach ($ships as $ship => $amount) {
-            $lostAmount = floor($amount * $lostChances);
+            $lostAmount = (int) floor($amount * $lostChances);
 
-            if ($lostAmount != 0) {
+            if ($lostAmount > 0) {
                 $lost[$ship] = $lostAmount;
-                $remaining[$ship] = ($amount - $lostAmount);
+            }
+
+            if ($amount > $lostAmount) {
+                $remaining[$ship] = $amount - $lostAmount;
             }
         }
 
-        return ['lost' => $lost, 'remaining' => $remaining, 'lostAll' => $lost === []];
+        return ['lost' => $lost, 'remaining' => $remaining];
     }
 
     /**

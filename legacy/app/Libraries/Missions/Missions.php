@@ -709,16 +709,19 @@ class Missions
     }
 
     /**
-     * @param array{ships: mixed, fleet_id: mixed} $data
+     * Replace the ships of a fleet and send it home.
+     *
+     * @param array{ships: mixed, amount: int|float, fleet_id: mixed} $data
      */
     protected function updateFleetArrayById(array $data): void
     {
         $this->statement(
             'UPDATE ' . FLEETS . " SET
                     `fleet_array` = ?,
+                    `fleet_amount` = ?,
                     `fleet_mess` = '1'
                     WHERE `fleet_id` = ?;",
-            [$data['ships'], self::int($data['fleet_id'])]
+            [$data['ships'], $data['amount'], self::int($data['fleet_id'])]
         );
     }
 

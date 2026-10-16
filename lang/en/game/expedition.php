@@ -79,6 +79,7 @@ return [
     // lost ships
     'exp_lost_1' => 'The only thing left from the expedition was the following radio transmission: Zzzrrt Oh no! Krrrzzzzt That zrrrtrzt looks krgzzzz like ... AHH! Krzzzzzzzztzzzz...<br><br><br><br><br><br>Transmission terminated', // ok
     'exp_lost_2' => '',
+    'exp_lost_partial' => 'Your expedition came too close to a black hole. Some of the ships could not escape its pull and were lost. The rest of the fleet is returning home.<br><br>Lost ships:<br>%s',
 
     // exploration status
     'exp_status_fresh_1' => 'Entry from the communications officers logbook: It seems that this part of the universe has not been explored yet.', // ok

@@ -11,8 +11,7 @@ use Xgp\App\Libraries\Missions\Expedition;
 
 /**
  * - earlyReturnEndTime(): regression for the TypeError on odd return times.
- * - blackHoleLosses(): compared with a verbatim copy of the original loop in
- *   resultBlackHole().
+ * - blackHoleLosses(): only the lost ships leave the fleet.
  */
 class ExpeditionTest extends TestCase
 {
@@ -37,69 +36,31 @@ class ExpeditionTest extends TestCase
     }
 
     /**
-     * Verbatim loop of the original resultBlackHole().
-     *
-     * @param array<int, int> $ships
-     *
-     * @return array{lost: array<int, float>, remaining: array<int, float>, lostAll: bool}
+     * @return array<string, array{0: array<int, int>, 1: float, 2: array<int, int>, 3: array<int, int>}>
      */
-    private static function originalLosses(array $ships, float $lostChances): array
-    {
-        $newShips = [];
-        $lostShips = [];
-        $lostAll = true;
-
-        foreach ($ships as $ship => $amount) {
-            if (floor($amount * $lostChances) != 0) {
-                $lostShips[$ship] = floor($amount * $lostChances);
-                $newShips[$ship] = ($amount - $lostShips[$ship]);
-                $lostAll = false;
-            }
-        }
-
-        return ['lost' => $lostShips, 'remaining' => $newShips, 'lostAll' => $lostAll];
-    }
-
-    /**
-     * @return array<string, array{0: array<int, int>}>
-     */
-    public static function fleets(): array
+    public static function blackHoleCases(): array
     {
         return [
-            'small fleet' => [[202 => 50, 210 => 3]],
-            'mixed fleet' => [[202 => 150, 210 => 2, 213 => 7]],
-            'single ships' => [[204 => 1, 205 => 1]],
-            'large fleet' => [[203 => 1000, 207 => 333, 215 => 12]],
+            'too few ships to lose any' => [[202 => 50, 210 => 3], 0.01, [], [202 => 50, 210 => 3]],
+            'only some types lose ships' => [[202 => 150, 210 => 2], 0.34, [202 => 51], [202 => 99, 210 => 2]],
+            'every type loses ships' => [[203 => 1000, 207 => 333, 215 => 12], 0.67, [203 => 670, 207 => 223, 215 => 8], [203 => 330, 207 => 110, 215 => 4]],
+            'a single ship survives 67 %' => [[204 => 1, 205 => 1], 0.67, [], [204 => 1, 205 => 1]],
         ];
     }
 
     /**
+     * Regression: ship types without losses used to vanish from the fleet,
+     * and a fleet without any loss was destroyed completely.
+     *
      * @param array<int, int> $ships
+     * @param array<int, int> $lost
+     * @param array<int, int> $remaining
      */
-    #[DataProvider('fleets')]
-    public function testBlackHoleLossesMatchTheOriginalLoop(array $ships): void
+    #[DataProvider('blackHoleCases')]
+    public function testBlackHoleLosesOnlyTheLostShips(array $ships, float $lostChances, array $lost, array $remaining): void
     {
         $ref = new ReflectionMethod(Expedition::class, 'blackHoleLosses');
 
-        // the possible chances of resultBlackHole() other than 1 (total loss)
-        foreach ([0, 1, 2] as $roll) {
-            $lostChances = ($roll * 33 + 1) / 100;
-
-            $this->assertSame(
-                self::originalLosses($ships, $lostChances),
-                $ref->invoke(null, $ships, $lostChances),
-                "lost chances {$lostChances}"
-            );
-        }
-    }
-
-    public function testBlackHoleWithoutAnyLostUnitDestroysTheWholeFleet(): void
-    {
-        $ref = new ReflectionMethod(Expedition::class, 'blackHoleLosses');
-
-        $this->assertSame(
-            ['lost' => [], 'remaining' => [], 'lostAll' => true],
-            $ref->invoke(null, [202 => 50, 210 => 3], 0.01)
-        );
+        $this->assertSame(['lost' => $lost, 'remaining' => $remaining], $ref->invoke(null, $ships, $lostChances));
     }
 }
