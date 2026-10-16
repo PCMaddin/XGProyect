@@ -12,9 +12,9 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht) (Schlüssel und Platzhalter per Test gleich) |
-| Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
+| Tests | 1.816 PHPUnit-Tests (50 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht); Schlüssel und Platzhalter per Test gleich, gezählte Texte über `trans_choice` mit der Pluralregel jeder Sprache |
+| Smoke-Test | Installer und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten); alle Spiel- und Admin-Seiten in allen zehn Sprachen gecrawlt, ohne echte Fehler (die drei erwarteten Meldungen stehen unter „Offen“ am Ende) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
 > `XGProyect/XGProyect`. GitHub schaltet Actions in Forks ab, bis der
@@ -1387,6 +1387,12 @@ Nachgezogen:
 Offen:
 
 - (nichts aus dem Smoke-Test)
+- ℹ️ Erwartete Meldungen im Crawl, keine Fehler:
+  `game.php?page=combatreport` ohne Bericht-Id liefert absichtlich 404;
+  unter `admin/errors` stehen alte Log-Einträge (Datenbank zeitweise nicht
+  erreichbar, Willkommens-Mail ohne Mailserver in der Testumgebung); die
+  Update-Prüfung im Admin fragt `updates.xgproyect.org` mit 5 Sekunden
+  Timeout ab, der Crawler verlässt die Seite manchmal vorher.
 - ℹ️ Neue Allianzen sind standardmäßig geschlossen
   (`alliance_request_notallow = 0` heißt trotz des Namens „keine
   Bewerbungen“). So ist es durchgängig im Code, also eine
