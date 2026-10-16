@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Core\GameObjects;
 
+use App\Core\Enumerators\ResearchEnumerator;
 use App\Enums\Game\BuildingCategory;
 use App\Enums\Game\DriveType;
-use App\Enums\Game\ResearchId;
 use PHPUnit\Framework\TestCase;
 
 class GameEnumsTest extends TestCase
@@ -31,9 +31,9 @@ class GameEnumsTest extends TestCase
 
     public function testDriveTypeResearchId(): void
     {
-        $this->assertSame(ResearchId::CombustionDrive, DriveType::Combustion->researchId());
-        $this->assertSame(ResearchId::ImpulseDrive, DriveType::Impulse->researchId());
-        $this->assertSame(ResearchId::HyperspaceDrive, DriveType::Hyperspace->researchId());
+        $this->assertSame(ResearchEnumerator::RESEARCH_COMBUSTION_DRIVE, DriveType::Combustion->researchId());
+        $this->assertSame(ResearchEnumerator::RESEARCH_IMPULSE_DRIVE, DriveType::Impulse->researchId());
+        $this->assertSame(ResearchEnumerator::RESEARCH_HYPERSPACE_DRIVE, DriveType::Hyperspace->researchId());
         $this->assertNull(DriveType::None->researchId());
     }
 

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Core\GameObjects;
 
+use App\Core\Enumerators\ResearchEnumerator;
+use App\Core\Enumerators\OfficiersEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\ShipsEnumerator;
+use App\Core\Enumerators\DefensesEnumerator;
 use App\Core\GameObjects\Building;
 use App\Core\GameObjects\Defense;
 use App\Core\GameObjects\GameObjectInterface;
@@ -12,10 +17,9 @@ use App\Core\GameObjects\Officer;
 use App\Core\GameObjects\Research;
 use App\Core\GameObjects\Ship;
 use App\Enums\Game\BuildingCategory;
-use App\Enums\Game\DefenseId;
 use App\Enums\Game\DriveType;
-use App\Enums\Game\ShipId;
 use InvalidArgumentException;
+use ReflectionClass;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -253,6 +257,28 @@ class GameObjectRegistryTest extends TestCase
         }
     }
 
+    /**
+     * The enumerators are the ids the game code uses; they must name exactly
+     * the registered objects of their kind.
+     */
+    public function testEnumeratorsNameExactlyTheRegisteredObjects(): void
+    {
+        $kinds = [
+            BuildingsEnumerator::class => $this->registry->buildings(),
+            ResearchEnumerator::class => $this->registry->research(),
+            ShipsEnumerator::class => $this->registry->ships(),
+            DefensesEnumerator::class => $this->registry->defenses(),
+            OfficiersEnumerator::class => $this->registry->officers(),
+        ];
+
+        foreach ($kinds as $enumerator => $objects) {
+            $ids = array_values((new ReflectionClass($enumerator))->getConstants());
+            sort($ids);
+
+            $this->assertSame($objects->keys()->sort()->values()->all(), $ids, $enumerator);
+        }
+    }
+
     // ── All objects implement interface ──────────────────────────────
 
     public function testAllObjectsImplementGameObjectInterface(): void
@@ -300,7 +326,7 @@ class GameObjectRegistryTest extends TestCase
     public function testReaperUsesCurrentCombatProfile(): void
     {
         /** @var Ship $reaper */
-        $reaper = $this->registry->get(ShipId::Reaper->value);
+        $reaper = $this->registry->get(ShipsEnumerator::SHIP_REAPER);
         $price = $reaper->getPrice();
 
         $this->assertSame(85000, $price->getMetal());
@@ -314,20 +340,20 @@ class GameObjectRegistryTest extends TestCase
         $this->assertSame(550, $reaper->getConsumption());
         $this->assertSame(550, $reaper->getConsumption2());
         $this->assertSame([
-            ShipId::Battleship->value => 7,
-            ShipId::EspionageProbe->value => 5,
-            ShipId::Bomber->value => 4,
-            ShipId::SolarSatellite->value => 5,
-            ShipId::Destroyer->value => 3,
+            ShipsEnumerator::SHIP_BATTLESHIP => 7,
+            ShipsEnumerator::SHIP_ESPIONAGE_PROBE => 5,
+            ShipsEnumerator::SHIP_BOMBER => 4,
+            ShipsEnumerator::SHIP_SOLAR_SATELLITE => 5,
+            ShipsEnumerator::SHIP_DESTROYER => 3,
         ], $reaper->getRapidFire()->toArray());
 
         /** @var Ship $deathstar */
-        $deathstar = $this->registry->get(ShipId::Deathstar->value);
-        $this->assertSame(10, $deathstar->getRapidFire()->get(ShipId::Reaper->value));
+        $deathstar = $this->registry->get(ShipsEnumerator::SHIP_DEATHSTAR);
+        $this->assertSame(10, $deathstar->getRapidFire()->get(ShipsEnumerator::SHIP_REAPER));
 
         /** @var Defense $ionCannon */
-        $ionCannon = $this->registry->get(DefenseId::IonCannon->value);
-        $this->assertSame(2, $ionCannon->getRapidFire()->get(ShipId::Reaper->value));
+        $ionCannon = $this->registry->get(DefensesEnumerator::DEFENSE_ION_CANNON);
+        $this->assertSame(2, $ionCannon->getRapidFire()->get(ShipsEnumerator::SHIP_REAPER));
     }
 
     public function testSmallCargoShipDriveIsUpgradeable(): void
