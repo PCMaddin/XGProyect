@@ -348,6 +348,15 @@ class GameObjectRegistry
             category: BuildingCategory::Facility,
         );
 
+        // its energy cost grows by 2.5 a level, metal and deuterium by 5
+        $this->objects[36] = new Building(
+            id: 36,
+            name: 'building_space_dock',
+            price: new Price(metal: 200, deuterium: 50, energyMax: 50, factor: 5, energyFactor: 2.5),
+            requirements: new Collection([21 => 2]),
+            category: BuildingCategory::Facility,
+        );
+
         $this->objects[41] = new Building(
             id: 41,
             name: 'building_mondbasis',

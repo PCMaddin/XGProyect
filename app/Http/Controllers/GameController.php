@@ -28,6 +28,7 @@ class GameController extends BaseController
         'buddies' => Game\BuddiesController::class,
         'changelog' => Game\ChangelogController::class,
         'characterclass' => Game\CharacterClassController::class,
+        'spacedock' => Game\SpaceDockController::class,
         'changenick' => Game\ChangenickController::class,
         'chat' => Game\ChatController::class,
         'combatreport' => Game\CombatreportController::class,

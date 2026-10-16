@@ -76,6 +76,7 @@ return [
     'us_user_building_laboratory' => 'Laboratorio de investigación',
     'us_user_building_terraformer' => 'Terraformer',
     'us_user_building_ally_deposit' => 'Depósito de la Alianza',
+    'us_user_building_space_dock' => 'Muelle espacial',
     'us_user_building_missile_silo' => 'Silo',
     'us_user_building_mondbasis' => 'Base lunar',
     'us_user_building_phalanx' => 'Sensor Phalanx',

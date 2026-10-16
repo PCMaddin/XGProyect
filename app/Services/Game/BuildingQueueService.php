@@ -61,7 +61,11 @@ class BuildingQueueService
         $queue = $planet->buildingQueue()->get();
         $count = $queue->count();
 
-        if ($count >= self::MAX_QUEUE_SIZE || ($mode === 'build' && !$this->hasFreeField($planet, $count))) {
+        // the space dock is in orbit and takes no field
+        $needsField = $mode === 'build' && $buildingId !== BuildingsEnumerator::BUILDING_SPACE_DOCK;
+        $fieldOrders = $queue->where('building_id', '!=', BuildingsEnumerator::BUILDING_SPACE_DOCK)->count();
+
+        if ($count >= self::MAX_QUEUE_SIZE || ($needsField && !$this->hasFreeField($planet, $fieldOrders))) {
             return false;
         }
 
@@ -322,7 +326,9 @@ class BuildingQueueService
             $buildings->save();
         }
 
-        if ($item->building_id === BuildingsEnumerator::BUILDING_MONDBASIS) {
+        if ($item->building_id === BuildingsEnumerator::BUILDING_SPACE_DOCK) {
+            // in orbit: no field
+        } elseif ($item->building_id === BuildingsEnumerator::BUILDING_MONDBASIS) {
             $planet->planet_field_current += 1;
             $planet->planet_field_max += FIELDS_BY_MOONBASIS_LEVEL;
         } elseif ($isDestroy) {

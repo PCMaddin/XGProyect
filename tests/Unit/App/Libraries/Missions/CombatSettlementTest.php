@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Libraries\Missions;
 
+use App\Services\Game\WreckFieldService;
 use App\Support\FleetShips;
 use App\Services\FormatService;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -158,6 +159,9 @@ class CombatSettlementTest extends TestCase
             'research_armour_technology' => 4,
             'current_planet' => 99,
         ];
+
+        // the wreck fields have their own tests
+        $this->app->instance(WreckFieldService::class, $this->createStub(WreckFieldService::class));
 
         $mission = self::mission($type);
         LangManager::getInstance()->setImplementation(new AttackLang(MissionObjects::names()));

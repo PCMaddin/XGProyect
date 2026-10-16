@@ -39,12 +39,12 @@ class GameObjectRegistryTest extends TestCase
     public function testTotalObjectCount(): void
     {
         // 18 buildings + 16 research + 14 ships + 10 defenses + 5 officers = 63
-        $this->assertCount(66, $this->registry->all());
+        $this->assertCount(67, $this->registry->all());
     }
 
     public function testBuildingCount(): void
     {
-        $this->assertCount(18, $this->registry->buildings());
+        $this->assertCount(19, $this->registry->buildings());
     }
 
     public function testResearchCount(): void
@@ -76,7 +76,7 @@ class GameObjectRegistryTest extends TestCase
 
     public function testFacilityBuildingCount(): void
     {
-        $this->assertCount(7, $this->registry->facilityBuildings());
+        $this->assertCount(8, $this->registry->facilityBuildings());
     }
 
     public function testMoonBuildingCount(): void

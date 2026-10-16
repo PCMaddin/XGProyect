@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Enums\PlayerClass;
+use App\Services\Game\WreckFieldService;
 use App\Services\Game\FleetEventsService;
 use App\Support\ClassBonuses;
 use App\Support\FleetShips;
@@ -23,6 +25,7 @@ use App\Libraries\BattleEngine\Models\PlayerGroup;
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 abstract class CombatMission extends Missions
 {
@@ -30,6 +33,12 @@ abstract class CombatMission extends Missions
     use SendsCombatReports;
     /** the defender did not log in for a week: discoverers plunder more */
     private bool $defenderInactive = false;
+
+    /** @var array{0: array<int, int>, 1: array<int, int>} the planet owner's ships before the battle and those lost */
+    private array $planetLosses = [[], []];
+
+    /** @var list<array{origin: array{planet: int, user: int, back: int}|null, player: int, before: array<int, int>, lost: array<int, int>}> the attacking fleets' losses */
+    private array $attackerLosses = [];
 
     protected const SHIP_MIN_ID = 202;
     protected const SHIP_MAX_ID = 219;
@@ -202,6 +211,37 @@ abstract class CombatMission extends Missions
 
         $this->updatePoints($report, $afterBattleAttackers, $afterBattleDefenders);
         $this->updateDebris($fleetRow, $report);
+        $this->leaveWrecks($fleetRow, $targetPlanet);
+    }
+
+    /**
+     * Wreck fields (OGame 7): for the defender at the planet, and for
+     * attacking generals at their start planet.
+     *
+     * @param array<string, mixed> $fleetRow
+     * @param array<string, mixed> $targetPlanet
+     */
+    private function leaveWrecks(array $fleetRow, array $targetPlanet): void
+    {
+        $wrecks = app(WreckFieldService::class);
+        $battleTime = self::int($fleetRow['fleet_start_time'] ?? time());
+
+        $wrecks->recordBattle(
+            self::int($targetPlanet['planet_id']),
+            self::int($targetPlanet['planet_user_id']),
+            $this->planetLosses[0],
+            $this->planetLosses[1],
+            $battleTime
+        );
+
+        foreach ($this->attackerLosses as $losses) {
+            $origin = $losses['origin'];
+
+            if ($origin !== null) {
+                // repairable once the fleet is back
+                $wrecks->recordBattle($origin['planet'], $origin['user'], $losses['before'], $losses['lost'], $battleTime, $origin['back']);
+            }
+        }
     }
 
     /**
@@ -323,9 +363,22 @@ abstract class CombatMission extends Missions
             'deuterium' => 0,
         ];
 
+        $fleetIds = [];
+
+        // attacking generals get wreck fields at their start planet
+        foreach ($playerGroupBeforeBattle->getIterator() as $playerId => $player) {
+            if (($this->playerClasses[$playerId] ?? new ClassBonuses())->player === PlayerClass::General) {
+                $fleetIds = array_merge($fleetIds, array_map('intval', array_keys($player->getIterator())));
+            }
+        }
+
+        $origins = app(WreckFieldService::class)->fleetOrigins($fleetIds);
+
         foreach ($playerGroupBeforeBattle->getIterator() as $playerId => $player) {
             foreach ($player->getIterator() as $fleetId => $fleet) {
                 $survivingFleet = CombatSurvivors::fleet($playerGroupAfterBattle, $playerId, $fleetId);
+                [$before, $lost] = CombatSurvivors::losses($fleet, $survivingFleet);
+                $this->attackerLosses[] = ['origin' => $origins[(int) $fleetId] ?? null, 'player' => (int) $playerId, 'before' => $before, 'lost' => $lost];
 
                 if ($survivingFleet === null) {
                     $emptyFleets[] = $fleetId;
@@ -420,6 +473,8 @@ abstract class CombatMission extends Missions
                 $survivors = CombatSurvivors::ships($fleet, $survivingFleet);
 
                 if ($fleetId === self::PLANET_FORCES) {
+                    $this->planetLosses = CombatSurvivors::losses($fleet, $survivingFleet);
+
                     foreach (array_keys($fleet->getIterator()) as $shipId) {
                         $ships .= '`' . $this->resource[$shipId] . '` = ' . ($survivors[$shipId] ?? 0) . ', ';
                     }

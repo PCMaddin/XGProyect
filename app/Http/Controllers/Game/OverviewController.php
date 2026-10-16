@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\WreckFieldService;
 use App\Services\Game\FleetEventsService;
 use App\Libraries\Template;
 use App\Enums\Module;
@@ -71,6 +72,7 @@ class OverviewController extends BaseController
                 'username' => $this->userStr('name'),
                 'dateTime' => $this->timingService->formatExtendedDate(time()),
                 'newMessage' => $this->getMessages(),
+                'wreckField' => app(WreckFieldService::class)->field($this->planetInt('planet_id')) !== null,
                 'fleetList' => $this->getFleetMovements(),
                 'planetImage' => $this->planetStr('planet_image'),
                 'building' => $this->getCurrentWork($this->planet),

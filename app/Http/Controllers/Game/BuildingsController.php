@@ -210,7 +210,7 @@ abstract class BuildingsController extends BaseController
             $this->getBuildingLevel(BuildingsEnumerator::BUILDING_TERRAFORMER, $planet)
         );
 
-        if (self::asInt($planet['planet_field_current'] ?? 0) >= $maxFields) {
+        if ($buildingId !== BuildingsEnumerator::BUILDING_SPACE_DOCK && self::asInt($planet['planet_field_current'] ?? 0) >= $maxFields) {
             return $this->buildButton('all_occupied');
         }
 

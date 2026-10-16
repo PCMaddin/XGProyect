@@ -137,6 +137,25 @@ class BuildingQueueServiceTest extends DatabaseTestCase
         $this->assertSame(5, BuildingQueue::query()->where('planet_id', 1)->count());
     }
 
+    public function testTheSpaceDockTakesNoField(): void
+    {
+        $planet = $this->makePlanet();
+        $planet->forceFill(['planet_field_current' => 163, 'planet_energy_max' => 100])->save();
+        Buildings::where('building_planet_id', 1)->update(['building_hangar' => 2]);
+        $planet = $planet->fresh() ?? $planet;
+
+        $this->assertFalse($this->service()->add($planet, [], self::METAL_MINE, 'build'));
+        $this->assertTrue($this->service()->add($planet, [], BuildingsEnum::BUILDING_SPACE_DOCK, 'build'));
+
+        DB::table('options')->insert(['name' => 'stat_points', 'value' => '1000', 'type' => '32']);
+        BuildingQueue::query()->update(['end_time' => time() - 1]);
+        $planet = $planet->fresh() ?? $planet;
+        $this->service()->processCompletions($planet, []);
+
+        $this->assertSame(1, Buildings::where('building_planet_id', 1)->firstOrFail()->building_space_dock);
+        $this->assertSame(163, (int) $planet->fresh()?->planet_field_current);
+    }
+
     public function testGetQueueDataReportsLengthAndDestroyCount(): void
     {
         $planet = $this->makePlanet();

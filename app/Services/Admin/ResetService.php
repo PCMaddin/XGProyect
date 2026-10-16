@@ -56,6 +56,9 @@ class ResetService
             'ship_reaper' => 0,
             'ship_pathfinder' => 0,
         ]);
+
+        // the wrecks would bring ships back
+        DB::table('wreck_fields')->delete();
     }
 
     public function resetShipyardQueues(): void
@@ -255,7 +258,7 @@ class ResetService
     {
         $tables = [
             'alliance', 'alliance_statistics', 'acs', 'acs_members', 'fleets', 'buddys', 'messages', 'notes', 'reports',
-            'building_queues', 'research_queues', 'planet_boosters', 'user_items', 'import_exports', 'auction_bids', 'auctions',
+            'building_queues', 'research_queues', 'planet_boosters', 'wreck_fields', 'user_items', 'import_exports', 'auction_bids', 'auctions',
             'planets', 'buildings', 'defenses', 'ships', 'preferences', 'premium', 'research', 'sessions',
         ];
 
@@ -364,6 +367,7 @@ class ResetService
                 'buildings.building_laboratory' => 0,
                 'buildings.building_terraformer' => 0,
                 'buildings.building_ally_deposit' => 0,
+                'buildings.building_space_dock' => 0,
                 'buildings.building_missile_silo' => 0,
                 'buildings.building_mondbasis' => 0,
                 'buildings.building_phalanx' => 0,

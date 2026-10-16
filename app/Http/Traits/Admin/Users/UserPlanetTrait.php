@@ -387,7 +387,7 @@ trait UserPlanetTrait
         $excludeMoon = [
             'building_metal_mine', 'building_crystal_mine', 'building_deuterium_sintetizer',
             'building_solar_plant', 'building_fusion_reactor', 'building_nano_factory',
-            'building_laboratory', 'building_terraformer', 'building_ally_deposit', 'building_missile_silo',
+            'building_laboratory', 'building_terraformer', 'building_ally_deposit', 'building_space_dock', 'building_missile_silo',
         ];
         $exclude = $type === PlanetTypesEnumerator::MOON ? $excludeMoon : $excludePlanet;
 

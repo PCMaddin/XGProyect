@@ -48,4 +48,23 @@ final class CombatSurvivors
 
         return $ships;
     }
+
+    /**
+     * The ships the fleet started with and those it lost.
+     *
+     * @return array{0: array<int, int>, 1: array<int, int>}
+     */
+    public static function losses(Fleet $fleet, ?Fleet $survivingFleet): array
+    {
+        $survivors = self::ships($fleet, $survivingFleet);
+        $before = [];
+        $lost = [];
+
+        foreach ($fleet->getIterator() as $shipId => $shipType) {
+            $before[(int) $shipId] = (int) $shipType->getCount();
+            $lost[(int) $shipId] = max(0, (int) $shipType->getCount() - (int) ($survivors[$shipId] ?? 0));
+        }
+
+        return [$before, $lost];
+    }
 }

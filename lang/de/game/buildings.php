@@ -30,6 +30,7 @@ return [
         'building_laboratory' => 'Für die Erforschung neuer Technologien wird ein Forschungslabor benötigt.',
         'building_terraformer' => 'Der Terraformer vergrößert die nutzbare Oberfläche von Planeten.',
         'building_ally_deposit' => 'Das Allianzdepot versorgt verbündete Flotten im Orbit, die bei der Verteidigung helfen, mit Treibstoff.',
+        'building_space_dock' => 'Das Raumdock repariert Schiffe aus Wrackfeldern, die nach großen Kämpfen über dem Planeten zurückbleiben.',
         'building_mondbasis' => 'Da der Mond keine Atmosphäre hat, braucht es eine Mondbasis, um Lebensraum zu schaffen.',
         'building_phalanx' => 'Mit der Sensorphalanx lassen sich die Flotten anderer Imperien entdecken und beobachten. Je größer die Phalanx, desto größer die Reichweite.',
         'building_jump_gate' => 'Sprungtore sind gewaltige Transmitter, die große Flotten ohne Zeitverlust durch das Universum schicken können.',

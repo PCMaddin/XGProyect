@@ -1071,6 +1071,38 @@ Nachgezogen:
     Mindestdauer von 14 Tagen vor der ersten Wahl.
   - Tests für die Boni, Wahl und Wechsel sowie die Verwaltungsseite; im
     Browser durchgespielt.
+- ✅ **Raumdock und Wrackfelder** (OGame 7; owiki „Raumdock“;
+  `WreckFieldService`, Seite `spacedock`, Tabelle `wreck_fields`):
+  - **Raumdock** (Gebäude 36, Anlagen, nur Planeten): Voraussetzung
+    Raumschiffwerft 2; Stufe 1 kostet 200 Metall, 50 Deuterium und 50
+    Energie, Metall und Deuterium ×5 je Stufe, Energie ×2,5 (Tabelle des
+    Originals; `Price` hat dafür einen eigenen Energie-Faktor). Es schwebt
+    im Orbit und belegt kein Feld.
+  - **Wrackfeld**: entsteht nach einem Kampf über einem Planeten oder
+    seinem Mond, wenn mindestens 150.000 Einheiten und 5 % der Schiffe des
+    Verteidigers dort zerstört wurden. Darin liegt, was nicht zu Trümmern
+    wurde (bei 30 % Trümmerfeld 70 %); Solarsatelliten und Crawler
+    hinterlassen keine Wracks. Es liegt immer beim Planeten (dort steht
+    das Raumdock). Ein weiterer Kampf legt Wracks dazu und gibt wieder 3
+    Tage; ohne begonnene Reparatur verglüht es nach 3 Tagen.
+  - **General als Angreifer**: seine zerstörten Schiffe bilden nach
+    denselben Regeln ein Wrackfeld an seinem Startplaneten, reparierbar,
+    sobald die Flotte zurück wäre.
+  - **Reparatur**: Das Raumdock repariert 45 % der Wracks auf Stufe 1 bis
+    56 % ab Stufe 14 (31,5 % bis 39,2 % der zerstörten Schiffe wie in der
+    Tabelle des Originals), kostenlos, in der Bauzeit der Werft, mindestens
+    30 Minuten, höchstens 12 Stunden. Danach stellt der Spieler die
+    Schiffe in Dienst, spätestens nach 3 Tagen geschieht es von selbst
+    (beim nächsten Aktualisieren des Planeten).
+  - Hinweis auf der Übersicht und Link beim Raumdock in den Anlagen.
+  - **Nicht übernommen**: schrittweises Indienststellen schon reparierter
+    Schiffe vor dem Ende, Wracks während einer laufenden Reparatur (sie
+    gehen verloren) und Wrackfelder in der Galaxieansicht.
+  - Rundung: Die Kosten werden wie bei allen Gebäuden gerundet, die
+    Energie für Stufe 3 ist also 313 statt 312.
+  - Tests für Kosten, Schwellen, Inhalt, Reparatur, Indienststellung,
+    Verglühen, Angreifer-Wracks und das Feld; ein echter Angriff auf
+    MariaDB; im Browser gebaut, repariert und in Dienst gestellt.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

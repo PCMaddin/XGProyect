@@ -67,8 +67,10 @@ class DevelopmentsService
 
         foreach ($resources as $type => $basePrice) {
             if ($basePrice > 0) {
+                $factor = $type === 'energy_max' ? $price->getEnergyFactor() : $price->getFactor();
+
                 if ($incremental) {
-                    $cost[$type] = $this->formulas->getDevelopmentCost($basePrice, $price->getFactor(), $level);
+                    $cost[$type] = $this->formulas->getDevelopmentCost($basePrice, $factor, $level);
                 } else {
                     $cost[$type] = floor($basePrice);
                 }
@@ -76,7 +78,7 @@ class DevelopmentsService
                 if ($destroy) {
                     $cost[$type] = $this->formulas->getTearDownCost(
                         $basePrice,
-                        $price->getFactor(),
+                        $factor,
                         $level,
                         $ionTechLevel
                     );

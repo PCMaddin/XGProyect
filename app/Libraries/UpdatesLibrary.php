@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Game\WreckFieldService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\ClassProductionService;
 use App\Services\Game\PlayerClassService;
@@ -292,6 +293,11 @@ class UpdatesLibrary
             $game_metal_basic_income = 0;
             $game_crystal_basic_income = 0;
             $game_deuterium_basic_income = 0;
+        }
+
+        // wreck fields burn up, repaired ships go into service on their own
+        if (!$Simul) {
+            app(WreckFieldService::class)->settle(self::numInt($current_planet['planet_id'] ?? 0), $UpdateTime);
         }
 
         $storageFactor = PlayerClassService::bonusesFromRow($current_user)->storageFactor();
