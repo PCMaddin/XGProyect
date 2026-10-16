@@ -10,6 +10,7 @@ use ReflectionMethod;
 use Tests\TestCase;
 use Tests\Unit\Legacy\App\Libraries\Missions\RecordingAttack;
 use Xgp\App\Libraries\BattleEngine\Core\Battle;
+use Xgp\App\Libraries\BattleEngine\Core\BattleReport;
 use Xgp\App\Libraries\BattleEngine\Models\Fleet;
 use Xgp\App\Libraries\BattleEngine\Models\Player;
 use Xgp\App\Libraries\BattleEngine\Models\PlayerGroup;
@@ -121,14 +122,10 @@ class BattleOutcomeTest extends TestCase
     }
 
     /**
-     * Everything the missions read from a finished battle.
-     *
      * @param ForceSpec $attackers
      * @param ForceSpec $defenders
-     *
-     * @return array<string, mixed>
      */
-    public static function outcome(int $seed, array $attackers, array $defenders): array
+    private static function report(int $seed, array $attackers, array $defenders): BattleReport
     {
         AttackLang::activate(MissionObjects::names());
 
@@ -138,6 +135,21 @@ class BattleOutcomeTest extends TestCase
         $report = $battle->getReport();
         // the missions always set the loot before the report is rendered
         $report->setSteal(['metal' => 12345.6, 'crystal' => 7890, 'deuterium' => 0]);
+
+        return $report;
+    }
+
+    /**
+     * Everything the missions read from a finished battle.
+     *
+     * @param ForceSpec $attackers
+     * @param ForceSpec $defenders
+     *
+     * @return array<string, mixed>
+     */
+    public static function outcome(int $seed, array $attackers, array $defenders): array
+    {
+        $report = self::report($seed, $attackers, $defenders);
 
         return [
             'report' => md5((string) $report),
@@ -178,5 +190,25 @@ class BattleOutcomeTest extends TestCase
             json_encode($expected[$this->dataName()], JSON_PRETTY_PRINT | JSON_PRESERVE_ZERO_FRACTION),
             json_encode(self::outcome($seed, $attackers, $defenders), JSON_PRETTY_PRINT | JSON_PRESERVE_ZERO_FRACTION)
         );
+    }
+
+    /**
+     * Regression: the report announced a new moon around "Planet [1:1:1]"
+     * whenever no moon had been rolled (also in every moon destruction
+     * report), and always with these placeholder name and coordinates.
+     */
+    public function testTheReportNamesThePlanetOfANewMoonOnlyWhenOneIsCreated(): void
+    {
+        [, $attackers, $defenders] = self::battles()['death stars, seed 6'];
+
+        $withoutMoon = self::report(6, $attackers, $defenders);
+        $this->assertStringNotContainsString('lunar satellite', (string) $withoutMoon);
+
+        $withMoon = self::report(6, $attackers, $defenders);
+        $withMoon->setMoonTarget('Tatooine', 3, 141, 9);
+        $this->assertSame(20, $withMoon->getMoonProb());
+        mt_srand(5); // first roll 11, below the chance of 20
+        $this->assertIsArray($withMoon->tryMoon());
+        $this->assertStringContainsString('in orbit the planet Tatooine [3:141:9]!', (string) $withMoon);
     }
 }

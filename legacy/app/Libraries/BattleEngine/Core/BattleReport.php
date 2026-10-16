@@ -50,8 +50,10 @@ class BattleReport
     private int $roundsCount = 0;
     /** @var array<string, int|float> */
     private array $steal = ['metal' => 0, 'crystal' => 0, 'deuterium' => 0];
-    /** @var array{size: int, fields: float}|false|null */
-    private array | false | null $moonEvent = null;
+    /** @var array{size: int, fields: float}|false the moon created by the battle, if any */
+    private array | false $moonEvent = false;
+    /** @var array{name: string, galaxy: int, system: int, planet: int} where a moon would be created */
+    private array $moonTarget = ['name' => '', 'galaxy' => 0, 'system' => 0, 'planet' => 0];
     private BattleLosses $losses;
 
     public function __construct()
@@ -215,11 +217,27 @@ class BattleReport
     }
 
     /**
-     * @return array{size: int, fields: float}|false|null
+     * @return array{size: int, fields: float}|false
      */
-    public function getMoonEvent(): array | false | null
+    public function getMoonEvent(): array | false
     {
         return $this->moonEvent;
+    }
+
+    /**
+     * The planet a moon from this battle would orbit (shown in the report).
+     */
+    public function setMoonTarget(string $name, int $galaxy, int $system, int $planet): void
+    {
+        $this->moonTarget = ['name' => $name, 'galaxy' => $galaxy, 'system' => $system, 'planet' => $planet];
+    }
+
+    /**
+     * @return array{name: string, galaxy: int, system: int, planet: int}
+     */
+    public function getMoonTarget(): array
+    {
+        return $this->moonTarget;
     }
 
     public function getMoonProb(): int

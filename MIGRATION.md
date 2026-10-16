@@ -324,6 +324,15 @@ Alle Werte sind nach dem Umbau identisch.
 11 PHPStan- + 68 PHPMD-Einträge abgebaut. **Damit sind `Missions/` und
 `BattleEngine/` vollständig ohne Baseline-Einträge.**
 
+**Anzeige-Bug gefixt (Kampfbericht):** Der Bericht meldete „…Mond im Orbit
+des Planeten Planet [1:1:1]“, sobald *kein* Mond gewürfelt worden war
+(`null !== false`), also auch in **jedem** Mondzerstörungs-Bericht. Und wenn
+ein Mond entstand, standen Name und Koordinaten fest auf
+„Planet [1:1:1]“. Jetzt ist „kein Mond“ der Ausgangszustand, und Attack setzt
+das Ziel per `BattleReport::setMoonTarget()`. Die beiden Fixtures haben dafür
+nur neue Bericht-Hashes (geprüft: der Berichtstext verliert genau diese eine
+Zeile), plus Regressionstest.
+
 > **Lehre aus dem Baseline-Audit:** Die Baseline enthält nicht nur Typ-Unschärfen,
 > sondern auch **echte Laufzeit-Crashes**: `strict_types` macht falsche Return-
 > oder Argumenttypen an *nativ* getypten Grenzen zu `TypeError`s. Beim Abbau gilt

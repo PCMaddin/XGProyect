@@ -28,11 +28,16 @@ class Attack extends CombatMission
      * @param array<string, mixed> $fleetRow
      * @param array<string, mixed> $targetPlanet
      * @param array<string, mixed> $targetUser
-     *
-     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     protected function afterBattle(array $fleetRow, BattleReport $report, array $targetPlanet, array $targetUser): void
     {
+        $report->setMoonTarget(
+            self::str($targetPlanet['planet_name']),
+            self::int($fleetRow['fleet_end_galaxy']),
+            self::int($fleetRow['fleet_end_system']),
+            self::int($fleetRow['fleet_end_planet'])
+        );
+
         $moon = $report->tryMoon();
 
         if (!is_array($moon)) {

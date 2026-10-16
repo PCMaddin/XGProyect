@@ -1,7 +1,7 @@
 {
     "rapid fire, seed 1": {
-        "report": "8216f2c06a4d5a2a70daffcd4ac15736",
-        "reportLength": 8957,
+        "report": "80af3908470dace529aaff605a82b0a1",
+        "reportLength": 8841,
         "rounds": 2,
         "result": [
             true,
@@ -106,8 +106,8 @@
         "nextRandom": 896155243
     },
     "rapid fire, seed 2": {
-        "report": "aed10ef4a2196f31099bd616904f3be2",
-        "reportLength": 8957,
+        "report": "68d0bff38e1b1dbfe823d183e12c6679",
+        "reportLength": 8841,
         "rounds": 2,
         "result": [
             true,
@@ -212,8 +212,8 @@
         "nextRandom": 1239759640
     },
     "draw": {
-        "report": "993082a3a0b860b71b0fd77e78992a2b",
-        "reportLength": 15705,
+        "report": "0b7b1ecf71058e70a285311cbabe724e",
+        "reportLength": 15589,
         "rounds": 6,
         "result": [
             false,
@@ -277,8 +277,8 @@
         "nextRandom": 1394026236
     },
     "several players, seed 4": {
-        "report": "62690b19e1bec11b33147c1534a3bae8",
-        "reportLength": 40580,
+        "report": "99897f4696e671af0f75b4198cea2b22",
+        "reportLength": 40464,
         "rounds": 6,
         "result": [
             false,
@@ -441,8 +441,8 @@
         "nextRandom": 1986819936
     },
     "several players, seed 5": {
-        "report": "fba485a8f81739397966b593d3d014d5",
-        "reportLength": 40172,
+        "report": "89ae3438ce5db8e9c0c36fc7957a4c7d",
+        "reportLength": 40056,
         "rounds": 6,
         "result": [
             false,
@@ -617,8 +617,8 @@
         "nextRandom": 46706671
     },
     "death stars, seed 6": {
-        "report": "bffb29f7210423c346a8546a48c7c82d",
-        "reportLength": 19633,
+        "report": "77a9e922695862b5647cd93e98ea95d4",
+        "reportLength": 19517,
         "rounds": 5,
         "result": [
             false,
@@ -763,8 +763,8 @@
         "nextRandom": 1797247518
     },
     "death stars, seed 7": {
-        "report": "0aa5d7b4584253d0c674f8c39c9ad728",
-        "reportLength": 19633,
+        "report": "afaa6e5855b248be30d6f01624551959",
+        "reportLength": 19517,
         "rounds": 5,
         "result": [
             false,
@@ -909,8 +909,8 @@
         "nextRandom": 281557958
     },
     "probe against nothing": {
-        "report": "875c690dcf2034bffa55ba297f4a5dd8",
-        "reportLength": 3469,
+        "report": "58d313125ee08f5b7a6e90987d61d76f",
+        "reportLength": 3353,
         "rounds": 0,
         "result": [
             true,
@@ -974,8 +974,8 @@
         "nextRandom": 1875675361
     },
     "defense repair, seed 9": {
-        "report": "7d9b69cf59ce3036290a3f83ca200016",
-        "reportLength": 14661,
+        "report": "49d061bd5023a103d5128b9fb0243e9b",
+        "reportLength": 14545,
         "rounds": 4,
         "result": [
             false,
@@ -1088,8 +1088,8 @@
         "nextRandom": 829953393
     },
     "defense repair, seed 10": {
-        "report": "7d9b69cf59ce3036290a3f83ca200016",
-        "reportLength": 14661,
+        "report": "49d061bd5023a103d5128b9fb0243e9b",
+        "reportLength": 14545,
         "rounds": 4,
         "result": [
             false,
@@ -1202,8 +1202,8 @@
         "nextRandom": 1165105158
     },
     "large stacks": {
-        "report": "daca5df40cdcfab028d81b5f8abc2790",
-        "reportLength": 12194,
+        "report": "dd3e41d29e95b049272672d1b73ac919",
+        "reportLength": 12078,
         "rounds": 3,
         "result": [
             true,
