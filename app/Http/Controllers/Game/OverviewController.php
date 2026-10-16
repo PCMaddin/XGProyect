@@ -11,7 +11,7 @@ use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\DevelopmentsLib;
@@ -31,7 +31,7 @@ use App\Libraries\Users;
  */
 class OverviewController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const PLANET_ASSET = 'assets/upload/skins/xgproyect/planets/';
 

@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
@@ -32,7 +32,7 @@ use App\Libraries\Users;
  */
 class ShipyardController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     protected string $page = 'shipyard';
 

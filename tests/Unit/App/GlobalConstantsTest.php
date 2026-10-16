@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Every global constant the code reads must be defined once the application
- * is booted (config/legacy/constants.php) or by the file that uses it.
+ * is booted (app/constants.php) or by the file that uses it.
  *
  * Regression: LIB_PATH, DPATH, IMG_PATH, XGP_ROOT and SYSTEM_ROOT were only
  * defined by the legacy bootstrap, which stopped running when the last game
@@ -82,6 +82,21 @@ class GlobalConstantsTest extends TestCase
         }
 
         return $constants;
+    }
+
+    /**
+     * Regression: the constants were defined by a config file, and config
+     * files are not read once `php artisan config:cache` ran, so every game
+     * page failed on an undefined constant.
+     */
+    public function testTheConstantsAreLoadedByTheAutoloaderNotAsConfig(): void
+    {
+        $composer = json_decode((string) file_get_contents(dirname(__DIR__, 3) . '/composer.json'), true);
+
+        $this->assertIsArray($composer);
+        $this->assertIsArray($composer['autoload'] ?? null);
+        $this->assertSame(['app/constants.php'], $composer['autoload']['files'] ?? null);
+        $this->assertFileDoesNotExist(dirname(__DIR__, 3) . '/config/legacy/constants.php');
     }
 
     public function testEveryUsedConstantIsDefined(): void

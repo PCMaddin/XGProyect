@@ -7,7 +7,11 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Contracts\View\View;
 
-class LegacyView extends Exception
+/**
+ * Ends the request with a view (rendered by the exception handler), for
+ * messages shown from deep inside the game code.
+ */
+class HaltWithView extends Exception
 {
     protected View $view;
 

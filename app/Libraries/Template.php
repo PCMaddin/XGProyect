@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
-use App\Exceptions\LegacyView;
+use App\Exceptions\HaltWithView;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\View;
 
@@ -16,18 +16,18 @@ use Illuminate\Support\Facades\View;
 abstract class Template
 {
     /**
-     * Render a view as the whole response (via the LegacyView exception).
+     * Render a view as the whole response (via the HaltWithView exception).
      *
      * @deprecated use view() helper whenever possible.
      *
      * @param array<string, mixed> $data
      * @param array<string, mixed> $mergeData
      */
-    public static function legacyView(string $view, array $data = [], array $mergeData = []): never
+    public static function haltWithView(string $view, array $data = [], array $mergeData = []): never
     {
         View::share('gameTitle', app(SettingsService::class)->getString('game_name'));
 
-        throw new LegacyView(View::make($view, $data, $mergeData));
+        throw new HaltWithView(View::make($view, $data, $mergeData));
     }
 
     /**

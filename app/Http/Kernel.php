@@ -53,7 +53,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\CheckInstalled::class,
         ],
 
-        'legacy' => [
+        'game' => [
             \App\Http\Middleware\RedirectIfNotInstalled::class,
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

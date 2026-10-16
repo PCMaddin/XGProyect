@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Services\Game\Formulas\FormulasService;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Libraries\FleetsLib;
@@ -24,7 +24,7 @@ use App\Libraries\Users;
  */
 class PhalanxController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     /** @var array<string, mixed> */
     private array $user = [];

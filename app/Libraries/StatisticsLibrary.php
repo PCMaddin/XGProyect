@@ -8,7 +8,7 @@ use App\Core\GameObjects\GameObjectInterface;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 
 /**
  * Rebuilds the per-user and per-alliance statistics points and ranks. The two
@@ -20,7 +20,7 @@ use App\Core\Concerns\PreparesLegacySql;
  */
 class StatisticsLibrary
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const USER_POINT_COLUMNS = [
         'buildings' => 'user_statistic_buildings_points',

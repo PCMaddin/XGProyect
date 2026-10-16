@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 710 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
+| Tests | 712 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
 
 > **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
 > Ausführung (Actions läuft dort offenbar nicht), die Checks aus
@@ -48,14 +48,25 @@
    stehende Flotten deshalb als „zurückkehrend“; `Acs::acs_planet_type`
    (1/3) hatte denselben Fehler. Beide sind jetzt `int`. Tests.
 
-### Bewusst offen (Modernisierung, keine Migration)
-
-- **Konstantenklassen vs. Enums:** `App\Enums\Game\{BuildingId, ShipId, …}`
-  existieren parallel zu den Enumeratoren, werden aber praktisch nur in Tests
-  genutzt.
-- **Benennung:** `LegacyController`, `routes/legacy.php`, Middleware-Gruppe
-  `legacy`, `config/legacy/constants.php` tragen den Namen noch, sind aber
-  normaler `app/`-Code.
+6. **Doppelte ID-Enums entfernt:** `App\Enums\Game\{BuildingId, ResearchId,
+   ShipId, DefenseId, OfficerId}` doppelten die Enumeratoren, wurden aber nur
+   in Tests genutzt. Die Enumeratoren sind die einzige Quelle der Ids; ein
+   Test prüft, dass sie genau die registrierten Objekte ihrer Art benennen.
+7. **„Legacy“ aus den Namen entfernt:** `LegacyController` → `GameController`
+   (Konstante `PAGES`), `routes/legacy.php` → `routes/game.php`,
+   Middleware-Gruppe `legacy` → `game`, `PreparesLegacySql` → `PreparesSql`,
+   `BindsLegacyQueries` → `BindsQueries`, `LegacyView`/`Template::legacyView()`
+   → `HaltWithView`/`Template::haltWithView()`; das unbenutzte
+   `ProductionFormula::toLegacyArray()` ist weg. Die Abschnitte unten nennen
+   noch die alten Namen (Protokoll).
+8. **Bugfix: Konstanten nach `config:cache`.** Die Spielkonstanten
+   (`ONE_DAY`, `DPATH`, Universumsgröße, Tabellennamen …) wurden als
+   Config-Datei `config/legacy/constants.php` geladen. Nach
+   `php artisan config:cache`, dem üblichen Produktions-Schritt, liest Laravel
+   keine Config-Dateien mehr: Alle 53 Konstanten waren undefiniert und jede
+   Spielseite brach ab. Die Datei liegt jetzt in `app/constants.php` und wird
+   über Composers `autoload.files` geladen (geprüft mit gecachter Config).
+   Regressionstest.
 
 ## Zentraler Befund: der geteilte Berechnungs-Layer
 

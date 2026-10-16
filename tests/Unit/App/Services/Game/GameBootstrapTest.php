@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Game;
 
-use App\Exceptions\LegacyView;
+use App\Exceptions\HaltWithView;
 use App\Models\Ban;
 use App\Models\User;
 use App\Services\Game\GameBootstrap;
@@ -87,7 +87,7 @@ class GameBootstrapTest extends DatabaseTestCase
     {
         $bootstrap = $this->bootstrap(['game_enable' => 0]);
 
-        $this->expectException(LegacyView::class);
+        $this->expectException(HaltWithView::class);
 
         $bootstrap->ensureAccess(self::user());
     }
@@ -103,7 +103,7 @@ class GameBootstrapTest extends DatabaseTestCase
     {
         $bootstrap = $this->bootstrap([]);
 
-        $this->expectException(LegacyView::class);
+        $this->expectException(HaltWithView::class);
 
         $bootstrap->ensureAccess(self::user(UserRanks::PLAYER, new Ban(['until' => time() + 3600])));
     }
@@ -112,7 +112,7 @@ class GameBootstrapTest extends DatabaseTestCase
     {
         $bootstrap = $this->bootstrap([]);
 
-        $this->expectException(LegacyView::class);
+        $this->expectException(HaltWithView::class);
 
         $bootstrap->ensureAccess(self::user(UserRanks::PLAYER, new Ban(['until' => null])));
     }

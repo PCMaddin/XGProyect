@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Libraries\Missions\Acs;
 use App\Libraries\Missions\Attack;
 use App\Libraries\Missions\Colonize;
@@ -28,7 +28,7 @@ use App\Libraries\Missions\Transport;
  */
 class MissionControlLib
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     public function arrivingFleets(): void
     {

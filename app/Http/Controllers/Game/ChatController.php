@@ -11,7 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Libraries\Functions;
 use App\Libraries\Users;
 
@@ -22,7 +22,7 @@ use App\Libraries\Users;
  */
 class ChatController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     /** Message type handled by Functions::sendMessage for player-to-player mail. */
     private const MESSAGE_TYPE_PLAYER = 4;

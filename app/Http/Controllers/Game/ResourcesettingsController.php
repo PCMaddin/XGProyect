@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\ProductionFormula;
@@ -31,7 +31,7 @@ use App\Libraries\Users;
  */
 class ResourcesettingsController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const REDIRECT_TARGET = 'game.php?page=resourcesettings';
 

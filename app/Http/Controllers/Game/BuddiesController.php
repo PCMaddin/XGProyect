@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Models\Buddys;
 use App\Core\Enumerators\BuddiesStatusEnumerator as BuddiesStatus;
 use App\Libraries\Buddies\Buddy;
@@ -29,7 +29,7 @@ class BuddiesController extends BaseController
 {
     use HydratesModels;
 
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const REDIRECT_TARGET = 'game.php?page=buddies';
 

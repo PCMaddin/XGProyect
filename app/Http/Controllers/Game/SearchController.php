@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
@@ -20,7 +20,7 @@ use App\Libraries\NoobsProtectionLib;
  */
 class SearchController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const MESSAGE_ICON = 'assets/upload/skins/xgproyect/img/m.gif';
     private const BUDDY_ICON = 'assets/upload/skins/xgproyect/img/b.gif';

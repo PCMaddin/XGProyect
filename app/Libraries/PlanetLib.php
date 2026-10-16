@@ -7,7 +7,7 @@ namespace App\Libraries;
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 
 /**
@@ -20,7 +20,7 @@ use App\Core\Enumerators\PlanetTypesEnumerator;
  */
 class PlanetLib
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     public function setNewPlanet(int $galaxy, int $system, int $position, int $owner, string $name = '', bool $main = false): bool
     {

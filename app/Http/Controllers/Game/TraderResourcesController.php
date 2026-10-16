@@ -11,7 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Libraries\Functions;
 use App\Libraries\Game\ResourceMarket;
 use App\Libraries\Users;
@@ -23,7 +23,7 @@ use App\Libraries\Users;
  */
 class TraderResourcesController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const REDIRECT_TARGET = 'game.php?page=traderResources';
 

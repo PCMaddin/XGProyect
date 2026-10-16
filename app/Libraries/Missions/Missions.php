@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Missions;
 
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\BindsLegacyQueries;
+use App\Core\Concerns\BindsQueries;
 use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
 use App\Libraries\UpdatesLibrary;
@@ -32,7 +32,7 @@ use App\Libraries\UpdatesLibrary;
  */
 class Missions
 {
-    use BindsLegacyQueries;
+    use BindsQueries;
 
     /** @var array<int, string> */
     protected array $resource;
@@ -968,7 +968,7 @@ class Missions
     }
 
     // ------------------------------------------------------------------
-    // Helpers (query/coercion helpers live in BindsLegacyQueries)
+    // Helpers (query/coercion helpers live in BindsQueries)
     // ------------------------------------------------------------------
 
     /**

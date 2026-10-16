@@ -11,14 +11,18 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
-class LegacyController extends BaseController
+/**
+ * The game's front controller: game.php?page=… runs the GameBootstrap and
+ * then the page's controller.
+ */
+class GameController extends BaseController
 {
     /**
      * Game pages served by native controllers (after the GameBootstrap).
      *
      * @var array<string, class-string>
      */
-    private const PROMOTED_PAGES = [
+    private const PAGES = [
         'alliance' => Game\AllianceController::class,
         'banned' => Game\BannedController::class,
         'buddies' => Game\BuddiesController::class,
@@ -68,8 +72,8 @@ class LegacyController extends BaseController
 
         $page = $request->query('page');
 
-        // unknown pages: the legacy front controller redirected to the overview
-        if (!is_string($page) || !isset(self::PROMOTED_PAGES[$page])) {
+        // unknown pages go to the overview
+        if (!is_string($page) || !isset(self::PAGES[$page])) {
             return redirect('game.php?page=overview');
         }
 
@@ -79,7 +83,7 @@ class LegacyController extends BaseController
             $bootstrap->run($user);
         }
 
-        $result = app()->call(self::PROMOTED_PAGES[$page]);
+        $result = app()->call(self::PAGES[$page]);
 
         return $result instanceof BaseResponse ? $result : new Response($result);
     }

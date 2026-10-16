@@ -8,7 +8,7 @@ use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Ranks;
@@ -23,7 +23,7 @@ use App\Libraries\Alliance\Ranks;
  */
 class Users
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     /** @var array<string, mixed> */
     private array $userData = [];

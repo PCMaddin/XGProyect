@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  */
-trait BindsLegacyQueries
+trait BindsQueries
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     /**
      * @param list<mixed> $bindings

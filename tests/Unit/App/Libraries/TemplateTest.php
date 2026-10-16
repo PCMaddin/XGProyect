@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Libraries;
 
-use App\Exceptions\LegacyView;
+use App\Exceptions\HaltWithView;
 use App\Libraries\Template;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -28,11 +28,11 @@ class TemplateTest extends DatabaseTestCase
         $this->assertSame('<div>a</div><b>c</b>', Template::jsReady("  <div>a</div>\r\n\n\t<b>c</b>  \r"));
     }
 
-    public function testLegacyViewEndsTheRequestWithTheView(): void
+    public function testHaltWithViewEndsTheRequestWithTheView(): void
     {
         DB::table('options')->insert(['name' => 'game_name', 'value' => 'XGP', 'type' => '32']);
-        $this->expectException(LegacyView::class);
+        $this->expectException(HaltWithView::class);
 
-        Template::legacyView('message.view', ['mes' => 'hello', 'middle1' => '', 'middle2' => '']);
+        Template::haltWithView('message.view', ['mes' => 'hello', 'middle1' => '', 'middle2' => '']);
     }
 }

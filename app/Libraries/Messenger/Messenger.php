@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\Messenger;
 
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 
 /**
  * Writes an in-game message row. Every field is now bound; the legacy version
@@ -15,7 +15,7 @@ use App\Core\Concerns\PreparesLegacySql;
  */
 final class Messenger
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     public function sendMessage(MessagesOptions $options): void
     {

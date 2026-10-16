@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * legacy
- * @todo deprecate
+ * The game's global constants (paths, timing, universe size, table names).
+ *
+ * Loaded through composer's autoload "files", not as a config file: config
+ * files are not read once `php artisan config:cache` ran, which left every
+ * constant undefined.
  */
 
 //##########################################################################

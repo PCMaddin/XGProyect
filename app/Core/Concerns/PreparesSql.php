@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  */
-trait PreparesLegacySql
+trait PreparesSql
 {
     private function prepareSql(string $sql): string
     {

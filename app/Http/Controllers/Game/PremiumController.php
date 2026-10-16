@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\OfficiersEnumerator as OE;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
@@ -26,7 +26,7 @@ use App\Libraries\Users;
  */
 class PremiumController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const OFFICERS = [
         OE::PREMIUM_OFFICIER_COMMANDER,

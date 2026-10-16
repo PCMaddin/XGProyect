@@ -12,7 +12,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
@@ -35,7 +35,7 @@ use App\Libraries\Users;
  */
 class Fleet3Controller extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     public const REDIRECT_TARGET = 'game.php?page=fleet1';
 

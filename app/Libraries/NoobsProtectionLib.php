@@ -6,7 +6,7 @@ namespace App\Libraries;
 
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 
 /**
  * Noob-protection rules: whether an attacker is too weak or too strong to hit a
@@ -16,7 +16,7 @@ use App\Core\Concerns\PreparesLegacySql;
  */
 class NoobsProtectionLib
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private bool $protection;
 

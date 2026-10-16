@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Functions;
 use App\Libraries\Users;
@@ -28,7 +28,7 @@ use App\Libraries\Users;
  */
 class MessagesController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const REDIRECT_BASE = 'game.php?';
 

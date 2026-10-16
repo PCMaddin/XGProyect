@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Alliances;
@@ -37,7 +37,7 @@ use App\Libraries\Users;
  */
 class AllianceController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     private const DEFAULT_RANKS = ['founder' => 0, 'newcomer' => 1];
 
@@ -1133,7 +1133,7 @@ class AllianceController extends BaseController
             (string) __('game/alliance.al_go_out_yes')
         );
 
-        // Unreachable: messageBox() renders and short-circuits via LegacyView.
+        // Unreachable: messageBox() renders and short-circuits via HaltWithView.
         return redirect('game.php?page=alliance');
     }
 

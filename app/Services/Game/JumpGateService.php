@@ -9,7 +9,7 @@ use App\Libraries\Functions;
 use App\Services\FormatService;
 use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 
 /**
@@ -28,7 +28,7 @@ use App\Core\Enumerators\BuildingsEnumerator as Buildings;
  */
 class JumpGateService
 {
-    use PreparesLegacySql;
+    use PreparesSql;
     use ReadsMixedValues;
 
     private const GATE = 'building_jump_gate';

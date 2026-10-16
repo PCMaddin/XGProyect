@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use App\Core\Concerns\PreparesLegacySql;
+use App\Core\Concerns\PreparesSql;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
@@ -35,7 +35,7 @@ use App\Libraries\Users;
  */
 class GalaxyController extends BaseController
 {
-    use PreparesLegacySql;
+    use PreparesSql;
 
     /** @var array<string, mixed> */
     private array $user = [];
@@ -286,7 +286,7 @@ class GalaxyController extends BaseController
     }
 
     /**
-     * Launch interplanetary missiles at a target. Ends by throwing a LegacyView
+     * Launch interplanetary missiles at a target. Ends by throwing a HaltWithView
      * (via Functions::message) in every branch, so it does not return a value.
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
