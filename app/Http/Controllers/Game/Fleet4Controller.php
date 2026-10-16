@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
@@ -343,6 +344,8 @@ class Fleet4Controller extends BaseController
 
         if ($mission === Missions::EXPEDITION && !$this->occupiedPlanet) {
             $this->validateExpedition();
+        } elseif ($mission === Missions::RECYCLE && $this->inDeepSpace()) {
+            // the debris in deep space belongs to nobody
         } elseif ($mission !== Missions::COLONIZE && !$this->occupiedPlanet) {
             return false;
         }
@@ -363,7 +366,9 @@ class Fleet4Controller extends BaseController
             Missions::ATTACK => !$this->ownPlanet,
             Missions::SPY => isset($fleet[Ships::SHIP_ESPIONAGE_PROBE]) && !$this->ownPlanet,
             Missions::COLONIZE => isset($fleet[Ships::SHIP_COLONY_SHIP]),
-            Missions::RECYCLE => !$this->isEmptyDebris(),
+            Missions::RECYCLE => $this->inDeepSpace()
+                ? isset($fleet[Ships::SHIP_PATHFINDER]) && $this->deepSpaceDebris() > 0
+                : !$this->isEmptyDebris(),
             Missions::DESTROY => !$this->ownPlanet &&
                 $this->occupiedPlanet &&
                 $this->asInt($this->sessionTarget()['type'] ?? 0) === PlanetTypes::MOON &&
@@ -409,6 +414,25 @@ class Fleet4Controller extends BaseController
         );
 
         return (is_object($buddyRow) ? $this->asInt(get_object_vars($buddyRow)['buddies'] ?? 0) : 0) >= 1;
+    }
+
+    /**
+     * Debris in deep space (position 16), which only pathfinders reach.
+     */
+    private function inDeepSpace(): bool
+    {
+        return $this->asInt($this->sessionTarget()['planet'] ?? 0) === MAX_PLANET_IN_SYSTEM + 1 &&
+            $this->asInt($this->sessionTarget()['type'] ?? 0) === PlanetTypes::DEBRIS;
+    }
+
+    private function deepSpaceDebris(): float
+    {
+        $debris = app(DeepSpaceDebrisService::class)->get(
+            $this->asInt($this->sessionTarget()['galaxy'] ?? 0),
+            $this->asInt($this->sessionTarget()['system'] ?? 0)
+        );
+
+        return $debris['metal'] + $debris['crystal'];
     }
 
     private function isEmptyDebris(): bool

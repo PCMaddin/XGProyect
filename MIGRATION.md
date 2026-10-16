@@ -1103,6 +1103,36 @@ Nachgezogen:
   - Tests für Kosten, Schwellen, Inhalt, Reparatur, Indienststellung,
     Verglühen, Angreifer-Wracks und das Feld; ein echter Angriff auf
     MariaDB; im Browser gebaut, repariert und in Dienst gestellt.
+- ✅ **Pathfinder, Reaper und Trümmerfelder im tiefen Raum** (OGame 7):
+  - **Pathfinder auf Expeditionen**: Ist mindestens einer in der Flotte,
+    verdoppeln sich Rohstoff- und Schiffsfunde (mit dem Entdecker-Bonus
+    multipliziert; der Laderaum begrenzt weiter).
+  - **Trümmerfeld an Position 16** (`DeepSpaceDebrisService`, Tabelle
+    `deep_space_debris`): Kämpfe gegen Piraten und Aliens hinterlassen
+    10 % von Metall und Kristall aller zerstörten Schiffe, beim Entdecker
+    20 % (Changelog 7.1). Nur Pathfinder bauen es ab (Recycler fliegen
+    nicht in den tiefen Raum); nur Entdecker sehen es in der Galaxie, mit
+    Link zum Abbauen. Flotte 3 bietet dort nur „Abbauen“ an, und nur mit
+    Pathfindern.
+  - **Pathfinder bauen auch normale Trümmerfelder ab**, zusammen mit den
+    Recyclern.
+  - **Reaper** sammeln nach einem Kampf gegen Spieler bis zu 25 % des
+    neuen Trümmerfelds direkt ein, so weit ihr Laderaum (und der nach der
+    Beute freie Raum der Flotte) reicht; der Kampfbericht nennt die
+    Menge. Gegen Piraten und Aliens nicht.
+  - `Recycle::splitRecycledDebris()` ist jetzt `DebrisLoad::split()` (auch
+    für die Reaper); eine negative Kapazität lädt nichts mehr aus.
+  - Annahmen: Die Größe des Expeditions-Trümmerfelds (10/20 %) folgt dem
+    Changelog 7.1; wie das Original es genau berechnet, ist nicht
+    dokumentiert.
+  - Tests für die Funde, das Feld, den Abbau (auch auf MariaDB), die
+    Expeditionskämpfe und die Reaper in einem echten Kampf; im Browser vom
+    Galaxie-Link bis zur Ladung durchgespielt.
+- 🔴→✅ **Admin-Flottenliste stürzte ab** (gefixt): Die Namen der
+  Admin-Listen kannten Crawler, Reaper (218) und Pathfinder nicht, unter
+  215 stand noch „Reaper“ statt Schlachtkreuzer. Sobald ein Pathfinder
+  flog, endete `/admin/fleets` mit „Undefined array key 219“. Ein Test
+  prüft jetzt, dass jedes Objekt in allen drei Sprachen einen Namen hat.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

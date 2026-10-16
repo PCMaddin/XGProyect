@@ -95,4 +95,5 @@ return [
     'gl_no_missiles' => 'Es sind keine Interplanetarraketen verfügbar',
     'gl_add_missile_number' => 'Gib die Anzahl der Raketen ein, die du schicken möchtest',
     'gl_missiles_sended' => ' Interplanetarraketen wurden abgeschickt. Hauptziel: ',
+    'gl_deep_space' => 'Tiefer Raum',
 ];

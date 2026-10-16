@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Enums\PlayerClass;
+use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
@@ -146,12 +148,36 @@ class GalaxyController extends BaseController
         return view('galaxy.galaxy_view', array_merge(
             [
                 'list_of_positions' => $this->buildPositionsList(),
+                'deep_space' => $this->deepSpaceDebris(),
                 'planet_count' => $this->planetCount,
                 'max_galaxy' => MAX_GALAXY_IN_WORLD,
                 'max_system' => MAX_SYSTEM_IN_GALAXY,
             ],
             $parse
         ));
+    }
+
+    /**
+     * The debris in deep space, which only discoverers see (OGame 7).
+     *
+     * @return array{metal: string, crystal: string}|null
+     */
+    private function deepSpaceDebris(): ?array
+    {
+        if (app(PlayerClassService::class)->currentBonuses()->player !== PlayerClass::Discoverer) {
+            return null;
+        }
+
+        $debris = app(DeepSpaceDebrisService::class)->get($this->currentGalaxy, $this->currentSystem);
+
+        if ($debris['metal'] + $debris['crystal'] <= 0) {
+            return null;
+        }
+
+        return [
+            'metal' => $this->formatService->prettyNumber((int) $debris['metal']),
+            'crystal' => $this->formatService->prettyNumber((int) $debris['crystal']),
+        ];
     }
 
     /**

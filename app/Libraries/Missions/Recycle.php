@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use Illuminate\Support\Facades\DB;
+use App\Core\Enumerators\ShipsEnumerator as Ships;
+use App\Services\Game\DeepSpaceDebrisService;
 use App\Services\Game\FleetEventsService;
 use App\Services\Game\PlayerClassService;
 use App\Support\FleetShips;
@@ -44,18 +47,7 @@ class Recycle extends Missions
         $recycledResources = $this->calculateCapacity($fleetRow);
 
         if ($fleetRow['fleet_mess'] == 0 && $fleetRow['fleet_start_time'] <= time()) {
-            $this->updatePlanetDebrisFieldAndFleet([
-                'recycled' => [
-                    'metal' => $recycledResources['metal'],
-                    'crystal' => $recycledResources['crystal'],
-                ],
-                'coords' => [
-                    'galaxy' => $fleetRow['fleet_end_galaxy'],
-                    'system' => $fleetRow['fleet_end_system'],
-                    'planet' => $fleetRow['fleet_end_planet'],
-                ],
-                'fleet_id' => $fleetRow['fleet_id'],
-            ]);
+            $this->harvest($fleetRow, $recycledResources);
 
             $message = sprintf(
                 __('game/recycle.rec_result'),
@@ -109,18 +101,8 @@ class Recycle extends Missions
      */
     private function calculateCapacity(array $fleetRow): array
     {
-        $targetPlanet = $this->getPlanetDebris([
-            'coords' => [
-                'galaxy' => $fleetRow['fleet_end_galaxy'],
-                'system' => $fleetRow['fleet_end_system'],
-                'planet' => $fleetRow['fleet_end_planet'],
-            ],
-        ]);
-
-        $this->planetDebris = [
-            'metal' => self::num($targetPlanet['planet_debris_metal']),
-            'crystal' => self::num($targetPlanet['planet_debris_crystal']),
-        ];
+        $deepSpace = self::inDeepSpace($fleetRow);
+        $this->planetDebris = $this->debrisAt($fleetRow, $deepSpace);
 
         // SOME REQUIRED VALUES
         $ships = FleetShips::decode(self::str($fleetRow['fleet_array']));
@@ -138,7 +120,8 @@ class Recycle extends Missions
                 app(PlayerClassService::class)->bonusesOf(self::int($fleetRow['fleet_owner']))
             );
 
-            if ($id == 209) {
+            // recyclers and pathfinders harvest, in deep space only pathfinders
+            if ($id == Ships::SHIP_PATHFINDER || ($id == Ships::SHIP_RECYCLER && !$deepSpace)) {
                 $recycleCapacity += $shipStorage * $amount;
                 continue;
             }
@@ -152,32 +135,94 @@ class Recycle extends Missions
 
         $this->recyclersCapacity = $recycleCapacity;
 
-        return self::splitRecycledDebris($this->planetDebris['metal'], $this->planetDebris['crystal'], $recycleCapacity);
+        return DebrisLoad::split($this->planetDebris['metal'], $this->planetDebris['crystal'], $recycleCapacity);
     }
 
     /**
-     * How much metal and crystal the recyclers collect from a debris field.
+     * The debris field the fleet harvests.
+     *
+     * @param array<string, mixed> $fleetRow
      *
      * @return array{metal: int|float, crystal: int|float}
      */
-    private static function splitRecycledDebris(int | float $metal, int | float $crystal, int | float $capacity): array
+    private function debrisAt(array $fleetRow, bool $deepSpace): array
     {
-        // everything fits into the recyclers
-        if ($metal + $crystal <= $capacity) {
-            return ['metal' => $metal, 'crystal' => $crystal];
+        if ($deepSpace) {
+            return app(DeepSpaceDebrisService::class)->get(self::int($fleetRow['fleet_end_galaxy']), self::int($fleetRow['fleet_end_system']));
         }
 
-        // both resources exceed half of the capacity: split it evenly
-        if ($metal > $capacity / 2 && $crystal > $capacity / 2) {
-            return ['metal' => $capacity / 2, 'crystal' => $capacity / 2];
+        $targetPlanet = $this->getPlanetDebris([
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+            ],
+        ]);
+
+        return [
+            'metal' => self::num($targetPlanet['planet_debris_metal'] ?? 0),
+            'crystal' => self::num($targetPlanet['planet_debris_crystal'] ?? 0),
+        ];
+    }
+
+    /**
+     * Load the debris into the fleet and take it from the field.
+     *
+     * @param array<string, mixed>                       $fleetRow
+     * @param array{metal: int|float, crystal: int|float} $recycled
+     */
+    private function harvest(array $fleetRow, array $recycled): void
+    {
+        if (self::inDeepSpace($fleetRow)) {
+            $this->harvestDeepSpace($fleetRow, $recycled);
+
+            return;
         }
 
-        // take all of the smaller resource and fill the rest with the bigger one
-        if ($metal > $crystal) {
-            return ['metal' => min($metal, $capacity - $crystal), 'crystal' => $crystal];
-        }
+        $this->updatePlanetDebrisFieldAndFleet([
+            'recycled' => [
+                'metal' => $recycled['metal'],
+                'crystal' => $recycled['crystal'],
+            ],
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+            ],
+            'fleet_id' => $fleetRow['fleet_id'],
+        ]);
+    }
 
-        return ['metal' => $metal, 'crystal' => min($crystal, $capacity - $metal)];
+    /**
+     * @param array<string, mixed> $fleetRow
+     */
+    private static function inDeepSpace(array $fleetRow): bool
+    {
+        return self::int($fleetRow['fleet_end_planet']) === DeepSpaceDebrisService::POSITION;
+    }
+
+    /**
+     * The pathfinders load debris in deep space.
+     *
+     * @param array<string, mixed>                       $fleetRow
+     * @param array{metal: int|float, crystal: int|float} $recycled
+     */
+    private function harvestDeepSpace(array $fleetRow, array $recycled): void
+    {
+        DB::transaction(function () use ($fleetRow, $recycled): void {
+            app(DeepSpaceDebrisService::class)->take(
+                self::int($fleetRow['fleet_end_galaxy']),
+                self::int($fleetRow['fleet_end_system']),
+                (float) $recycled['metal'],
+                (float) $recycled['crystal']
+            );
+
+            DB::table('fleets')->where('fleet_id', self::int($fleetRow['fleet_id']))->update([
+                'fleet_resource_metal' => DB::raw('`fleet_resource_metal` + ' . (float) $recycled['metal']),
+                'fleet_resource_crystal' => DB::raw('`fleet_resource_crystal` + ' . (float) $recycled['crystal']),
+                'fleet_mess' => 1,
+            ]);
+        });
     }
 
     private function recycleMessage(int $owner, string $message, int $time, string $statusMessage): void

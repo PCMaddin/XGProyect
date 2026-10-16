@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Enums\PlayerClass;
@@ -39,6 +40,9 @@ class Expedition extends Missions
 
     /** the bonuses of the owner's class and alliance class */
     private ClassBonuses $bonuses;
+
+    /** pathfinders in the fleet double the resources and ships found */
+    private float $pathfinderFactor = 1.0;
 
     /** the espionage probe, which reports how busy the area is */
     private const PROBE = 210;
@@ -157,6 +161,7 @@ class Expedition extends Missions
     private function setExpeditionPoints(array $fleet): void
     {
         $expeditionPoints = 0;
+        $this->pathfinderFactor = (FleetShips::decode(self::str($fleet['fleet_array']))[Ships::SHIP_PATHFINDER] ?? 0) > 0 ? 2.0 : 1.0;
 
         foreach (FleetShips::decode(self::str($fleet['fleet_array'])) as $id => $count) {
             $ship = $this->registry->ships()->get($id);
@@ -226,7 +231,7 @@ class Expedition extends Missions
             $this->expeditionService->getShipSourceSizeMultChances($this->expeditionService->calculateResourceSourceSize()),
             $this->shipExpeditionPoints
         );
-        $found = $this->expeditionService->getFoundShips($currentFleet, (int) ($budget * $this->owner->expeditionFindFactor()), $this->shipStructures());
+        $found = $this->expeditionService->getFoundShips($currentFleet, (int) ($budget * $this->owner->expeditionFindFactor() * $this->pathfinderFactor), $this->shipStructures());
 
         if ($found === []) {
             $this->resultNothing($fleet);
@@ -291,7 +296,7 @@ class Expedition extends Missions
             $typeObtained
         );
 
-        $loaded = min((int) ($foundAmount * $this->owner->expeditionFindFactor()), $fleetMaxCapacity);
+        $loaded = min((int) ($foundAmount * $this->owner->expeditionFindFactor() * $this->pathfinderFactor), $fleetMaxCapacity);
 
         $this->updateFleetResourcesById(self::int($fleet['fleet_id']), $typeObtained, $loaded);
 

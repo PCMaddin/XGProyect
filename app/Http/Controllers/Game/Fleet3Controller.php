@@ -260,8 +260,13 @@ class Fleet3Controller extends BaseController
         $planet = $this->asInt($target['planet'] ?? 0);
         $type = $this->asInt($target['type'] ?? 0);
 
+        // deep space: expeditions, and pathfinders harvest its debris
         if ($planet === MAX_PLANET_IN_SYSTEM + 1) {
-            return [Missions::EXPEDITION];
+            if ($type !== PlanetTypes::DEBRIS) {
+                return [Missions::EXPEDITION];
+            }
+
+            return isset($this->sessionShips()[Ships::SHIP_PATHFINDER]) ? [Missions::RECYCLE] : [];
         }
 
         $selectedPlanet = $this->fetchTargetPlanet($galaxy, $system, $planet, $type);
@@ -518,7 +523,7 @@ class Fleet3Controller extends BaseController
             Ships::SHIP_BATTLECRUISER => $combat,
             Ships::SHIP_CRAWLER => [],
             Ships::SHIP_REAPER => $combat,
-            Ships::SHIP_PATHFINDER => $combat,
+            Ships::SHIP_PATHFINDER => [...$combat, Missions::RECYCLE],
         ];
     }
 

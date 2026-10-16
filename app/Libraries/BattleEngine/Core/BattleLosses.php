@@ -63,6 +63,32 @@ final class BattleLosses
     }
 
     /**
+     * The metal and crystal of lost units (as lostUnits() returns them).
+     *
+     * @param array<int|string, array<int|string, array<string, array<int|string, array{0: int|float, 1: int|float}>>>> $lostUnits
+     *
+     * @return array{0: int|float, 1: int|float}
+     */
+    public function units(array $lostUnits): array
+    {
+        $metal = 0;
+        $crystal = 0;
+
+        foreach ($lostUnits as $player) {
+            foreach ($player as $fleet) {
+                foreach ($fleet as $values) {
+                    foreach ($values as $lost) {
+                        $metal += $lost[0];
+                        $crystal += $lost[1];
+                    }
+                }
+            }
+        }
+
+        return [$metal, $crystal];
+    }
+
+    /**
      * The debris (metal, crystal) of lost units: SHIP_DEBRIS_FACTOR /
      * DEFENSE_DEBRIS_FACTOR of their value.
      *

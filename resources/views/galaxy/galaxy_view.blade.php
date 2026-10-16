@@ -324,6 +324,18 @@
         <th role="cell" width="125px" style="white-space: nowrap;">{!! $item['actions'] !!}</th>
     </tr>
     @endforeach
+    @if ($deep_space !== null)
+    <tr>
+        <th role="cell" width="30px">16</th>
+        <th role="cell" colspan="5" style="text-align: left">
+            {{ __('game/galaxy.gl_deep_space') }}: {{ __('game/galaxy.gl_debris_field') }}
+            ({{ __('game/global.metal') }}: {{ $deep_space['metal'] }}, {{ __('game/global.crystal') }}: {{ $deep_space['crystal'] }})
+        </th>
+        <th role="cell" colspan="2">
+            <a href="game.php?page=fleet1&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}&amp;planet=16&amp;planettype=2&amp;target_mission=8">{{ __('game/galaxy.gl_collect') }}</a>
+        </th>
+    </tr>
+    @endif
     <tr id="fleetstatusrow">
         <th role="cell" class="c" colspan="8">
             <table style="font-weight: bold" width="100%" id="fleetstatustable">

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\PlayerClassService;
+use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
 use App\Libraries\BattleEngine\Core\Battle;
 use App\Libraries\BattleEngine\Core\BattleReport;
@@ -76,6 +78,7 @@ class ExpeditionBattle extends Missions
         );
 
         $this->recordLosses($playerId, $ships, $survivors);
+        $this->leaveDebris($fleetRow, $report);
         $this->sendReport($fleetRow, $report, (string) __('game/expedition.exp_' . $enemy . '_name'));
 
         if ($survivors === []) {
@@ -122,6 +125,27 @@ class ExpeditionBattle extends Missions
         $player->setName((string) __('game/expedition.exp_' . $enemy . '_name'));
 
         return $player;
+    }
+
+    /**
+     * The battle leaves a debris field in deep space (OGame 7): 10 % of
+     * what was destroyed, 20 % for discoverers.
+     *
+     * @param array<string, mixed> $fleetRow
+     */
+    private function leaveDebris(array $fleetRow, BattleReport $report): void
+    {
+        $debris = app(DeepSpaceDebrisService::class);
+        $share = $debris->share(app(PlayerClassService::class)->classOf(self::int($fleetRow['fleet_owner'])));
+        [$metal, $crystal] = $report->getDestroyedUnits();
+
+        $debris->add(
+            self::int($fleetRow['fleet_end_galaxy']),
+            self::int($fleetRow['fleet_end_system']),
+            $metal * $share,
+            $crystal * $share,
+            self::int($fleetRow['fleet_end_stay'] ?? time())
+        );
     }
 
     private function group(Player $player): PlayerGroup

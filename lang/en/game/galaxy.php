@@ -95,4 +95,5 @@ return [
     'gl_no_missiles' => 'There are no available Interplanetary Missile',
     'gl_add_missile_number' => 'Enter the number of missiles that you want to send',
     'gl_missiles_sended' => ' interplanetary missiles were sent. Main objective: ',
+    'gl_deep_space' => 'Deep space',
 ];

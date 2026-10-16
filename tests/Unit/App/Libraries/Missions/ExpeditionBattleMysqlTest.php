@@ -62,6 +62,10 @@ class ExpeditionBattleMysqlTest extends MysqlTestCase
         app(ExpeditionBattle::class)->fight($this->fleetRow($fleetId), 'aliens');
 
         $this->assertNull(Fleets::find($fleetId));
+        // the destroyed light fighter leaves 10 % in deep space
+        $debris = DB::table('deep_space_debris')->first(['metal', 'crystal']);
+        $this->assertNotNull($debris);
+        $this->assertEquals([300, 100], [$debris->metal, $debris->crystal]);
         $points = DB::table('users_statistics')->where('user_statistic_user_id', $this->player->id)->value('user_statistic_ships_points');
         $this->assertLessThan(100000, is_numeric($points) ? (float) $points : 100000);
         $this->assertReportSent();

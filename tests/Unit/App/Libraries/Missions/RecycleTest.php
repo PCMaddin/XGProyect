@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Libraries\Missions;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use ReflectionMethod;
 use Tests\TestCase;
-use App\Libraries\Missions\Recycle;
+use App\Libraries\Missions\DebrisLoad;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Characterization of how recyclers split a debris field. The expected
  * values are golden values captured from the original nested if/else
- * implementation before it was flattened into splitRecycledDebris().
+ * implementation before it was flattened into splitRecycledDebris() (now
+ * DebrisLoad::split(), shared with the reapers).
  */
+#[CoversClass(DebrisLoad::class)]
 class RecycleTest extends TestCase
 {
     /**
@@ -28,9 +30,9 @@ class RecycleTest extends TestCase
             'metal bigger, crystal small' => [50000, 4000, 20000, 16000, 4000],
             'crystal bigger, metal small' => [3000, 60000, 20000, 3000, 17000],
             'odd capacity' => [9001, 9001, 15001, 7500.5, 7500.5],
-            // not reachable in practice (a fleet never carries more than it can hold),
-            // pinned so that a refactoring does not silently change it
-            'negative capacity' => [1000, 500, -300, -150, -150],
+            // not reachable in practice (a fleet never carries more than it can
+            // hold); a negative capacity no longer unloads the fleet
+            'negative capacity' => [1000, 500, -300, 0, 0],
         ];
     }
 
@@ -42,10 +44,8 @@ class RecycleTest extends TestCase
         int | float $expectedMetal,
         int | float $expectedCrystal
     ): void {
-        $ref = new ReflectionMethod(Recycle::class, 'splitRecycledDebris');
-        $result = $ref->invoke(null, $metal, $crystal, $capacity);
+        $result = DebrisLoad::split($metal, $crystal, $capacity);
 
-        $this->assertIsArray($result);
         $this->assertEqualsWithDelta($expectedMetal, $result['metal'], 0.0001);
         $this->assertEqualsWithDelta($expectedCrystal, $result['crystal'], 0.0001);
     }

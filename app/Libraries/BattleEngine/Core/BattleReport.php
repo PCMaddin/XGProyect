@@ -266,6 +266,19 @@ class BattleReport
     }
 
     /**
+     * The metal and crystal of everything destroyed on both sides.
+     *
+     * @return array{0: int|float, 1: int|float}
+     */
+    public function getDestroyedUnits(): array
+    {
+        $attackers = $this->losses->units($this->losses->lostUnits($this->getRound('START')->getAfterBattleAttackers(), $this->getRound('END')->getAfterBattleAttackers(), false));
+        $defenders = $this->losses->units($this->getDefendersDestroyedUnits());
+
+        return [$attackers[0] + $defenders[0], $attackers[1] + $defenders[1]];
+    }
+
+    /**
      * @return array{0: int|float, 1: int|float}
      */
     public function getDebris(): array

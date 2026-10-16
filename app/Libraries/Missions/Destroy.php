@@ -141,9 +141,10 @@ class Destroy extends CombatMission
                 ? __('game/destroy.des_result_' . $this->destruction['destroyed'])
                 : __('game/destroy.des_report_defender')),
             sprintf(__('game/destroy.des_moon_ds_chances'), $this->destruction['moonChance'], $this->destruction['dsChance']),
+            parent::reportAppendix($fleetRow, $report),
         ];
 
-        return implode('<br>', $lines);
+        return implode('<br>', array_filter($lines, fn (string $line): bool => $line !== ''));
     }
 
     /**

@@ -18,7 +18,7 @@ use Tests\MysqlTestCase;
 /**
  * A real attack leaves wreck fields: for the defender at the attacked
  * planet, and for an attacking general at their home planet, repairable
- * once the fleet is back.
+ * once the fleet is back. Reapers collect a quarter of the debris.
  */
 #[CoversClass(CombatMission::class)]
 #[CoversClass(WreckFieldService::class)]
@@ -67,6 +67,28 @@ class WreckFieldBattleMysqlTest extends MysqlTestCase
         // repairable when the fleet would have been back
         $this->assertEqualsWithDelta(time() + 3600, $field['repairable_from'], 5);
         $this->assertNull(app(WreckFieldService::class)->field($this->homeOf($this->defender)));
+    }
+
+    public function testReapersCollectAQuarterOfTheDebris(): void
+    {
+        $target = $this->homeOf($this->defender);
+        DB::table('ships')->where('ship_planet_id', $target)->update(['ship_battleship' => 20]);
+        DB::table('planets')->where('planet_id', $target)->update(['planet_metal' => 0, 'planet_crystal' => 0, 'planet_deuterium' => 0, 'planet_last_update' => time() + 60]);
+        $this->attack([218 => 300]);
+
+        $fleet = DB::table('fleets')->where('fleet_owner', $this->attacker->id)->first(['fleet_resource_metal', 'fleet_resource_crystal']);
+        $debris = DB::table('planets')->where('planet_id', $target)->first(['planet_debris_metal', 'planet_debris_crystal']);
+        $this->assertNotNull($fleet);
+        $this->assertNotNull($debris);
+
+        // a quarter went into the reapers, three quarters are left
+        $this->assertGreaterThan(0, (float) $fleet->fleet_resource_metal);
+        $this->assertEqualsWithDelta((float) $debris->planet_debris_metal / 3, (float) $fleet->fleet_resource_metal, 2);
+        $this->assertEqualsWithDelta((float) $debris->planet_debris_crystal / 3, (float) $fleet->fleet_resource_crystal, 2);
+
+        $report = DB::table('reports')->value('report_content');
+        $this->assertIsString($report);
+        $this->assertStringContainsString(explode('%s', (string) __('game/attack.at_reapers_collected'))[0], $report);
     }
 
     private function homeOf(User $user): int

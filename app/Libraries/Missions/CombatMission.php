@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Enums\PlayerClass;
 use App\Services\Game\WreckFieldService;
 use App\Services\Game\FleetEventsService;
@@ -36,6 +37,15 @@ abstract class CombatMission extends Missions
 
     /** @var array{0: array<int, int>, 1: array<int, int>} the planet owner's ships before the battle and those lost */
     private array $planetLosses = [[], []];
+
+    /** reapers collect up to a quarter of the debris field after the battle */
+    private const REAPER_SHARE = 0.25;
+
+    /** @var array<int, array{player: int, ships: array<int, int|float>, loot: int|float}> the attacking fleets flying home */
+    private array $returningFleets = [];
+
+    /** the report line on the debris the reapers collected */
+    private string $reaperLine = '';
 
     /** @var list<array{origin: array{planet: int, user: int, back: int}|null, player: int, before: array<int, int>, lost: array<int, int>}> the attacking fleets' losses */
     private array $attackerLosses = [];
@@ -92,7 +102,7 @@ abstract class CombatMission extends Missions
      */
     protected function reportAppendix(array $fleetRow, BattleReport $report): string
     {
-        return '';
+        return $this->reaperLine;
     }
 
     /**
@@ -211,7 +221,96 @@ abstract class CombatMission extends Missions
 
         $this->updatePoints($report, $afterBattleAttackers, $afterBattleDefenders);
         $this->updateDebris($fleetRow, $report);
+        $this->reapersHarvest($fleetRow, $report);
         $this->leaveWrecks($fleetRow, $targetPlanet);
+    }
+
+    /**
+     * Reapers collect up to a quarter of the new debris field right after
+     * the battle, as far as their holds (and the fleet's free room after
+     * the loot) allow (OGame 7).
+     *
+     * @param array<string, mixed> $fleetRow
+     */
+    private function reapersHarvest(array $fleetRow, BattleReport $report): void
+    {
+        [$metal, $crystal] = $report->getDebris();
+        $left = ['metal' => $metal * self::REAPER_SHARE, 'crystal' => $crystal * self::REAPER_SHARE];
+        $collected = ['metal' => 0, 'crystal' => 0];
+
+        foreach ($this->returningFleets as $fleetId => $fleet) {
+            $reapers = (int) ($fleet['ships'][Ships::SHIP_REAPER] ?? 0);
+
+            if ($reapers === 0) {
+                continue;
+            }
+
+            $room = min(
+                $reapers * $this->shipCapacity(Ships::SHIP_REAPER, $fleet['player']),
+                $this->fleetCapacity($fleet['ships'], $fleet['player']) - $fleet['loot']
+            );
+            $load = DebrisLoad::split(floor($left['metal']), floor($left['crystal']), floor($room));
+
+            if ($load['metal'] + $load['crystal'] <= 0) {
+                continue;
+            }
+
+            $left['metal'] -= $load['metal'];
+            $left['crystal'] -= $load['crystal'];
+            $collected['metal'] += $load['metal'];
+            $collected['crystal'] += $load['crystal'];
+
+            $this->updateReturningFleetData([
+                'ships' => FleetShips::encode($fleet['ships']),
+                'amount' => array_sum($fleet['ships']),
+                'stolen' => ['metal' => $load['metal'], 'crystal' => $load['crystal'], 'deuterium' => 0],
+                'fleet_id' => $fleetId,
+            ]);
+        }
+
+        if ($collected['metal'] + $collected['crystal'] <= 0) {
+            return;
+        }
+
+        $this->updatePlanetDebrisByCoords([
+            'time' => time(),
+            'debris' => ['metal' => -$collected['metal'], 'crystal' => -$collected['crystal']],
+            'coords' => [
+                'galaxy' => $fleetRow['fleet_end_galaxy'],
+                'system' => $fleetRow['fleet_end_system'],
+                'planet' => $fleetRow['fleet_end_planet'],
+            ],
+        ]);
+
+        $this->reaperLine = sprintf(
+            (string) __('game/attack.at_reapers_collected'),
+            $this->formatService->prettyNumber((int) $collected['metal']),
+            $this->formatService->prettyNumber((int) $collected['crystal'])
+        );
+    }
+
+    private function shipCapacity(int $shipId, int $playerId): int
+    {
+        return app(FleetsService::class)->getMaxStorage(
+            self::int($this->pricelist[$shipId]['capacity']),
+            $this->hyperspaceTechnology[$playerId] ?? 0,
+            $shipId,
+            $this->playerClasses[$playerId] ?? new ClassBonuses()
+        );
+    }
+
+    /**
+     * @param array<int, int|float> $ships
+     */
+    private function fleetCapacity(array $ships, int $playerId): int | float
+    {
+        $capacity = 0;
+
+        foreach ($ships as $shipId => $count) {
+            $capacity += $count * $this->shipCapacity((int) $shipId, $playerId);
+        }
+
+        return $capacity;
     }
 
     /**
@@ -417,6 +516,11 @@ abstract class CombatMission extends Missions
                     'stolen' => $fleetSteal,
                     'fleet_id' => $fleetId,
                 ]);
+                $this->returningFleets[(int) $fleetId] = [
+                    'player' => (int) $playerId,
+                    'ships' => $ships,
+                    'loot' => $fleetSteal['metal'] + $fleetSteal['crystal'] + $fleetSteal['deuterium'],
+                ];
             }
         }
 
