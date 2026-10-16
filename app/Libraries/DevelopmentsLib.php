@@ -77,7 +77,7 @@ class DevelopmentsLib
                 : floor($base);
 
             if ($destroy) {
-                $ionTech = self::asInt($currentUser[$resource[Research::research_ionic_technology]] ?? 0);
+                $ionTech = self::asInt($currentUser[$resource[Research::RESEARCH_IONIC_TECHNOLOGY]] ?? 0);
                 $cost[$type] = (float) Formulas::getTearDownCost($base, $factor, $level, $ionTech);
             }
         }
@@ -295,7 +295,7 @@ class DevelopmentsLib
      */
     private static function researchTime(array $currentUser, array $currentPlanet, array $resource, float $costMetal, float $costCrystal, int $totalLabLevel): float
     {
-        $intergalactic = self::asInt($currentUser[$resource[Research::research_intergalactic_research_network]] ?? 0);
+        $intergalactic = self::asInt($currentUser[$resource[Research::RESEARCH_INTERGALACTIC_RESEARCH_NETWORK]] ?? 0);
         $labLevel = $intergalactic < 1
             ? self::asInt($currentPlanet[$resource[Buildings::BUILDING_LABORATORY]] ?? 0)
             : $totalLabLevel;
@@ -304,7 +304,7 @@ class DevelopmentsLib
             $costMetal,
             $costCrystal,
             $labLevel,
-            self::asInt($currentUser[$resource[Research::research_astrophysics]] ?? 0)
+            self::asInt($currentUser[$resource[Research::RESEARCH_ASTROPHYSICS]] ?? 0)
         );
 
         $technocrate = app(OfficerService::class)->isOfficerActive(self::asInt($currentUser['premium_officier_technocrat'] ?? 0), time())

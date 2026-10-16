@@ -64,15 +64,15 @@ final class Ranks
         $this->ranks[] = [
             'rank' => $name,
             'rights' => [
-                AllianceRanks::DELETE => SwitchInt::off,
-                AllianceRanks::KICK => SwitchInt::off,
-                AllianceRanks::APPLICATIONS => SwitchInt::off,
-                AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::off,
-                AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::off,
-                AllianceRanks::ADMINISTRATION => SwitchInt::off,
-                AllianceRanks::ONLINE_STATUS => SwitchInt::off,
-                AllianceRanks::SEND_CIRCULAR => SwitchInt::off,
-                AllianceRanks::RIGHT_HAND => SwitchInt::off,
+                AllianceRanks::DELETE => SwitchInt::OFF,
+                AllianceRanks::KICK => SwitchInt::OFF,
+                AllianceRanks::APPLICATIONS => SwitchInt::OFF,
+                AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::OFF,
+                AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::OFF,
+                AllianceRanks::ADMINISTRATION => SwitchInt::OFF,
+                AllianceRanks::ONLINE_STATUS => SwitchInt::OFF,
+                AllianceRanks::SEND_CIRCULAR => SwitchInt::OFF,
+                AllianceRanks::RIGHT_HAND => SwitchInt::OFF,
             ],
         ];
     }
@@ -143,7 +143,7 @@ final class Ranks
     {
         $rights = [];
         foreach (is_array($rank['rights'] ?? null) ? $rank['rights'] : [] as $right => $value) {
-            $rights[(int) $right] = is_numeric($value) ? (int) $value : SwitchInt::off;
+            $rights[(int) $right] = is_numeric($value) ? (int) $value : SwitchInt::OFF;
         }
 
         return [

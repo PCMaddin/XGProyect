@@ -67,7 +67,7 @@ class Buddy
 
     private function isBuddy(BuddyEntity $buddy): bool
     {
-        return (int) $buddy->getBuddyStatus() === BuddiesStatus::isBuddy;
+        return (int) $buddy->getBuddyStatus() === BuddiesStatus::IS_BUDDY;
     }
 
     private function isOwnRequest(BuddyEntity $buddy): bool

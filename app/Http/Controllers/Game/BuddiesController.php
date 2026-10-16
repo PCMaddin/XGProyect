@@ -127,7 +127,7 @@ class BuddiesController extends BaseController
 
         $this->sendBuddyMessage(
             $target,
-            $this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::isNotBuddy ? 1 : 2
+            $this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_NOT_BUDDY ? 1 : 2
         );
 
         DB::delete(
@@ -157,7 +157,7 @@ class BuddiesController extends BaseController
             $this->prepareSql(
                 'UPDATE `' . BUDDY . '` SET `buddy_status` = ? WHERE `buddy_id` = ? AND `buddy_receiver` = ?;'
             ),
-            [BuddiesStatus::isBuddy, $bid, $this->userId()]
+            [BuddiesStatus::IS_BUDDY, $bid, $this->userId()]
         );
 
         return redirect(self::REDIRECT_TARGET);
@@ -179,7 +179,7 @@ class BuddiesController extends BaseController
                 'INSERT INTO `' . BUDDY . '`
                     SET `buddy_sender` = ?, `buddy_receiver` = ?, `buddy_status` = ?, `buddy_request_text` = ?;'
             ),
-            [$this->userId(), $target, BuddiesStatus::isNotBuddy, strip_tags($text)]
+            [$this->userId(), $target, BuddiesStatus::IS_NOT_BUDDY, strip_tags($text)]
         );
 
         return redirect(self::REDIRECT_TARGET);
@@ -334,7 +334,7 @@ class BuddiesController extends BaseController
 
     private function setText(BuddyEntity $buddy, int $onlineTime): string
     {
-        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::isBuddy) {
+        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_BUDDY) {
             return $this->timingService->getOnlineStatus($onlineTime, time());
         }
 
@@ -345,7 +345,7 @@ class BuddiesController extends BaseController
     {
         $bid = $this->asInt($buddy->getBuddyId());
 
-        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::isBuddy) {
+        if ($this->asInt($buddy->getBuddyStatus()) === BuddiesStatus::IS_BUDDY) {
             return $this->generateUrl($bid, 1, (string) __('game/buddies.bu_delete'));
         }
 

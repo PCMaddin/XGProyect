@@ -6,7 +6,7 @@ namespace Xgp\App\Core\Enumerators;
 
 abstract class ImportanceEnumerator
 {
-    public const unimportant = 0;
-    public const normal = 1;
-    public const important = 2;
+    public const UNIMPORTANT = 0;
+    public const NORMAL = 1;
+    public const IMPORTANT = 2;
 }

@@ -56,7 +56,7 @@ class ResearchQueueService
         $levelForCalc = $currentLevel + $alreadyQueued;
 
         $labLevel = $this->labLevel($user, $planet);
-        $astrophysicsCol = $this->registry->get(ResearchEnumerator::research_astrophysics)->getName();
+        $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
         $astrophysicsLevel = (int) ($userData[$astrophysicsCol] ?? 0);
 
         $duration = $this->developmentsService->developmentTime(
@@ -132,7 +132,7 @@ class ResearchQueueService
 
         if ($remaining->isNotEmpty()) {
             $currentTime = time();
-            $astrophysicsCol = $this->registry->get(ResearchEnumerator::research_astrophysics)->getName();
+            $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
             $astrophysicsLevel = (int) $user->research->$astrophysicsCol;
             $technocrateActive = $user->premium->premium_officier_technocrat > $currentTime;
 
@@ -223,7 +223,7 @@ class ResearchQueueService
 
     public function labLevel(User $user, Planets $planet): int
     {
-        $intergalCol = $this->registry->get(ResearchEnumerator::research_intergalactic_research_network)->getName();
+        $intergalCol = $this->registry->get(ResearchEnumerator::RESEARCH_INTERGALACTIC_RESEARCH_NETWORK)->getName();
         $intergalLevel = (int) $user->research->$intergalCol;
 
         if ($intergalLevel < 1) {

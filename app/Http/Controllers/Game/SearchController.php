@@ -214,7 +214,7 @@ class SearchController extends BaseController
 
     private function allianceApplicationAction(int $allianceId, int $allianceRequests): string
     {
-        if ($allianceRequests !== SwitchInt::on) {
+        if ($allianceRequests !== SwitchInt::ON) {
             return '';
         }
 

@@ -690,7 +690,7 @@ class TechnologyInfoService
         }
 
         $techBonus = '';
-        $ionTechnologyLevel = (int) ($this->user[$this->resource[Research::research_ionic_technology]] ?? 0);
+        $ionTechnologyLevel = (int) ($this->user[$this->resource[Research::RESEARCH_IONIC_TECHNOLOGY]] ?? 0);
         $ionTechnologyPercentage = $this->formulasService->getIonTechnologyBonus($ionTechnologyLevel) * 100;
 
         if ($ionTechnologyPercentage > 0) {

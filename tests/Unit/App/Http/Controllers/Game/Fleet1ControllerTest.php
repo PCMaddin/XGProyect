@@ -54,8 +54,8 @@ class Fleet1ControllerTest extends TestCase
         $input = new ReflectionMethod(Fleet1Controller::class, 'buildShipsInput');
         $link = new ReflectionMethod(Fleet1Controller::class, 'buildMaxShipsLink');
 
-        $this->assertNull($input->invoke($controller, Ships::ship_solar_satellite));
-        $this->assertNull($link->invoke($controller, Ships::ship_solar_satellite));
+        $this->assertNull($input->invoke($controller, Ships::SHIP_SOLAR_SATELLITE));
+        $this->assertNull($link->invoke($controller, Ships::SHIP_SOLAR_SATELLITE));
     }
 
     public function testRegularShipRendersAnInputField(): void
@@ -63,9 +63,9 @@ class Fleet1ControllerTest extends TestCase
         $controller = app(Fleet1Controller::class);
         $input = new ReflectionMethod(Fleet1Controller::class, 'buildShipsInput');
 
-        $result = $input->invoke($controller, Ships::ship_light_fighter);
+        $result = $input->invoke($controller, Ships::SHIP_LIGHT_FIGHTER);
 
         $this->assertIsString($result);
-        $this->assertStringContainsString('name="ship' . Ships::ship_light_fighter . '"', $result);
+        $this->assertStringContainsString('name="ship' . Ships::SHIP_LIGHT_FIGHTER . '"', $result);
     }
 }

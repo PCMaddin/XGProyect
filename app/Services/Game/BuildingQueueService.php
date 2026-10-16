@@ -110,7 +110,7 @@ class BuildingQueueService
 
         $forDestroy = $mode === 'destroy';
         $ionTech = $forDestroy
-            ? (int) ($user[$this->registry->get(ResearchEnumerator::research_ionic_technology)->getName()] ?? 0)
+            ? (int) ($user[$this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName()] ?? 0)
             : 0;
 
         if ($count === 0) {
@@ -165,7 +165,7 @@ class BuildingQueueService
         }
 
         $forDestroy = $firstItem->mode === 'destroy';
-        $ionTechCol = $this->registry->get(ResearchEnumerator::research_ionic_technology)->getName();
+        $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
         $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
         $buildingCol = $this->registry->get($firstItem->building_id)->getName();
         $currentLevel = (int) ($planet->buildings?->$buildingCol ?? 0);
@@ -315,7 +315,7 @@ class BuildingQueueService
             }
 
             $forDestroy = $first->mode === 'destroy';
-            $ionTechCol = $this->registry->get(ResearchEnumerator::research_ionic_technology)->getName();
+            $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
             $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
             $buildingCol = $this->registry->get($first->building_id)->getName();
             $currentLevel = (int) ($planet->buildings?->$buildingCol ?? 0);
@@ -381,7 +381,7 @@ class BuildingQueueService
         int $currentLevel,
     ): void {
         $forDestroy = $item->mode === 'destroy';
-        $ionTechCol = $this->registry->get(ResearchEnumerator::research_ionic_technology)->getName();
+        $ionTechCol = $this->registry->get(ResearchEnumerator::RESEARCH_IONIC_TECHNOLOGY)->getName();
         $ionTech = $forDestroy ? (int) ($user[$ionTechCol] ?? 0) : 0;
 
         $price = $this->developmentsService->developmentPrice(

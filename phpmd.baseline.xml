@@ -57,12 +57,4 @@
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="app/View/Components/Game/Topnav.php"/>
   <violation rule="PHPMD\Rule\CleanCode\ElseExpression" file="app/View/Components/Game/Topnav.php"/>
   <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="app/View/Components/Install/Navigation.php"/>
-  <violation rule="PHPMD\Rule\CleanCode\StaticAccess" file="legacy/app/Core/Concerns/PreparesLegacySql.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/BuddiesStatusEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/DefensesEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ImportanceEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/PreferencesEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ResearchEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/ShipsEnumerator.php"/>
-  <violation rule="PHPMD\Rule\Naming\ConstantNamingConventions" file="legacy/app/Core/Enumerators/SwitchIntEnumerator.php"/>
 </phpmd-baseline>

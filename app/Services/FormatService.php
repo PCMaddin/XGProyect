@@ -216,9 +216,9 @@ class FormatService
     public function getImportanceColor(int $priority): string
     {
         return match ($priority) {
-            Importance::unimportant => 'lime',
-            Importance::normal => 'yellow',
-            Importance::important => 'red',
+            Importance::UNIMPORTANT => 'lime',
+            Importance::NORMAL => 'yellow',
+            Importance::IMPORTANT => 'red',
             default => 'lime',
         };
     }

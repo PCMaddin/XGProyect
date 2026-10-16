@@ -6,14 +6,14 @@ namespace Xgp\App\Core\Enumerators;
 
 abstract class DefensesEnumerator
 {
-    public const defense_rocket_launcher = 401;
-    public const defense_light_laser = 402;
-    public const defense_heavy_laser = 403;
-    public const defense_gauss_cannon = 404;
-    public const defense_ion_cannon = 405;
-    public const defense_plasma_turret = 406;
-    public const defense_small_shield_dome = 407;
-    public const defense_large_shield_dome = 408;
-    public const defense_anti_ballistic_missile = 502;
-    public const defense_interplanetary_missile = 503;
+    public const DEFENSE_ROCKET_LAUNCHER = 401;
+    public const DEFENSE_LIGHT_LASER = 402;
+    public const DEFENSE_HEAVY_LASER = 403;
+    public const DEFENSE_GAUSS_CANNON = 404;
+    public const DEFENSE_ION_CANNON = 405;
+    public const DEFENSE_PLASMA_TURRET = 406;
+    public const DEFENSE_SMALL_SHIELD_DOME = 407;
+    public const DEFENSE_LARGE_SHIELD_DOME = 408;
+    public const DEFENSE_ANTI_BALLISTIC_MISSILE = 502;
+    public const DEFENSE_INTERPLANETARY_MISSILE = 503;
 }

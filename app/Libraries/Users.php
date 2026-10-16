@@ -146,7 +146,7 @@ class Users
     private function findRightHandRank(Ranks $ranks): ?int
     {
         foreach ($ranks->getAllRanksAsArray() as $id => $rank) {
-            if (($rank['rights'][AllianceRanks::RIGHT_HAND] ?? null) == SwitchInt::on) {
+            if (($rank['rights'][AllianceRanks::RIGHT_HAND] ?? null) == SwitchInt::ON) {
                 return $id;
             }
         }

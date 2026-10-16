@@ -6,7 +6,7 @@ namespace Xgp\App\Core\Enumerators;
 
 abstract class PreferencesEnumerator
 {
-    public const order = [
+    public const ORDER = [
         'emergence' => 0,
         'coordinates' => 1,
         'alphabet' => 2,
@@ -14,7 +14,7 @@ abstract class PreferencesEnumerator
         'used_fields' => 4,
     ];
 
-    public const sequence = [
+    public const SEQUENCE = [
         'up' => 0,
         'down' => 1,
     ];

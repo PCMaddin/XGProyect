@@ -61,8 +61,8 @@ class Fleet4ControllerTest extends TestCase
         (new ReflectionProperty(Fleet4Controller::class, 'ownPlanet'))->setValue($controller, false);
         $method = new ReflectionMethod(Fleet4Controller::class, 'isMissionShipValid');
 
-        $this->assertTrue($method->invoke($controller, Missions::SPY, [Ships::ship_espionage_probe => 1]));
-        $this->assertFalse($method->invoke($controller, Missions::SPY, [Ships::ship_light_fighter => 1]));
+        $this->assertTrue($method->invoke($controller, Missions::SPY, [Ships::SHIP_ESPIONAGE_PROBE => 1]));
+        $this->assertFalse($method->invoke($controller, Missions::SPY, [Ships::SHIP_LIGHT_FIGHTER => 1]));
     }
 
     public function testAttackOnOwnPlanetIsInvalid(): void

@@ -181,7 +181,7 @@ class Fleet1Controller extends BaseController
 
     private function buildMaxShipsLink(int $shipId): ?string
     {
-        if ($shipId === Ships::ship_solar_satellite) {
+        if ($shipId === Ships::SHIP_SOLAR_SATELLITE) {
             return null;
         }
 
@@ -190,7 +190,7 @@ class Fleet1Controller extends BaseController
 
     private function buildShipsInput(int $shipId): ?string
     {
-        if ($shipId === Ships::ship_solar_satellite) {
+        if ($shipId === Ships::SHIP_SOLAR_SATELLITE) {
             return null;
         }
 

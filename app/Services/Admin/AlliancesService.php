@@ -77,15 +77,15 @@ class AlliancesService
             return [
                 'i' => $index,
                 'name' => $details['rank'],
-                'delete' => $rights[AllianceRanks::DELETE] === SwitchInt::on,
-                'kick' => $rights[AllianceRanks::KICK] === SwitchInt::on,
-                'applications' => $rights[AllianceRanks::APPLICATIONS] === SwitchInt::on,
-                'memberlist' => $rights[AllianceRanks::VIEW_MEMBER_LIST] === SwitchInt::on,
-                'app_management' => $rights[AllianceRanks::APPLICATION_MANAGEMENT] === SwitchInt::on,
-                'administration' => $rights[AllianceRanks::ADMINISTRATION] === SwitchInt::on,
-                'online_status' => $rights[AllianceRanks::ONLINE_STATUS] === SwitchInt::on,
-                'send_circular' => $rights[AllianceRanks::SEND_CIRCULAR] === SwitchInt::on,
-                'right_hand' => $rights[AllianceRanks::RIGHT_HAND] === SwitchInt::on,
+                'delete' => $rights[AllianceRanks::DELETE] === SwitchInt::ON,
+                'kick' => $rights[AllianceRanks::KICK] === SwitchInt::ON,
+                'applications' => $rights[AllianceRanks::APPLICATIONS] === SwitchInt::ON,
+                'memberlist' => $rights[AllianceRanks::VIEW_MEMBER_LIST] === SwitchInt::ON,
+                'app_management' => $rights[AllianceRanks::APPLICATION_MANAGEMENT] === SwitchInt::ON,
+                'administration' => $rights[AllianceRanks::ADMINISTRATION] === SwitchInt::ON,
+                'online_status' => $rights[AllianceRanks::ONLINE_STATUS] === SwitchInt::ON,
+                'send_circular' => $rights[AllianceRanks::SEND_CIRCULAR] === SwitchInt::ON,
+                'right_hand' => $rights[AllianceRanks::RIGHT_HAND] === SwitchInt::ON,
             ];
         }, $rawRanks, array_keys($rawRanks));
     }
@@ -166,8 +166,8 @@ class AlliancesService
 
             foreach ($availableRanks as $rank) {
                 $rights[$rank] = $request->has('u' . $id . 'r' . $rank)
-                    ? SwitchInt::on
-                    : SwitchInt::off;
+                    ? SwitchInt::ON
+                    : SwitchInt::OFF;
             }
 
             $ranks->editRankById($id, $rights);

@@ -18,21 +18,21 @@ class DefensesController extends ShipyardController
 
     /** @var array<int, int> */
     protected array $allowedStructures = [
-        Defenses::defense_rocket_launcher,
-        Defenses::defense_light_laser,
-        Defenses::defense_heavy_laser,
-        Defenses::defense_gauss_cannon,
-        Defenses::defense_ion_cannon,
-        Defenses::defense_plasma_turret,
-        Defenses::defense_small_shield_dome,
-        Defenses::defense_large_shield_dome,
-        Defenses::defense_anti_ballistic_missile,
-        Defenses::defense_interplanetary_missile,
+        Defenses::DEFENSE_ROCKET_LAUNCHER,
+        Defenses::DEFENSE_LIGHT_LASER,
+        Defenses::DEFENSE_HEAVY_LASER,
+        Defenses::DEFENSE_GAUSS_CANNON,
+        Defenses::DEFENSE_ION_CANNON,
+        Defenses::DEFENSE_PLASMA_TURRET,
+        Defenses::DEFENSE_SMALL_SHIELD_DOME,
+        Defenses::DEFENSE_LARGE_SHIELD_DOME,
+        Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE,
+        Defenses::DEFENSE_INTERPLANETARY_MISSILE,
     ];
 
     /** @var array<int, int> */
     protected array $missiles = [
-        Defenses::defense_anti_ballistic_missile => 0,
-        Defenses::defense_interplanetary_missile => 0,
+        Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE => 0,
+        Defenses::DEFENSE_INTERPLANETARY_MISSILE => 0,
     ];
 }

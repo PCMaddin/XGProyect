@@ -229,7 +229,7 @@ class MessagesController extends BaseController
             $list[] = [
                 'message_type' => self::TYPE_NAMES[$typeId],
                 'checked' => isset($active[$typeId]) ? 'checked' : '',
-                'checked_status' => isset($active[$typeId]) ? SwitchInt::on : SwitchInt::off,
+                'checked_status' => isset($active[$typeId]) ? SwitchInt::ON : SwitchInt::OFF,
                 'message_type_name' => $this->typeLabel($typeId),
                 'message_amount' => $this->asInt($row['message_type_count'] ?? 0),
                 'message_unread' => $this->asInt($row['unread_count'] ?? 0),

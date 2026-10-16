@@ -73,7 +73,7 @@ final class GameBootstrap
      */
     public function ensureAccess(User $user): void
     {
-        if ($this->settings->getInt('game_enable') == SwitchInt::off && $user->authlevel < UserRanks::ADMIN) {
+        if ($this->settings->getInt('game_enable') == SwitchInt::OFF && $user->authlevel < UserRanks::ADMIN) {
             Functions::popupMessage($this->settings->getString('close_reason'));
         }
 

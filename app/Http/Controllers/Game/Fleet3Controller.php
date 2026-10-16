@@ -497,20 +497,20 @@ class Fleet3Controller extends BaseController
         $combat = [Missions::ATTACK, Missions::ACS, Missions::TRANSPORT, Missions::DEPLOY, Missions::STAY, Missions::EXPEDITION];
 
         return [
-            Ships::ship_small_cargo_ship => $combat,
-            Ships::ship_big_cargo_ship => $combat,
-            Ships::ship_light_fighter => $combat,
-            Ships::ship_heavy_fighter => $combat,
-            Ships::ship_cruiser => $combat,
-            Ships::ship_battleship => $combat,
-            Ships::ship_colony_ship => [Missions::DEPLOY, Missions::COLONIZE, Missions::EXPEDITION],
-            Ships::ship_recycler => [Missions::DEPLOY, Missions::RECYCLE, Missions::EXPEDITION],
-            Ships::ship_espionage_probe => [Missions::ATTACK, Missions::ACS, Missions::DEPLOY, Missions::STAY, Missions::SPY, Missions::EXPEDITION],
-            Ships::ship_bomber => $combat,
-            Ships::ship_solar_satellite => [],
-            Ships::ship_destroyer => $combat,
-            Ships::ship_deathstar => [Missions::ATTACK, Missions::ACS, Missions::TRANSPORT, Missions::DEPLOY, Missions::STAY, Missions::DESTROY, Missions::EXPEDITION],
-            Ships::ship_reaper => $combat,
+            Ships::SHIP_SMALL_CARGO_SHIP => $combat,
+            Ships::SHIP_BIG_CARGO_SHIP => $combat,
+            Ships::SHIP_LIGHT_FIGHTER => $combat,
+            Ships::SHIP_HEAVY_FIGHTER => $combat,
+            Ships::SHIP_CRUISER => $combat,
+            Ships::SHIP_BATTLESHIP => $combat,
+            Ships::SHIP_COLONY_SHIP => [Missions::DEPLOY, Missions::COLONIZE, Missions::EXPEDITION],
+            Ships::SHIP_RECYCLER => [Missions::DEPLOY, Missions::RECYCLE, Missions::EXPEDITION],
+            Ships::SHIP_ESPIONAGE_PROBE => [Missions::ATTACK, Missions::ACS, Missions::DEPLOY, Missions::STAY, Missions::SPY, Missions::EXPEDITION],
+            Ships::SHIP_BOMBER => $combat,
+            Ships::SHIP_SOLAR_SATELLITE => [],
+            Ships::SHIP_DESTROYER => $combat,
+            Ships::SHIP_DEATHSTAR => [Missions::ATTACK, Missions::ACS, Missions::TRANSPORT, Missions::DEPLOY, Missions::STAY, Missions::DESTROY, Missions::EXPEDITION],
+            Ships::SHIP_REAPER => $combat,
         ];
     }
 

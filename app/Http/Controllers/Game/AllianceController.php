@@ -144,8 +144,8 @@ class AllianceController extends BaseController
             'text' => $text[$tab],
             'alliance_web' => $current->getAllianceWeb(),
             'alliance_image' => $current->getAllianceImage(),
-            'alliance_request_notallow_0' => $current->getAllianceRequestNotAllow() === SwitchInt::off ? 'selected' : '',
-            'alliance_request_notallow_1' => $current->getAllianceRequestNotAllow() === SwitchInt::on ? 'selected' : '',
+            'alliance_request_notallow_0' => $current->getAllianceRequestNotAllow() === SwitchInt::OFF ? 'selected' : '',
+            'alliance_request_notallow_1' => $current->getAllianceRequestNotAllow() === SwitchInt::ON ? 'selected' : '',
             'alliance_owner_range' => $this->rankName($ranks, self::DEFAULT_RANKS['founder']),
             'alliance_newcomer_range' => $this->rankName($ranks, self::DEFAULT_RANKS['newcomer']),
         ]);
@@ -487,10 +487,10 @@ class AllianceController extends BaseController
      */
     private function collectRankRights(Request $request, int $id): array
     {
-        $can = fn (int $right): int => $request->has('u' . $id . 'r' . $right) ? SwitchInt::on : SwitchInt::off;
+        $can = fn (int $right): int => $request->has('u' . $id . 'r' . $right) ? SwitchInt::ON : SwitchInt::OFF;
 
         return [
-            AllianceRanks::DELETE => ($can(1) === SwitchInt::on && $this->alliance->isOwner()) ? SwitchInt::on : SwitchInt::off,
+            AllianceRanks::DELETE => ($can(1) === SwitchInt::ON && $this->alliance->isOwner()) ? SwitchInt::ON : SwitchInt::OFF,
             AllianceRanks::KICK => $can(2),
             AllianceRanks::APPLICATIONS => $can(3),
             AllianceRanks::VIEW_MEMBER_LIST => $can(4),
@@ -555,7 +555,7 @@ class AllianceController extends BaseController
      */
     private function rightChecked(array $rights, int $right): string
     {
-        return ($rights[$right] ?? 0) === SwitchInt::on ? ' checked="checked"' : '';
+        return ($rights[$right] ?? 0) === SwitchInt::ON ? ' checked="checked"' : '';
     }
 
     private function adminTransferSection(Request $request): View | RedirectResponse
@@ -587,7 +587,7 @@ class AllianceController extends BaseController
 
             $rights = $ranks->getRankById($rankId)['rights'] ?? [];
 
-            if (($rights[AllianceRanks::RIGHT_HAND] ?? 0) === SwitchInt::on) {
+            if (($rights[AllianceRanks::RIGHT_HAND] ?? 0) === SwitchInt::ON) {
                 $members[] = [
                     'id' => $this->asInt($member['id'] ?? 0),
                     'name' => $this->asString($member['name'] ?? ''),

@@ -6,6 +6,6 @@ namespace Xgp\App\Core\Enumerators;
 
 abstract class BuddiesStatusEnumerator
 {
-    public const isBuddy = 1;
-    public const isNotBuddy = 0;
+    public const IS_BUDDY = 1;
+    public const IS_NOT_BUDDY = 0;
 }

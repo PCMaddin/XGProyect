@@ -119,7 +119,7 @@ class PreferencesController extends BaseController
      */
     private function sortPlanetOptions(Preferences $preferences): array
     {
-        return collect(PrefEnum::order)
+        return collect(PrefEnum::ORDER)
             ->map(fn (int $value, string $order) => [
                 'value' => $value,
                 'selected' => $value === (int) $preferences->preference_planet_sort,
@@ -134,7 +134,7 @@ class PreferencesController extends BaseController
      */
     private function sortSequenceOptions(Preferences $preferences): array
     {
-        return collect(PrefEnum::sequence)
+        return collect(PrefEnum::SEQUENCE)
             ->map(fn (int $value, string $sequence) => [
                 'value' => $value,
                 'selected' => $value === (int) $preferences->preference_planet_sort_sequence,
@@ -246,14 +246,14 @@ class PreferencesController extends BaseController
                 'preference_planet_sort',
                 0,
                 0,
-                max(PrefEnum::order)
+                max(PrefEnum::ORDER)
             ),
             'preference_planet_sort_sequence' => $this->boundedInteger(
                 $request,
                 'preference_planet_sort_sequence',
                 0,
                 0,
-                max(PrefEnum::sequence)
+                max(PrefEnum::SEQUENCE)
             ),
         ]);
 

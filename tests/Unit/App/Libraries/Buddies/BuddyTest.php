@@ -21,11 +21,11 @@ class BuddyTest extends TestCase
     {
         return [
             // confirmed buddy
-            ['buddy_id' => 1, 'buddy_sender' => 10, 'buddy_receiver' => 20, 'buddy_status' => BuddiesStatus::isBuddy],
+            ['buddy_id' => 1, 'buddy_sender' => 10, 'buddy_receiver' => 20, 'buddy_status' => BuddiesStatus::IS_BUDDY],
             // request this user sent, still pending
-            ['buddy_id' => 2, 'buddy_sender' => 10, 'buddy_receiver' => 30, 'buddy_status' => BuddiesStatus::isNotBuddy],
+            ['buddy_id' => 2, 'buddy_sender' => 10, 'buddy_receiver' => 30, 'buddy_status' => BuddiesStatus::IS_NOT_BUDDY],
             // request this user received, still pending
-            ['buddy_id' => 3, 'buddy_sender' => 40, 'buddy_receiver' => 10, 'buddy_status' => BuddiesStatus::isNotBuddy],
+            ['buddy_id' => 3, 'buddy_sender' => 40, 'buddy_receiver' => 10, 'buddy_status' => BuddiesStatus::IS_NOT_BUDDY],
         ];
     }
 

@@ -40,15 +40,15 @@ class AlliancesServiceTest extends TestCase
     public function testBuildRanksViewDataCastsRightsToBoolean(): void
     {
         $rank = $this->rankWithRights([
-            AllianceRanks::DELETE => SwitchInt::on,
-            AllianceRanks::KICK => SwitchInt::off,
-            AllianceRanks::APPLICATIONS => SwitchInt::on,
-            AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::off,
-            AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::on,
-            AllianceRanks::ADMINISTRATION => SwitchInt::off,
-            AllianceRanks::ONLINE_STATUS => SwitchInt::on,
-            AllianceRanks::SEND_CIRCULAR => SwitchInt::off,
-            AllianceRanks::RIGHT_HAND => SwitchInt::on,
+            AllianceRanks::DELETE => SwitchInt::ON,
+            AllianceRanks::KICK => SwitchInt::OFF,
+            AllianceRanks::APPLICATIONS => SwitchInt::ON,
+            AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::OFF,
+            AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::ON,
+            AllianceRanks::ADMINISTRATION => SwitchInt::OFF,
+            AllianceRanks::ONLINE_STATUS => SwitchInt::ON,
+            AllianceRanks::SEND_CIRCULAR => SwitchInt::OFF,
+            AllianceRanks::RIGHT_HAND => SwitchInt::ON,
         ]);
 
         $data = $this->service->buildRanksViewData([$rank]);
@@ -131,15 +131,15 @@ class AlliancesServiceTest extends TestCase
         return [
             'rank' => 'Founder',
             'rights' => [
-                AllianceRanks::DELETE => SwitchInt::on,
-                AllianceRanks::KICK => SwitchInt::on,
-                AllianceRanks::APPLICATIONS => SwitchInt::on,
-                AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::on,
-                AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::on,
-                AllianceRanks::ADMINISTRATION => SwitchInt::on,
-                AllianceRanks::ONLINE_STATUS => SwitchInt::on,
-                AllianceRanks::SEND_CIRCULAR => SwitchInt::on,
-                AllianceRanks::RIGHT_HAND => SwitchInt::on,
+                AllianceRanks::DELETE => SwitchInt::ON,
+                AllianceRanks::KICK => SwitchInt::ON,
+                AllianceRanks::APPLICATIONS => SwitchInt::ON,
+                AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::ON,
+                AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::ON,
+                AllianceRanks::ADMINISTRATION => SwitchInt::ON,
+                AllianceRanks::ONLINE_STATUS => SwitchInt::ON,
+                AllianceRanks::SEND_CIRCULAR => SwitchInt::ON,
+                AllianceRanks::RIGHT_HAND => SwitchInt::ON,
             ],
         ];
     }
@@ -160,15 +160,15 @@ class AlliancesServiceTest extends TestCase
     private function allOffRights(): array
     {
         return [
-            AllianceRanks::DELETE => SwitchInt::off,
-            AllianceRanks::KICK => SwitchInt::off,
-            AllianceRanks::APPLICATIONS => SwitchInt::off,
-            AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::off,
-            AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::off,
-            AllianceRanks::ADMINISTRATION => SwitchInt::off,
-            AllianceRanks::ONLINE_STATUS => SwitchInt::off,
-            AllianceRanks::SEND_CIRCULAR => SwitchInt::off,
-            AllianceRanks::RIGHT_HAND => SwitchInt::off,
+            AllianceRanks::DELETE => SwitchInt::OFF,
+            AllianceRanks::KICK => SwitchInt::OFF,
+            AllianceRanks::APPLICATIONS => SwitchInt::OFF,
+            AllianceRanks::VIEW_MEMBER_LIST => SwitchInt::OFF,
+            AllianceRanks::APPLICATION_MANAGEMENT => SwitchInt::OFF,
+            AllianceRanks::ADMINISTRATION => SwitchInt::OFF,
+            AllianceRanks::ONLINE_STATUS => SwitchInt::OFF,
+            AllianceRanks::SEND_CIRCULAR => SwitchInt::OFF,
+            AllianceRanks::RIGHT_HAND => SwitchInt::OFF,
         ];
     }
 }

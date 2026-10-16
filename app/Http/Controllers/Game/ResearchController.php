@@ -32,12 +32,12 @@ use App\Libraries\Users;
 class ResearchController extends BaseController
 {
     private const OFFICER_BONUSES = [
-        ResearchEnumerator::research_espionage_technology => [
+        ResearchEnumerator::RESEARCH_ESPIONAGE_TECHNOLOGY => [
             'officer' => 'premium_officier_technocrat',
             'const' => TECHNOCRATE_SPY,
             'lang' => 're_spy',
         ],
-        ResearchEnumerator::research_computer_technology => [
+        ResearchEnumerator::RESEARCH_COMPUTER_TECHNOLOGY => [
             'officer' => 'premium_officier_admiral',
             'const' => AMIRAL,
             'lang' => 're_commander',
@@ -149,7 +149,7 @@ class ResearchController extends BaseController
         );
 
         $totalLabLevel = $this->researchQueueService->labLevel($userModel, $planetModel);
-        $astrophysicsCol = $this->registry->get(ResearchEnumerator::research_astrophysics)->getName();
+        $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
         $astrophysicsLevel = (int) ($userData[$astrophysicsCol] ?? 0);
 
         $workingPlanet = null;

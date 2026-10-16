@@ -205,7 +205,7 @@ class GalaxyLib
         }
 
         $recyclerStorage = app(FleetsService::class)->getMaxStorage(
-            self::asInt($this->pricelist[Ships::ship_recycler]['capacity'] ?? 0),
+            self::asInt($this->pricelist[Ships::SHIP_RECYCLER]['capacity'] ?? 0),
             self::asInt($this->user['research_hyperspace_technology'] ?? 0)
         );
         $recyclerStorage = $recyclerStorage === 0 ? 1 : $recyclerStorage;

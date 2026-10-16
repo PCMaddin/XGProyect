@@ -64,7 +64,7 @@ class Destroy extends CombatMission
      */
     protected function onAttackerVictory(int $playerId, array $targetPlanet, array $ships): array
     {
-        $deathStars = (int) ($ships[Ships::ship_deathstar] ?? 0);
+        $deathStars = (int) ($ships[Ships::SHIP_DEATHSTAR] ?? 0);
 
         if ($deathStars > 0) {
             $this->tryToDestroyMoon(self::int($targetPlanet['planet_diameter']), $deathStars);
@@ -74,8 +74,8 @@ class Destroy extends CombatMission
             return $ships;
         }
 
-        $this->updateLostShipsAndDefensePoints($playerId, [Ships::ship_deathstar => $ships[Ships::ship_deathstar]]);
-        unset($ships[Ships::ship_deathstar]);
+        $this->updateLostShipsAndDefensePoints($playerId, [Ships::SHIP_DEATHSTAR => $ships[Ships::SHIP_DEATHSTAR]]);
+        unset($ships[Ships::SHIP_DEATHSTAR]);
 
         return $ships;
     }

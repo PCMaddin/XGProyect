@@ -324,7 +324,7 @@ class FleetsLib
     {
         if ($missionType === Missions::MISSILE) {
             $missiles = self::getFleetShipsArray(self::asString($fleetRow['fleet_array'] ?? ''));
-            $count = self::asInt($missiles[Defenses::defense_interplanetary_missile] ?? 0);
+            $count = self::asInt($missiles[Defenses::DEFENSE_INTERPLANETARY_MISSILE] ?? 0);
             $time = self::asInt($fleetRow['fleet_start_time'] ?? 0);
 
             $event = (string) __('game/events.ev_missile_attack') . ' ( ' . $count . ' ) '

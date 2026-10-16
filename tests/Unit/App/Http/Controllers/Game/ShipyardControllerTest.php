@@ -21,10 +21,10 @@ class ShipyardControllerTest extends TestCase
      */
     public static function missileProvider(): iterable
     {
-        yield 'anti-ballistic missile' => [Defenses::defense_anti_ballistic_missile, true];
-        yield 'interplanetary missile' => [Defenses::defense_interplanetary_missile, true];
-        yield 'a ship is not a missile' => [Ships::ship_light_fighter, false];
-        yield 'a shield dome is not a missile' => [Defenses::defense_small_shield_dome, false];
+        yield 'anti-ballistic missile' => [Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, true];
+        yield 'interplanetary missile' => [Defenses::DEFENSE_INTERPLANETARY_MISSILE, true];
+        yield 'a ship is not a missile' => [Ships::SHIP_LIGHT_FIGHTER, false];
+        yield 'a shield dome is not a missile' => [Defenses::DEFENSE_SMALL_SHIELD_DOME, false];
     }
 
     #[DataProvider('missileProvider')]

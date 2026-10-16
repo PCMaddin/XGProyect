@@ -71,7 +71,7 @@ class Alliances
 
         $rights = $ranks->getRankById($this->currentUserRankId)['rights'] ?? [];
 
-        return ($rights[$rank] ?? null) == SwitchIntEnumerator::on;
+        return ($rights[$rank] ?? null) == SwitchIntEnumerator::ON;
     }
 
     public function hasAccess(int $rank): bool

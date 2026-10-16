@@ -40,20 +40,20 @@ class ShipyardController extends BaseController
 
     /** @var array<int, int> */
     protected array $allowedStructures = [
-        Ships::ship_small_cargo_ship,
-        Ships::ship_big_cargo_ship,
-        Ships::ship_light_fighter,
-        Ships::ship_heavy_fighter,
-        Ships::ship_cruiser,
-        Ships::ship_battleship,
-        Ships::ship_colony_ship,
-        Ships::ship_recycler,
-        Ships::ship_espionage_probe,
-        Ships::ship_bomber,
-        Ships::ship_solar_satellite,
-        Ships::ship_destroyer,
-        Ships::ship_deathstar,
-        Ships::ship_reaper,
+        Ships::SHIP_SMALL_CARGO_SHIP,
+        Ships::SHIP_BIG_CARGO_SHIP,
+        Ships::SHIP_LIGHT_FIGHTER,
+        Ships::SHIP_HEAVY_FIGHTER,
+        Ships::SHIP_CRUISER,
+        Ships::SHIP_BATTLESHIP,
+        Ships::SHIP_COLONY_SHIP,
+        Ships::SHIP_RECYCLER,
+        Ships::SHIP_ESPIONAGE_PROBE,
+        Ships::SHIP_BOMBER,
+        Ships::SHIP_SOLAR_SATELLITE,
+        Ships::SHIP_DESTROYER,
+        Ships::SHIP_DEATHSTAR,
+        Ships::SHIP_REAPER,
     ];
 
     /** @var array<int, int> */
@@ -196,7 +196,7 @@ class ShipyardController extends BaseController
     {
         $description = $this->descriptionText($this->objectName($itemId));
 
-        if ($itemId === Defenses::defense_interplanetary_missile) {
+        if ($itemId === Defenses::DEFENSE_INTERPLANETARY_MISSILE) {
             return strtr($description, ['%s' => (string) $this->formulasService->missileRange($this->userInt('research_impulse_drive'))]);
         }
 
@@ -327,7 +327,7 @@ class ShipyardController extends BaseController
 
     private function getMaxBuildableItems(int $itemId, int $requested): int
     {
-        if (in_array($itemId, [Defenses::defense_small_shield_dome, Defenses::defense_large_shield_dome], true)) {
+        if (in_array($itemId, [Defenses::DEFENSE_SMALL_SHIELD_DOME, Defenses::DEFENSE_LARGE_SHIELD_DOME], true)) {
             $requested = min($requested, $this->getShieldDomeItemLimit($itemId));
         }
 
@@ -369,11 +369,11 @@ class ShipyardController extends BaseController
         $this->calculateMissilesAmount();
 
         $siloSize = $this->planetInt($this->objectName(44)) * 10;
-        $takenSpace = ($this->missiles[Defenses::defense_anti_ballistic_missile] ?? 0)
-            + (($this->missiles[Defenses::defense_interplanetary_missile] ?? 0) * 2);
+        $takenSpace = ($this->missiles[Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE] ?? 0)
+            + (($this->missiles[Defenses::DEFENSE_INTERPLANETARY_MISSILE] ?? 0) * 2);
         $available = $siloSize - $takenSpace;
 
-        if ($itemId === Defenses::defense_interplanetary_missile) {
+        if ($itemId === Defenses::DEFENSE_INTERPLANETARY_MISSILE) {
             return (int) floor($available / 2);
         }
 
@@ -394,7 +394,7 @@ class ShipyardController extends BaseController
 
     private function isShieldDomeAvailable(int $itemId): bool
     {
-        if (!in_array($itemId, [Defenses::defense_small_shield_dome, Defenses::defense_large_shield_dome], true)) {
+        if (!in_array($itemId, [Defenses::DEFENSE_SMALL_SHIELD_DOME, Defenses::DEFENSE_LARGE_SHIELD_DOME], true)) {
             return false;
         }
 
@@ -406,7 +406,7 @@ class ShipyardController extends BaseController
     {
         $queue = $this->processQueueToArray();
 
-        foreach ([Defenses::defense_anti_ballistic_missile, Defenses::defense_interplanetary_missile] as $missile) {
+        foreach ([Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, Defenses::DEFENSE_INTERPLANETARY_MISSILE] as $missile) {
             $this->missiles[$missile] = ($this->missiles[$missile] ?? 0)
                 + $this->planetInt($this->objectName($missile))
                 + ($queue[$missile] ?? 0);
@@ -434,7 +434,7 @@ class ShipyardController extends BaseController
 
     private function isMissile(int $itemId): bool
     {
-        return in_array($itemId, [Defenses::defense_anti_ballistic_missile, Defenses::defense_interplanetary_missile], true);
+        return in_array($itemId, [Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, Defenses::DEFENSE_INTERPLANETARY_MISSILE], true);
     }
 
     private function descriptionText(string $key): string

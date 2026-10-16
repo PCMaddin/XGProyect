@@ -353,13 +353,13 @@ class Fleet4Controller extends BaseController
     {
         return match ($mission) {
             Missions::ATTACK => !$this->ownPlanet,
-            Missions::SPY => isset($fleet[Ships::ship_espionage_probe]) && !$this->ownPlanet,
-            Missions::COLONIZE => isset($fleet[Ships::ship_colony_ship]),
+            Missions::SPY => isset($fleet[Ships::SHIP_ESPIONAGE_PROBE]) && !$this->ownPlanet,
+            Missions::COLONIZE => isset($fleet[Ships::SHIP_COLONY_SHIP]),
             Missions::RECYCLE => !$this->isEmptyDebris(),
             Missions::DESTROY => !$this->ownPlanet &&
                 $this->occupiedPlanet &&
                 $this->asInt($this->sessionTarget()['type'] ?? 0) === PlanetTypes::MOON &&
-                isset($fleet[Ships::ship_deathstar]),
+                isset($fleet[Ships::SHIP_DEATHSTAR]),
             default => true,
         };
     }
@@ -379,7 +379,7 @@ class Fleet4Controller extends BaseController
             $this->showMessage($this->formatService->colorRed((string) __('game/fleet.fl_stay_not_on_enemy')));
         }
 
-        if ($mission === Missions::COLONIZE && isset($fleet[Ships::ship_colony_ship]) && $this->occupiedPlanet) {
+        if ($mission === Missions::COLONIZE && isset($fleet[Ships::SHIP_COLONY_SHIP]) && $this->occupiedPlanet) {
             $this->showMessage($this->formatService->colorRed((string) __('game/fleet.fl_planet_populed')));
         }
     }
