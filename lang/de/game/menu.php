@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'lm_players' => 'Spieler:',
+    'lm_overview' => 'Übersicht',
+    'lm_galaxy' => 'Galaxie',
+    'lm_empire' => 'Imperium',
+    'lm_fleet' => 'Flotte',
+    'lm_movement' => 'Flottenbewegungen',
+    'lm_resources' => 'Rohstoffe',
+    'lm_resources_settings' => 'Rohstoffeinstellungen',
+    'lm_station' => 'Anlagen',
+    'lm_research' => 'Forschung',
+    'lm_shipyard' => 'Schiffswerft',
+    'lm_defenses' => 'Verteidigung',
+    'lm_officiers' => 'Offiziere rekrutieren',
+    'lm_trader' => 'Händler',
+    'lm_technology' => 'Technik',
+    'lm_messages' => 'Nachrichten',
+    'lm_alliance' => 'Allianz',
+    'lm_buddylist' => 'Buddies',
+    'lm_notes' => 'Notizen',
+    'lm_playerprofile' => 'Profil',
+    'lm_statistics' => 'Statistik',
+    'lm_search' => 'Suche',
+    'lm_options' => 'Einstellungen',
+    'lm_forums' => 'Forum',
+    'lm_logout' => 'Abmelden',
+    'lm_administration' => 'Administration',
+];

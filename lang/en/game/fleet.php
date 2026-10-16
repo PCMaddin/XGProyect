@@ -86,7 +86,7 @@ return [
     'fl_from' => 'From',
     'fl_arrival_time' => 'Arrival time',
     'fl_return_time' => 'Return time',
-    'fl_fleet' => 'Fllet',
+    'fl_fleet' => 'Fleet',
     'fl_player' => 'The player ',
     'fl_add_to_attack' => ' was added to the attack.',
     'fl_dont_exist' => ' was not added to the attack.',

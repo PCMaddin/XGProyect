@@ -11,7 +11,7 @@ return [
     'mg_type' => [
         0 => 'Spy reports',
         1 => 'Battle reports',
-        2 => 'Reportes de expedición',
+        2 => 'Expedition reports',
         3 => 'Messages from alliance',
         4 => 'Messages from players',
         5 => 'Other messages',

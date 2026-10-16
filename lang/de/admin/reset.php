@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Universum zurücksetzen',
+    're_sub_title' => 'Hier kannst du einzelne Bereiche des Universums zurücksetzen oder alles komplett löschen. Das lässt sich nicht rückgängig machen, lege vorher unbedingt eine Sicherung an.',
+    're_reset_universe_confirmation' => 'Wenn du auf OK klickst, werden die gewählten Optionen auf null gesetzt. Das lässt sich nicht rückgängig machen, und für eine Sicherung der Datenbank bist du selbst verantwortlich. Beim Neustart des ganzen Universums werden die Konten nicht gelöscht.',
+    're_defenses_and_ships' => 'Werft und Verteidigung',
+    're_defenses' => 'Verteidigung zurücksetzen',
+    're_ships' => 'Schiffe zurücksetzen',
+    're_reset_hangar' => 'Bauliste von Werft und Verteidigung zurücksetzen',
+    're_buldings' => 'Gebäude',
+    're_buildings_pl' => 'Planetare Gebäude zurücksetzen',
+    're_buildings_lu' => 'Mondgebäude zurücksetzen',
+    're_reset_buldings' => 'Bauliste zurücksetzen',
+    're_inve_ofis' => 'Forschung und Offiziere',
+    're_ofici' => 'Offiziere zurücksetzen',
+    're_investigations' => 'Forschungen zurücksetzen',
+    're_reset_invest' => 'Laufende Forschungen zurücksetzen',
+    're_resources' => 'Rohstoffe',
+    're_resources_dark' => 'Dunkle Materie zurücksetzen',
+    're_resources_met_cry' => 'Metall, Kristall und Deuterium zurücksetzen',
+    're_general' => 'Allgemein',
+    're_reset_moons' => 'Monde zurücksetzen',
+    're_reset_notes' => 'Notizen zurücksetzen',
+    're_reset_rw' => 'Kampfberichte zurücksetzen',
+    're_reset_buddies' => 'Buddylisten zurücksetzen',
+    're_reset_allys' => 'Allianzen zurücksetzen',
+    're_reset_fleets' => 'Flotten zurücksetzen',
+    're_reset_banned' => 'Gesperrte Benutzer zurücksetzen',
+    're_reset_messages' => 'Nachrichten zurücksetzen',
+    're_reset_statpoints' => 'Statistik zurücksetzen',
+    're_reset_all' => 'Das ganze Universum zurücksetzen',
+    're_reset_h1' => 'Optionen zurücksetzen',
+    're_reset_excess' => 'Optionen erfolgreich zurückgesetzt',
+    're_reset_go' => 'Zurücksetzen',
+];

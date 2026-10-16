@@ -611,3 +611,37 @@ Baseline-Einträge.
   die spanischen Menge und Name (`%s %s`), `al_created` nennt auch den Tag.
 - **`LanguageFilesTest`:** prüft für jede Sprachdatei gleiche Schlüssel,
   keine leeren Texte und gleiche Platzhalter in beiden Sprachen.
+- **Deutsch als dritte Sprache:** `lang/de` mit allen 89 Sprachdateien (Spiel,
+  Admin, Installer, E-Mails, Laravel-Validierung). Die Sprache erscheint
+  automatisch im Installer und in den Servereinstellungen (die Liste kommt aus
+  den Verzeichnissen unter `lang/`). Durchgehend wird geduzt, und die üblichen
+  deutschen OGame-Begriffe werden verwendet (Kleiner Transporter,
+  Trümmerfeld, Sensorphalanx, Verbandsangriff …).
+  - **Tabelle `languages`:** `LanguagesTableSeeder` legt `de` an; für
+    bestehende Installationen fügt die Migration
+    `400/2026_10_16_000001_add_german_language.php` die Zeile hinzu, falls sie
+    fehlt (`php artisan migrate --path=database/migrations/400`).
+  - **Changelog im Spiel:** zeigt die Einträge der Serversprache und, wenn es
+    in ihr keine gibt (Deutsch), die englischen. Vorher blieb die Seite dann
+    leer.
+  - **Serversprache `spanish`:** `OptionsTableSeeder` speicherte als Sprache
+    `spanish`, ein Wert ohne Sprachverzeichnis. Das Spiel fiel deshalb auf
+    Englisch zurück, die Changelog-Seite war leer und in den
+    Servereinstellungen war keine Sprache ausgewählt. Neu installiert wird
+    jetzt `en`, und `400/2026_10_16_000002_normalize_server_language.php`
+    setzt einen ungültigen Wert auf `en`, so dass das Spiel genauso aussieht
+    wie bisher.
+  - **Englische Texte korrigiert:** `abandon_homeplanet_with_colonies`,
+    `mg_type.2` und `al_error_founder` standen auf Spanisch, und `fl_fleet`
+    lautete „Fllet“. Der GitHub-Link in `hm_old_version` (`https//`) ist
+    repariert.
+  - **Forschungsnetzwerk-Beschreibung (en/es):** Sie beschreibt jetzt die
+    entschiedene Regel, dass alle Labore zusammengezählt werden; vorher war
+    von „Stufe+1 Laboren“ die Rede.
+  - **Spanischer Platzhalter:** In der Hilfe zu Rundschreiben stand
+    `% player%`; ersetzt wird aber nur `%player%`.
+  - **`LanguageFilesTest`:** vergleicht jetzt Spanisch und Deutsch mit
+    Englisch. Zusätzlich zu sprintf- und `:name`-Platzhaltern erkennt er die
+    eigenen Platzhalter des Spiels (`%1%`, `%player%`, `%t`, `%m`, `%n`). Er
+    meldet außerdem Sprachdateien, die es auf Englisch nicht gibt. Neue Tests
+    gibt es für den Changelog-Rückfall und die beiden Migrationen.

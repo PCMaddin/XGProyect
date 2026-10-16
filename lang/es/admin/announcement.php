@@ -16,7 +16,7 @@ return [
     'an_not_sent' => '¡No pudimos enviar tu mensaje!',
     'an_sent' => 'Tu mensaje ha sido enviado!',
     'an_delivery_result' => '<strong>Resumen de envío de correos:</strong><br>%s',
-    'an_info' => '¡Puedes usar% player% para apuntar nombres de usuario y hacer que el mensaje sea más personalizado! La etiqueta será reemplazada con el nickname una vez que el mensaje haya sido enviado.',
+    'an_info' => '¡Puedes usar %player% para apuntar nombres de usuario y hacer que el mensaje sea más personalizado! La etiqueta será reemplazada con el nickname una vez que el mensaje haya sido enviado.',
     'an_email_sent' => '¡Enviado!',
     'an_email_failed' => '¡Fallo el envío!',
     'an_color' => 'Selecciona un color',

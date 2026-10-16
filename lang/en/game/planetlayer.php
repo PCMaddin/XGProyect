@@ -14,7 +14,7 @@ return [
     'abandon_moon' => 'Abandon Moon',
     'abandon_moon_button' => 'Abandon moon',
     'abandon_homeplanet_unique' => 'You cannot abandon your home planet when you have yet to colonise another planet.',
-    'abandon_homeplanet_with_colonies' => 'Si abandonas tu planeta principal, al conectarte irás directamente al siguiente planeta que colonizaras.',
+    'abandon_homeplanet_with_colonies' => 'If you abandon your home planet, you will go straight to your next colonised planet when you log in.',
     'abandon_confirm_message' => 'Please confirm deletion of planet :coords by putting in your password',
     'abandon_confirm' => 'Confirm',
     'rename_error' => 'Special characters may not be used!',
