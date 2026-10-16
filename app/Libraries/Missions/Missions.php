@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\FleetShips;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\BindsQueries;
-use App\Libraries\FleetsLib;
 use App\Libraries\StatisticsLibrary;
 use App\Libraries\UpdatesLibrary;
 
@@ -91,7 +91,7 @@ class Missions
 
         $shipsFields = '';
 
-        foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $amount) {
+        foreach (FleetShips::decode(self::str($fleetRow['fleet_array'])) as $id => $amount) {
             $shipsFields .= '`' . $this->resource[$id] . '` = `' . $this->resource[$id] . "` + '" . $amount . "', ";
         }
 

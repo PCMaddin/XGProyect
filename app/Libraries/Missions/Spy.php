@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\FleetShips;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Core\Enumerators\MissionsEnumerator;
 use App\Helpers\StringsHelper;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
 /**
@@ -75,7 +75,7 @@ class Spy extends Missions
         $spyLevel = $this->espionageLevel($currentData);
         $targetLevel = $this->espionageLevel($targetData);
 
-        foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $probes) {
+        foreach (FleetShips::decode(self::str($fleetRow['fleet_array'])) as $id => $probes) {
             if ($id != self::ESPIONAGE_PROBE) {
                 continue;
             }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\FleetShips;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -16,7 +17,6 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\FleetsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
 use App\Libraries\GalaxyLib;
@@ -418,7 +418,7 @@ class GalaxyController extends BaseController
                 [
                     $this->userInt('id'),
                     $amount,
-                    FleetsLib::setFleetShipsArray([503 => $amount]),
+                    FleetShips::encode([503 => $amount]),
                     $now + $flightTime,
                     $this->planetInt('planet_galaxy'),
                     $this->planetInt('planet_system'),
@@ -725,7 +725,7 @@ class GalaxyController extends BaseController
                     $this->userInt('id'),
                     $order,
                     $consumption['shipCount'],
-                    FleetsLib::setFleetShipsArray($ships),
+                    FleetShips::encode($ships),
                     $consumption['startTime'],
                     $this->planetInt('planet_galaxy'),
                     $this->planetInt('planet_system'),

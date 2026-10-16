@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
 use App\Helpers\StringsHelper;
-use App\Libraries\FleetsLib as Fleets;
+use App\Services\Game\FleetEventsService;
 use App\Libraries\Functions;
 
 /**
@@ -102,9 +103,9 @@ class Transport extends Missions
             __('game/transport.tra_reaching'),
             StringsHelper::parseReplacements(__('game/transport.tra_delivered_resources'), [
                 self::str($tradingPlanets['start_name']),
-                Fleets::startLink($fleet, ''),
+                app(FleetEventsService::class)->startLink($fleet, ''),
                 self::str($tradingPlanets['target_name']),
-                Fleets::targetLink($fleet, ''),
+                app(FleetEventsService::class)->targetLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
@@ -132,9 +133,9 @@ class Transport extends Missions
                 StringsHelper::parseReplacements(__('game/transport.tra_incoming_delivery'), [
                     self::str($tradingPlanets['start_user_name']),
                     self::str($tradingPlanets['start_name']),
-                    Fleets::startLink($fleet, ''),
+                    app(FleetEventsService::class)->startLink($fleet, ''),
                     self::str($tradingPlanets['target_name']),
-                    Fleets::targetLink($fleet, ''),
+                    app(FleetEventsService::class)->targetLink($fleet, ''),
                     $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                     $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
                     $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
@@ -160,18 +161,18 @@ class Transport extends Missions
         $text = __('game/missions.mi_fleet_back_without_resources');
         $replacements = [
             $tradingPlanets['target_name'],
-            Fleets::targetLink($fleet, ''),
+            app(FleetEventsService::class)->targetLink($fleet, ''),
             $tradingPlanets['start_name'],
-            Fleets::startLink($fleet, ''),
+            app(FleetEventsService::class)->startLink($fleet, ''),
         ];
 
-        if (Fleets::hasResources($fleet)) {
+        if (app(FleetsService::class)->carriesResources($fleet)) {
             $text = __('game/missions.mi_fleet_back_with_resources');
             $replacements = [
                 self::str($fleet['planet_end_name']),
-                Fleets::targetLink($fleet, ''),
+                app(FleetEventsService::class)->targetLink($fleet, ''),
                 self::str($fleet['planet_start_name']),
-                Fleets::startLink($fleet, ''),
+                app(FleetEventsService::class)->startLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),

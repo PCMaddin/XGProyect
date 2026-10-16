@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Services\Game\FleetEventsService;
+use App\Support\FleetShips;
 use App\Libraries\Functions;
 use App\Libraries\UpdatesLibrary;
 use App\Services\FormatService;
@@ -205,9 +206,9 @@ abstract class CombatMission extends Missions
         $message = sprintf(
             __('game/missions.mi_fleet_back_with_resources'),
             self::str($fleetRow['planet_end_name']),
-            FleetsLib::targetLink($fleetRow, ''),
+            app(FleetEventsService::class)->targetLink($fleetRow, ''),
             self::str($fleetRow['planet_start_name']),
-            FleetsLib::startLink($fleetRow, ''),
+            app(FleetEventsService::class)->startLink($fleetRow, ''),
             $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_metal'])),
             $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_crystal'])),
             $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_deuterium']))
@@ -350,7 +351,7 @@ abstract class CombatMission extends Missions
                 }
 
                 $this->updateReturningFleetData([
-                    'ships' => FleetsLib::setFleetShipsArray($ships),
+                    'ships' => FleetShips::encode($ships),
                     'amount' => array_sum($ships),
                     'stolen' => $fleetSteal,
                     'fleet_id' => $fleetId,
@@ -424,7 +425,7 @@ abstract class CombatMission extends Missions
                 }
 
                 $this->updateFleetShipsById([
-                    'ships' => FleetsLib::setFleetShipsArray($survivors),
+                    'ships' => FleetShips::encode($survivors),
                     'amount' => array_sum($survivors),
                     'fleet_id' => $fleetId,
                 ]);

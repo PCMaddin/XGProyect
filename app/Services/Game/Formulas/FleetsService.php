@@ -163,4 +163,20 @@ class FleetsService
     {
         return ($fleetMess == 1);
     }
+
+    /**
+     * Whether the fleet carries any metal, crystal or deuterium.
+     *
+     * @param array<string, mixed> $fleet a fleet row
+     */
+    public function carriesResources(array $fleet): bool
+    {
+        foreach (['fleet_resource_metal', 'fleet_resource_crystal', 'fleet_resource_deuterium'] as $resource) {
+            if (is_numeric($fleet[$resource] ?? null) && (float) $fleet[$resource] !== 0.0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

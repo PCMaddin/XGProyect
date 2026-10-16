@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Services\Game\FleetEventsService;
 use App\Libraries\Functions;
 
 /**
@@ -54,7 +54,7 @@ class Stay extends Missions
         $ownerMessage = sprintf(
             __('game/stay.stay_mess_owner'),
             $targetName,
-            FleetsLib::targetLink($fleetRow, ''),
+            app(FleetEventsService::class)->targetLink($fleetRow, ''),
             $metal,
             $crystal,
             $deuterium
@@ -65,7 +65,7 @@ class Stay extends Missions
         $userMessage = sprintf(
             __('game/stay.stay_mess_user'),
             $startName,
-            FleetsLib::startLink($fleetRow, ''),
+            app(FleetEventsService::class)->startLink($fleetRow, ''),
             $metal,
             $crystal,
             $deuterium
@@ -74,9 +74,9 @@ class Stay extends Missions
         $backMessage = sprintf(
             __('game/missions.mi_fleet_back_without_resources'),
             $targetName,
-            FleetsLib::targetLink($fleetRow, ''),
+            app(FleetEventsService::class)->targetLink($fleetRow, ''),
             $startName,
-            FleetsLib::startLink($fleetRow, '')
+            app(FleetEventsService::class)->startLink($fleetRow, '')
         );
 
         if ($fleetRow['fleet_mess'] == 0) {

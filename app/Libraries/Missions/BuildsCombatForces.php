@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Support\FleetShips;
 use App\Libraries\BattleEngine\Models\Defense;
 use App\Libraries\BattleEngine\Models\Fleet;
 use App\Libraries\BattleEngine\Models\HomeFleet;
@@ -153,7 +153,7 @@ trait BuildsCombatForces
     {
         $fleet = new Fleet(self::int($fleetRow['fleet_id']));
 
-        foreach (FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array'])) as $id => $count) {
+        foreach (FleetShips::decode(self::str($fleetRow['fleet_array'])) as $id => $count) {
             if ($id != 0 && $count != 0) {
                 $fleet->addShipType($this->getShipType($id, $count));
             }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Support\FleetShips;
 use App\Services\FormatService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
@@ -51,7 +51,7 @@ class CombatSettlementTest extends TestCase
             'fleet_id' => $id,
             'fleet_owner' => $owner,
             'fleet_group' => $group,
-            'fleet_array' => FleetsLib::setFleetShipsArray($ships),
+            'fleet_array' => FleetShips::encode($ships),
             'fleet_start_galaxy' => 1,
             'fleet_start_system' => 2,
             'fleet_start_planet' => $owner,

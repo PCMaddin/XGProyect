@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\FleetShips;
 use App\Libraries\BattleEngine\Core\Battle;
 use App\Libraries\BattleEngine\Core\BattleReport;
 use App\Libraries\BattleEngine\Models\Fleet;
 use App\Libraries\BattleEngine\Models\Player;
 use App\Libraries\BattleEngine\Models\PlayerGroup;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\ExpeditionService;
@@ -56,7 +56,7 @@ class ExpeditionBattle extends Missions
 
         $playerId = self::int($fleetRow['fleet_owner']);
         $fleetId = self::int($fleetRow['fleet_id']);
-        $ships = FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array']));
+        $ships = FleetShips::decode(self::str($fleetRow['fleet_array']));
         $technologies = $this->getTechnologiesByUserId($playerId);
 
         $expedition = $this->buildFleet($fleetRow);
@@ -85,7 +85,7 @@ class ExpeditionBattle extends Missions
         }
 
         $this->updateFleetShipsById([
-            'ships' => FleetsLib::setFleetShipsArray($survivors),
+            'ships' => FleetShips::encode($survivors),
             'amount' => array_sum($survivors),
             'fleet_id' => $fleetId,
         ]);

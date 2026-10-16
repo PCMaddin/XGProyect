@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Support\FleetShips;
 use App\Libraries\Missions\ExpeditionBattle;
 use App\Models\Fleets;
 use App\Models\User;
@@ -48,7 +48,7 @@ class ExpeditionBattleMysqlTest extends MysqlTestCase
 
         $fleet = Fleets::findOrFail($fleetId);
         $this->assertSame(1, $fleet->fleet_mess);
-        $survivors = FleetsLib::getFleetShipsArray($fleet->fleet_array);
+        $survivors = FleetShips::decode($fleet->fleet_array);
         $this->assertSame([207], array_keys($survivors));
         $this->assertGreaterThan(0, $survivors[207]);
         $this->assertReportSent();
@@ -99,7 +99,7 @@ class ExpeditionBattleMysqlTest extends MysqlTestCase
         $this->assertNotNull($home);
 
         return DB::table('fleets')->insertGetId([
-            'fleet_owner' => $this->player->id, 'fleet_mission' => 15, 'fleet_amount' => array_sum($ships), 'fleet_array' => FleetsLib::setFleetShipsArray($ships),
+            'fleet_owner' => $this->player->id, 'fleet_mission' => 15, 'fleet_amount' => array_sum($ships), 'fleet_array' => FleetShips::encode($ships),
             'fleet_start_time' => time() - 60, 'fleet_end_stay' => time() - 30, 'fleet_end_time' => time() + 600,
             'fleet_start_galaxy' => $home->planet_galaxy, 'fleet_start_system' => $home->planet_system, 'fleet_start_planet' => $home->planet_planet, 'fleet_start_type' => 1,
             'fleet_end_galaxy' => $home->planet_galaxy, 'fleet_end_system' => $home->planet_system, 'fleet_end_planet' => 16, 'fleet_end_type' => 1,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\FleetEventsService;
 use App\Libraries\Template;
 use App\Enums\Module;
 use App\Services\FormatService;
@@ -15,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
 use App\Libraries\UpdatesLibrary;
@@ -52,6 +52,7 @@ class OverviewController extends BaseController
         private FormatService $formatService,
         private DevelopmentsService $developmentsService,
         private TimingService $timingService,
+        private FleetEventsService $fleetEvents,
     ) {
     }
 
@@ -228,15 +229,15 @@ class OverviewController extends BaseController
 
         if ($isOwn) {
             $record++;
-            $this->put($rows, $start, $id, $start > time() ? FleetsLib::flyingFleetsTable($fleet, 0, true, 'fs', $record, $this->user) : '');
+            $this->put($rows, $start, $id, $start > time() ? $this->fleetEvents->eventRow($fleet, 0, true, 'fs', $record, $this->user) : '');
 
             if ($mission !== 4 && $mission !== 10) {
-                $this->put($rows, $stay, $id, $stay > time() ? FleetsLib::flyingFleetsTable($fleet, 1, true, 'ft', $record, $this->user) : '');
-                $this->put($rows, $end, $id, $end > time() ? FleetsLib::flyingFleetsTable($fleet, 2, true, 'fe', $record, $this->user) : '');
+                $this->put($rows, $stay, $id, $stay > time() ? $this->fleetEvents->eventRow($fleet, 1, true, 'ft', $record, $this->user) : '');
+                $this->put($rows, $end, $id, $end > time() ? $this->fleetEvents->eventRow($fleet, 2, true, 'fe', $record, $this->user) : '');
             }
 
             if ($mission === 4 && $start < time() && $end > time()) {
-                $this->put($rows, $end, $id, FleetsLib::flyingFleetsTable($fleet, 2, true, 'none', $record, $this->user));
+                $this->put($rows, $end, $id, $this->fleetEvents->eventRow($fleet, 2, true, 'none', $record, $this->user));
             }
 
             return;
@@ -246,16 +247,16 @@ class OverviewController extends BaseController
 
         if ($mission === 2 || ($mission === 1 && $this->asInt($fleet['fleet_group'] ?? 0) > 0)) {
             $record++;
-            $this->put($rows, $start, $id, !$hidden && $start > time() ? FleetsLib::flyingFleetsTable($fleet, 0, false, 'ofs', $record, $this->user) : '');
+            $this->put($rows, $start, $id, !$hidden && $start > time() ? $this->fleetEvents->eventRow($fleet, 0, false, 'ofs', $record, $this->user) : '');
         }
 
         if ($mission !== 8) {
             $record++;
             $acsMember = in_array($this->userInt('id'), array_map(intval(...), explode(',', $this->asString($fleet['acs_members'] ?? ''))), true);
-            $this->put($rows, $start, $id, $start > time() ? FleetsLib::flyingFleetsTable($fleet, 0, false, 'ofs', $record, $this->user, $acsMember) : '');
+            $this->put($rows, $start, $id, $start > time() ? $this->fleetEvents->eventRow($fleet, 0, false, 'ofs', $record, $this->user, $acsMember) : '');
 
             if ($mission === 5) {
-                $this->put($rows, $stay, $id, $stay > time() ? FleetsLib::flyingFleetsTable($fleet, 1, false, 'oft', $record, $this->user, $acsMember) : '');
+                $this->put($rows, $stay, $id, $stay > time() ? $this->fleetEvents->eventRow($fleet, 1, false, 'oft', $record, $this->user, $acsMember) : '');
             }
         }
     }

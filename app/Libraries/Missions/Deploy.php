@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
 use App\Helpers\StringsHelper;
-use App\Libraries\FleetsLib as Fleets;
+use App\Services\Game\FleetEventsService;
 use App\Libraries\Functions;
 
 /**
@@ -78,9 +79,9 @@ class Deploy extends Missions
             __('game/deploy.dep_report_title'),
             StringsHelper::parseReplacements(__('game/deploy.dep_report_deployed'), [
                 $fleet['planet_start_name'],
-                Fleets::startLink($fleet, ''),
+                app(FleetEventsService::class)->startLink($fleet, ''),
                 $fleet['planet_end_name'],
-                Fleets::targetLink($fleet, ''),
+                app(FleetEventsService::class)->targetLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),
@@ -98,18 +99,18 @@ class Deploy extends Missions
         $text = __('game/deploy.dep_report_back');
         $replacements = [
             $fleet['planet_end_name'],
-            Fleets::targetLink($fleet, ''),
+            app(FleetEventsService::class)->targetLink($fleet, ''),
             $fleet['planet_start_name'],
-            Fleets::startLink($fleet, ''),
+            app(FleetEventsService::class)->startLink($fleet, ''),
         ];
 
-        if (Fleets::hasResources($fleet)) {
+        if (app(FleetsService::class)->carriesResources($fleet)) {
             $text = __('game/deploy.dep_report_deployed');
             $replacements = [
                 $fleet['planet_end_name'],
-                Fleets::targetLink($fleet, ''),
+                app(FleetEventsService::class)->targetLink($fleet, ''),
                 $fleet['planet_start_name'],
-                Fleets::startLink($fleet, ''),
+                app(FleetEventsService::class)->startLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_deuterium'])),

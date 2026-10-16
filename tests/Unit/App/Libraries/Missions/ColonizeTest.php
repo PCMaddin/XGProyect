@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Libraries\Missions;
 
-use App\Libraries\FleetsLib;
+use App\Support\FleetShips;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -26,22 +26,22 @@ class ColonizeTest extends TestCase
      */
     public function testBuildNewFleetLeavesOneColonyShipBehind(): void
     {
-        $fleet = FleetsLib::setFleetShipsArray([202 => 5, 208 => 2]);
+        $fleet = FleetShips::encode([202 => 5, 208 => 2]);
 
         $result = $this->invoke('buildNewFleet', $fleet);
 
         $this->assertIsString($result);
-        $this->assertSame([202 => 5, 208 => 1], FleetsLib::getFleetShipsArray($result));
+        $this->assertSame([202 => 5, 208 => 1], FleetShips::decode($result));
     }
 
     public function testBuildNewFleetDropsTheLastColonyShipAndEmptyEntries(): void
     {
-        $fleet = FleetsLib::setFleetShipsArray([208 => 1, 203 => 0, 210 => 3]);
+        $fleet = FleetShips::encode([208 => 1, 203 => 0, 210 => 3]);
 
         $result = $this->invoke('buildNewFleet', $fleet);
 
         $this->assertIsString($result);
-        $this->assertSame([210 => 3], FleetsLib::getFleetShipsArray($result));
+        $this->assertSame([210 => 3], FleetShips::decode($result));
     }
 
     /**

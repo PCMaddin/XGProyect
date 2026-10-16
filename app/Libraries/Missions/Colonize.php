@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\FleetShips;
 use App\Services\Game\Formulas\FleetsService;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\PlanetLib;
 use App\Libraries\StatisticsLibrary;
@@ -154,7 +154,7 @@ class Colonize extends Missions
     {
         $newFleet = [];
 
-        foreach (FleetsLib::getFleetShipsArray($fleetArray) as $ship => $count) {
+        foreach (FleetShips::decode($fleetArray) as $ship => $count) {
             // one colony ship (208) stays behind as the new colony
             if ($ship == 208) {
                 if ($count > 1) {
@@ -169,7 +169,7 @@ class Colonize extends Missions
             }
         }
 
-        return FleetsLib::setFleetShipsArray($newFleet);
+        return FleetShips::encode($newFleet);
     }
 
     private function colonizeMessage(int $owner, string $message, int $time): void

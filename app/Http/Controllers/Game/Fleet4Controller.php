@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\FleetShips;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -19,7 +20,6 @@ use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\NoobsProtectionLib;
@@ -318,7 +318,7 @@ class Fleet4Controller extends BaseController
         }
 
         $this->fleetData['fleet_amount'] = $totalShips;
-        $this->fleetData['fleet_array'] = FleetsLib::setFleetShipsArray($fleet);
+        $this->fleetData['fleet_array'] = FleetShips::encode($fleet);
 
         return true;
     }

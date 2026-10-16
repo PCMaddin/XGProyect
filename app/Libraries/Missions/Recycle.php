@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\FleetEventsService;
+use App\Support\FleetShips;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
 /**
@@ -59,7 +60,7 @@ class Recycle extends Missions
                 __('game/recycle.rec_result'),
                 $this->formatService->prettyNumber(self::int($fleetRow['fleet_amount'])),
                 $this->formatService->prettyNumber((int) $this->recyclersCapacity),
-                FleetsLib::targetLink($fleetRow, ''),
+                app(FleetEventsService::class)->targetLink($fleetRow, ''),
                 $this->formatService->prettyNumber((int) $this->planetDebris['metal']),
                 $this->formatService->prettyNumber((int) $this->planetDebris['crystal']),
                 $this->formatService->prettyNumber((int) $recycledResources['metal']),
@@ -70,7 +71,7 @@ class Recycle extends Missions
                 self::int($fleetRow['fleet_owner']),
                 $message,
                 self::int($fleetRow['fleet_start_time']),
-                sprintf(__('game/recycle.rec_report_title'), FleetsLib::targetLink($fleetRow, ''))
+                sprintf(__('game/recycle.rec_report_title'), app(FleetEventsService::class)->targetLink($fleetRow, ''))
             );
 
             return;
@@ -80,9 +81,9 @@ class Recycle extends Missions
             $message = sprintf(
                 __('game/missions.mi_fleet_back_with_resources'),
                 self::str($fleetRow['planet_end_name']),
-                FleetsLib::targetLink($fleetRow, ''),
+                app(FleetEventsService::class)->targetLink($fleetRow, ''),
                 self::str($fleetRow['planet_start_name']),
-                FleetsLib::startLink($fleetRow, ''),
+                app(FleetEventsService::class)->startLink($fleetRow, ''),
                 $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_crystal'])),
                 $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_deuterium'])),
@@ -121,7 +122,7 @@ class Recycle extends Missions
         ];
 
         // SOME REQUIRED VALUES
-        $ships = FleetsLib::getFleetShipsArray(self::str($fleetRow['fleet_array']));
+        $ships = FleetShips::decode(self::str($fleetRow['fleet_array']));
         $recycleCapacity = 0;
         $otherCapacity = 0;
         $currentResources = self::num($fleetRow['fleet_resource_metal']) +

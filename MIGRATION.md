@@ -119,20 +119,18 @@ promoteten Pfad verfügbar (Laravel lädt `config/legacy/constants.php` bei jede
 Request); `DPATH` dagegen **nicht** — Bildpfade über `asset()` auflösen. Array-Über-
 setzungen (`planet_type_short`, `officier.officiers`) über `trans()` statt `__()`.
 
-## Welle 2 — Geteilter Berechnungs-Layer  🟡 teilweise
+## Welle 2 — Geteilter Berechnungs-Layer  ✅ abgeschlossen
 
-> **Stand:** Die Services gibt es (`FormulasService`, `DevelopmentsService`,
-> `FleetsService` u. a. unter `app/Services/Game/Formulas/`). Die statischen
-> Klassen `Formulas`, `DevelopmentsLib` und `FleetsLib` liegen aber weiter in
-> `app/Libraries/` und werden noch von 5, 2 bzw. 14 Dateien benutzt. Das ist
-> reine Aufräumarbeit ohne bekannte Fehler.
+Die statischen Klassen in `app/Libraries/` sind entfernt, alle Aufrufer nutzen
+die typisierten Services:
 
-**Der wichtigste Schritt.** Vor den schweren Controllern die geteilten Libraries als
-typisierte Services nach `app/Services/Game/Formulas/` portieren (dort liegen schon einige).
-
-- `Formulas` (281 Z., 11 Nutzer) → Service
-- `DevelopmentsLib` (296 Z.), `FleetsLib` (500 Z.) → Services
-- Danach die 33 `app/`-Referenzen auf Legacy-Libs sauber umhängen
+| Alt | Neu |
+|---|---|
+| `Formulas` | `App\Services\Game\Formulas\FormulasService` |
+| `DevelopmentsLib` | `App\Services\Game\Formulas\DevelopmentsService` (Hangar-Bauzeit in `UpdatesLibrary` für alle Schiffe/Verteidigungen × Stufen gegen die alte Formel verglichen: identisch) |
+| `FleetsLib::get/setFleetShipsArray` | `App\Support\FleetShips::decode/encode` (`unserialize` nur ohne Objekte) |
+| `FleetsLib::hasResources` | `FleetsService::carriesResources` |
+| `FleetsLib::startLink/targetLink/flyingFleetsTable` u. a. | `App\Services\Game\FleetEventsService` (`eventRow` für Übersicht und Phalanx) |
 
 ## Welle 3 — Sozial & Kommunikation  ✅ abgeschlossen
 

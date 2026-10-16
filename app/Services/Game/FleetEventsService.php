@@ -2,72 +2,43 @@
 
 declare(strict_types=1);
 
-namespace App\Libraries;
+namespace App\Services\Game;
 
+use App\Libraries\Functions;
+use App\Libraries\Template;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\TimingService;
+use App\Support\FleetShips;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\GameObjects\GameObjectRegistry;
 
 /**
- * Presentation helpers for in-flight fleets (event rows, hover popups, coord
- * links) plus the fleet-array (de)serialisation. The numeric fleet maths that
- * the legacy class also carried now lives in the injected FleetsService, so
- * only the view-side helpers were ported here.
+ * The fleet events of the overview and the phalanx (one row per flight,
+ * hold or return, with the hover popups of ships and cargo) and the
+ * coordinate links of fleets.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
-class FleetsLib
+class FleetEventsService
 {
-    /**
-     * @param array<array-key, mixed> $fleetArray
-     */
-    public static function setFleetShipsArray(array $fleetArray): string
-    {
-        return serialize($fleetArray);
-    }
-
-    /**
-     * Fleet arrays are plain ship-id => count maps; both sides are normalised
-     * to int so the (legacy) callers can do arithmetic on the counts safely.
-     *
-     * @return array<int, int>
-     */
-    public static function getFleetShipsArray(string $fleetArray): array
-    {
-        // An empty fleet_array is a normal state (no ships); skip the unserialize
-        // that would only warn on it.
-        if ($fleetArray === '') {
-            return [];
-        }
-
-        // Refuse any embedded objects so a tampered row cannot instantiate
-        // classes on unserialize.
-        $ships = unserialize($fleetArray, ['allowed_classes' => false]);
-
-        if (!is_array($ships)) {
-            return [];
-        }
-
-        $normalised = [];
-
-        foreach ($ships as $shipId => $count) {
-            $normalised[self::asInt($shipId)] = self::asInt($count);
-        }
-
-        return $normalised;
+    public function __construct(
+        private FormatService $format,
+        private OfficerService $officer,
+        private TimingService $timing,
+        private GameObjectRegistry $registry,
+    ) {
     }
 
     /**
      * @param array<string, mixed> $fleetRow
      */
-    public static function startLink(array $fleetRow, string $fleetType): string
+    public function startLink(array $fleetRow, string $fleetType): string
     {
-        return self::coordLink(
+        return $this->coordLink(
             self::asInt($fleetRow['fleet_start_galaxy'] ?? 0),
             self::asInt($fleetRow['fleet_start_system'] ?? 0),
             self::asInt($fleetRow['fleet_start_planet'] ?? 0),
@@ -78,9 +49,9 @@ class FleetsLib
     /**
      * @param array<string, mixed> $fleetRow
      */
-    public static function targetLink(array $fleetRow, string $fleetType): string
+    public function targetLink(array $fleetRow, string $fleetType): string
     {
-        return self::coordLink(
+        return $this->coordLink(
             self::asInt($fleetRow['fleet_end_galaxy'] ?? 0),
             self::asInt($fleetRow['fleet_end_system'] ?? 0),
             self::asInt($fleetRow['fleet_end_planet'] ?? 0),
@@ -91,9 +62,9 @@ class FleetsLib
     /**
      * @param array<string, mixed> $fleetRow
      */
-    public static function fleetResourcesPopup(array $fleetRow, string $text, string $fleetType): string
+    public function fleetResourcesPopup(array $fleetRow, string $text, string $fleetType): string
     {
-        $format = app(FormatService::class);
+        $format = $this->format;
         $total = self::asInt($fleetRow['fleet_resource_metal'] ?? 0)
             + self::asInt($fleetRow['fleet_resource_crystal'] ?? 0)
             + self::asInt($fleetRow['fleet_resource_deuterium'] ?? 0);
@@ -123,20 +94,20 @@ class FleetsLib
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      * @SuppressWarnings("PHPMD.NPathComplexity")
      */
-    public static function fleetShipsPopup(array $fleetRow, string $text, string $fleetType, array $currentUser): string
+    public function fleetShipsPopup(array $fleetRow, string $text, string $fleetType, array $currentUser): string
     {
-        $objects = app(GameObjectRegistry::class)->names();
-        $ships = self::getFleetShipsArray(self::asString($fleetRow['fleet_array'] ?? ''));
+        $objects = $this->registry->names();
+        $ships = FleetShips::decode(self::asString($fleetRow['fleet_array'] ?? ''));
         $isOwn = self::asInt($fleetRow['fleet_owner'] ?? 0) === self::asInt($currentUser['id'] ?? 0);
         $amount = self::asString($fleetRow['fleet_amount'] ?? '');
 
-        $officer = app(OfficerService::class);
+        $officer = $this->officer;
         $espionage = $officer->getMaxEspionage(
             self::asInt($currentUser['research_espionage_technology'] ?? 0),
             $officer->isOfficerActive(self::asInt($currentUser['premium_officier_technocrat'] ?? 0), time())
         );
 
-        $body = '<table width=200>' . self::popupBody($ships, $objects, $isOwn, $espionage, $amount) . '</table>';
+        $body = '<table width=200>' . $this->popupBody($ships, $objects, $isOwn, $espionage, $amount) . '</table>';
 
         return "<a href='#' onmouseover=\"return overlib('" . $body
             . "');\" onmouseout=\"return nd();\" class=\"" . $fleetType . '">' . $text . '</a>';
@@ -146,7 +117,7 @@ class FleetsLib
      * @param array<int, int> $ships
      * @param array<int|string, mixed> $objects
      */
-    private static function popupBody(array $ships, array $objects, bool $isOwn, int $espionage, string $amount): string
+    private function popupBody(array $ships, array $objects, bool $isOwn, int $espionage, string $amount): string
     {
         if (!$isOwn && $espionage < 2) {
             return '<tr><td width=50% align=left><font color=white>' . __('game/events.ev_no_fleet_data') . '</font></td></tr>';
@@ -156,26 +127,16 @@ class FleetsLib
             return '<tr><td width=50% align=left><font color=white>' . __('game/events.ev_aproaching') . $amount . __('game/events.ev_ships') . '</font></td></tr>';
         }
 
-        return self::shipsPopupRows($ships, $objects, $isOwn, $espionage, $amount);
-    }
-
-    /**
-     * @param array<string, mixed> $fleet
-     */
-    public static function hasResources(array $fleet): bool
-    {
-        return self::asFloat($fleet['fleet_resource_metal'] ?? 0) !== 0.0 ||
-            self::asFloat($fleet['fleet_resource_crystal'] ?? 0) !== 0.0 ||
-            self::asFloat($fleet['fleet_resource_deuterium'] ?? 0) !== 0.0;
+        return $this->shipsPopupRows($ships, $objects, $isOwn, $espionage, $amount);
     }
 
     /**
      * @param array<string, mixed> $fleetRow
      */
-    public static function enemyLink(array $fleetRow): string
+    public function enemyLink(array $fleetRow): string
     {
         $image = Functions::setImage(DPATH . '/img/m.gif');
-        $link = app(FormatService::class)->link('game.php?page=chat&playerId=' . self::asInt($fleetRow['fleet_owner'] ?? 0), $image);
+        $link = $this->format->link('game.php?page=chat&playerId=' . self::asInt($fleetRow['fleet_owner'] ?? 0), $image);
 
         return self::asString($fleetRow['start_planet_user'] ?? '') . ' ' . $link;
     }
@@ -190,7 +151,7 @@ class FleetsLib
      * @SuppressWarnings("PHPMD.ExcessiveParameterList")
      * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
-    public static function flyingFleetsTable(array $fleetRow, int $status, bool $owner, string $label, int $record, array $currentUser, bool $acsOwner = false): string
+    public function eventRow(array $fleetRow, int $status, bool $owner, string $label, int $record, array $currentUser, bool $acsOwner = false): string
     {
         $fleetStyle = [
             1 => 'attack', 2 => 'federation', 3 => 'transport', 4 => 'deploy', 5 => 'hold',
@@ -202,10 +163,10 @@ class FleetsLib
 
         $content = $missionType === Missions::MISSILE
             ? ''
-            : self::fleetShipsPopup($fleetRow, (string) __('game/events.ev_fleet'), $style, $currentUser);
+            : $this->fleetShipsPopup($fleetRow, (string) __('game/events.ev_fleet'), $style, $currentUser);
 
-        [$startId, $targetId] = self::routeLabels($fleetRow, $status, $missionType, $style);
-        [$eventString, $time, $rest] = self::eventString($fleetRow, $status, $missionType, $owner, $content, $startId, $targetId, $style);
+        [$startId, $targetId] = $this->routeLabels($fleetRow, $status, $missionType, $style);
+        [$eventString, $time, $rest] = $this->eventString($fleetRow, $status, $missionType, $owner, $content, $startId, $targetId, $style);
 
         $fleetStatus = [0 => 'flight', 1 => 'holding', 2 => 'return'];
         $reference = (string) $record;
@@ -218,7 +179,7 @@ class FleetsLib
             'fleet_order' => $label . $reference,
             'fleet_descr' => $eventString,
             'fleet_javas' => Functions::chronoApplet($label, $reference, $rest, false),
-            'fleet_time' => app(TimingService::class)->formatExtendedDate($time),
+            'fleet_time' => $this->timing->formatExtendedDate($time),
         ]);
     }
 
@@ -226,7 +187,7 @@ class FleetsLib
      * @param array<int|string, mixed> $ships
      * @param array<int|string, mixed> $objects
      */
-    private static function shipsPopupRows(array $ships, array $objects, bool $isOwn, int $espionage, string $amount): string
+    private function shipsPopupRows(array $ships, array $objects, bool $isOwn, int $espionage, string $amount): string
     {
         $rows = '';
 
@@ -236,7 +197,7 @@ class FleetsLib
 
         foreach ($ships as $ship => $count) {
             $name = self::asString($objects[$ship] ?? '');
-            $pretty = app(FormatService::class)->prettyNumber(self::asInt($count));
+            $pretty = $this->format->prettyNumber(self::asInt($count));
 
             if ($isOwn) {
                 $rows .= '<tr><td width=50% align=left><font color=white>' . __('game/ships.' . $name)
@@ -267,27 +228,27 @@ class FleetsLib
      *
      * @return array{0: string, 1: string}
      */
-    private static function routeLabels(array $fleetRow, int $status, int $missionType, string $style): array
+    private function routeLabels(array $fleetRow, int $status, int $missionType, string $style): array
     {
         $startType = self::asInt($fleetRow['fleet_start_type'] ?? 0);
         $targetType = self::asInt($fleetRow['fleet_end_type'] ?? 0);
         $returning = $status === 2;
 
-        $startId = self::originLabel($startType, $returning)
+        $startId = $this->originLabel($startType, $returning)
             . self::asString($fleetRow['start_planet_name'] ?? '') . ' '
-            . self::startLink($fleetRow, $style);
+            . $this->startLink($fleetRow, $style);
 
         $targetLabel = $missionType === Missions::EXPEDITION
             ? (string) __($returning ? 'game/events.ev_from_position' : 'game/events.ev_the_position')
-            : self::destinationLabel($targetType, $returning);
+            : $this->destinationLabel($targetType, $returning);
 
         $targetId = $targetLabel . self::asString($fleetRow['target_planet_name'] ?? '') . ' '
-            . self::targetLink($fleetRow, $style);
+            . $this->targetLink($fleetRow, $style);
 
         return [$startId, $targetId];
     }
 
-    private static function originLabel(int $startType, bool $returning): string
+    private function originLabel(int $startType, bool $returning): string
     {
         return match (true) {
             $startType === 1 => (string) __($returning ? 'game/events.ev_to_the_planet' : 'game/events.ev_from_the_planet'),
@@ -296,7 +257,7 @@ class FleetsLib
         };
     }
 
-    private static function destinationLabel(int $targetType, bool $returning): string
+    private function destinationLabel(int $targetType, bool $returning): string
     {
         if ($returning) {
             return match ($targetType) {
@@ -320,10 +281,10 @@ class FleetsLib
      *
      * @return array{0: string, 1: int, 2: int}
      */
-    private static function eventString(array $fleetRow, int $status, int $missionType, bool $owner, string $content, string $startId, string $targetId, string $style): array
+    private function eventString(array $fleetRow, int $status, int $missionType, bool $owner, string $content, string $startId, string $targetId, string $style): array
     {
         if ($missionType === Missions::MISSILE) {
-            $missiles = self::getFleetShipsArray(self::asString($fleetRow['fleet_array'] ?? ''));
+            $missiles = FleetShips::decode(self::asString($fleetRow['fleet_array'] ?? ''));
             $count = self::asInt($missiles[Defenses::DEFENSE_INTERPLANETARY_MISSILE] ?? 0);
             $time = self::asInt($fleetRow['fleet_start_time'] ?? 0);
 
@@ -335,13 +296,13 @@ class FleetsLib
 
         $event = $owner
             ? (string) __('game/events.ev_one_of_your') . $content
-            : (string) __('game/events.ev_a') . $content . __('game/events.ev_of') . self::enemyLink($fleetRow);
+            : (string) __('game/events.ev_a') . $content . __('game/events.ev_of') . $this->enemyLink($fleetRow);
 
-        [$phrase, $time] = self::statusPhrase($fleetRow, $status, $startId, $targetId);
+        [$phrase, $time] = $this->statusPhrase($fleetRow, $status, $startId, $targetId);
         $event .= $phrase;
 
         $missionTypes = (array) __('game/missions.type_mission');
-        $event .= self::fleetResourcesPopup($fleetRow, self::asString($missionTypes[$missionType] ?? ''), $style);
+        $event .= $this->fleetResourcesPopup($fleetRow, self::asString($missionTypes[$missionType] ?? ''), $style);
 
         return [$event, $time, $time - time()];
     }
@@ -351,7 +312,7 @@ class FleetsLib
      *
      * @return array{0: string, 1: int}
      */
-    private static function statusPhrase(array $fleetRow, int $status, string $startId, string $targetId): array
+    private function statusPhrase(array $fleetRow, int $status, string $startId, string $targetId): array
     {
         $mission = (string) __('game/events.ev_with_the_mission_of');
 
@@ -372,9 +333,9 @@ class FleetsLib
         };
     }
 
-    private static function coordLink(int $galaxy, int $system, int $planet, string $fleetType): string
+    private function coordLink(int $galaxy, int $system, int $planet, string $fleetType): string
     {
-        $format = app(FormatService::class);
+        $format = $this->format;
         $link = 'game.php?page=galaxy&mode=3&galaxy=' . $galaxy . '&system=' . $system;
 
         return $format->link($link, $format->prettyCoords($galaxy, $system, $planet), '', $fleetType);
@@ -383,11 +344,6 @@ class FleetsLib
     private static function asInt(mixed $value): int
     {
         return is_numeric($value) ? (int) $value : 0;
-    }
-
-    private static function asFloat(mixed $value): float
-    {
-        return is_numeric($value) ? (float) $value : 0.0;
     }
 
     private static function asString(mixed $value): string

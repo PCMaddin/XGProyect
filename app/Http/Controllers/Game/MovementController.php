@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\FleetShips;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -18,7 +19,6 @@ use App\Core\Concerns\PreparesSql;
 use App\Models\Fleets as FleetsModel;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\Game\Fleets;
 use App\Libraries\Premium\Premium;
@@ -210,7 +210,7 @@ class MovementController extends BaseController
     private function buildShipsBlock(string $fleetArray): string
     {
         $objects = $this->registry->names();
-        $ships = FleetsLib::getFleetShipsArray($fleetArray);
+        $ships = FleetShips::decode($fleetArray);
         $tooltips = [];
 
         foreach ($ships as $ship => $amount) {

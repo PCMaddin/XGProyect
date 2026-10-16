@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Support\FleetShips;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
@@ -11,7 +12,6 @@ use App\Services\FormatService;
 use App\Services\Game\MerchantService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 
 /**
@@ -100,7 +100,7 @@ class Expedition extends Missions
     {
         $expeditionPoints = 0;
 
-        foreach (FleetsLib::getFleetShipsArray(self::str($fleet['fleet_array'])) as $id => $count) {
+        foreach (FleetShips::decode(self::str($fleet['fleet_array'])) as $id => $count) {
             $ship = $this->registry->ships()->get($id);
 
             if (!$ship instanceof Ship) {
@@ -168,7 +168,7 @@ class Expedition extends Missions
     {
         $shipsRatio = $this->expeditionService->getShipsObtainableChances();
         $foundChance = $this->shipExpeditionPoints / self::num($fleet['fleet_amount']);
-        $currentFleet = FleetsLib::getFleetShipsArray(self::str($fleet['fleet_array']));
+        $currentFleet = FleetShips::decode(self::str($fleet['fleet_array']));
         $foundShip = [];
 
         for ($ship = 202; $ship <= 215; $ship++) {
@@ -197,7 +197,7 @@ class Expedition extends Missions
         }
 
         $this->updateFleetArrayById([
-            'ships' => FleetsLib::setFleetShipsArray($newShips),
+            'ships' => FleetShips::encode($newShips),
             'amount' => array_sum($newShips),
             'fleet_id' => $fleet['fleet_id'],
         ]);
@@ -300,7 +300,7 @@ class Expedition extends Missions
     private function resultBlackHole(array $fleet): void
     {
         $lostChances = (mt_rand(0, 3) * 33 + 1) / 100;
-        $ships = FleetsLib::getFleetShipsArray(self::str($fleet['fleet_array']));
+        $ships = FleetShips::decode(self::str($fleet['fleet_array']));
 
         if ($lostChances == 1) {
             $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_lost_1')));
@@ -327,7 +327,7 @@ class Expedition extends Missions
 
         $this->updateLostShipsAndDefensePoints(self::int($fleet['fleet_owner']), $losses['lost']);
         $this->updateFleetArrayById([
-            'ships' => FleetsLib::setFleetShipsArray($losses['remaining']),
+            'ships' => FleetShips::encode($losses['remaining']),
             'amount' => array_sum($losses['remaining']),
             'fleet_id' => $fleet['fleet_id'],
         ]);

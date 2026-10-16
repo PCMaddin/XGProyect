@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\FleetEventsService;
 use App\Enums\Module;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Services\Game\Formulas\FormulasService;
 use App\Core\Enumerators\PlanetTypesEnumerator;
-use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\Users;
 
@@ -32,8 +32,10 @@ class PhalanxController extends BaseController
     /** @var array<string, mixed> */
     private array $planet = [];
 
-    public function __construct(private FormulasService $formulasService)
-    {
+    public function __construct(
+        private FormulasService $formulasService,
+        private FleetEventsService $fleetEvents,
+    ) {
     }
 
     public function __invoke(Request $request): View | RedirectResponse
@@ -201,20 +203,20 @@ class PhalanxController extends BaseController
         // moon), unless it is a hold mission started here.
         if ($arrive > time()) {
             if ($startedHere && $this->visibleType($startType, $moonDestroyed) && $mission !== 4) {
-                $events[$arrive] .= "\n" . FleetsLib::flyingFleetsTable($fleet, 0, $myFleet, 'fs', $record, $this->user);
+                $events[$arrive] .= "\n" . $this->fleetEvents->eventRow($fleet, 0, $myFleet, 'fs', $record, $this->user);
             } elseif (!$startedHere && $this->visibleType($endType, $moonDestroyed)) {
-                $events[$arrive] .= "\n" . FleetsLib::flyingFleetsTable($fleet, 0, $myFleet, 'fs', $record, $this->user);
+                $events[$arrive] .= "\n" . $this->fleetEvents->eventRow($fleet, 0, $myFleet, 'fs', $record, $this->user);
             }
         }
 
         // Fleet holding on the target planet.
         if ($stay > time() && $mission === 5 && $this->visibleType($endType, $moonDestroyed) && $isTarget) {
-            $events[$stay] .= "\n" . FleetsLib::flyingFleetsTable($fleet, 1, $myFleet, 'ft', $record, $this->user);
+            $events[$stay] .= "\n" . $this->fleetEvents->eventRow($fleet, 1, $myFleet, 'ft', $record, $this->user);
         }
 
         // Returning fleet: visible from the planet it started at, except hold/mip.
         if ($return > time() && $mission !== 4 && $mission !== 10 && $startedHere && $this->visibleType($startType, $moonDestroyed)) {
-            $events[$return] .= "\n" . FleetsLib::flyingFleetsTable($fleet, 2, $myFleet, 'fe', $record, $this->user);
+            $events[$return] .= "\n" . $this->fleetEvents->eventRow($fleet, 2, $myFleet, 'fe', $record, $this->user);
         }
 
         return $events;
