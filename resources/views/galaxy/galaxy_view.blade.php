@@ -272,6 +272,9 @@
                             <input type="submit" value="{{ __('game/galaxy.gl_go') }}">
                         </td>
                         <td style="background-color: transparent; width: 50%; text-align: right;">
+                            @if ($system_phalanx)
+                            <input type="button" value="{{ __('game/phalanx.px_system_phalanx') }}" onClick="fenster('game.php?page=phalanx&amp;mode=system&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}', 'phalanx')">
+                            @endif
                             <a href="game.php?page=fleet1&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}&amp;planet=16&amp;planettype=1&amp;target_mission=15">
                                 <input type="button" value="{{ __('game/galaxy.gl_expedition') }}">
                             </a>
@@ -324,6 +327,37 @@
         <th role="cell" width="125px" style="white-space: nowrap;">{!! $item['actions'] !!}</th>
     </tr>
     @endforeach
+    @if ($system_spy !== null)
+    <tr>
+        <th role="cell" colspan="8" style="text-align: left">
+            <form method="POST" action="game.php?page=galaxy&amp;mode=3&amp;systemspy=true" style="display: inline">
+                @csrf
+                <input type="hidden" name="galaxy" value="{{ $selected_galaxy }}">
+                <input type="hidden" name="system" value="{{ $selected_system }}">
+                {{ __('game/galaxy.gl_system_spy') }}:
+                <input type="number" name="probes" value="{{ $system_spy['probes'] }}" min="1" max="999" style="width: 50px" title="{{ __('game/galaxy.gl_system_spy_probes') }}">
+                {{ __('game/galaxy.gl_system_spy_probes') }}
+                <select name="targets">
+                    @foreach (['both', 'planets', 'moons'] as $option)
+                    <option value="{{ $option }}"{{ $system_spy['targets'] === $option ? ' selected' : '' }}>{{ __('game/galaxy.gl_system_spy_targets_' . $option) }}</option>
+                    @endforeach
+                </select>
+                <select name="activity">
+                    @foreach (['both', 'active', 'inactive'] as $option)
+                    <option value="{{ $option }}"{{ $system_spy['activity'] === $option ? ' selected' : '' }}>{{ __('game/galaxy.gl_system_spy_activity_' . $option) }}</option>
+                    @endforeach
+                </select>
+                {{ __('game/galaxy.gl_system_spy_skip') }}
+                <input type="number" name="skip_hours" value="{{ $system_spy['skip_hours'] }}" min="0" max="720" style="width: 50px">
+                {{ __('game/galaxy.gl_system_spy_hours') }}
+                <input type="submit" value="{{ __('game/galaxy.gl_system_spy_send') }}">
+            </form>
+            @if ($system_spy_result !== '')
+            <br><span style="color: lime">{{ $system_spy_result }}</span>
+            @endif
+        </th>
+    </tr>
+    @endif
     @if ($deep_space !== null)
     <tr>
         <th role="cell" width="30px">16</th>

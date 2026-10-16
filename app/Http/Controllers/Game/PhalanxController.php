@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Enums\AllianceClass;
 use App\Services\Game\FleetEventsService;
 use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
@@ -19,10 +20,13 @@ use App\Libraries\Functions;
 use App\Libraries\Users;
 
 /**
- * Sensor phalanx: scan the fleet movements around a target planet.
+ * Sensor phalanx: scan the fleet movements around a target planet; members
+ * of a researcher alliance can scan a whole system at once (system phalanx,
+ * OGame 8: 40.000 deuterium, same range).
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class PhalanxController extends BaseController
 {
@@ -60,13 +64,13 @@ class PhalanxController extends BaseController
         $system = $request->integer('system');
         $planet = $request->integer('planet');
         $planetType = $request->integer('planettype');
+        $systemScan = $request->query('mode') === 'system';
 
         if (
             $system < $lowerSystem ||
             $system > $upperSystem ||
             $galaxy !== $this->planetInt('planet_galaxy') ||
-            $planetType !== PlanetTypesEnumerator::PLANET ||
-            $this->planetInt('planet_type') !== PlanetTypesEnumerator::MOON
+            !$this->isAllowedScan($systemScan, $planetType)
         ) {
             return redirect('game.php?page=galaxy');
         }
@@ -80,7 +84,12 @@ class PhalanxController extends BaseController
             return redirect('game.php?page=galaxy');
         }
 
+        if ($systemScan) {
+            return $this->systemScan($galaxy, $system);
+        }
+
         if ($this->planetInt('planet_deuterium') >= PHALANX_COST) {
+            $this->charge(PHALANX_COST);
             [$targetName, $fleetsTable] = $this->scan($galaxy, $system, $planet);
             $deuteriumError = '';
         }
@@ -96,15 +105,67 @@ class PhalanxController extends BaseController
     }
 
     /**
+     * From a moon with a phalanx; the target a planet, or the whole system
+     * for members of a researcher alliance.
+     */
+    private function isAllowedScan(bool $systemScan, int $planetType): bool
+    {
+        if ($this->planetInt('planet_type') !== PlanetTypesEnumerator::MOON || $this->planetInt('building_phalanx') < 1) {
+            return false;
+        }
+
+        return $systemScan
+            ? app(PlayerClassService::class)->currentBonuses()->alliance === AllianceClass::Researcher
+            : $planetType === PlanetTypesEnumerator::PLANET;
+    }
+
+    /**
+     * The fleet movements at every planet of the system but the player's own.
+     */
+    private function systemScan(int $galaxy, int $system): View
+    {
+        $positions = [];
+        $deuteriumError = (string) __('game/phalanx.px_no_deuterium');
+
+        if ($this->planetInt('planet_deuterium') >= SYSTEM_PHALANX_COST) {
+            $this->charge(SYSTEM_PHALANX_COST);
+            $deuteriumError = '';
+            $planets = $this->rows(
+                'SELECT `planet_planet` FROM `' . PLANETS . '`
+                WHERE `planet_galaxy` = ? AND `planet_system` = ? AND `planet_type` = 1
+                    AND `planet_destroyed` = 0 AND `planet_user_id` <> ?
+                ORDER BY `planet_planet`;',
+                [$galaxy, $system, $this->userInt('id')]
+            );
+
+            foreach ($planets as $row) {
+                $planet = $this->asInt($row['planet_planet'] ?? 0);
+                [$name, $table] = $this->scan($galaxy, $system, $planet);
+                $positions[] = ['planet' => $planet, 'name' => $name, 'fleets' => $table];
+            }
+        }
+
+        return view('galaxy.phalanx_system', [
+            'error' => $deuteriumError,
+            'galaxy' => $galaxy,
+            'system' => $system,
+            'positions' => $positions,
+        ]);
+    }
+
+    private function charge(int $deuterium): void
+    {
+        DB::update(
+            $this->prepareSql('UPDATE `' . PLANETS . '` SET `planet_deuterium` = `planet_deuterium` - ? WHERE `planet_id` = ?;'),
+            [$deuterium, $this->userInt('current_planet')]
+        );
+    }
+
+    /**
      * @return array{0: string, 1: string}
      */
     private function scan(int $galaxy, int $system, int $planet): array
     {
-        DB::update(
-            $this->prepareSql('UPDATE `' . PLANETS . '` SET `planet_deuterium` = `planet_deuterium` - ? WHERE `planet_id` = ?;'),
-            [PHALANX_COST, $this->userInt('current_planet')]
-        );
-
         $targetRow = DB::selectOne(
             $this->prepareSql(
                 'SELECT `planet_name`, `planet_user_id` FROM `' . PLANETS . '`

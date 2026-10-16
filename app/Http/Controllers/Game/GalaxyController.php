@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Core\Enumerators\MissionsEnumerator as Missions;
+use App\Core\Enumerators\ShipsEnumerator as Ships;
+use App\Services\Game\SystemEspionageService;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Enums\AllianceClass;
+use App\Services\Game\WreckFieldService;
 use App\Enums\PlayerClass;
 use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
@@ -50,6 +56,9 @@ class GalaxyController extends BaseController
     private array $galaxy = [];
 
     private int $planetCount = 0;
+
+    /** the result of a system espionage, shown above the galaxy */
+    private string $systemSpyResult = '';
 
     private int $currentGalaxy = 0;
 
@@ -105,6 +114,10 @@ class GalaxyController extends BaseController
             $this->sendMissiles($request);
         }
 
+        if ($request->query('systemspy') === 'true') {
+            $this->systemSpyResult = $this->sendSystemEspionage($request);
+        }
+
         return null;
     }
 
@@ -149,12 +162,189 @@ class GalaxyController extends BaseController
             [
                 'list_of_positions' => $this->buildPositionsList(),
                 'deep_space' => $this->deepSpaceDebris(),
+                'system_phalanx' => $this->canSystemPhalanx(),
+                'system_spy' => $this->systemSpyForm(),
+                'system_spy_result' => $this->systemSpyResult,
                 'planet_count' => $this->planetCount,
                 'max_galaxy' => MAX_GALAXY_IN_WORLD,
                 'max_system' => MAX_SYSTEM_IN_GALAXY,
             ],
             $parse
         ));
+    }
+
+    private function isWarrior(): bool
+    {
+        return app(PlayerClassService::class)->currentBonuses()->alliance === AllianceClass::Warrior;
+    }
+
+    /**
+     * The options of the system espionage for members of a warrior
+     * alliance (the last ones used), or null.
+     *
+     * @return array{probes: int, targets: string, activity: string, skip_hours: int}|null
+     */
+    private function systemSpyForm(): ?array
+    {
+        if (!$this->isWarrior()) {
+            return null;
+        }
+
+        $saved = session('system_spy_options');
+
+        return app(SystemEspionageService::class)->options(
+            is_array($saved) ? $saved : [],
+            max(1, $this->userInt('preference_spy_probes'))
+        );
+    }
+
+    /**
+     * System espionage (warrior alliances, OGame 8): probes to every target
+     * of the system that matches the options; each one is a normal
+     * espionage mission with its probes, deuterium and fleet slot. Stops
+     * when the probes, the deuterium or the slots run out.
+     */
+    private function sendSystemEspionage(Request $request): string
+    {
+        if (!$this->isWarrior() || $this->userInt('preference_vacation_mode') > 0) {
+            return '';
+        }
+
+        $espionage = app(SystemEspionageService::class);
+        $options = $espionage->options($request->only(['probes', 'targets', 'activity', 'skip_hours']), max(1, $this->userInt('preference_spy_probes')));
+        session(['system_spy_options' => $options]);
+
+        $galaxy = $request->integer('galaxy');
+        $system = $request->integer('system');
+        $now = time();
+        $probes = $this->planetInt('ship_espionage_probe');
+        $deuterium = $this->planetInt('planet_deuterium');
+        $freeSlots = $this->fleetsService->getMaxFleets(
+            $this->userInt('research_computer_technology'),
+            $this->officerService->isOfficerActive($this->userInt('premium_officier_admiral'), $now),
+            app(PlayerClassService::class)->currentBonuses()
+        ) - $this->currentFleets();
+        $sent = 0;
+        $skipped = 0;
+
+        foreach ($espionage->targets($this->userInt('id'), $galaxy, $system, $options, $now) as $target) {
+            $count = min($options['probes'], $probes);
+            $ships = [Ships::SHIP_ESPIONAGE_PROBE => $count];
+            $consumption = $count > 0 ? $this->fleetConsumption($ships, $galaxy, $system, $target['planet']) : null;
+
+            if ($consumption === null || $freeSlots <= 0 || $deuterium < $consumption['fuel']) {
+                break;
+            }
+
+            if (!$this->isSpyableTarget($target['owner'])) {
+                $skipped++;
+
+                continue;
+            }
+
+            $this->persistFleet($ships, Missions::SPY, $target['type'], $galaxy, $system, $target['planet'], $target['owner'], $consumption);
+            $espionage->record($this->userInt('id'), $target['planet_id'], $now);
+            $probes -= $count;
+            $deuterium -= $consumption['fuel'];
+            $freeSlots--;
+            $sent++;
+        }
+
+        return sprintf((string) __('game/galaxy.gl_system_spy_result'), $sent, $skipped);
+    }
+
+    /**
+     * Noob protection, vacation mode and protected administrators, as for a
+     * single espionage from the galaxy.
+     */
+    private function isSpyableTarget(int $ownerId): bool
+    {
+        $owner = DB::table('users AS u')
+            ->join('preferences AS pr', 'pr.preference_user_id', '=', 'u.id')
+            ->where('u.id', $ownerId)
+            ->first(['u.onlinetime', 'u.authlevel', 'pr.preference_vacation_mode']);
+
+        if ($owner === null || $this->asInt($owner->preference_vacation_mode) > 0) {
+            return false;
+        }
+
+        if ($this->settingsService->getInt('adm_attack') === 1 && $this->asInt($owner->authlevel) > 0) {
+            return false;
+        }
+
+        if ($this->asInt($owner->onlinetime) < time() - 60 * 60 * 24 * 7) {
+            return true;
+        }
+
+        $points = $this->noob->returnPoints($this->userInt('id'), $ownerId);
+        $current = $this->asInt($points['user_points'] ?? 0);
+        $targetPoints = $this->asInt($points['target_points'] ?? 0);
+
+        return !$this->noob->isWeak($current, $targetPoints) && !$this->noob->isStrong($current, $targetPoints);
+    }
+
+    /**
+     * Members of a researcher alliance scan the whole system with the
+     * phalanx of the current moon, when it is in range (OGame 8).
+     */
+    private function canSystemPhalanx(): bool
+    {
+        if (
+            app(PlayerClassService::class)->currentBonuses()->alliance !== AllianceClass::Researcher ||
+            $this->planetInt('planet_type') !== PlanetTypesEnumerator::MOON ||
+            $this->planetInt('building_phalanx') < 1 ||
+            $this->planetInt('planet_galaxy') !== $this->currentGalaxy
+        ) {
+            return false;
+        }
+
+        $range = $this->formulasService->phalanxRange(
+            $this->planetInt('building_phalanx'),
+            app(PlayerClassService::class)->currentBonuses()->player->phalanxRangeFactor()
+        );
+
+        return abs($this->planetInt('planet_system') - $this->currentSystem) <= $range;
+    }
+
+    /**
+     * The wreck fields of the system (OGame 7), by position: the ships in
+     * them, and for the owner the way to the space dock.
+     *
+     * @param array<int, int> $planetIds position => planet id
+     *
+     * @return array<int, string>
+     */
+    private function wreckBlocks(array $planetIds): array
+    {
+        $now = time();
+        $fields = app(WreckFieldService::class)->visibleFields(array_values($planetIds), $now);
+        $blocks = [];
+
+        foreach ($planetIds as $slot => $planetId) {
+            $field = $fields[$planetId] ?? null;
+
+            if ($field === null) {
+                continue;
+            }
+
+            $own = $field['user_id'] === $this->userInt('id');
+            $blocks[$slot] = view('galaxy.galaxy_wreck_block', [
+                'galaxy' => $this->currentGalaxy,
+                'system' => $this->currentSystem,
+                'planet' => $slot,
+                'image' => asset('assets/upload/skins/xgproyect/planets/wreck.jpg'),
+                'ships' => array_map(fn (int $id, int $amount): array => [
+                    'name' => (string) __('game/ships.' . $this->registry->get($id)->getName()),
+                    'amount' => $this->formatService->prettyNumber($amount),
+                ], array_keys($field['ships']), $field['ships']),
+                'state' => $field['repair_started_at'] > 0
+                    ? (string) __('game/galaxy.gl_wreck_in_repair')
+                    : sprintf((string) __('game/galaxy.gl_wreck_burns_up'), $this->formatService->prettyTime(max(0, $field['expires_at'] - $now))),
+                'dock_url' => $own ? 'game.php?page=spacedock&cp=' . $planetId . '&re=0' : '',
+            ])->render();
+        }
+
+        return $blocks;
     }
 
     /**
@@ -239,12 +429,19 @@ class GalaxyController extends BaseController
     private function buildPositionsList(): array
     {
         $positions = [];
+        $planetIds = [];
         $galaxyRow = new GalaxyLib($this->user, $this->planet, $this->currentGalaxy, $this->currentSystem);
 
         foreach ($this->galaxy as $planet) {
             $this->planetCount++;
             $slot = $this->asInt($planet['planet_planet'] ?? 0);
             $positions[$slot] = $galaxyRow->buildRow($planet, $slot);
+            $planetIds[$slot] = $this->asInt($planet['id_planet'] ?? 0);
+        }
+
+        foreach ($this->wreckBlocks($planetIds) as $slot => $block) {
+            $debris = $positions[$slot]['debris'] ?? '';
+            $positions[$slot]['debris'] = (is_string($debris) ? $debris : '') . $block;
         }
 
         for ($slot = 1; $slot <= MAX_PLANET_IN_SYSTEM; $slot++) {
@@ -593,6 +790,10 @@ class GalaxyController extends BaseController
         }
 
         $this->persistFleet($ships, $order, $planetType, $galaxy, $system, $planet, $targetId, $consumption);
+
+        if ($order === Missions::SPY) {
+            app(SystemEspionageService::class)->recordAt($this->userInt('id'), $galaxy, $system, $planet, $planetType, time());
+        }
 
         return new Response($this->fleetResultMessage($ships, $consumption['shipCount']));
     }

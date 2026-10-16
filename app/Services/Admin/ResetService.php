@@ -258,7 +258,7 @@ class ResetService
     {
         $tables = [
             'alliance', 'alliance_statistics', 'acs', 'acs_members', 'fleets', 'buddys', 'messages', 'notes', 'reports',
-            'building_queues', 'research_queues', 'planet_boosters', 'wreck_fields', 'deep_space_debris', 'user_items', 'import_exports', 'auction_bids', 'auctions',
+            'building_queues', 'research_queues', 'planet_boosters', 'wreck_fields', 'deep_space_debris', 'espionage_log', 'user_items', 'import_exports', 'auction_bids', 'auctions',
             'planets', 'buildings', 'defenses', 'ships', 'preferences', 'premium', 'research', 'sessions',
         ];
 

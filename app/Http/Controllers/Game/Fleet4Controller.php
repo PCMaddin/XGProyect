@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\SystemEspionageService;
 use App\Services\Game\DeepSpaceDebrisService;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
@@ -667,6 +668,18 @@ class Fleet4Controller extends BaseController
                 ),
                 $bindings
             );
+
+            // the system espionage skips targets spied on recently
+            if ($this->asInt($this->fleetData['fleet_mission']) === Missions::SPY) {
+                app(SystemEspionageService::class)->recordAt(
+                    $this->userInt('id'),
+                    $this->asInt($this->fleetData['fleet_end_galaxy']),
+                    $this->asInt($this->fleetData['fleet_end_system']),
+                    $this->asInt($this->fleetData['fleet_end_planet']),
+                    $this->asInt($this->fleetData['fleet_end_type']),
+                    time()
+                );
+            }
         });
     }
 

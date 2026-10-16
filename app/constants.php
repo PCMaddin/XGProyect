@@ -103,6 +103,8 @@ defined('BASIC_RESOURCE_MARKET_DM') || define('BASIC_RESOURCE_MARKET_DM', [
 
 // PHALANX COST
 defined('PHALANX_COST') || define('PHALANX_COST', 10000);
+// the system phalanx of researcher alliances (OGame 8)
+defined('SYSTEM_PHALANX_COST') || define('SYSTEM_PHALANX_COST', 40000);
 
 /**
  *

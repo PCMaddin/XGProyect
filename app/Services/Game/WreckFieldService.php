@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  */
 class WreckFieldService
 {
@@ -157,10 +158,41 @@ class WreckFieldService
     {
         $row = DB::table('wreck_fields')->where('planet_id', $planetId)->first();
 
-        if ($row === null) {
-            return null;
+        return $row === null ? null : self::fromRow($row);
+    }
+
+    /**
+     * The wreck fields of the planets that can still be seen (not burnt
+     * up), by planet id, for the galaxy view.
+     *
+     * @param list<int> $planetIds
+     *
+     * @return array<int, array{planet_id: int, user_id: int, ships: array<int, int>, created_at: int, expires_at: int, repairable_from: int, repair_started_at: int, repair_ends_at: int, repaired: array<int, int>}>
+     */
+    public function visibleFields(array $planetIds, int $now): array
+    {
+        if ($planetIds === []) {
+            return [];
         }
 
+        $fields = [];
+
+        foreach (DB::table('wreck_fields')->whereIn('planet_id', $planetIds)->get() as $row) {
+            $field = self::fromRow($row);
+
+            if ($field['repair_started_at'] > 0 || $field['expires_at'] > $now) {
+                $fields[$field['planet_id']] = $field;
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * @return array{planet_id: int, user_id: int, ships: array<int, int>, created_at: int, expires_at: int, repairable_from: int, repair_started_at: int, repair_ends_at: int, repaired: array<int, int>}
+     */
+    private static function fromRow(\stdClass $row): array
+    {
         return [
             'planet_id' => (int) $row->planet_id,
             'user_id' => (int) $row->user_id,

@@ -1066,9 +1066,21 @@ Nachgezogen:
   - Der Tempobonus für Expeditionen und Allianzflüge wirkt auf die
     Flugzeit beim Absenden; die Zeitvorschau in Flotte 3 zeigt die Zeit
     ohne ihn.
-  - **Nicht übernommen**: System-Phalanx und System-Spionage des Forschers
-    bzw. Kriegers (es gibt keine Systemansicht dafür) sowie die
-    Mindestdauer von 14 Tagen vor der ersten Wahl.
+  - **System-Phalanx** (Forscher, Changelog 8.0): Button in der Galaxie,
+    wenn der aktuelle Mond eine Phalanx hat und das System in Reichweite
+    liegt. Ein Scan kostet 40.000 Deuterium (`SYSTEM_PHALANX_COST`) und
+    zeigt die Flottenbewegungen aller fremden Planeten des Systems.
+  - **System-Spionage** (Krieger, Changelog 8.0): Formular in der Galaxie;
+    schickt Sonden an alle Ziele des Systems, jede Mission mit eigenen
+    Sonden, Deuterium und Flottenslot, bis eines davon ausgeht. Optionen:
+    Sonden je Ziel, Planeten/Monde/beides, aktive/inaktive/beide, Ziele
+    überspringen, die in den letzten N Stunden ausspioniert wurden
+    (Tabelle `espionage_log`, auch für einzelne Spionage aus Galaxie und
+    Flottenmenü geführt). Noob-Schutz, Urlaubsmodus und geschützte Admins
+    gelten wie bei der einzelnen Spionage. Die Optionen bleiben in der
+    Sitzung.
+  - **Nicht übernommen**: die Mindestdauer von 14 Tagen vor der ersten
+    Wahl.
   - Tests für die Boni, Wahl und Wechsel sowie die Verwaltungsseite; im
     Browser durchgespielt.
 - ✅ **Raumdock und Wrackfelder** (OGame 7; owiki „Raumdock“;
@@ -1095,9 +1107,12 @@ Nachgezogen:
     Schiffe in Dienst, spätestens nach 3 Tagen geschieht es von selbst
     (beim nächsten Aktualisieren des Planeten).
   - Hinweis auf der Übersicht und Link beim Raumdock in den Anlagen.
+  - **Galaxieansicht**: Ein Wrackfeld erscheint in der Spalte „TF“ mit
+    seinen Schiffen und der Zeit bis zum Verglühen (oder „In Reparatur“),
+    für den Besitzer mit Link zum Raumdock des Planeten.
   - **Nicht übernommen**: schrittweises Indienststellen schon reparierter
-    Schiffe vor dem Ende, Wracks während einer laufenden Reparatur (sie
-    gehen verloren) und Wrackfelder in der Galaxieansicht.
+    Schiffe vor dem Ende und Wracks während einer laufenden Reparatur (sie
+    gehen verloren).
   - Rundung: Die Kosten werden wie bei allen Gebäuden gerundet, die
     Energie für Stufe 3 ist also 313 statt 312.
   - Tests für Kosten, Schwellen, Inhalt, Reparatur, Indienststellung,
