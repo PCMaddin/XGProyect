@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Services\Game\HonorService;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\SettingsService;
@@ -55,7 +56,8 @@ class HighscoreController extends BaseController
             $type = 4;
         }
 
-        $mapping = $this->rankingType($type);
+        // honour belongs to the players
+        $mapping = $this->rankingType($who === 2 && $type === 6 ? 1 : $type);
 
         [$rangeOptions, $header, $values] = $who === 2
             ? $this->buildAllianceRanking($mapping, $range)
@@ -72,6 +74,7 @@ class HighscoreController extends BaseController
                 2 => __('game/highscore.st_economy'),
                 3 => __('game/highscore.st_research'),
                 4 => __('game/highscore.st_military'),
+                6 => __('game/highscore.st_honour'),
             ], $type),
             'range' => $rangeOptions,
             'stat_header' => $header,
@@ -121,9 +124,9 @@ class HighscoreController extends BaseController
             $values .= view('highscore.player_table', [
                 'player_rank' => $position,
                 'player_rankplus' => $this->rankDifference($ranking),
-                'player_name' => $rowId === $currentUserId
+                'player_name' => ($rowId === $currentUserId
                     ? '<font color="lime">' . $name . '</font>'
-                    : $name,
+                    : $name) . $this->honourTitle($mapping, $rowId),
                 'player_mes' => $rowId === $currentUserId
                     ? ''
                     : '<a href="game.php?page=chat&playerId=' . $rowId . '"><img src="' . asset(self::MESSAGE_ICON) . '" border="0" title="' . __('game/global.write_message') . '" /></a>',
@@ -285,6 +288,12 @@ class HighscoreController extends BaseController
                 'rank' => 'military_rank',
                 'oldrank' => 'military_old_rank',
             ],
+            6 => [
+                'order' => 'honor_points',
+                'points' => 'honor_points',
+                'rank' => 'honor_rank',
+                'oldrank' => 'honor_old_rank',
+            ],
             default => [
                 'order' => 'total_points',
                 'points' => 'total_points',
@@ -292,6 +301,22 @@ class HighscoreController extends BaseController
                 'oldrank' => 'total_old_rank',
             ],
         };
+    }
+
+    /**
+     * In the honour ranking the title (Starlord … Bandit) after the name.
+     *
+     * @param array<string, string> $mapping
+     */
+    private function honourTitle(array $mapping, int $userId): string
+    {
+        if ($mapping['order'] !== 'honor_points') {
+            return '';
+        }
+
+        $title = app(HonorService::class)->titleOf($userId);
+
+        return $title === '' ? '' : ' (' . e((string) __('game/highscore.st_title_' . $title)) . ')';
     }
 
     private function pageOffset(int $range): int

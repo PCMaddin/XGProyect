@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\HonorService;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Enums\PlayerClass;
 use App\Services\Game\WreckFieldService;
@@ -35,6 +36,11 @@ abstract class CombatMission extends Missions
     use SendsCombatReports;
     /** the defender did not log in for a week: discoverers plunder more */
     private bool $defenderInactive = false;
+
+    /** how the fight counts for honour, and the loot share that follows */
+    private string $honourFight = HonorService::NEUTRAL;
+
+    private float $honourLootShare = 0.5;
 
     /** @var array{0: array<int, int>, 1: array<int, int>} the planet owner's ships before the battle and those lost */
     private array $planetLosses = [[], []];
@@ -167,6 +173,7 @@ abstract class CombatMission extends Missions
             ]),
             $targetUser
         );
+        $this->classifyFight($attackers, self::int($targetUser['id']));
         $fled = $this->fleeFrom($attackers, $defenders, $targetUser, $targetPlanet);
         $this->addPlanetForces($defenders, $targetUser, $targetPlanet, $fleetRow, $fled);
 
@@ -175,6 +182,7 @@ abstract class CombatMission extends Missions
 
         $report = $battle->getReport();
         $this->settleBattle($fleetRow, $report, $targetPlanet);
+        $this->awardHonour(self::int($targetUser['id']), $report);
         $this->afterBattle($fleetRow, $report, $targetPlanet, $targetUser);
         $this->createNewReportAndSendIt($fleetRow, $report, self::str($targetPlanet['planet_name']));
     }
@@ -313,6 +321,45 @@ abstract class CombatMission extends Missions
         }
 
         return $capacity;
+    }
+
+    /**
+     * Honour (owiki "Ehrenpunkte"): neutral, honourable or dishonourable;
+     * honourable fights take 75 % of the resources, bandits lose all.
+     */
+    private function classifyFight(PlayerGroup $attackers, int $defenderId): void
+    {
+        $honour = app(HonorService::class);
+        $this->honourFight = $honour->classify(array_map('intval', array_keys($attackers->getIterator())), $defenderId, time());
+        $this->honourLootShare = $honour->lootShare($this->honourFight, $defenderId);
+    }
+
+    /**
+     * Honour points for what was destroyed, the attackers' part by the
+     * value of their fleets.
+     */
+    private function awardHonour(int $defenderId, BattleReport $report): void
+    {
+        if ($this->honourFight === HonorService::NEUTRAL) {
+            return;
+        }
+
+        $honour = app(HonorService::class);
+        $values = [];
+        $attackersLost = [];
+
+        foreach ($this->attackerLosses as $losses) {
+            $values[$losses['player']] = ($values[$losses['player']] ?? 0) + $honour->value($losses['before'], 1.0);
+
+            foreach ($losses['lost'] as $id => $count) {
+                $attackersLost[$id] = ($attackersLost[$id] ?? 0) + $count;
+            }
+        }
+
+        $total = array_sum($values);
+        $shares = array_map(fn (float $value): float => $total > 0 ? $value / $total : 1 / max(1, count($values)), $values);
+
+        $honour->award($this->honourFight, $shares, $defenderId, $this->planetLosses[1], $attackersLost, array_sum($report->getSteal()));
     }
 
     /**
@@ -548,7 +595,7 @@ abstract class CombatMission extends Missions
             $fleetCapacity += $amount * self::num($this->pricelist[$shipId]['capacity']);
         }
 
-        $share = $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? new ClassBonuses())->player->inactiveLootShare() : 0.5;
+        $share = $this->defenderInactive ? ($this->playerClasses[$attackerId] ?? new ClassBonuses())->player->inactiveLootShare() : $this->honourLootShare;
         $metal = self::num($targetPlanet['planet_metal']) * $fleetCapacity / $capacity;
         $crystal = self::num($targetPlanet['planet_crystal']) * $fleetCapacity / $capacity;
         $deuterium = self::num($targetPlanet['planet_deuterium']) * $fleetCapacity / $capacity;

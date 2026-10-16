@@ -1186,8 +1186,33 @@ Nachgezogen:
   Flotte. Nur innerhalb der Noob-Schutz-Grenze (Punkte unter
   `noobprotectiontime`), nicht bei Inaktiven; in den Einstellungen
   abschaltbar (etwa für Mondschüsse). Der Kampfbericht nennt die
-  geflohenen Schiffe. Die Bedingung „nicht bei ehrenhaften Kämpfen“ kommt
-  mit dem Ehrensystem. Tests mit echten Angriffen auf MariaDB.
+  geflohenen Schiffe. Nicht bei ehrenhaften Kämpfen. Tests mit echten
+  Angriffen auf MariaDB.
+- ✅ **Ehrensystem** (owiki „Ehrenpunkte“, OGame-Wiki „Honor Points“;
+  `HonorService`, `users_statistics.user_statistic_honor_*`):
+  - Ein Kampf ist **neutral** gegen Inaktive, Allianzmitglieder und
+    Buddys (im AKS nur, wenn alle Angreifer es sind), **ehrenhaft**, wenn
+    das Ziel mindestens die Hälfte der Militärpunkte der Angreifer hat
+    (oder höchstens 10 weniger) oder ein Bandit ist, sonst **ehrenlos**.
+  - Ehrenpunkte = abgerundet(Einheiten^0,9 / 1.000): Im ehrenhaften Kampf
+    gewinnen die Angreifer für die zerstörten militärischen Einheiten des
+    Verteidigers, im ehrenlosen verlieren sie (zivile Schiffe halb, dazu
+    die halbe Beute); der Verteidiger gewinnt für die zerstörten
+    militärischen Schiffe der Angreifer und verliert nie. Die Angreifer
+    teilen nach dem Wert ihrer Flotten.
+  - Beute: 50 %, im ehrenhaften Kampf 75 %, von Banditen 100 % (der
+    Entdecker-Bonus gegen Inaktive bleibt).
+  - Titel nach Rang: Starlord (Top 250, ab 500), Imperator (Top 100, ab
+    2.500), Groß-Imperator (Top 10, ab 15.000); Bandit (letzte 250, ab
+    -500), Banditenlord (letzte 100, ab -2.500), Banditenkönig (letzte 10,
+    ab -15.000).
+  - Galaxie: ehrenhafte Ziele tragen „eZ“; Highscore: neue Kategorie
+    „Ehre“ mit Titeln; der Statistik-Lauf führt den Ehrenrang.
+  - **Nicht übernommen**: Vogelfreiheit (Angriff auf viel Stärkere hebt
+    den eigenen Noob-Schutz auf) und die Rangbedingung „höchstens 100
+    Ränge dahinter“.
+  - Tests mit echten Angriffen auf MariaDB (ehrenhaft, ehrenlos, Bandit,
+    neutral); im Browser geprüft.
 
 Offen:
 

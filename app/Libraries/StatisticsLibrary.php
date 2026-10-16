@@ -273,6 +273,8 @@ class StatisticsLibrary
                         us.`user_statistic_ships_points`,
                         us.`user_statistic_military_rank`,
                         us.`user_statistic_military_points`,
+                        us.`user_statistic_honor_rank`,
+                        us.`user_statistic_honor_points`,
                         us.`user_statistic_total_rank`,
                         (
                             us.`user_statistic_buildings_points`
@@ -297,6 +299,7 @@ class StatisticsLibrary
         $defs = ['old_rank' => [], 'points' => [], 'rank' => []];
         $ships = ['old_rank' => [], 'points' => [], 'rank' => []];
         $military = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $honor = ['old_rank' => [], 'points' => [], 'rank' => []];
         $total = ['old_rank' => [], 'points' => []];
 
         // BUILD ALL THE ARRAYS
@@ -316,6 +319,9 @@ class StatisticsLibrary
             $military['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_military_rank'];
             $military['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_military_points'];
 
+            $honor['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_honor_rank'];
+            $honor['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_honor_points'];
+
             $total['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_total_rank'];
             $total['points'][$CurUser['user_statistic_user_id']] = $CurUser['total_points'];
         }
@@ -326,6 +332,7 @@ class StatisticsLibrary
         arsort($defs['points']);
         arsort($ships['points']);
         arsort($military['points']);
+        arsort($honor['points']);
         arsort($total['points']);
 
         // ALL RANKS SHOULD START ON 1
@@ -335,6 +342,7 @@ class StatisticsLibrary
         $rank['defe'] = 1;
         $rank['ship'] = 1;
         $rank['mili'] = 1;
+        $rank['hono'] = 1;
         $rank['tota'] = 1;
 
         // TECH
@@ -382,6 +390,11 @@ class StatisticsLibrary
             }
         }
 
+        // HONOUR
+        foreach ($honor['points'] as $userId => $data) {
+            $honor['rank'][$userId] = $rank['hono']++;
+        }
+
         // UPDATE QUERY
         $update_query = 'INSERT INTO ' . USERS_STATISTICS . '
                         (user_statistic_user_id,
@@ -393,6 +406,8 @@ class StatisticsLibrary
                         user_statistic_ships_rank,
                         user_statistic_military_old_rank,
                         user_statistic_military_rank,
+                        user_statistic_honor_old_rank,
+                        user_statistic_honor_rank,
                         user_statistic_technology_old_rank,
                         user_statistic_technology_rank,
                         user_statistic_total_points,
@@ -417,6 +432,8 @@ class StatisticsLibrary
                                 ' . $ships['rank'][$userId] . ',
                                 ' . $military['old_rank'][$userId] . ',
                                 ' . $military['rank'][$userId] . ',
+                                ' . $honor['old_rank'][$userId] . ',
+                                ' . $honor['rank'][$userId] . ',
                                 ' . $tech['old_rank'][$userId] . ',
                                 ' . $tech['rank'][$userId] . ',
                                 ' . $total['points'][$userId] . ',
@@ -441,6 +458,8 @@ class StatisticsLibrary
 								user_statistic_ships_rank = VALUES(user_statistic_ships_rank),
                                 user_statistic_military_old_rank = VALUES(user_statistic_military_old_rank),
                                 user_statistic_military_rank = VALUES(user_statistic_military_rank),
+                                user_statistic_honor_old_rank = VALUES(user_statistic_honor_old_rank),
+                                user_statistic_honor_rank = VALUES(user_statistic_honor_rank),
 								user_statistic_technology_old_rank = VALUES(user_statistic_technology_old_rank),
 								user_statistic_technology_rank = VALUES(user_statistic_technology_rank),
 								user_statistic_total_points = VALUES(user_statistic_total_points),
@@ -452,7 +471,7 @@ class StatisticsLibrary
         DB::statement($this->prepareSql($update_query));
 
         // MEMORY CLEAN UP
-        unset($all_stats_data, $build, $defs, $ships, $military, $tech, $rank, $update_query, $values);
+        unset($all_stats_data, $build, $defs, $ships, $military, $honor, $tech, $rank, $update_query, $values);
     }
 
     /**

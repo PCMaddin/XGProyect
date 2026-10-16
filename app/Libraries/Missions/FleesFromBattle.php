@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Game\HonorService;
 use App\Libraries\BattleEngine\Models\PlayerGroup;
 use App\Libraries\Functions;
 use App\Services\Game\Formulas\FleetsService;
@@ -77,6 +78,7 @@ trait FleesFromBattle
     {
         return self::int($targetUser['preference_fleet_escape'] ?? 0) === 1 &&
             !$this->defenderInactive &&
+            $this->honourFight !== HonorService::HONOURABLE &&
             $this->withinNoobProtection(self::int($targetUser['id']));
     }
 

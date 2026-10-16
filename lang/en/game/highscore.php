@@ -23,4 +23,11 @@ return [
     'st_in_the_positions' => 'in ranks',
     'st_actions' => 'Actions',
     'st_ally_request' => 'Send request to this alliance',
+    'st_honour' => 'Honour',
+    'st_title_grand_emperor' => 'Grand Emperor',
+    'st_title_emperor' => 'Emperor',
+    'st_title_starlord' => 'Starlord',
+    'st_title_bandit_king' => 'Bandit King',
+    'st_title_bandit_lord' => 'Bandit Lord',
+    'st_title_bandit' => 'Bandit',
 ];

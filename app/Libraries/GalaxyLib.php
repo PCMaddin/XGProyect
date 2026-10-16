@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Game\HonorService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Enums\PlayerClass;
 use App\Services\Game\PlayerClassService;
@@ -48,6 +49,8 @@ class GalaxyLib
     private bool $noPopup = false;
 
     private FormatService $formatService;
+
+    private ?HonorService $honour = null;
 
     /**
      * @param array<string, mixed> $user
@@ -317,9 +320,19 @@ class GalaxyLib
             if ($this->noob->isStrong($ownPoints, $rowPoints)) {
                 $statuses['protection'] = $this->status('s', 'gl_s');
             }
+
+            // an honourable target: attacking it wins honour
+            if (!$this->isCurrentPlayer() && $this->honour()->classify([self::asInt($this->user['id'] ?? 0)], self::asInt($this->rowData['id'] ?? 0), time()) === HonorService::HONOURABLE) {
+                $statuses['honourable'] = $this->status('hp', 'gl_hp');
+            }
         }
 
         return $statuses;
+    }
+
+    private function honour(): HonorService
+    {
+        return $this->honour ??= app(HonorService::class);
     }
 
     /**

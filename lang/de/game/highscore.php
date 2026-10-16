@@ -23,4 +23,11 @@ return [
     'st_in_the_positions' => 'auf den Plätzen',
     'st_actions' => 'Aktionen',
     'st_ally_request' => 'Bewerbung an diese Allianz senden',
+    'st_honour' => 'Ehre',
+    'st_title_grand_emperor' => 'Groß-Imperator',
+    'st_title_emperor' => 'Imperator',
+    'st_title_starlord' => 'Starlord',
+    'st_title_bandit_king' => 'Banditenkönig',
+    'st_title_bandit_lord' => 'Banditenlord',
+    'st_title_bandit' => 'Bandit',
 ];

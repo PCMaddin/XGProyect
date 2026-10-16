@@ -50,6 +50,18 @@ class FleetEscapeMysqlTest extends MysqlTestCase
 
         DB::table('ships')->where('ship_planet_id', $this->target)->update(['ship_light_fighter' => 20, 'ship_espionage_probe' => 5]);
         DB::table('planets')->where('planet_id', $this->target)->update(['planet_deuterium' => 10000]);
+
+        // a far stronger attacker: a dishonourable fight, in which fleets may flee
+        DB::table('users_statistics')->where('user_statistic_user_id', $this->attacker->id)->update(['user_statistic_military_points' => 100000]);
+        DB::table('users_statistics')->where('user_statistic_user_id', $this->defender->id)->update(['user_statistic_military_points' => 100]);
+    }
+
+    public function testNoEscapeInAnHonourableFight(): void
+    {
+        DB::table('users_statistics')->where('user_statistic_user_id', $this->defender->id)->update(['user_statistic_military_points' => 60000]);
+        $this->attack([206 => 50]);
+
+        $this->assertSame(0, $this->ships('ship_light_fighter'));
     }
 
     public function testTheFleetFleesFromAFarStrongerAttacker(): void
