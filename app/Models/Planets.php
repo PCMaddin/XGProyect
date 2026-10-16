@@ -49,6 +49,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $planet_ship_solar_satellite_percent
  * @property int    $planet_last_jump_time
  * @property int    $planet_invisible_start_time
+ * @property int    $planet_relocate_galaxy
+ * @property int    $planet_relocate_system
+ * @property int    $planet_relocate_planet
+ * @property int    $planet_relocate_at
  * @property float  $planet_metal
  * @property float  $planet_crystal
  * @property float  $planet_deuterium
@@ -113,6 +117,10 @@ class Planets extends Model
         'planet_debris_metal',
         'planet_debris_crystal',
         'planet_invisible_start_time',
+        'planet_relocate_galaxy',
+        'planet_relocate_system',
+        'planet_relocate_planet',
+        'planet_relocate_at',
     ];
 
     /**
@@ -168,6 +176,10 @@ class Planets extends Model
         'planet_ship_solar_satellite_percent' => 'int',
         'planet_last_jump_time' => 'int',
         'planet_invisible_start_time' => 'int',
+        'planet_relocate_galaxy' => 'int',
+        'planet_relocate_system' => 'int',
+        'planet_relocate_planet' => 'int',
+        'planet_relocate_at' => 'int',
     ];
 
     /**

@@ -7,6 +7,8 @@ namespace Tests\Unit\App\Http\Controllers\Game;
 use App\Http\Controllers\Game\PlanetlayerController;
 use App\Services\FormatService;
 use App\Services\Game\HomePlanetService;
+use App\Services\Game\RelocationService;
+use App\Services\TimingService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
@@ -40,7 +42,12 @@ class PlanetlayerControllerTest extends TestCase
         int $endType,
         bool $expected,
     ): void {
-        $controller = new PlanetlayerController(new FormatService(), new HomePlanetService());
+        $controller = new PlanetlayerController(
+            new FormatService(),
+            new HomePlanetService(),
+            $this->createStub(RelocationService::class),
+            $this->createStub(TimingService::class),
+        );
 
         $method = new ReflectionMethod(PlanetlayerController::class, 'fleetBlocksAbandon');
 

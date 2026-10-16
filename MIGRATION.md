@@ -1220,6 +1220,36 @@ Nachgezogen:
   Highscore-Kategorien (nur für Spieler, wie „Ehre“). Die Kategorie
   „Wirtschaft“ bleibt die Gebäudepunkte. Test mit einem echten Angriff
   und Statistik-Lauf auf MariaDB.
+- ✅ **Planet umsiedeln** (owiki „Umsiedeln“, OGame-Forum-FAQ;
+  `RelocationService`, `PlanetMover`, `planets.planet_relocate_*`,
+  Option `relocation_price`):
+  - Im Planetenmenü wählt der Spieler eine freie Position desselben
+    Bereichs (1–3, 4–12, 13–15) in beliebigem System. Die Position ist
+    24 Stunden reserviert (auch Kolonisieren scheitert dort), dann ziehen
+    Planet und Mond mit Gebäuden, Verteidigung und Rohstoffen um.
+  - 240.000 Dunkle Materie müssen beim Start da sein und werden erst beim
+    Umzug abgezogen. Abbruch ist jederzeit kostenlos.
+  - Beim Start und beim Umzug dürfen Planet und Mond nicht bauen, nicht
+    forschen, keine Werftaufträge haben und keine eigenen Flotten von
+    oder zu ihnen fliegen. Sonst, oder im Urlaubsmodus, wird die
+    Umsiedlung abgebrochen; der Spieler bekommt eine Nachricht mit dem
+    Grund.
+  - Beim Umzug fliegen die Schiffe von Planet und Mond als Stationierung
+    mit normaler Flugzeit und ohne Treibstoff hinterher; Solarsatelliten
+    und Crawler ziehen mit. Fremde haltende Flotten kehren heim. Das
+    Trümmerfeld bleibt an der alten Position (verfällt). Das Sprungtor
+    des Mondes ruht 24 Stunden. Die Temperatur richtet sich nach der neuen
+    Position, die Felder bleiben.
+  - Eine Flotte, deren Startplanet nicht mehr existiert, kann nicht
+    zurückgerufen werden; sonst gingen ihre Schiffe an der leeren
+    Position verloren.
+  - **Annahmen**: Ein noch nicht reparierendes Wrackfeld verfällt beim
+    Umzug. Eine laufende Raumdock-Reparatur oder wartende reparierte
+    Schiffe verhindern das Umsiedeln. Umzüge werden im Spiel-Tick
+    abgeschlossen (wie Flotten), nicht sekundengenau.
+  - Tests auf MariaDB (Bereich, belegt, reserviert, DM, Aufträge,
+    Flotten, Urlaubsmodus, kompletter Umzug mit Landung der Schiffe); im
+    Browser gestartet, abgebrochen und durchgeführt.
 
 Offen:
 

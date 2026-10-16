@@ -228,7 +228,7 @@ class MovementController extends BaseController
 
     private function buildActionsBlock(FleetsModel $fleet): string
     {
-        if ($this->asInt($fleet->fleet_mess) !== 0) {
+        if ($this->asInt($fleet->fleet_mess) !== 0 || !$this->originExists($fleet)) {
             return '-';
         }
 
@@ -260,13 +260,27 @@ class MovementController extends BaseController
 
         $fleet = $this->fleets->getOwnFleetById($fleetId);
 
-        if ($fleet === null || $this->asInt($fleet->fleet_mess) === 1) {
+        if ($fleet === null || $this->asInt($fleet->fleet_mess) === 1 || !$this->originExists($fleet)) {
             return null;
         }
 
         $this->returnFleet($fleet, $this->userInt('id'));
 
         return redirect(self::REDIRECT_TARGET);
+    }
+
+    /**
+     * The ships of a relocated planet cannot fly back to its old position.
+     */
+    private function originExists(FleetsModel $fleet): bool
+    {
+        return DB::table('planets')
+            ->where('planet_user_id', $this->asInt($fleet->fleet_owner))
+            ->where('planet_galaxy', $this->asInt($fleet->fleet_start_galaxy))
+            ->where('planet_system', $this->asInt($fleet->fleet_start_system))
+            ->where('planet_planet', $this->asInt($fleet->fleet_start_planet))
+            ->where('planet_type', $this->asInt($fleet->fleet_start_type))
+            ->exists();
     }
 
     private function returnFleet(FleetsModel $fleet, int $userId): void

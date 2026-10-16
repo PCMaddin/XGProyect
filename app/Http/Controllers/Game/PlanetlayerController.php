@@ -8,6 +8,8 @@ use App\Enums\Module;
 use App\Models\Planets;
 use App\Services\FormatService;
 use App\Services\Game\HomePlanetService;
+use App\Services\Game\RelocationService;
+use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -19,9 +21,10 @@ use App\Libraries\Functions;
 use App\Libraries\Users;
 
 /**
- * Planet detail layer: rename or abandon the current planet/moon.
+ * Planet detail layer: rename, relocate or abandon the current planet/moon.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class PlanetlayerController extends BaseController
 {
@@ -38,6 +41,8 @@ class PlanetlayerController extends BaseController
     public function __construct(
         private FormatService $formatService,
         private HomePlanetService $homePlanetService,
+        private RelocationService $relocationService,
+        private TimingService $timingService,
     ) {
     }
 
@@ -70,6 +75,10 @@ class PlanetlayerController extends BaseController
             $this->deletePlanet($request);
         }
 
+        if ($request->isMethod('post') && !$isMoon) {
+            $this->relocate($request);
+        }
+
         return view('planetlayer.view', [
             'planetImage' => $this->str($this->planet, 'planet_image'),
             'mainPlanet' => $this->int($this->user, 'home_planet_id') === $this->int($this->planet, 'planet_id'),
@@ -84,7 +93,58 @@ class PlanetlayerController extends BaseController
                 $this->int($this->planet, 'planet_planet')
             ),
             'planetName' => $this->str($this->planet, 'planet_name'),
+            'relocation' => $isMoon ? null : $this->relocationView(),
         ]);
+    }
+
+    /**
+     * @return array{price: string, galaxy: int, system: int, running: string}
+     */
+    private function relocationView(): array
+    {
+        $running = $this->relocationService->running($this->int($this->planet, 'planet_id'));
+
+        return [
+            'price' => $this->formatService->prettyNumber($this->relocationService->price()),
+            'galaxy' => $this->int($this->planet, 'planet_galaxy'),
+            'system' => $this->int($this->planet, 'planet_system'),
+            'running' => $running === null ? '' : sprintf(
+                (string) __('game/planetlayer.rl_running'),
+                $this->formatService->formatCoords($running['galaxy'], $running['system'], $running['position']),
+                $this->timingService->formatExtendedDate($running['at'])
+            ),
+        ];
+    }
+
+    /**
+     * Start or cancel relocating the planet.
+     */
+    private function relocate(Request $request): void
+    {
+        $planetId = $this->int($this->planet, 'planet_id');
+        $userId = $this->int($this->user, 'id');
+
+        if ($request->has('relocate_cancel')) {
+            $this->relocationService->cancel($userId, $planetId);
+            Functions::popupMessage(__('game/planetlayer.rl_cancelled'), self::REDIRECT_TARGET, 3);
+
+            return;
+        }
+
+        if (!$request->has('relocate')) {
+            return;
+        }
+
+        $error = $this->relocationService->start(
+            $userId,
+            $planetId,
+            $request->integer('galaxy'),
+            $request->integer('system'),
+            $request->integer('position'),
+            time()
+        );
+
+        Functions::popupMessage(__('game/planetlayer.' . ($error ?? 'rl_started')), self::REDIRECT_TARGET, 3);
     }
 
     private function renamePlanet(Request $request): void

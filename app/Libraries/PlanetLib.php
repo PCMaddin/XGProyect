@@ -6,6 +6,7 @@ namespace App\Libraries;
 
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\PlayerClassService;
+use App\Services\Game\RelocationService;
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,8 @@ class PlanetLib
             'planet_planet' => $position,
         ])->first() !== null;
 
-        if ($planetExists) {
+        // a relocation reserves the position
+        if ($planetExists || app(RelocationService::class)->taken($galaxy, $system, $position)) {
             return false;
         }
 

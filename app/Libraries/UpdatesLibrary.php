@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Support\OfficerBonuses;
+use App\Services\Game\RelocationService;
 use App\Services\Game\WreckFieldService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\ClassProductionService;
@@ -52,6 +53,7 @@ class UpdatesLibrary
 
         // Updates
         $this->updateFleets();
+        app(RelocationService::class)->settleDue(time());
         $this->updateStatistics();
         app(AuctionService::class)->settleEnded(time());
     }

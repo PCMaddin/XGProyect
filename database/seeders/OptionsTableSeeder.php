@@ -86,6 +86,7 @@ class OptionsTableSeeder extends Seeder
             ['name' => 'merchant_scrap_max_rate', 'value' => '75', 'type' => 'int'],
             ['name' => 'merchant_scrap_bargain_price', 'value' => '2000', 'type' => 'int'],
             ['name' => 'class_change_price', 'value' => '500000', 'type' => 'int'],
+            ['name' => 'relocation_price', 'value' => '240000', 'type' => 'int'],
             ['name' => 'registration_dark_matter', 'value' => '0', 'type' => 'int'],
             ['name' => 'mailing_protocol', 'value' => 'smtp', 'type' => 'string'],
             ['name' => 'mailing_smtp_host', 'value' => 'mailpit', 'type' => 'string'],

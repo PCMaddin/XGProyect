@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'description' => 'En este menú puedes cambiar los nombres de tus planetas y lunas o abandonar completamente una colonia.',
+    'description' => 'En este menú puedes cambiar los nombres de tus planetas y lunas, reubicar planetas o abandonarlos completamente.',
     'rename' => 'Renombrar',
     'new_planet_name' => 'Nuevo nombre de planeta',
     'new_moon_name' => 'Nuevo nombre de luna',
@@ -25,4 +25,29 @@ return [
     'rp_abandon_planet_not_possible' => 'No es posible abandonar un planeta cuando hay flotas moviendose',
     'rp_planet_abandoned' => 'Planeta abandonado con éxito.',
     'rp_wrong_pass' => 'Contraseña incorrecta, introdúcela de nuevo.',
+
+    'rl_title' => 'Reubicar planeta',
+    'rl_description' => 'Por %s de materia oscura el planeta y su luna se trasladan en 24 horas a una posición libre del mismo rango (1-3, 4-12, 13-15). La materia oscura solo se descuenta al trasladarse. Hasta entonces no se puede construir, investigar ni producir en el hangar del planeta y su luna, y ninguna flota propia puede salir de allí ni volar hacia allí. Las naves siguen sin combustible con su tiempo de vuelo normal, el campo de escombros se queda atrás y el salto cuántico descansa 24 horas. El modo vacaciones cancela la reubicación.',
+    'rl_target' => 'Destino',
+    'rl_start' => 'Reubicar',
+    'rl_running' => 'El planeta se traslada a %s el %s.',
+    'rl_cancel' => 'Cancelar reubicación',
+    'rl_started' => 'La reubicación ha comenzado.',
+    'rl_cancelled' => 'La reubicación fue cancelada.',
+    'rl_error_planet' => 'Este planeta no se puede reubicar.',
+    'rl_error_running' => 'El planeta ya se está reubicando.',
+    'rl_error_target' => 'Posición de destino no válida.',
+    'rl_error_band' => 'El destino debe estar en el mismo rango de posiciones (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'La posición de destino está ocupada o reservada.',
+    'rl_error_vacation' => 'No puedes reubicar en modo vacaciones.',
+    'rl_error_dark_matter' => 'No tienes suficiente materia oscura.',
+    'rl_error_building' => 'Se está construyendo en el planeta o la luna.',
+    'rl_error_research' => 'Se está investigando en el planeta o la luna.',
+    'rl_error_shipyard' => 'El hangar del planeta o la luna tiene encargos.',
+    'rl_error_fleets' => 'Flotas propias vuelan desde o hacia el planeta o la luna.',
+    'rl_error_wreck_field' => 'El muelle espacial está reparando naves o esperan ser puestas en servicio.',
+    'rl_from' => 'Administración',
+    'rl_subject' => 'Reubicación',
+    'rl_done' => 'El planeta se ha trasladado a %s. Las naves le siguen.',
+    'rl_failed' => 'La reubicación a %s ha fallado: %s',
 ];

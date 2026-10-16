@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 return [
-    'description' => 'In diesem Menü kannst du Planeten und Monde umbenennen oder ganz aufgeben.',
+    'description' => 'In diesem Menü kannst du Planeten und Monde umbenennen, Planeten umsiedeln oder sie ganz aufgeben.',
     'rename' => 'Umbenennen',
     'new_planet_name' => 'Neuer Planetenname',
     'new_moon_name' => 'Neuer Mondname',
@@ -25,4 +25,29 @@ return [
     'rp_abandon_planet_not_possible' => 'Ein Planet mit Flottenbewegungen kann nicht aufgegeben werden',
     'rp_planet_abandoned' => 'Planet erfolgreich aufgegeben',
     'rp_wrong_pass' => 'Falsches Passwort, bitte erneut eingeben.',
+
+    'rl_title' => 'Planet umsiedeln',
+    'rl_description' => 'Für %s Dunkle Materie zieht der Planet samt Mond in 24 Stunden auf eine freie Position desselben Bereichs (1-3, 4-12, 13-15). Die Dunkle Materie wird erst beim Umzug abgezogen. Bis dahin darf auf Planet und Mond nichts gebaut, geforscht oder in der Werft gefertigt werden, und keine eigene Flotte darf von dort starten oder dorthin fliegen. Die Schiffe folgen ohne Treibstoff mit normaler Flugzeit, das Trümmerfeld bleibt zurück, das Sprungtor ruht 24 Stunden. Im Urlaubsmodus wird die Umsiedlung abgebrochen.',
+    'rl_target' => 'Ziel',
+    'rl_start' => 'Umsiedeln',
+    'rl_running' => 'Der Planet zieht nach %s um, am %s.',
+    'rl_cancel' => 'Umsiedlung abbrechen',
+    'rl_started' => 'Die Umsiedlung wurde gestartet.',
+    'rl_cancelled' => 'Die Umsiedlung wurde abgebrochen.',
+    'rl_error_planet' => 'Dieser Planet kann nicht umgesiedelt werden.',
+    'rl_error_running' => 'Der Planet wird bereits umgesiedelt.',
+    'rl_error_target' => 'Ungültige Zielposition.',
+    'rl_error_band' => 'Das Ziel muss im selben Positionsbereich liegen (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'Die Zielposition ist belegt oder reserviert.',
+    'rl_error_vacation' => 'Im Urlaubsmodus ist kein Umsiedeln möglich.',
+    'rl_error_dark_matter' => 'Du hast nicht genug Dunkle Materie.',
+    'rl_error_building' => 'Auf dem Planeten oder Mond wird gebaut.',
+    'rl_error_research' => 'Auf dem Planeten oder Mond wird geforscht.',
+    'rl_error_shipyard' => 'Die Werft des Planeten oder Mondes hat Aufträge.',
+    'rl_error_fleets' => 'Eigene Flotten fliegen von oder zu dem Planeten oder Mond.',
+    'rl_error_wreck_field' => 'Das Raumdock repariert Schiffe oder sie warten auf ihre Indienststellung.',
+    'rl_from' => 'Verwaltung',
+    'rl_subject' => 'Umsiedlung',
+    'rl_done' => 'Der Planet ist nach %s umgezogen. Die Schiffe folgen.',
+    'rl_failed' => 'Die Umsiedlung nach %s ist gescheitert: %s',
 ];

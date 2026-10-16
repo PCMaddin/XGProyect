@@ -25,6 +25,29 @@
                 </form>
             </td>
         </tr>
+        @if ($relocation !== null)
+        <tr>
+            <td colspan="3" class="c">{{ __('game/planetlayer.rl_title') }}</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <form method="POST" action="game.php?page=planetlayer">
+                    @csrf
+                    @if ($relocation['running'] !== '')
+                        <p>{{ $relocation['running'] }}</p>
+                        <input type="submit" name="relocate_cancel" value="{{ __('game/planetlayer.rl_cancel') }}">
+                    @else
+                        <p>{{ sprintf(__('game/planetlayer.rl_description'), $relocation['price']) }}</p>
+                        {{ __('game/planetlayer.rl_target') }}
+                        <input type="number" name="galaxy" min="1" max="{{ MAX_GALAXY_IN_WORLD }}" value="{{ $relocation['galaxy'] }}" style="width: 4em">
+                        <input type="number" name="system" min="1" max="{{ MAX_SYSTEM_IN_GALAXY }}" value="{{ $relocation['system'] }}" style="width: 5em">
+                        <input type="number" name="position" min="1" max="{{ MAX_PLANET_IN_SYSTEM }}" value="" style="width: 4em">
+                        <input type="submit" name="relocate" value="{{ __('game/planetlayer.rl_start') }}">
+                    @endif
+                </form>
+            </td>
+        </tr>
+        @endif
         <tr>
             <td colspan="3" class="c">
                 @if ($mainPlanet)
