@@ -13,7 +13,7 @@
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
 | Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
-| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch (Schlüssel und Platzhalter per Test gleich) |
+| Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht) (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
 > **Hinweis CI:** `pcmaddin/xgproyect` ist ein **Fork** von
@@ -728,6 +728,11 @@ Baseline-Einträge.
     so gewählt, dass die japanische Reihenfolge lesbar bleibt
     („あなたの艦隊 が移動中: A → B。任務: …“); die Platzhalter bleiben in der
     englischen Reihenfolge, damit der Test sie vergleichen kann. Mit `ja`
+    gecrawlt, ohne neue Fehler.
+  - ✅ **Chinesisch (vereinfacht)** (`zh_CN`, Migration `000028`,
+    `lang_code` `zh-CN`): Anrede „你“, eingeführte Begriffe der chinesischen
+    OGame-Gemeinschaft (小型运输舰, 废墟场, 传感器阵列, 暗物质, 死星 …).
+    Satzbausteine und Platzhalter wie beim Japanischen. Mit `zh_CN`
     gecrawlt, ohne neue Fehler.
 
 ## Smoke-Test gegen eine echte Datenbank
