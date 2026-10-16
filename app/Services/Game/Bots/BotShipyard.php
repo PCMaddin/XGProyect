@@ -14,7 +14,7 @@ use App\Services\Game\Formulas\DevelopmentsService;
 
 /**
  * What a bot's shipyard builds: a colony ship when astrophysics allows a
- * colony (saving for it if need be), then a few probes, cargo ships for
+ * colony, defences first after a raid, then a few probes, cargo ships for
  * expeditions, raids and transports and light fighters; what the budget
  * does not spend on ships goes into the best defence allowed.
  *
@@ -42,10 +42,10 @@ class BotShipyard
     }
 
     /**
-     * The next shipyard order, or null. A wanted colony ship comes first
-     * and is paid from the whole stock above the reserve; while the bot
-     * saves for it nothing else is ordered. Other ships and defences share
-     * the spare budget.
+     * The next shipyard order, or null. A wanted colony ship comes first,
+     * paid from the whole stock. A planet raided lately puts all its stock
+     * above the reserve into defences. Otherwise ships and then defences
+     * share the spare budget.
      *
      * @param array<int, int>          $levels  levels by object id
      * @param array<int, int>          $ships   ships on the planet by id
@@ -54,17 +54,18 @@ class BotShipyard
      *
      * @return array{0: int, 1: int}|null
      */
-    public function order(array $levels, array $ships, bool $home, bool $wantsColony, array $stock, array $reserve, int $maxPerOrder): ?array
+    public function order(array $levels, array $ships, bool $home, bool $wantsColony, bool $raided, array $stock, array $reserve, int $maxPerOrder): ?array
     {
         if ($home && $wantsColony && ($ships[Ships::SHIP_COLONY_SHIP] ?? 0) === 0 &&
-            $this->developments->isDevelopmentAllowed(Ships::SHIP_COLONY_SHIP, $levels)) {
-            $budget = [];
+            $this->developments->isDevelopmentAllowed(Ships::SHIP_COLONY_SHIP, $levels) &&
+            $this->affordable(Ships::SHIP_COLONY_SHIP, $stock) > 0) {
+            return [Ships::SHIP_COLONY_SHIP, 1];
+        }
 
-            foreach (['metal', 'crystal', 'deuterium'] as $resource) {
-                $budget[$resource] = max(0.0, (float) ($stock[$resource] ?? 0) - (float) ($reserve[$resource] ?? 0));
-            }
+        $defence = $raided ? $this->defenceOrder($levels, $this->aboveReserve($stock, $reserve), $maxPerOrder) : null;
 
-            return $this->affordable(Ships::SHIP_COLONY_SHIP, $budget) > 0 ? [Ships::SHIP_COLONY_SHIP, 1] : null;
+        if ($defence !== null) {
+            return $defence;
         }
 
         $budget = $this->spareBudget($stock, $reserve);
@@ -120,6 +121,25 @@ class BotShipyard
 
         foreach (['metal', 'crystal', 'deuterium'] as $resource) {
             $budget[$resource] = max(0.0, ((float) ($stock[$resource] ?? 0) - 2 * (float) ($reserve[$resource] ?? 0)) / 4);
+        }
+
+        return $budget;
+    }
+
+    /**
+     * The stock above the reserve.
+     *
+     * @param array<string, float|int> $stock
+     * @param array<string, float|int> $reserve
+     *
+     * @return array<string, float>
+     */
+    private function aboveReserve(array $stock, array $reserve): array
+    {
+        $budget = [];
+
+        foreach (['metal', 'crystal', 'deuterium'] as $resource) {
+            $budget[$resource] = max(0.0, (float) ($stock[$resource] ?? 0) - (float) ($reserve[$resource] ?? 0));
         }
 
         return $budget;

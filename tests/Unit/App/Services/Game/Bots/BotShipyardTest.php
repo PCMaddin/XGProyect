@@ -13,8 +13,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
 
 /**
- * The bots' shipyard: a wanted colony ship first (saving for it), then
- * probes, cargo ships and fighters, then defences from what is spare; and
+ * The bots' shipyard: a wanted colony ship first, defences after a raid,
+ * then probes, cargo ships and fighters, then defences from what is spare; and
  * the rough combat value the raids are judged by.
  */
 #[CoversClass(BotShipyard::class)]
@@ -31,32 +31,47 @@ class BotShipyardTest extends TestCase
         $this->shipyard = $this->app->make(BotShipyard::class);
     }
 
-    public function testAWantedColonyShipComesFirstOrTheBotSavesForIt(): void
+    public function testAWantedColonyShipComesFirst(): void
     {
         $levels = $this->developed();
 
-        $this->assertSame([Ships::SHIP_COLONY_SHIP, 1], $this->shipyard->order($levels, [], true, true, self::STOCK, [], 1000));
+        // paid from the whole stock, the reserve for the next building notwithstanding
+        $this->assertSame([Ships::SHIP_COLONY_SHIP, 1], $this->shipyard->order($levels, [], true, true, false, self::STOCK, self::STOCK, 1000));
 
-        // not enough crystal above the reserve: nothing else is built meanwhile
-        $this->assertNull($this->shipyard->order($levels, [], true, true, ['metal' => 100000, 'crystal' => 25000, 'deuterium' => 100000], ['crystal' => 10000], 1000));
+        // not enough crystal: the shipyard does not wait for it
+        $this->assertSame(
+            [Ships::SHIP_ESPIONAGE_PROBE, 3],
+            $this->shipyard->order($levels, [], true, true, false, ['metal' => 100000, 'crystal' => 15000, 'deuterium' => 100000], [], 1000)
+        );
 
         // a colony does not build colony ships
-        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 4], $this->shipyard->order($levels, [], false, true, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 4], $this->shipyard->order($levels, [], false, true, false, self::STOCK, [], 1000));
     }
 
     public function testProbesThenCargoThenFightersThenDefences(): void
     {
         $levels = $this->developed();
 
-        $this->assertSame([Ships::SHIP_ESPIONAGE_PROBE, 3], $this->shipyard->order($levels, [], true, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_ESPIONAGE_PROBE, 3], $this->shipyard->order($levels, [], true, false, false, self::STOCK, [], 1000));
         // a quarter of the stock: 25,000 metal pays 12 cargo ships of the 24 wanted
-        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 12], $this->shipyard->order($levels, [Ships::SHIP_ESPIONAGE_PROBE => 3], true, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 12], $this->shipyard->order($levels, [Ships::SHIP_ESPIONAGE_PROBE => 3], true, false, false, self::STOCK, [], 1000));
 
         $ships = [Ships::SHIP_ESPIONAGE_PROBE => 3, Ships::SHIP_SMALL_CARGO_SHIP => 24];
-        $this->assertSame([Ships::SHIP_LIGHT_FIGHTER, 8], $this->shipyard->order($levels, $ships, true, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_LIGHT_FIGHTER, 8], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000));
 
         $ships[Ships::SHIP_LIGHT_FIGHTER] = 24;
-        $this->assertSame([Defenses::DEFENSE_LIGHT_LASER, 16], $this->shipyard->order($levels, $ships, true, false, self::STOCK, [], 1000));
+        $this->assertSame([Defenses::DEFENSE_LIGHT_LASER, 16], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000));
+    }
+
+    public function testARaidedPlanetPutsItsStockAboveTheReserveIntoDefences(): void
+    {
+        $levels = $this->developed();
+
+        // 60,000 metal and 20,000 crystal above the reserve: 40 light lasers
+        $this->assertSame(
+            [Defenses::DEFENSE_LIGHT_LASER, 40],
+            $this->shipyard->order($levels, [], true, false, true, self::STOCK, ['metal' => 40000, 'crystal' => 80000], 1000)
+        );
     }
 
     public function testSpareResourcesBuyTheBestAllowedDefence(): void

@@ -47,6 +47,9 @@ class BotFleetPlanner
     /** a report older than this is not acted on */
     private const REPORT_VALID = 3 * 3600;
 
+    /** how long a bot remembers being raided */
+    private const RAID_MEMORY = 86400;
+
     /** a raid must bring at least this much */
     private const MIN_LOOT = 5000;
 
@@ -114,6 +117,20 @@ class BotFleetPlanner
             ->count();
 
         return $colonies + $flying < $this->fleets->getMaxColonies(self::asInt($user['research_astrophysics'] ?? 0));
+    }
+
+    /**
+     * Whether the bot was attacked in the last day. A combat report lists
+     * the attackers first and the defender last; bots attack alone.
+     *
+     * @param array<string, mixed> $user
+     */
+    public function wasRaided(array $user, int $now): bool
+    {
+        return DB::table('reports')
+            ->where('report_time', '>', $now - self::RAID_MEMORY)
+            ->where('report_owners', 'like', '%,' . self::asInt($user['id'] ?? 0))
+            ->exists();
     }
 
     /**

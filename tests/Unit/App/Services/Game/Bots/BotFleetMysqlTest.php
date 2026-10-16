@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Game\Bots;
 
+use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Libraries\MissionControlLib;
@@ -26,7 +27,7 @@ use Tests\MysqlTestCase;
 /**
  * Bots' fleets on a real database: the home planet founds a colony, sends
  * spare cargo ships on expeditions, spies on another bot and raids it once
- * the report is in; players are spared unless the admin allows it; a
+ * the report is in; a raided bot builds defences first; players are spared unless the admin allows it; a
  * colony ships its stock home. Every fleet is paid for like a player's.
  */
 #[CoversClass(BotFleetPlanner::class)]
@@ -142,6 +143,33 @@ class BotFleetMysqlTest extends MysqlTestCase
         app(BotPlayerService::class)->play($this->bot, time());
 
         $this->assertSame(0, DB::table('fleets')->where('fleet_mission', Missions::ATTACK)->count());
+    }
+
+    public function testARaidedBotBuildsDefencesFirst(): void
+    {
+        DB::table('buildings')->where('building_planet_id', $this->planet)->update(['building_hangar' => 2]);
+        DB::table('planets')->where('planet_id', $this->planet)->update(['planet_metal' => 30000]);
+        $raid = ['report_owners' => $this->other . ',' . $this->bot, 'report_rid' => 'raid', 'report_content' => '', 'report_destroyed' => 1, 'report_time' => time() - 3600];
+
+        // its own attack does not count: a quarter of the spare metal
+        DB::table('reports')->insert(['report_rid' => 'own', 'report_owners' => $this->bot . ',' . $this->other] + $raid);
+        app(BotPlayerService::class)->play($this->bot, time());
+        $this->assertLessThanOrEqual(4, $this->rocketLaunchersOrdered());
+
+        // raided: the stock above the reserve
+        DB::table('planets')->where('planet_id', $this->planet)->update(['planet_b_hangar_id' => '', 'planet_metal' => 30000]);
+        DB::table('reports')->insert($raid);
+        app(BotPlayerService::class)->play($this->bot, time());
+        $this->assertGreaterThan(10, $this->rocketLaunchersOrdered());
+    }
+
+    private function rocketLaunchersOrdered(): int
+    {
+        $hangar = DB::table('planets')->where('planet_id', $this->planet)->value('planet_b_hangar_id');
+        $this->assertIsString($hangar);
+        $this->assertMatchesRegularExpression('/^' . Defenses::DEFENSE_ROCKET_LAUNCHER . ',\d+;$/', $hangar);
+
+        return (int) explode(',', rtrim($hangar, ';'))[1];
     }
 
     public function testPlayersAreSparedUnlessTheAdminAllowsIt(): void

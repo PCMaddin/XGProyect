@@ -747,7 +747,7 @@ final class Invariants
     {
         $limit = $now - 2 * $this->step;
         $rows = DB::table('fleets')
-            ->where(fn ($q) => $q->where('fleet_end_time', '<', $limit)->orWhere(fn ($q) => $q->where('fleet_mess', 0)->where('fleet_start_time', '<', $limit)))
+            ->where(fn ($q) => $q->where('fleet_end_time', '<', $limit)->orWhere(fn ($q) => $q->where('fleet_mess', 0)->where('fleet_start_time', '<', $limit)->where('fleet_end_stay', '<', $limit)))
             ->get(['fleet_id', 'fleet_owner', 'fleet_mission', 'fleet_mess', 'fleet_start_time', 'fleet_end_stay', 'fleet_end_time']);
 
         foreach ($rows as $row) {
@@ -1767,7 +1767,7 @@ final class ReportWriter
         $md[] = '';
         $md[] = '## World';
         $md[] = '';
-        $md[] = sprintf('- Battle reports: %d (%d with the attacker destroyed)', $g['battle_reports'], $g['battle_reports_attacker_destroyed']);
+        $md[] = sprintf('- Battle reports: %d (%d over after the first round)', $g['battle_reports'], $g['battle_reports_attacker_destroyed']);
         $md[] = '- Colonizations: ' . $g['colonizations'] . ', moons created: ' . $g['moons_created'];
         $md[] = '- Debris fields: `' . json_encode($g['debris_fields']) . '`, deep space debris: `' . json_encode($g['deep_space_debris']) . '`';
         $md[] = '- Expeditions by outcome: `' . json_encode($g['expeditions_by_outcome']) . '`';

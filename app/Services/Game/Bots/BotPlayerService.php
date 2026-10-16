@@ -131,7 +131,7 @@ class BotPlayerService
         $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
 
         $this->fleetPlanner->act($user, $this->planetRow($planetId), $reserve, $now);
-        $this->orderShips($user, $planetId, $levels, $reserve);
+        $this->orderShips($user, $planetId, $levels, $reserve, $now);
     }
 
     /**
@@ -198,7 +198,7 @@ class BotPlayerService
      * @param array<int, int>      $levels
      * @param array<string, float> $reserve
      */
-    private function orderShips(array $user, int $planetId, array $levels, array $reserve): void
+    private function orderShips(array $user, int $planetId, array $levels, array $reserve, int $now): void
     {
         $model = Planets::find($planetId);
         $planet = $this->planetRow($planetId);
@@ -213,6 +213,7 @@ class BotPlayerService
             $this->shipyard->shipsOf($planet),
             $planetId === self::asInt($user['home_planet_id'] ?? 0),
             $this->fleetPlanner->wantsColony($user),
+            $this->fleetPlanner->wasRaided($user, $now),
             ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
             $reserve,
             MAX_FLEET_OR_DEFS_PER_ROW

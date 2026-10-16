@@ -859,6 +859,13 @@ Baseline-Einträge.
   - Energie: Bei Mangel baut der Bot Solar- oder Fusionskraftwerk, je
     nachdem, welches die nächste Stufe billiger pro Energieeinheit liefert
     (vorher nur Solar; ab Stufe 20 warteten Bots tagelang darauf).
+  - Überfallen (Kampfbericht als Verteidiger in den letzten 24 Stunden),
+    steckt der Bot alles über der Gebäude-Reserve in Verteidigung statt
+    eines Viertels.
+  - Das Kolonieschiff wird aus dem ganzen Vorrat bezahlt; reicht er nicht,
+    baut die Werft weiter (vorher sparte sie und baute nichts, solange die
+    Reserve das Kolonieschiff unbezahlbar machte – in der Simulation hatten
+    so die meisten Bots am Ende kein einziges Schiff).
 
   Ein Fehler in einem Bot-Zug wird wie bisher nur gemeldet; die Bot-Tests
   prüfen jetzt aber, dass nichts gemeldet wurde (so fiel ein fehlendes
@@ -871,6 +878,21 @@ Baseline-Einträge.
   Spionage mit anschließendem Überfall, kein Überfall auf Verteidigte ohne
   Kriegsschiffe, Spieler nur mit Schalter, Transport von der Kolonie
   (MariaDB).
+- ✅ **Bot-Simulator (`tools/simulate-bots.php`):** lässt N Bots auf einer
+  eigenen MariaDB-Datenbank (Name muss auf `_sim`/`_sim2` enden, sie wird
+  geleert) viele Spielstunden gegeneinander spielen, mit dem echten
+  Spiel-Tick. Die Zeit läuft über eine Simulationsuhr: `time()`, `date()`
+  und `strtotime()` werden in allen Namensräumen von `app/` und `database/`
+  auf die Uhr umgelenkt, Carbon per `setTestNow()`; in der Datenbank wird
+  nichts verschoben. Jede Ausnahme, jeder Log-Eintrag (auch `report()`) und
+  tägliche Invarianten (keine negativen Rohstoffe oder Schiffe, Felder,
+  hängende Flotten und Warteschlangen, gültige Werft-Warteschlange, keine
+  sinkenden Stufen, jeder Bot handelt) landen in einem Bericht (Markdown und
+  JSON). `--self-test` pflanzt bekannte Fehler und prüft, dass jeder
+  gemeldet wird; `--profile` misst die Phasen des Ticks; mit `--seed`
+  reproduzierbar. 10 Bots × 1440 h × 10-Minuten-Schritte dauern etwa 25
+  Minuten. Beispiel:
+  `php -d memory_limit=2G tools/simulate-bots.php --db=xgp_sim --bots=10 --hours=1440 --seed=42`
 - ✅ **Keine externen Inhalte mehr:** Spiel, Admin-Panel, Installer und
   E-Mails luden Inhalte von fremden Servern, und jeder Aufruf verriet diesen
   Servern, wer wo spielt:
