@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\Concerns\ReadsMixedValues;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Enums\Module;
 use App\Models\Planets;
@@ -31,6 +32,8 @@ use App\Libraries\Users;
  */
 class ResearchController extends BaseController
 {
+    use ReadsMixedValues;
+
     private const OFFICER_BONUSES = [
         ResearchEnumerator::RESEARCH_ESPIONAGE_TECHNOLOGY => [
             'officer' => 'premium_officier_technocrat',
@@ -79,7 +82,7 @@ class ResearchController extends BaseController
         $cmd = (string) $request->query('cmd', '');
         $techId = (int) $request->query('tech', 0);
 
-        $userModel = User::with(['research', 'researchQueue'])->find((int) ($userData['id'] ?? 0));
+        $userModel = User::with(['research', 'researchQueue'])->find(self::asInt($userData['id'] ?? 0));
         $planetModel = Planets::with(['buildings'])->where('planet_id', $planetData['planet_id'])->first();
 
         if ($userModel === null || $planetModel === null) {
@@ -88,7 +91,7 @@ class ResearchController extends BaseController
 
         if ($cmd === 'search' && $this->registry->has($techId) && $this->registry->research()->has($techId)) {
             $technocrateActive = $this->officerService->isOfficerActive(
-                (int) ($userData['premium_officier_technocrat'] ?? 0),
+                self::asInt($userData['premium_officier_technocrat'] ?? 0),
                 time()
             );
             $this->researchQueueService->add($userModel, $planetModel, $userData, $techId, $technocrateActive);
@@ -112,11 +115,11 @@ class ResearchController extends BaseController
      */
     private function showPage(array $userData, array $planetData): View
     {
-        $userModel = User::with(['research', 'researchQueue'])->find((int) ($userData['id'] ?? 0));
+        $userModel = User::with(['research', 'researchQueue'])->find(self::asInt($userData['id'] ?? 0));
         $planetModel = Planets::with(['buildings', 'buildingQueue'])->where('planet_id', $planetData['planet_id'])->first();
 
         $labCol = $this->registry->get(BuildingsEnumerator::BUILDING_LABORATORY)->getName();
-        $labLevel = (int) ($planetData[$labCol] ?? 0);
+        $labLevel = self::asInt($planetData[$labCol] ?? 0);
 
         if ($labLevel === 0) {
             Functions::message(__('game/research.re_lab_required'), '', 0, true);
@@ -138,19 +141,19 @@ class ResearchController extends BaseController
         $queueCount = $queue->count();
 
         $labInQueue = $planetModel->buildingQueue()->where('building_id', BuildingsEnumerator::BUILDING_LABORATORY)->exists();
-        $isOnVacation = (int) ($userData['preference_vacation_mode'] ?? 0) > 0;
+        $isOnVacation = self::asInt($userData['preference_vacation_mode'] ?? 0) > 0;
         $commanderActive = $this->officerService->isOfficerActive(
-            (int) ($userData['premium_officier_commander'] ?? 0),
+            self::asInt($userData['premium_officier_commander'] ?? 0),
             time()
         );
         $technocrateActive = $this->officerService->isOfficerActive(
-            (int) ($userData['premium_officier_technocrat'] ?? 0),
+            self::asInt($userData['premium_officier_technocrat'] ?? 0),
             time()
         );
 
         $totalLabLevel = $this->researchQueueService->labLevel($userModel, $planetModel);
         $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
-        $astrophysicsLevel = (int) ($userData[$astrophysicsCol] ?? 0);
+        $astrophysicsLevel = self::asInt($userData[$astrophysicsCol] ?? 0);
 
         $workingPlanet = null;
         if ($isWorking && $activeItem->planet_id !== $planetModel->planet_id) {
@@ -166,7 +169,7 @@ class ResearchController extends BaseController
             }
 
             $techCol = $this->registry->get($techId)->getName();
-            $currentLevel = (int) ($userData[$techCol] ?? 0);
+            $currentLevel = self::asInt($userData[$techCol] ?? 0);
             $duration = $this->developmentsService->developmentTime(
                 $techId,
                 $currentLevel,
@@ -221,7 +224,7 @@ class ResearchController extends BaseController
 
         if (isset(self::OFFICER_BONUSES[$techId])) {
             $bonus = self::OFFICER_BONUSES[$techId];
-            if ($this->officerService->isOfficerActive((int) ($userData[$bonus['officer']] ?? 0), time())) {
+            if ($this->officerService->isOfficerActive(self::asInt($userData[$bonus['officer']] ?? 0), time())) {
                 $text .= $this->formatService->strongText(
                     $this->formatService->colorGreen(' +' . $bonus['const'] . __('game/research.' . $bonus['lang']))
                 );

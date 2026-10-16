@@ -32,7 +32,7 @@ class BannedController extends BaseController
         $bannedPlayers = $bans->map(fn (Ban $ban) => [
             'player' => $ban->user->name,
             'reason' => $ban->details,
-            'since' => $this->timingService->formatExtendedDate($ban->created_at->timestamp),
+            'since' => $ban->created_at !== null ? $this->timingService->formatExtendedDate($ban->created_at->getTimestamp()) : '-',
             'until' => $ban->until !== null
                 ? $this->timingService->formatExtendedDate($ban->until)
                 : '∞',

@@ -1,30 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cannot access property \$timestamp on Carbon\\Carbon\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Game/BannedController.php
-
-		-
-			message: '#^Parameter \#1 \$time of method App\\Services\\TimingService\:\:formatExtendedDate\(\) expects int\|string, float\|int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Game/BannedController.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 15
-			path: app/Http/Controllers/Game/BuildingsController.php
-
-		-
-			message: '#^Cannot cast mixed to string\.$#'
-			identifier: cast.string
-			count: 1
-			path: app/Http/Controllers/Game/BuildingsController.php
-
-		-
 			message: '#^Cannot cast mixed to string\.$#'
 			identifier: cast.string
 			count: 2
@@ -59,18 +35,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/Http/Controllers/Game/NoticesController.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 10
-			path: app/Http/Controllers/Game/ResearchController.php
-
-		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
-			path: app/Http/Controllers/Game/TechnologydetailsController.php
 
 		-
 			message: '#^Method App\\Services\\Admin\\SearchService\:\:searchAlliances\(\) should return Illuminate\\Support\\Collection\<int, array\{label\: string, type\: string, detail\: string, url\: string\}\> but returns Illuminate\\Support\\Collection\<int, array\{label\: string, type\: ''Alliance'', detail\: non\-falsy\-string, url\: string\}\>\.$#'

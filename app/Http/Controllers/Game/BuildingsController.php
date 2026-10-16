@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\Concerns\ReadsMixedValues;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Enums\Module;
 use App\Models\Planets;
@@ -29,6 +30,8 @@ use App\Libraries\Users;
  */
 abstract class BuildingsController extends BaseController
 {
+    use ReadsMixedValues;
+
     protected string $page = '';
 
     private const WORKING_BUILDINGS = [
@@ -110,7 +113,7 @@ abstract class BuildingsController extends BaseController
     private function showPage(array $user, array $planet): View
     {
         $planetModel = Planets::with(['buildings'])->where('planet_id', $planet['planet_id'])->first();
-        $commanderActive = $this->officerService->isOfficerActive((int) ($user['premium_officier_commander'] ?? 0), time());
+        $commanderActive = $this->officerService->isOfficerActive(self::asInt($user['premium_officier_commander'] ?? 0), time());
         $queueData = $planetModel ? $this->queueService->getQueueData($planetModel) : ['length' => 0, 'to_destroy' => 0, 'items' => []];
         $allowedIds = $this->resolveAllowedBuildings($user, $planet);
 
@@ -127,7 +130,7 @@ abstract class BuildingsController extends BaseController
                 'call_program' => $this->page,
                 'current_page' => $this->page,
             ])->render();
-            $queueRows = $this->buildQueueRows($queueData['items'], (int) ($planet['planet_id'] ?? 0));
+            $queueRows = $this->buildQueueRows($queueData['items'], self::asInt($planet['planet_id'] ?? 0));
         }
 
         return view('buildings.body', [
@@ -166,7 +169,7 @@ abstract class BuildingsController extends BaseController
      */
     private function getBuildingLevel(int $buildingId, array $planet): int
     {
-        return (int) ($planet[$this->registry->get($buildingId)->getName()] ?? 0);
+        return self::asInt($planet[$this->registry->get($buildingId)->getName()] ?? 0);
     }
 
     /**
@@ -199,14 +202,14 @@ abstract class BuildingsController extends BaseController
     ): string {
         $buildUrl = 'game.php?page=' . $this->page . '&cmd=insert&building=' . $buildingId;
         $queueLength = $queueData['length'];
-        $isOnVacation = ((int) ($user['preference_vacation_mode'] ?? 0)) > 0;
+        $isOnVacation = self::asInt($user['preference_vacation_mode'] ?? 0) > 0;
 
         $maxFields = $this->developmentsService->maxFields(
-            (int) ($planet['planet_field_max'] ?? 0),
+            self::asInt($planet['planet_field_max'] ?? 0),
             $this->getBuildingLevel(BuildingsEnumerator::BUILDING_TERRAFORMER, $planet)
         );
 
-        if ((int) ($planet['planet_field_current'] ?? 0) >= $maxFields) {
+        if (self::asInt($planet['planet_field_current'] ?? 0) >= $maxFields) {
             return $this->buildButton('all_occupied');
         }
 
@@ -249,11 +252,11 @@ abstract class BuildingsController extends BaseController
     {
         $firstItem = $queueData['items'][0] ?? null;
 
-        if ($firstItem === null || (int) $firstItem['building_id'] !== $buildingId) {
+        if ($firstItem === null || self::asInt($firstItem['building_id']) !== $buildingId) {
             return '<center>-</center>';
         }
 
-        $timeLeft = (int) $firstItem['end_time'] - time();
+        $timeLeft = self::asInt($firstItem['end_time']) - time();
 
         return view('buildings.build_single_script', [
             'build_time' => $timeLeft,
@@ -268,12 +271,12 @@ abstract class BuildingsController extends BaseController
     private function isWorkInProgress(int $buildingId, array $user, array $planet): bool
     {
         if ($buildingId === BuildingsEnumerator::BUILDING_LABORATORY &&
-            $this->developmentsService->isLabWorking((int) ($user['research_current_research'] ?? 0))) {
+            $this->developmentsService->isLabWorking(self::asInt($user['research_current_research'] ?? 0))) {
             return true;
         }
 
         if (in_array($buildingId, self::WORKING_BUILDINGS, true) &&
-            $this->developmentsService->isShipyardWorking((int) ($planet['planet_b_hangar'] ?? 0))) {
+            $this->developmentsService->isShipyardWorking(self::asInt($planet['planet_b_hangar'] ?? 0))) {
             return true;
         }
 
@@ -309,17 +312,17 @@ abstract class BuildingsController extends BaseController
         $rows = [];
 
         foreach ($items as $item) {
-            $endTime = (int) $item['end_time'];
+            $endTime = self::asInt($item['end_time']);
             $timeLeft = $endTime - time();
 
             if ($timeLeft <= 0) {
                 continue;
             }
 
-            $position = (int) $item['position'];
-            $buildingId = (int) $item['building_id'];
-            $targetLevel = (int) $item['target_level'];
-            $mode = (string) $item['mode'];
+            $position = self::asInt($item['position']);
+            $buildingId = self::asInt($item['building_id']);
+            $targetLevel = self::asInt($item['target_level']);
+            $mode = self::asString($item['mode']);
             $title = __('game/constructions.' . $this->registry->get($buildingId)->getName());
             $isActive = $position === 1;
 
@@ -363,7 +366,7 @@ abstract class BuildingsController extends BaseController
      */
     private function resolveAllowedBuildings(array $user, array $planet): array
     {
-        $planetType = (int) ($planet['planet_type'] ?? 1);
+        $planetType = self::asInt($planet['planet_type'] ?? 1);
         $raw = $this->setAllowedBuildings($planetType);
 
         $levels = $this->developmentDataService->levelsFromData($planet, $user);

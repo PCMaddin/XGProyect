@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Support\Concerns\ReadsMixedValues;
 use App\Core\GameObjects\Building;
 use App\Core\GameObjects\Defense;
 use App\Core\GameObjects\GameObject;
@@ -29,6 +30,8 @@ use App\Libraries\Users;
  */
 class TechnologydetailsController extends BaseController
 {
+    use ReadsMixedValues;
+
     public function __construct(
         private GameObjectRegistry $registry,
         private SettingsService $settings,
@@ -144,7 +147,7 @@ class TechnologydetailsController extends BaseController
         $levels = [];
 
         foreach ($this->registry->all() as $id => $candidate) {
-            $levels[$id] = (int) ($planetData[$candidate->getName()] ?? $userData[$candidate->getName()] ?? 0);
+            $levels[$id] = self::asInt($planetData[$candidate->getName()] ?? $userData[$candidate->getName()] ?? 0);
         }
 
         return $levels;
