@@ -357,19 +357,23 @@ class Fleet4Controller extends BaseController
         }
 
         $this->fleetData['fleet_mission'] = $mission;
-
-        // the admiral sets the plunder priority of an attack
-        $priority = $this->lootPriority;
-
-        if (
-            in_array($mission, [Missions::ATTACK, Missions::ACS], true) &&
-            CombatMission::isLootPriority($priority) &&
-            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time())->admiral
-        ) {
-            $this->fleetData['fleet_loot_priority'] = $priority;
-        }
+        $this->applyLootPriority($mission);
 
         return true;
+    }
+
+    /**
+     * The admiral sets the plunder priority of an attack.
+     */
+    private function applyLootPriority(int $mission): void
+    {
+        if (
+            in_array($mission, [Missions::ATTACK, Missions::ACS], true) &&
+            CombatMission::isLootPriority($this->lootPriority) &&
+            $this->officerService->bonuses($this->premium->getCurrentPremium()->toArray(), time())->admiral
+        ) {
+            $this->fleetData['fleet_loot_priority'] = $this->lootPriority;
+        }
     }
 
     /**

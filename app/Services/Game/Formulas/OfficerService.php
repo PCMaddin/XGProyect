@@ -6,6 +6,9 @@ namespace App\Services\Game\Formulas;
 
 use App\Support\OfficerBonuses;
 
+/**
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ */
 class OfficerService
 {
     public function isOfficerActive(int $expireTime, int $currentTime): bool
