@@ -22,6 +22,10 @@ use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
  */
 final class Ranks
 {
+    public const FOUNDER = 0;
+
+    public const NEWCOMER = 1;
+
     private const RIGHTS_COUNT = 9;
 
     /** @var array<int, Rank> */
@@ -99,16 +103,22 @@ final class Ranks
     }
 
     /**
-     * Remove a rank; the following ranks move up one id.
+     * Remove a rank; the following ranks move up one id, so the members'
+     * rank ids must follow (AllianceRankService::deleteRank()). The founder
+     * and newcomer ranks cannot be removed.
+     *
+     * @return bool whether a rank was removed
      */
-    public function deleteRankById(int $rankId): void
+    public function deleteRankById(int $rankId): bool
     {
-        if (!isset($this->ranks[$rankId])) {
-            return;
+        if ($rankId <= self::NEWCOMER || !isset($this->ranks[$rankId])) {
+            return false;
         }
 
         unset($this->ranks[$rankId]);
         $this->ranks = array_values($this->ranks);
+
+        return true;
     }
 
     /**

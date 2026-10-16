@@ -153,7 +153,7 @@ class AlliancesController extends BaseController
         } elseif ($request->has('save_ranks')) {
             $this->alliancesService->saveRankPermissions($request, $ranks);
         } elseif ($request->has('delete_ranks')) {
-            $this->alliancesService->deleteRanks($request, $ranks);
+            $this->alliancesService->deleteRanks($request, $alliance->alliance_id, $ranks);
         }
 
         $alliance->update(['alliance_ranks' => $ranks->getAllRanksAsJsonString()]);

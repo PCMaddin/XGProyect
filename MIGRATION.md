@@ -479,6 +479,17 @@ Baseline-Einträge.
   Produktionsformeln direkt aus der `GameObjectRegistry` statt aus
   untypisierten Legacy-Arrays. Die Ausgabe ist für alle Objekte auf Stufe 0
   und 5 byte-identisch geprüft.
+- ✅ **Allianz-Ränge: Mitglieder rutschten beim Löschen eines Rangs um**
+  (gefixt): Beim Löschen rücken die folgenden Ränge eine Id auf, die
+  `ally_rank_id` der Mitglieder blieben aber stehen. Mitglieder der
+  folgenden Ränge bekamen dadurch Name und Rechte des jeweils nächsten Rangs
+  (Rechte-Eskalation möglich), Mitglieder des gelöschten Rangs den
+  nachfolgenden. Und über `?d=0` bzw. `?d=1` ließen sich im Spiel Gründer-
+  und Neuling-Rang löschen; die Oberfläche blendete den Link nur aus.
+  `AllianceRankService::deleteRank()` (Spiel und Admin) macht die
+  Mitglieder des gelöschten Rangs zu Neulingen, zieht die folgenden nach
+  und speichert alles in einer Transaktion. `Ranks` lässt Rang 0 und 1 nicht
+  mehr löschen. DB-Tests.
 - 🟡 **Offen (Balancing, Entscheidung nötig): Intergalaktisches
   Forschungsnetzwerk.** `ResearchQueueService::labLevel()` summiert per
   `SUM(...) ... ORDER BY ... LIMIT Stufe+1`. `LIMIT` wirkt aber erst auf das

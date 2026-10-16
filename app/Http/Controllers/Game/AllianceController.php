@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
+use App\Services\Game\AllianceRankService;
 use App\Services\FormatService;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
@@ -52,6 +53,7 @@ class AllianceController extends BaseController
     public function __construct(
         private FormatService $formatService,
         private TimingService $timingService,
+        private AllianceRankService $rankService,
     ) {
     }
 
@@ -473,8 +475,7 @@ class AllianceController extends BaseController
         }
 
         if ($request->has('d')) {
-            $ranks->deleteRankById($request->integer('d'));
-            $this->persistRanks($ranks, $request);
+            $this->rankService->deleteRank($this->allianceId($request), $ranks, $request->integer('d'));
         }
 
         return view('alliance.admin.rights', [

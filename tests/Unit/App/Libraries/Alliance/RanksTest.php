@@ -107,12 +107,21 @@ class RanksTest extends TestCase
         $ranks->addNew('Officer');
         $ranks->addNew('Trader');
 
-        $ranks->deleteRankById(-1);
-        $ranks->deleteRankById(9);
-        $ranks->deleteRankById(2);
+        $this->assertFalse($ranks->deleteRankById(-1));
+        $this->assertFalse($ranks->deleteRankById(9));
+        $this->assertTrue($ranks->deleteRankById(2));
 
         $this->assertSame(['Founder', 'Newcomer', 'Trader'], array_column($ranks->getAllRanksAsArray(), 'rank'));
         $this->assertSame([0, 1, 2], array_keys($ranks->getAllRanksAsArray()));
+    }
+
+    public function testTheFounderAndNewcomerRanksCannotBeDeleted(): void
+    {
+        $ranks = new Ranks(self::DEFAULT_RANKS);
+
+        $this->assertFalse($ranks->deleteRankById(Ranks::FOUNDER));
+        $this->assertFalse($ranks->deleteRankById(Ranks::NEWCOMER));
+        $this->assertSame(['Founder', 'Newcomer'], array_column($ranks->getAllRanksAsArray(), 'rank'));
     }
 
     public function testAnUnknownRankFallsBackToTheNewcomer(): void

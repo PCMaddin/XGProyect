@@ -6,6 +6,7 @@ namespace App\Services\Admin;
 
 use App\Http\Requests\Admin\AllianceRankRequest;
 use App\Models\User;
+use App\Services\Game\AllianceRankService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
 use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
@@ -17,8 +18,10 @@ use App\Libraries\Alliance\Ranks;
  */
 class AlliancesService
 {
-    public function __construct(private readonly SettingsService $settings)
-    {
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly AllianceRankService $rankService,
+    ) {
     }
 
     public function createAlliance(string $allianceName, string $allianceTag, int $allianceFounder): void
@@ -182,17 +185,16 @@ class AlliancesService
         session()->flash('success', __('admin/alliances.al_rank_saved'));
     }
 
-    public function deleteRanks(AllianceRankRequest $request, Ranks $ranks): void
+    public function deleteRanks(AllianceRankRequest $request, int $allianceId, Ranks $ranks): void
     {
         /** @var array<int, int|string> $toDelete */
         $toDelete = (array) $request->input('delete_message', []);
 
         $ids = array_map('intval', $toDelete);
-        $ids = array_filter($ids, fn (int $id) => $id >= 2);
         rsort($ids);
 
         foreach ($ids as $rankId) {
-            $ranks->deleteRankById($rankId);
+            $this->rankService->deleteRank($allianceId, $ranks, $rankId);
         }
 
         session()->flash('success', __('admin/alliances.al_rank_removed'));

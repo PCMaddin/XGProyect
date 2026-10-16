@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Admin;
 
+use App\Services\Game\AllianceRankService;
 use App\Services\Admin\AlliancesService;
 use App\Services\SettingsService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -20,7 +21,7 @@ class AlliancesServiceTest extends TestCase
     {
         parent::setUp();
         $this->settings = $this->createMock(SettingsService::class);
-        $this->service = new AlliancesService($this->settings);
+        $this->service = new AlliancesService($this->settings, new AllianceRankService());
     }
 
     public function testBuildRanksViewDataMapsIndexToI(): void
