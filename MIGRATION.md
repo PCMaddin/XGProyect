@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 712 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
+| Tests | 711 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate) und php-cs-fixer über das ganze Repo |
 
 > **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
 > Ausführung (Actions läuft dort offenbar nicht), die Checks aus
