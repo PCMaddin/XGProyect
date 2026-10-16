@@ -33,6 +33,14 @@ final class ClassBonuses
         return $this->player->speedFactor($shipId) * $trader;
     }
 
+    /**
+     * @return list<float>
+     */
+    public function speedSteps(): array
+    {
+        return $this->player->speedSteps();
+    }
+
     public function cargoBonus(int $shipId): float
     {
         return $this->player->cargoBonus($shipId);

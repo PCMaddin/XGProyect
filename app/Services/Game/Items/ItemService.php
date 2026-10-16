@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Game\Items;
 
 use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Libraries\PlanetLib;
 use App\Models\Planets;
 use App\Services\Game\BuildingQueueService;
 use App\Services\Game\ResearchQueueService;
@@ -19,16 +20,27 @@ use Illuminate\Support\Facades\DB;
  * - Field items work once per planet or moon (not cumulative).
  * - Kraken, detroid and newtron need a running building, shipyard or
  *   research order.
+ * - M.O.O.N.S. needs a planet without a moon; it is used up whether the
+ *   moon comes or not (outcome() tells which).
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class ItemService
 {
+    /** language key of what the last item did, when there is more to say */
+    private ?string $outcome = null;
+
     public function __construct(
         private ItemCatalog $catalog,
         private BuildingQueueService $buildingQueue,
         private ResearchQueueService $researchQueue,
+        private PlanetLib $planetLib,
     ) {
+    }
+
+    public function outcome(): ?string
+    {
+        return $this->outcome;
     }
 
     /**
@@ -96,6 +108,7 @@ class ItemService
     public function use(int $userId, int $planetId, string $key, int $now): ?string
     {
         $item = $this->catalog->get($key);
+        $this->outcome = null;
 
         if ($item === null) {
             return 'it_unknown_item';
@@ -175,6 +188,7 @@ class ItemService
             Item::KRAKEN => $this->buildingQueue->speedUp($planet, $item->value) ? null : 'it_nothing_building',
             Item::DETROID => $this->speedUpShipyard($planet, $item->value),
             Item::NEWTRON => $this->speedUpResearch($userId, $item->value),
+            Item::MOONS => $this->moonShot($item, $planet),
             default => 'it_unknown_item',
         };
     }
@@ -231,6 +245,38 @@ class ItemService
         }
 
         DB::table('planets')->where('planet_id', $planet->planet_id)->increment('planet_b_hangar', $seconds);
+
+        return null;
+    }
+
+    /**
+     * A moon shot without a fleet: a moon with the item's chance, as big as
+     * a moon of a battle with that chance.
+     */
+    private function moonShot(Item $item, Planets $planet): ?string
+    {
+        if ($planet->planet_type !== PlanetTypesEnumerator::PLANET) {
+            return 'it_planet_only';
+        }
+
+        $moon = Planets::where('planet_galaxy', $planet->planet_galaxy)
+            ->where('planet_system', $planet->planet_system)
+            ->where('planet_planet', $planet->planet_planet)
+            ->where('planet_type', PlanetTypesEnumerator::MOON)
+            ->exists();
+
+        if ($moon) {
+            return 'it_moon_exists';
+        }
+
+        $this->outcome = 'it_moons_failed';
+
+        if (mt_rand(0, 99) < $item->value) {
+            // the diameter of a battle moon (BattleEngine Events::eventMoon)
+            $size = mt_rand(2000 + ($item->value * 100), 6000 + ($item->value * 200));
+            $this->planetLib->setNewMoon($planet->planet_galaxy, $planet->planet_system, $planet->planet_planet, $planet->planet_user_id, '', 0, $size);
+            $this->outcome = 'it_moons_success';
+        }
 
         return null;
     }

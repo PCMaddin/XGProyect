@@ -117,6 +117,18 @@ enum PlayerClass: int
         return $this === self::General ? 2 : 0;
     }
 
+    /**
+     * The fleet speeds to choose, in tenths: generals in steps of 5 %.
+     *
+     * @return list<float>
+     */
+    public function speedSteps(): array
+    {
+        $step = $this === self::General ? 0.5 : 1.0;
+
+        return array_map(fn (int $index): float => 10 - ($index * $step), range(0, (int) (10 / $step) - 1));
+    }
+
     /** generals' moons have 5 more fields */
     public function moonFieldBonus(): int
     {

@@ -54,7 +54,8 @@ class ItemsController extends BaseController
             if ($result === null) {
                 return redirect(self::REDIRECT_TARGET)->with(
                     'items_success',
-                    sprintf((string) __('game/items.' . ($request->has('buy') ? 'it_bought' : 'it_used')), $this->texts->name($key))
+                    sprintf((string) __('game/items.' . ($request->has('buy') ? 'it_bought' : 'it_used')), rtrim($this->texts->name($key), '.'))
+                    . ($this->items->outcome() !== null ? ' ' . __('game/items.' . $this->items->outcome()) : '')
                 );
             }
 

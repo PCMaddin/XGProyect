@@ -21,9 +21,12 @@ class ItemTexts
     {
         $item = $this->catalog->get($key);
 
-        return $item === null
-            ? ''
-            : __('game/items.' . $item->nameKey()) . ' ' . __('game/items.it_' . $item->tier);
+        if ($item === null) {
+            return '';
+        }
+
+        // M.O.O.N.S. comes in one kind only
+        return __('game/items.' . $item->nameKey()) . ($item->type === Item::MOONS ? '' : ' ' . __('game/items.it_' . $item->tier));
     }
 
     public function description(string $key): string

@@ -15,12 +15,13 @@ final class Item
     public const KRAKEN = 'kraken';
     public const DETROID = 'detroid';
     public const NEWTRON = 'newtron';
+    public const MOONS = 'moons';
 
     public const TIERS = ['bronze', 'silver', 'gold'];
 
     /**
      * @param string      $type     one of the constants above
-     * @param int         $value    percent (booster), fields, or seconds (kraken, detroid, newtron)
+     * @param int         $value    percent (booster, moon chance of M.O.O.N.S.), fields, or seconds (kraken, detroid, newtron)
      * @param int         $duration seconds a booster works
      * @param int|null    $price    dark matter in the shop, null when not sold there
      * @param string|null $resource the resource of a booster
@@ -38,11 +39,11 @@ final class Item
 
     /**
      * Whether the auctioneer, import/export and expeditions hand it out
-     * (all but the field items).
+     * (all but the field items and M.O.O.N.S.).
      */
     public function isTradable(): bool
     {
-        return !in_array($this->type, [self::PLANET_FIELDS, self::MOON_FIELDS], true);
+        return !in_array($this->type, [self::PLANET_FIELDS, self::MOON_FIELDS, self::MOONS], true);
     }
 
     /**

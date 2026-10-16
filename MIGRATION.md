@@ -1250,6 +1250,20 @@ Nachgezogen:
   - Tests auf MariaDB (Bereich, belegt, reserviert, DM, Aufträge,
     Flotten, Urlaubsmodus, kompletter Umzug mit Landung der Schiffe); im
     Browser gestartet, abgebrochen und durchgeführt.
+- ✅ **General: Flottentempo in 5-%-Schritten** (V7): Generäle wählen 5 %
+  bis 100 % in 5-%-Schritten, alle anderen weiter in 10-%-Schritten
+  (`PlayerClass::speedSteps`). Das Tempo läuft intern weiter in Zehnteln
+  (9,5 = 95 %), auch durch die vorhandene Flugzeit-Berechnung im
+  Browser. Fleet3 nimmt nur die Stufen der eigenen Klasse an, ein
+  eingeschmuggeltes 95 % eines Nicht-Generals führt zurück zu Schritt 1.
+  Im Browser mit 95 % gesendet (Flugzeit wie angezeigt).
+- ✅ **M.O.O.N.S.** (Gegenstand des Originals, OGame-DE-Forum): ein
+  Mondschuss ohne Flotte auf einen eigenen Planeten ohne Mond. Mit 20 %
+  entsteht ein Mond in der Größe eines Kampfmondes mit 20 % Chance, ein
+  Trümmerfeld entsteht nicht; der Gegenstand ist auch ohne Mond
+  verbraucht. Im Shop für 50.000 Dunkle Materie (**Annahme**: Der
+  Original-Preis war nicht belegt). Wird nicht versteigert und nicht auf
+  Expeditionen gefunden. Tests; im Browser gekauft und eingesetzt.
 
 Offen:
 

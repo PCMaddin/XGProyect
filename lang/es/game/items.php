@@ -40,4 +40,9 @@ return [
     'it_nothing_building' => 'No se está construyendo nada en este planeta.',
     'it_nothing_in_shipyard' => 'El hangar de este planeta no tiene encargos.',
     'it_nothing_researching' => 'No se está investigando nada.',
+    'it_moons' => 'M.O.O.N.S.',
+    'it_desc_moons' => 'Un disparo lunar sin flota a este planeta: con una probabilidad del %1$s %% se forma una luna, sin campo de escombros. Solo para planetas sin luna; el objeto se consume aunque no se forme la luna.',
+    'it_moon_exists' => 'Este planeta ya tiene una luna.',
+    'it_moons_success' => '¡Se ha formado una luna!',
+    'it_moons_failed' => 'No se ha formado ninguna luna.',
 ];

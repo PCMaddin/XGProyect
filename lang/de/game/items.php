@@ -40,4 +40,9 @@ return [
     'it_nothing_building' => 'Auf diesem Planeten wird gerade nichts gebaut.',
     'it_nothing_in_shipyard' => 'Die Werft dieses Planeten hat keinen Auftrag.',
     'it_nothing_researching' => 'Es wird gerade nichts erforscht.',
+    'it_moons' => 'M.O.O.N.S.',
+    'it_desc_moons' => 'Ein Mondschuss ohne Flotte auf diesen Planeten: Mit %1$s %% Wahrscheinlichkeit entsteht ein Mond, ein Trümmerfeld entsteht nicht. Nur für Planeten ohne Mond; der Gegenstand wird auch ohne Mond verbraucht.',
+    'it_moon_exists' => 'Dieser Planet hat schon einen Mond.',
+    'it_moons_success' => 'Ein Mond ist entstanden!',
+    'it_moons_failed' => 'Es ist kein Mond entstanden.',
 ];

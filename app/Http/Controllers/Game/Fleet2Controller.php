@@ -305,7 +305,7 @@ class Fleet2Controller extends BaseController
     }
 
     /**
-     * @return array<string, int|array{expedition: float, ally: float, allies: list<string>}>
+     * @return array<string, int|list<float>|array{expedition: float, ally: float, allies: list<string>}>
      */
     private function buildInputVars(Request $request): array
     {
@@ -320,6 +320,8 @@ class Fleet2Controller extends BaseController
             'planet_end' => $this->targetInput($request, 'planet', 1, MAX_PLANET_IN_SYSTEM + 1, $this->planetInt('planet_planet')),
             'target_mission' => $request->has('target_mission') ? $request->integer('target_mission') : 0,
             'class_speed' => $this->classSpeed(),
+            // generals choose the speed in steps of 5 %
+            'speed_steps' => app(PlayerClassService::class)->currentBonuses()->speedSteps(),
         ];
     }
 

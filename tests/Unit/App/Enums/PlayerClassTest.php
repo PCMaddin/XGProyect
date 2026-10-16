@@ -114,4 +114,16 @@ class PlayerClassTest extends DatabaseTestCase
         $this->assertSame(5000.0, $service->extras($mines, 0, 100, 60, 15, new ClassBonuses(PlayerClass::None), false)['energyUsed']);
         $this->assertSame(5000.0, $service->extras($mines, 0, 100000, 100000, 10, new ClassBonuses(PlayerClass::None), false)['metal']);
     }
+
+    public function testGeneralsChooseTheSpeedInStepsOfFivePercent(): void
+    {
+        $this->assertSame([10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0], PlayerClass::Collector->speedSteps());
+        $this->assertSame(PlayerClass::None->speedSteps(), PlayerClass::Discoverer->speedSteps());
+
+        $general = PlayerClass::General->speedSteps();
+        $this->assertCount(20, $general);
+        $this->assertSame([10.0, 9.5, 9.0], array_slice($general, 0, 3));
+        $this->assertSame(0.5, end($general));
+        $this->assertSame($general, (new ClassBonuses(PlayerClass::General))->speedSteps());
+    }
 }

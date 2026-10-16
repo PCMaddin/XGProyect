@@ -40,4 +40,9 @@ return [
     'it_nothing_building' => 'Nothing is being built on this planet.',
     'it_nothing_in_shipyard' => 'The shipyard of this planet has no order.',
     'it_nothing_researching' => 'Nothing is being researched.',
+    'it_moons' => 'M.O.O.N.S.',
+    'it_desc_moons' => 'A moon shot at this planet without a fleet: a moon forms with a chance of %1$s %%, no debris field. Only for planets without a moon; the item is used up even when no moon forms.',
+    'it_moon_exists' => 'This planet already has a moon.',
+    'it_moons_success' => 'A moon has formed!',
+    'it_moons_failed' => 'No moon has formed.',
 ];

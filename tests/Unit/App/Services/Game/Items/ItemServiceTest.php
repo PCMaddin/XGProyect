@@ -6,6 +6,7 @@ namespace Tests\Unit\App\Services\Game\Items;
 
 use App\Models\BuildingQueue;
 use App\Models\ResearchQueue;
+use App\Services\Game\Items\ItemCatalog;
 use App\Services\Game\Items\ItemService;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -134,6 +135,37 @@ class ItemServiceTest extends DatabaseTestCase
         $this->assertSame($end - 21600, $this->int(DB::table('planets')->where('planet_id', self::PLANET)->value('planet_b_tech')));
     }
 
+    public function testMoonsFiresAMoonShotAtAPlanetWithoutAMoon(): void
+    {
+        DB::table('planets')->insert(['planet_id' => 72, 'planet_user_id' => self::USER, 'planet_type' => 1, 'planet_galaxy' => 1, 'planet_system' => 2, 'planet_planet' => 3, 'planet_b_hangar_id' => '']);
+        $this->items()->add(self::USER, 'moons_gold', 100);
+        $service = $this->items();
+
+        // planet 70 already has its moon 71
+        $this->assertSame('it_moon_exists', $service->use(self::USER, self::PLANET, 'moons_gold', self::NOW));
+        $this->assertSame('it_planet_only', $service->use(self::USER, self::MOON, 'moons_gold', self::NOW));
+
+        mt_srand(7);
+        $outcomes = [];
+
+        do {
+            $this->assertNull($service->use(self::USER, 72, 'moons_gold', self::NOW));
+            $outcomes[] = $service->outcome();
+        } while ($service->outcome() === 'it_moons_failed' && count($outcomes) < 100);
+
+        // used up on every try, a moon at 20 % (8.000 to 10.000 km, as in a battle)
+        $this->assertSame('it_moons_success', end($outcomes));
+        $this->assertSame(['moons_gold' => 100 - count($outcomes)], $service->inventory(self::USER));
+        $moon = DB::table('planets')->where('planet_galaxy', 1)->where('planet_system', 2)->where('planet_planet', 3)->where('planet_type', 3)->first();
+        $this->assertNotNull($moon);
+        $this->assertGreaterThanOrEqual(4000, (int) $moon->planet_diameter);
+        $this->assertLessThanOrEqual(10000, (int) $moon->planet_diameter);
+        $this->assertSame('it_moon_exists', $service->use(self::USER, 72, 'moons_gold', self::NOW));
+        // not sold by the auctioneer or found on expeditions
+        $this->assertSame(50000, $this->catalog()->get('moons_gold')?->price);
+        $this->assertArrayNotHasKey('moons_gold', $this->catalog()->tradable());
+    }
+
     public function testOnlyOwnPlanets(): void
     {
         $this->items()->add(self::USER, 'metal_booster_bronze');
@@ -160,5 +192,10 @@ class ItemServiceTest extends DatabaseTestCase
         $this->assertIsNumeric($value);
 
         return (int) $value;
+    }
+
+    private function catalog(): ItemCatalog
+    {
+        return new ItemCatalog();
     }
 }

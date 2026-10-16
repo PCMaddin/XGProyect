@@ -93,16 +93,9 @@
             <th scope="row">{{ __('game/fleet.fl_fleet_speed') }}</th>
             <th role="cell">
                 <select name="speed" onChange="shortInfo()" onKeyUp="shortInfo()">
-                    <option value="10">100</option>
-                    <option value="9">90</option>
-                    <option value="8">80</option>
-                    <option value="7">70</option>
-                    <option value="6">60</option>
-                    <option value="5">50</option>
-                    <option value="4">40</option>
-                    <option value="3">30</option>
-                    <option value="2">20</option>
-                    <option value="1">10</option>
+                    @foreach ($speed_steps as $step)
+                        <option value="{{ $step }}">{{ $step * 10 }}</option>
+                    @endforeach
                 </select> %
             </th>
         </tr>

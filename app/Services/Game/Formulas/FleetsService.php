@@ -37,7 +37,7 @@ class FleetsService
         return 5;
     }
 
-    public function missionDuration(int $percentage, float $maxFleetSpeed, int $distance, int $speedFactor): float
+    public function missionDuration(float $percentage, float $maxFleetSpeed, int $distance, int $speedFactor): float
     {
         return (35000 / $percentage * sqrt($distance * 10 / $maxFleetSpeed) + 10) / $speedFactor;
     }

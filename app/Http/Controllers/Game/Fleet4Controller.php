@@ -565,7 +565,7 @@ class Fleet4Controller extends BaseController
     private function validateTime(): bool
     {
         $duration = (int) floor($this->fleetsService->missionDuration(
-            $this->sessionInt('speed'),
+            $this->sessionFloat('speed'),
             $this->sessionFloat('fleet_speed') * $this->classSpeedFactor(),
             $this->sessionInt('distance'),
             Functions::fleetSpeedFactor()

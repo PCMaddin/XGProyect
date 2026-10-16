@@ -318,7 +318,7 @@ class Fleet3Controller extends BaseController
         $consumption = $this->fleetsService->fleetConsumption(
             $fleet,
             $speedFactor,
-            (int) $this->fleetsService->missionDuration($this->asInt($data['speed']), (float) $minSpeed, $distance, $speedFactor),
+            (int) $this->fleetsService->missionDuration($this->asFloat($data['speed']), (float) $minSpeed, $distance, $speedFactor),
             $distance,
             $this->driveLevel('combustion'),
             $this->driveLevel('impulse'),
@@ -328,7 +328,7 @@ class Fleet3Controller extends BaseController
 
         session([
             'fleet_data' => array_merge($this->sessionFleetData(), [
-                'speed' => $this->asInt($data['speed']),
+                'speed' => $this->asFloat($data['speed']),
                 'target' => [
                     'galaxy' => $this->asInt($data['galaxy']),
                     'system' => $this->asInt($data['system']),
@@ -354,7 +354,7 @@ class Fleet3Controller extends BaseController
             'system_end' => $this->asInt($data['system']),
             'planet_end' => $this->asInt($data['planet']),
             'planet_type_end' => $this->asInt($data['planettype']),
-            'speed' => $this->asInt($data['speed']),
+            'speed' => $this->asString($data['speed']),
             'speedfactor' => Functions::fleetSpeedFactor(),
         ];
     }
@@ -381,7 +381,7 @@ class Fleet3Controller extends BaseController
             'system' => $this->rangeOrNull($request, 'system', 1, MAX_SYSTEM_IN_GALAXY),
             'planet' => $this->rangeOrNull($request, 'planet', 1, MAX_PLANET_IN_SYSTEM + 1),
             'planettype' => $this->rangeOrNull($request, 'planettype', 1, 3),
-            'speed' => $this->rangeOrNull($request, 'speed', 1, 10),
+            'speed' => $this->speedOrNull($request),
             'target_mission' => $this->intOrNull($request, 'target_mission'),
             'fleet_group' => $this->intOrNull($request, 'fleet_group'),
             'acs_target' => $this->rawOrNull($request, 'acs_target'),
@@ -590,6 +590,22 @@ class Fleet3Controller extends BaseController
         return $value >= $min && $value <= $max ? $value : null;
     }
 
+    /**
+     * The speed in tenths, one of the player's steps (generals: 5 %).
+     */
+    private function speedOrNull(Request $request): ?string
+    {
+        $value = $request->post('speed');
+
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        $steps = app(PlayerClassService::class)->currentBonuses()->speedSteps();
+
+        return in_array((float) $value, $steps, true) ? (string) (float) $value : null;
+    }
+
     private function intOrNull(Request $request, string $key): ?int
     {
         return $request->has($key) && is_numeric($request->post($key)) ? $request->integer($key) : null;
@@ -650,6 +666,11 @@ class Fleet3Controller extends BaseController
     private function asInt(mixed $value): int
     {
         return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function asFloat(mixed $value): float
+    {
+        return is_numeric($value) ? (float) $value : 0.0;
     }
 
     private function asString(mixed $value): string

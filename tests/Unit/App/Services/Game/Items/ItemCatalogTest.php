@@ -20,8 +20,9 @@ class ItemCatalogTest extends TestCase
     {
         $catalog = new ItemCatalog();
 
-        // 3 boosters, planet and moon fields, kraken, detroid, newtron; 3 tiers each
-        $this->assertCount(24, $catalog->all());
+        // 3 boosters, planet and moon fields, kraken, detroid, newtron; 3 tiers each; M.O.O.N.S.
+        $this->assertCount(25, $catalog->all());
+        $this->assertSame([Item::MOONS, 20, 'it_moons'], [$catalog->get('moons_gold')?->type, $catalog->get('moons_gold')?->value, $catalog->get('moons_gold')?->nameKey()]);
 
         $booster = $catalog->get('crystal_booster_silver');
         $this->assertNotNull($booster);
@@ -37,7 +38,7 @@ class ItemCatalogTest extends TestCase
     {
         $catalog = new ItemCatalog();
 
-        $this->assertCount(15, $catalog->shop());
+        $this->assertCount(16, $catalog->shop());
         $this->assertArrayNotHasKey('kraken_bronze', $catalog->shop());
 
         $this->assertCount(18, $catalog->tradable());

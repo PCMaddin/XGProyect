@@ -13,7 +13,10 @@ namespace App\Services\Game\Items;
  *   moon fields 2/4/6 to a moon (30.000/50.000/100.000), once each;
  * - kraken, detroid and newtron shorten the building, shipyard or research
  *   order by 30 minutes, 2 or 6 hours; only the auctioneer, import/export
- *   and expeditions hand them out, as the boosters.
+ *   and expeditions hand them out, as the boosters;
+ * - M.O.O.N.S. fires a moon shot at one of the player's planets without a
+ *   moon: a moon with a chance of 20 %, without a debris field (the price
+ *   of 50.000 dark matter is an assumption, the original's is not known).
  */
 final class ItemCatalog
 {
@@ -27,6 +30,7 @@ final class ItemCatalog
         Item::KRAKEN => ['bronze' => 1800, 'silver' => 7200, 'gold' => 21600],
         Item::DETROID => ['bronze' => 1800, 'silver' => 7200, 'gold' => 21600],
         Item::NEWTRON => ['bronze' => 1800, 'silver' => 7200, 'gold' => 21600],
+        Item::MOONS => ['gold' => 20],
     ];
 
     /** @var array<string, array<string, int>> dark matter in the shop */
@@ -34,6 +38,7 @@ final class ItemCatalog
         Item::BOOSTER => ['bronze' => 2500, 'silver' => 8500, 'gold' => 25000],
         Item::PLANET_FIELDS => ['bronze' => 75000, 'silver' => 150000, 'gold' => 300000],
         Item::MOON_FIELDS => ['bronze' => 30000, 'silver' => 50000, 'gold' => 100000],
+        Item::MOONS => ['gold' => 50000],
     ];
 
     private const RESOURCES = ['metal', 'crystal', 'deuterium'];
