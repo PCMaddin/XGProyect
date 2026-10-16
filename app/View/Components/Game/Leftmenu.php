@@ -33,10 +33,6 @@ class Leftmenu extends Component
         $rawId = session('user_id');
         $user = User::findOrFail(is_int($rawId) ? $rawId : 0);
 
-        // @todo review - future reference in case there is a bug
-        // $tota_rank = $this->current_user['user_statistic_total_rank'] == '' ?
-        // :$this->current_planet['stats_users'] : $this->current_user['user_statistic_total_rank'];
-
         $menu = [];
         $modules = explode(';', $this->settingsService->getString('modules'));
         $pages = [

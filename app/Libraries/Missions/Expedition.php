@@ -20,7 +20,6 @@ use App\Libraries\Functions;
 class Expedition extends Missions
 {
     private int $resourceExpeditionPoints = 0;
-    private int $shipExpeditionPoints = 0;
     private int $fleetCapacity = 0;
 
     public function __construct(
@@ -123,22 +122,13 @@ class Expedition extends Missions
 
         $topPlayerPoints = (float) self::num(UsersStatistics::max('user_statistic_total_points'));
 
-        $maxResourcePoints = $this->expeditionService->getMaxExpeditionPoints($topPlayerPoints);
-        $maxShipsPoints = $this->expeditionService->getMaxShipsExpeditionPoints($topPlayerPoints);
-
         // limit the amount of resources and of ships that can be found
-        $this->resourceExpeditionPoints = min($expeditionPoints, $maxResourcePoints);
-        $this->shipExpeditionPoints = min($expeditionPoints, $maxShipsPoints);
+        $this->resourceExpeditionPoints = min($expeditionPoints, $this->expeditionService->getMaxExpeditionPoints($topPlayerPoints));
     }
 
     /**
-     * @todo needs polishing, there are 3 types of packages
-     * small package: 300-400 DM
-     * medium package: 500-700 DM
-     * large package: 1.000-1.800 DM
-     *
-     * needs review because I replicated previous used logic for resources
-     * I couldn't find any rule behind this...
+     * Dark matter in one of three sizes (weights in the settings): small
+     * 300-400, medium 500-700, large 1.000-1.800.
      *
      * @param array<string, mixed> $fleet
      */
@@ -160,54 +150,56 @@ class Expedition extends Missions
     }
 
     /**
-     * @todo probably not 100% like the original game
+     * The fleet finds ships worth half of what it would find in resources
+     * (structure points: metal and crystal), see
+     * ExpeditionService::getFoundShips; with none found it is a "nothing".
      *
      * @param array<string, mixed> $fleet
      */
     private function resultShips(array $fleet): void
     {
-        $shipsRatio = $this->expeditionService->getShipsObtainableChances();
-        $foundChance = $this->shipExpeditionPoints / self::num($fleet['fleet_amount']);
         $currentFleet = FleetShips::decode(self::str($fleet['fleet_array']));
-        $foundShip = [];
+        $budget = $this->expeditionService->calculateShipFoundAmount(
+            $this->expeditionService->getResourceSourceSizeMultChances($this->expeditionService->calculateResourceSourceSize()),
+            $this->resourceExpeditionPoints
+        );
+        $found = $this->expeditionService->getFoundShips($currentFleet, $budget, $this->shipStructures());
 
-        for ($ship = 202; $ship <= 215; $ship++) {
-            if (isset($currentFleet[$ship]) && $currentFleet[$ship] != 0) {
-                $foundShip[$ship] = round($currentFleet[$ship] * self::num($shipsRatio[$ship]) * $foundChance) + 1;
+        if ($found === []) {
+            $this->resultNothing($fleet);
 
-                if ($foundShip[$ship] > 0) {
-                    $currentFleet[$ship] += $foundShip[$ship];
-                }
-            }
+            return;
         }
 
-        $newShips = [];
         $foundShipMessage = '';
 
-        foreach ($currentFleet as $ship => $count) {
-            if ($count > 0) {
-                $newShips[$ship] = $count;
-            }
-        }
-
-        foreach ($foundShip as $ship => $count) {
-            if ($count != 0) {
-                $foundShipMessage .= self::str(__('game/ships.' . $this->resource[$ship])) . ': ' . $count . '<br>';
-            }
+        foreach ($found as $ship => $count) {
+            $currentFleet[$ship] = ($currentFleet[$ship] ?? 0) + $count;
+            $foundShipMessage .= self::str(__('game/ships.' . $this->resource[$ship])) . ': ' . $count . '<br>';
         }
 
         $this->updateFleetArrayById([
-            'ships' => FleetShips::encode($newShips),
-            'amount' => array_sum($newShips),
+            'ships' => FleetShips::encode($currentFleet),
+            'amount' => array_sum($currentFleet),
             'fleet_id' => $fleet['fleet_id'],
         ]);
 
-        $message = sprintf(
-            self::str(__('game/expedition.exp_new_ships_' . mt_rand(1, 5))),
+        $this->expeditionMessage($fleet, sprintf(
+            self::str(__('game/expedition.exp_new_ships_' . mt_rand(1, 7))),
             $foundShipMessage
-        );
+        ));
+    }
 
-        $this->expeditionMessage($fleet, $message);
+    /**
+     * Metal and crystal of each ship, by id.
+     *
+     * @return array<int, int>
+     */
+    private function shipStructures(): array
+    {
+        return $this->registry->ships()
+            ->mapWithKeys(fn (Ship $ship): array => [$ship->getId() => $ship->getPrice()->getMetal() + $ship->getPrice()->getCrystal()])
+            ->all();
     }
 
     /**
@@ -221,9 +213,11 @@ class Expedition extends Missions
 
         // expedition resources obtained calculations
         $typeObtained = $this->expeditionService->calculateResourceTypeObtained();
+        // bugfix: this passed the resource type as the source size, so the
+        // large and huge finds never happened
         $foundAmount = $this->expeditionService->getResourceFoundAmount(
             $this->expeditionService->getResourceSourceSizeMultChances(
-                $typeObtained
+                $this->expeditionService->calculateResourceSourceSize()
             ),
             $this->resourceExpeditionPoints,
             $typeObtained
@@ -243,7 +237,8 @@ class Expedition extends Missions
     }
 
     /**
-     * @todo probably not 100% like the original game
+     * The return flight is extended by 2, 3 or 5 times its duration
+     * (weights in the settings).
      *
      * @param array<string, mixed> $fleet
      */
@@ -263,7 +258,7 @@ class Expedition extends Missions
     }
 
     /**
-     * @todo probably not 100% like the original game
+     * The fleet comes back after half of its return flight.
      *
      * @param array<string, mixed> $fleet
      */
@@ -411,7 +406,7 @@ class Expedition extends Missions
      */
     private function resultNothing(array $fleet): void
     {
-        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_nothing_' . mt_rand(1, 6))));
+        $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_nothing_' . mt_rand(1, 16))));
 
         parent::returnFleet(self::int($fleet['fleet_id']));
     }

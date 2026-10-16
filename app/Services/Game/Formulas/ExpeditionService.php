@@ -48,14 +48,9 @@ class ExpeditionService
         return 25000;
     }
 
-    public function getMaxShipsExpeditionPoints(int | float $topPlayerPoints): int
-    {
-        return $this->getMaxExpeditionPoints($topPlayerPoints) * 100;
-    }
-
     public function calculateExpeditionPoints(int $structuralIntegrity): int
     {
-        return ($structuralIntegrity * 5 / 1000);
+        return intdiv($structuralIntegrity * 5, 1000);
     }
 
     public function getExpeditionResult(): string
@@ -160,6 +155,54 @@ class ExpeditionService
             213 => 0.0625, // ship_destroyer
             215 => 0.0625, // ship_reaper
         ];
+    }
+
+    /**
+     * The ships an expedition finds for $budget structure points (metal and
+     * crystal of the ships): only the obtainable types, none bigger than the
+     * biggest obtainable ship of the fleet, the budget split between them by
+     * their chances. Empty when the fleet has no obtainable ship or the
+     * budget buys none.
+     *
+     * Bugfix: the former rule added a share of each type of the fleet times
+     * points per ship plus one: a fleet of 100 large cargos found about 600
+     * more, and every deathstar, recycler or colony ship in the fleet (no
+     * chance defined) brought a free one or stopped the mission with an
+     * undefined array key.
+     *
+     * @param array<int, int|float> $fleet     the expedition's ships by id
+     * @param array<int, int>       $structure metal + crystal by ship id
+     *
+     * @return array<int, int>
+     */
+    public function getFoundShips(array $fleet, int $budget, array $structure): array
+    {
+        $chances = $this->getShipsObtainableChances();
+        $largest = 0;
+
+        foreach ($fleet as $id => $count) {
+            if ($count > 0 && isset($chances[$id])) {
+                $largest = max($largest, $structure[$id] ?? 0);
+            }
+        }
+
+        $candidates = array_filter(
+            $chances,
+            fn (int $id): bool => ($structure[$id] ?? 0) > 0 && $structure[$id] <= $largest,
+            ARRAY_FILTER_USE_KEY
+        );
+        $total = array_sum($candidates);
+        $found = [];
+
+        foreach ($candidates as $id => $chance) {
+            $count = (int) floor($budget * $chance / $total / $structure[$id]);
+
+            if ($count > 0) {
+                $found[$id] = $count;
+            }
+        }
+
+        return $found;
     }
 
     public function getFleetDeplay(): int

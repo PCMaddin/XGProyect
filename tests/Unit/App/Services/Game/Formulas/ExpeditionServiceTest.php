@@ -54,26 +54,11 @@ class ExpeditionServiceTest extends TestCase
         $this->assertEquals(25000, $expedition->getMaxExpeditionPoints(120000000));
     }
 
-    public function testGetMaxShipsExpeditionPoints(): void
-    {
-        $expedition = $this->expeditionService();
-
-        $this->assertEquals(250000, $expedition->getMaxShipsExpeditionPoints(50000));
-        $this->assertEquals(600000, $expedition->getMaxShipsExpeditionPoints(500000));
-        $this->assertEquals(900000, $expedition->getMaxShipsExpeditionPoints(2500000));
-        $this->assertEquals(1200000, $expedition->getMaxShipsExpeditionPoints(10000000));
-        $this->assertEquals(1500000, $expedition->getMaxShipsExpeditionPoints(30000000));
-        $this->assertEquals(1800000, $expedition->getMaxShipsExpeditionPoints(60000000));
-        $this->assertEquals(2100000, $expedition->getMaxShipsExpeditionPoints(90000000));
-        $this->assertEquals(2500000, $expedition->getMaxShipsExpeditionPoints(120000000));
-    }
-
     public function testMaxExpeditionPointsAcceptStatisticFloats(): void
     {
         $expedition = $this->expeditionService();
 
         $this->assertEquals(6000, $expedition->getMaxExpeditionPoints(500000.0));
-        $this->assertEquals(600000, $expedition->getMaxShipsExpeditionPoints(500000.0));
     }
 
     public function testCalculateExpeditionPoints(): void
@@ -229,6 +214,34 @@ class ExpeditionServiceTest extends TestCase
 
         $result = $expedition->calculateShipFoundAmount(3, 150);
         $this->assertEquals(225, $result);
+    }
+
+    public function testFoundShipsSplitTheBudgetUpToTheBiggestShipOfTheFleet(): void
+    {
+        $structure = [202 => 4000, 203 => 12000, 204 => 4000, 205 => 10000, 206 => 27000, 208 => 30000, 209 => 16000, 210 => 1000, 214 => 9000000];
+
+        // large cargos: types up to 12000, chances 0.1/0.1/0.1/0.5/0.1 of 0.9
+        $this->assertSame(
+            [202 => 2, 204 => 2, 205 => 5, 210 => 10],
+            $this->expeditionService()->getFoundShips([203 => 100], 90000, $structure)
+        );
+        // more budget buys the large cargo itself
+        $this->assertSame(10, $this->expeditionService()->getFoundShips([203 => 100], 1080000, $structure)[203] ?? 0);
+    }
+
+    public function testShipsWithoutAChanceAreNeverFound(): void
+    {
+        $structure = [203 => 12000, 208 => 30000, 209 => 16000, 210 => 1000, 214 => 9000000];
+
+        // regression: each deathstar, recycler and colony ship brought a free one
+        $found = $this->expeditionService()->getFoundShips([203 => 1, 208 => 1, 209 => 5, 214 => 1], 10000000, $structure);
+        $this->assertArrayNotHasKey(208, $found);
+        $this->assertArrayNotHasKey(209, $found);
+        $this->assertArrayNotHasKey(214, $found);
+
+        // no obtainable ship in the fleet, or a budget too small: nothing
+        $this->assertSame([], $this->expeditionService()->getFoundShips([209 => 50, 214 => 1], 10000000, $structure));
+        $this->assertSame([], $this->expeditionService()->getFoundShips([210 => 5], 500, $structure));
     }
 
     public function testGetPossibleShips(): void

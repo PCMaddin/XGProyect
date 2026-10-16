@@ -867,6 +867,35 @@ Nachgezogen:
     Gegenstände (Booster u. Ä.), und ein Gegenstandssystem gibt es im Spiel
     nicht. Die leeren Platzhalter-Seiten sind entfernt.
 
+- 🔴→✅ **Expeditionsergebnis „Schiffe“** neu geregelt
+  (`ExpeditionService::getFoundShips`).
+  - Fehler 1: Mit Todesstern, Recycler oder Kolonieschiff in der Flotte
+    brach die Mission mit „Undefined array key“ ab; in anderen Fällen gab
+    es davon ein Gratis-Exemplar.
+  - Fehler 2: Die Fundmenge war ein Anteil jeder Schiffsart mal Punkte je
+    Schiff plus eins. Aus 100 Großen Transportern wurden so 701.
+  - Neue Regel: Die gefundenen Schiffe sind halb so viel wert wie ein
+    Rohstofffund (Struktur = Metall + Kristall; Fundgröße normal/groß/riesig
+    wie bei Rohstoffen). Es gibt nur auffindbare Typen und keinen, der
+    größer ist als das größte auffindbare Schiff der Flotte; das Budget wird
+    nach den vorhandenen Fundchancen verteilt. Wird nichts gefunden, ist es
+    ein „nichts gefunden“.
+  - Die ungenutzte Obergrenze `getMaxShipsExpeditionPoints` ist entfernt.
+  - Tests für die Regel und auf MariaDB für die ganze Mission, mit
+    Gegenprobe gegen den alten Code.
+- ✅ **Rohstofffund ohne große Funde** (gefixt): Statt der Fundgröße wurde
+  der Rohstofftyp übergeben, also gab es immer nur den normalen Fund
+  (10–50fach). Jetzt gelten die Gewichte aus den Einstellungen.
+- ✅ **Expeditionstexte**: Benutzt werden jetzt alle 16 „nichts
+  gefunden“- und alle 7 „Schiffe gefunden“-Texte (bisher 6 bzw. 5). Ohne
+  passende Spielfunktion bleiben die Texte für Gegenstände
+  (`exp_found_object_*`) und für unerforschte Sektoren
+  (`exp_status_fresh_*`) ungenutzt.
+- ✅ **`@todo`s**: keine mehr in `app/`. Die Regeln für Dunkle Materie,
+  Verspätung und frühe Rückkehr sind jetzt dokumentiert, statt mit „not
+  100 % like the original“ markiert; sie sind nicht gegen das
+  Original-Spiel geprüft. Ein toter Kommentarblock im Menü ist entfernt.
+
 Offen:
 
 - (nichts aus dem Smoke-Test)
