@@ -24,6 +24,7 @@ return [
     'ex_result_early' => 'Frühere Rückkehr',
     'ex_result_nothing' => 'Nichts',
     'ex_result_merchant' => 'Händler',
+    'ex_result_item' => 'Gegenstand',
     'ex_result_black_hole' => 'Flottenverlust',
 
     'ex_package_small' => 'Klein',

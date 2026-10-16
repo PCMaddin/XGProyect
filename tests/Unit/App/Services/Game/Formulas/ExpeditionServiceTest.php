@@ -23,9 +23,10 @@ class ExpeditionServiceTest extends TestCase
         'expedition_result_aliens_weight' => 260,
         'expedition_result_delay_weight' => 700,
         'expedition_result_early_weight' => 200,
-        'expedition_result_nothing_weight' => 1880,
+        'expedition_result_nothing_weight' => 1830,
         'expedition_result_merchant_weight' => 17,
         'expedition_result_black_hole_weight' => 33,
+        'expedition_result_item_weight' => 50,
         'expedition_dark_matter_source_small_weight' => 8900,
         'expedition_dark_matter_source_medium_weight' => 1000,
         'expedition_dark_matter_source_large_weight' => 100,
@@ -98,7 +99,7 @@ class ExpeditionServiceTest extends TestCase
         $result = $expedition->getExpeditionResult();
 
         $validResults = [
-            'darkMatter', 'ships', 'resources', 'pirates', 'aliens', 'delay', 'early', 'nothing', 'merchant', 'blackHole'
+            'darkMatter', 'ships', 'resources', 'pirates', 'aliens', 'delay', 'early', 'nothing', 'merchant', 'blackHole', 'item'
         ];
 
         $this->assertContains($result, $validResults);
@@ -116,10 +117,12 @@ class ExpeditionServiceTest extends TestCase
             'aliens' => 260,
             'delay' => 700,
             'early' => 200,
-            'nothing' => 1880,
+            'nothing' => 1830,
             'merchant' => 17,
             'blackHole' => 33,
+            'item' => 50,
         ], $expedition->getExpeditionResultWeights());
+        $this->assertSame(10000, array_sum($expedition->getExpeditionResultWeights()));
 
         $this->assertSame([
             'small' => 8900,

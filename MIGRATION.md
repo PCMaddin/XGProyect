@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 967 PHPUnit-Tests (25 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 994 PHPUnit-Tests (27 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
@@ -921,8 +921,7 @@ Nachgezogen:
     Ergebnisse, Dunkle Materie (300–400 / 500–700 / ab 1.000), Größen
     89/10/1 %, Technik der Gegner ±3 Stufen, Kampf ohne Trümmerfeld,
     Händlerkurse und -preis.
-  - **Nicht übernommen**: Gegenstände; ihre Texte (`exp_found_object_*`)
-    bleiben ungenutzt.
+  - Gegenstände kamen später dazu (siehe „Gegenstände“).
   - Tests mit festgelegten Zufallszahlen für alle Regeln, der Schiffsfund
     auf MariaDB; alle Ergebnisse im laufenden Spiel ausgelöst und geprüft.
 - ✅ **Belastete Expeditionsgebiete** wie im Original
@@ -984,6 +983,16 @@ Nachgezogen:
   - Ehrenpunkte als Zahlungsmittel gibt es im Spiel nicht.
   - Neue Tabellen `auctions`, `auction_bids`. Tests; im Browser bis zum
     Gewinn durchgespielt.
+- ✅ **Expeditionen finden Gegenstände** (Teil 4): neues Ergebnis „item“
+  mit 0,5 %, genommen von „nichts gefunden“ (18,8 → 18,3 %), damit die
+  Ergebnisse im Admin weiter 100 % ergeben; wo ein Admin „nichts“ geändert
+  hat, startet das Gewicht bei 0. Ein normaler Fund bringt einen
+  Bronze-, ein großer einen Silber-, ein sehr großer zwei Gold-Gegenstände
+  (Texte `exp_found_object_1/2`). Häufigkeit und Stufen nennt das Wiki
+  nicht, die Werte sind eine Annäherung. Tests; im Spiel geprüft.
+- ℹ️ **Nicht übernommen** aus den Gegenständen des Originals: M.O.O.N.S.
+  (ein gekaufter Mondschuss), Ehrenpunkte und Buddy-Punkte als
+  Zahlungsmittel.
 - 🔴→✅ **Admin-Reset der Bau- und Forschungsschleifen wirkungslos**
   (gefixt): Er leerte nur die Cache-Spalten der Planeten, die Aufträge in
   `building_queues`/`research_queues` liefen weiter und wurden fertig

@@ -10,6 +10,9 @@ use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
 use App\Services\FormatService;
 use App\Services\Game\ExpeditionAreaService;
+use App\Services\Game\Items\ItemCatalog;
+use App\Services\Game\Items\ItemService;
+use App\Services\Game\Items\ItemTexts;
 use App\Services\Game\MerchantService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
@@ -56,6 +59,7 @@ class Expedition extends Missions
                 'early' => $this->resultEarly($fleet),
                 'blackHole' => $this->resultBlackHole($fleet),
                 'merchant' => $this->resultMerchant($fleet),
+                'item' => $this->resultItem($fleet),
                 'pirates' => $this->resultEnemy($fleet, 'pirates'),
                 'aliens' => $this->resultEnemy($fleet, 'aliens'),
                 default => $this->resultNothing($fleet),
@@ -397,6 +401,31 @@ class Expedition extends Missions
         app(MerchantService::class)->grantExpeditionOffer(self::int($fleet['fleet_owner']));
 
         $this->expeditionMessage($fleet, self::str(__('game/expedition.exp_trader')));
+
+        parent::returnFleet(self::int($fleet['fleet_id']));
+    }
+
+    /**
+     * The fleet finds an item (no field items): bronze in a normal find,
+     * silver in a large one, two gold items in a huge one (sizes as for
+     * resources).
+     *
+     * @param array<string, mixed> $fleet
+     */
+    private function resultItem(array $fleet): void
+    {
+        $size = $this->expeditionService->calculateResourceSourceSize();
+        $tier = ['large' => 'silver', 'xl' => 'gold'][$size] ?? 'bronze';
+        $candidates = array_keys(app(ItemCatalog::class)->tradable($tier));
+        $keys = array_map(fn (): string => $candidates[array_rand($candidates)], range(1, $size === 'xl' ? 2 : 1));
+        $found = [];
+
+        foreach ($keys as $key) {
+            app(ItemService::class)->add(self::int($fleet['fleet_owner']), $key);
+            $found[] = app(ItemTexts::class)->name($key);
+        }
+
+        $this->expeditionMessage($fleet, sprintf(self::str(__('game/expedition.exp_found_object_' . count($found))), ...$found));
 
         parent::returnFleet(self::int($fleet['fleet_id']));
     }

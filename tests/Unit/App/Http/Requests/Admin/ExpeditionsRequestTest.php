@@ -33,7 +33,7 @@ class ExpeditionsRequestTest extends TestCase
     public function testValidationFailsWhenGroupTotalExceedsOneHundredPercent(): void
     {
         $payload = $this->validPayload();
-        $payload['expedition_result_nothing_weight'] = '18.81';
+        $payload['expedition_result_nothing_weight'] = '18.31';
 
         $validator = $this->validator($payload);
 
@@ -80,9 +80,10 @@ class ExpeditionsRequestTest extends TestCase
             'expedition_result_aliens_weight' => '2.6',
             'expedition_result_delay_weight' => '7',
             'expedition_result_early_weight' => '2',
-            'expedition_result_nothing_weight' => '18.8',
+            'expedition_result_nothing_weight' => '18.3',
             'expedition_result_merchant_weight' => '0.17',
             'expedition_result_black_hole_weight' => '0.33',
+            'expedition_result_item_weight' => '0.5',
             'expedition_dark_matter_source_small_weight' => '89',
             'expedition_dark_matter_source_medium_weight' => '10',
             'expedition_dark_matter_source_large_weight' => '1',

@@ -55,6 +55,7 @@ class ExpeditionsController extends AdminSettingsController
                     'expedition_result_nothing_weight' => __('admin/expeditions.ex_result_nothing'),
                     'expedition_result_merchant_weight' => __('admin/expeditions.ex_result_merchant'),
                     'expedition_result_black_hole_weight' => __('admin/expeditions.ex_result_black_hole'),
+                    'expedition_result_item_weight' => __('admin/expeditions.ex_result_item'),
                 ]),
             ],
             'darkMatter' => [

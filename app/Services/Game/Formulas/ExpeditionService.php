@@ -278,6 +278,7 @@ class ExpeditionService
             'nothing' => $this->settings->getInt('expedition_result_nothing_weight'),
             'merchant' => $this->settings->getInt('expedition_result_merchant_weight'),
             'blackHole' => $this->settings->getInt('expedition_result_black_hole_weight'),
+            'item' => $this->settings->getInt('expedition_result_item_weight'),
         ];
     }
 
