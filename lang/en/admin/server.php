@@ -18,7 +18,7 @@ return [
     'se_admin_email' => 'Administrator email',
     'se_forum_link' => 'Forum link',
     'se_server_name' => 'Name of your server',
-    'se_server_logo' => 'Your server Logo. Only an URL.',
+    'se_server_logo' => 'Your server logo, as a URL. Empty: the XG Proyect logo that comes with the game.',
     // Speed & Economy
     'se_general_speed' => 'General speed',
     'se_normal_speed' => 'Default general speed: 1<br>Maximum recommended speed: 100',

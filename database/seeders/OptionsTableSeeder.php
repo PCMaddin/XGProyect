@@ -13,7 +13,7 @@ class OptionsTableSeeder extends Seeder
     {
         $options = [
             ['name' => 'game_name', 'value' => 'XG Proyect', 'type' => 'string'],
-            ['name' => 'game_logo', 'value' => 'https://xgproyect.org/wp-content/uploads/2019/10/xgp-new-logo-white.png', 'type' => 'string'],
+            ['name' => 'game_logo', 'value' => '', 'type' => 'string'],
             ['name' => 'lang', 'value' => 'en', 'type' => 'string'],
             ['name' => 'game_speed', 'value' => '2500', 'type' => 'int'],
             ['name' => 'fleet_speed', 'value' => '2500', 'type' => 'int'],

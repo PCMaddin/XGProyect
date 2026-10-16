@@ -23,7 +23,7 @@ class HandlerTest extends TestCase
         $handler = $this->app->make(ExceptionHandler::class);
         $this->assertInstanceOf(Handler::class, $handler);
 
-        $this->assertFalse($handler->shouldReport(new HaltWithView(View::make('welcome'))));
+        $this->assertFalse($handler->shouldReport(new HaltWithView(View::make('home.welcome'))));
         $this->assertTrue($handler->shouldReport(new RuntimeException('a real error')));
     }
 }

@@ -18,7 +18,7 @@ return [
     'se_admin_email' => 'E-Mail-Adresse des Administrators',
     'se_forum_link' => 'Forum-Link',
     'se_server_name' => 'Name deines Servers',
-    'se_server_logo' => 'Das Logo deines Servers. Nur eine URL.',
+    'se_server_logo' => 'Das Logo deines Servers, als URL. Leer: das mitgelieferte XG-Proyect-Logo.',
     // Speed & Economy
     'se_general_speed' => 'Allgemeine Geschwindigkeit',
     'se_normal_speed' => 'Standardgeschwindigkeit: 1<br>Empfohlenes Maximum: 100',

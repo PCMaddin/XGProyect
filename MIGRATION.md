@@ -864,6 +864,49 @@ Baseline-Einträge.
   Spionage mit anschließendem Überfall, kein Überfall auf Verteidigte ohne
   Kriegsschiffe, Spieler nur mit Schalter, Transport von der Kolonie
   (MariaDB).
+- ✅ **Keine externen Inhalte mehr:** Spiel, Admin-Panel, Installer und
+  E-Mails luden Inhalte von fremden Servern, und jeder Aufruf verriet diesen
+  Servern, wer wo spielt:
+  - das XG-Proyect-Logo von `xgproyect.org` (weiß: Admin-Seitenleiste,
+    Admin-Login, Installer, Standard-Serverlogo der Startseite; schwarz:
+    Willkommens-, Passwort- und Ankündigungs-Mail),
+  - die Schrift Nunito von Google Fonts (Admin-Panel, Admin-Login,
+    Installer),
+  - Laravels Standardseite `welcome.blade.php` (Schrift von
+    `fonts.bunny.net`); sie wurde nirgends benutzt und ist gelöscht,
+  - Laravels Mail-Kopf hätte bei `APP_NAME=Laravel` das Laravel-Logo von
+    `laravel.com` geladen; der Kopf liegt jetzt unter
+    `resources/views/vendor/mail/html/header.blade.php` ohne diesen Zweig.
+
+  Jetzt lokal unter `public/`: die Original-Logos (von `xgproyect.org`
+  heruntergeladen, unverändert) als `assets/images/xgp-logo-white.png` und
+  `xgp-logo-black.png`, Nunito als `assets/admin/vendor/nunito/` (die
+  woff2-Dateien, die Google Fonts ausliefert, v32, variable Schrift 200–900,
+  normal und kursiv, je Latin, Latin-Ext, Kyrillisch, Kyrillisch-Ext,
+  Vietnamesisch; eigenes `css/nunito.css` mit denselben `unicode-range`s).
+  Nunito steht unter der SIL Open Font License 1.1, die Lizenz liegt als
+  `OFL.txt` daneben; die Logos gehören zum Projekt selbst (GPL). Eingebunden
+  per `asset()`, das in E-Mails absolute URLs liefert (`APP_URL`).
+  Serverlogo: Standard ist jetzt leer, leer heißt mitgeliefertes Logo
+  (`WelcomeController`); Migration `000030` leert den alten Standardwert,
+  ein vom Admin gesetztes Logo bleibt. Der Hilfetext unter Admin → Server
+  sagt das (de/en). Einziger eingebauter Abruf nach außen bleibt die
+  Update-Prüfung (siehe oben, Standard aus); Links, die man anklickt (z. B.
+  „Powered by XG Proyect“), bleiben.
+
+  Tests: `NoExternalResourcesTest` durchsucht alle Views nach `<link href>`,
+  `src`/`srcset`/`poster`/`background`, `url(` und `@import` mit
+  `http(s)://` oder `//` (normale `<a href>` erlaubt), alle CSS-Dateien in
+  `public/` nach `url(` und `@import`, und prüft, dass jedes `asset(...)`
+  einer View als Datei existiert. `WelcomeLogoTest`: leeres Logo zeigt das
+  mitgelieferte, ein eigenes bleibt, die Migration ersetzt nur den alten
+  Standard. Im Browser (Playwright, alle Anfragen mitgeschnitten):
+  Admin-Login, Admin-Startseite und alle 26 Seiten der Seitenleiste,
+  Installer (Start, Voraussetzungen, Datenbank), Startseite (mit altem
+  Logo-Wert vor Migration `000030` eine Anfrage an `xgproyect.org`, danach
+  keine), Spiel (Übersicht, Forschung, Werft, Rangliste, Imperium) und die
+  gerenderte Willkommens-Mail: keine Anfrage verlässt `127.0.0.1`, Logo und
+  Schrift laden.
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -2,7 +2,7 @@
     <table width="100%">
         <tr>
             <th align="center">
-                <img src="https://xgproyect.org/wp-content/uploads/2019/10/xgp-new-logo-black.png" alt="XG Proyect Logo" width="250px"/>
+                <img src="{{ asset('assets/images/xgp-logo-black.png') }}" alt="XG Proyect Logo" width="250px"/>
             </th>
         </tr>
         <tr>

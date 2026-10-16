@@ -13,6 +13,9 @@ use Illuminate\Support\ViewErrorBag;
 
 class WelcomeController extends BaseController
 {
+    // the logo shown while the admin has not set one
+    private const DEFAULT_LOGO = 'assets/images/xgp-logo-white.png';
+
     public function __construct(private SettingsService $settingsService)
     {
     }
@@ -24,7 +27,7 @@ class WelcomeController extends BaseController
             array_merge(
                 [
                     'servername' => __('home/welcome.hm_title', ['game' => $this->settingsService->getString('game_name')]),
-                    'gameLogo' => $this->settingsService->getString('game_logo'),
+                    'gameLogo' => $this->settingsService->getString('game_logo') ?: asset(self::DEFAULT_LOGO),
                     'basePath' => url('/'),
                     'userName' => '',
                     'userEmail' => '',
