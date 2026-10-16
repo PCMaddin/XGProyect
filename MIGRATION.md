@@ -10,20 +10,20 @@
 | | Neu (`app/`) | Legacy (`legacy/`) |
 |---|---|---|
 | Game-Controller | **38 migriert — Controller-Schicht komplett** | 0 verbleibend |
-| Bibliotheken | 14 migriert + 6 tote gelöscht | Welle 5 läuft |
-| Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | Raw-SQL, Templates, `$_POST`, globale Konstanten |
-| Analyse-Schuld | — | 693 PHPStan- + 267 PHPMD-Einträge in Baselines unterdrückt |
+| Bibliotheken | alle Bibliotheken außer Missions/BattleEngine nach `app/` migriert oder gelöscht | nur noch Missions-Handler, BattleEngine (OPBE), `Objects`, Entities, Enumeratoren, Helpers |
+| Architektur | Eloquent, Services, FormRequests, typisiert, PHPStan Level 9 | typisiert, gebundene SQL-Parameter, Level 9 ohne Baseline |
+| Analyse-Schuld | 36 PHPStan- + 57 PHPMD-Einträge (nur noch `app/`) | **0** |
 
-> **Stand:** `legacy/app/Http/Controllers/Game/` ist **leer** — alle 38 Spielseiten
-> laufen nativ. Ausgehend von 1.337 PHPStan- / 682 PHPMD-Einträgen wurden über alle
-> Wellen 644 PHPStan- und 415 PHPMD-Einträge abgebaut. Jede Migration ist lokal mit
-> PHPStan Level 9, PHPMD und der PHPUnit-Suite (563 Tests) verifiziert.
+> **Stand:** Alle 38 Spielseiten laufen nativ, der Legacy-Front-Controller ist
+> entfernt (vor jeder Seite läuft `GameBootstrap`). Ausgehend von 1.337 PHPStan- /
+> 682 PHPMD-Einträgen sind noch 36 / 57 übrig, alle in `app/`; `legacy/` hat
+> keinen einzigen Baseline-Eintrag mehr. Jede Änderung ist lokal mit PHPStan
+> Level 9, PHPMD (roh und Gate), php-cs-fixer (Dry-Run über das ganze Repo) und
+> der PHPUnit-Suite (677 Tests) verifiziert.
 >
-> **Verbleibende Legacy-Bibliotheken** (kein Controller mehr, nur noch Backend):
-> die Missions-/Kampf-Engine (`Missions`, `BattleEngine`, `MissionControlLib`) und
-> Update-/Objekt-Bibliotheken (`UpdatesLibrary`, `Objects`, `Fleets`, `Users` …),
-> die vom Tick und den nativen Controllern genutzt werden. Das ist die nächste,
-> entkoppelte Refactoring-Welle ohne Zeitdruck.
+> **Hinweis CI:** Im GitHub-Repository gibt es keine einzige Workflow-
+> Ausführung (Actions läuft dort offenbar nicht), die Checks aus
+> `.github/workflows/php.yml` greifen also nur lokal.
 
 **Bereits migriert** (`app/Http/Controllers/Game/`): Buildings, Research, Supplies,
 Facilities, Preferences, Empire, Technologytree, Technologydetails, Combatreport,
