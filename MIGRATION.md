@@ -554,12 +554,13 @@ Baseline-Einträge.
   Mitglieder des gelöschten Rangs zu Neulingen, zieht die folgenden nach
   und speichert alles in einer Transaktion. `Ranks` lässt Rang 0 und 1 nicht
   mehr löschen. DB-Tests.
-- 🟡 **Offen (Balancing, Entscheidung nötig): Intergalaktisches
-  Forschungsnetzwerk.** `ResearchQueueService::labLevel()` summiert per
-  `SUM(...) ... ORDER BY ... LIMIT Stufe+1`. `LIMIT` wirkt aber erst auf das
-  eine Ergebnis der Aggregation, also zählen **alle** Labore des Spielers statt
-  der Stufe+1 besten (Forschung damit schneller als vorgesehen). Der Fehler
-  stammt aus dem Upstream-Code.
+- ✅ **Intergalaktisches Forschungsnetzwerk** (entschieden): Mit dem Netzwerk
+  zählen **alle** Labore des Spielers, so wie das Spiel es bisher schon
+  rechnete. Die Abfrage behauptete per `ORDER BY … LIMIT Stufe+1` etwas
+  anderes, `LIMIT` begrenzt aber keine Summe; außerdem lehnt MySQL im
+  strikten Modus (`ONLY_FULL_GROUP_BY`, Laravels Standard) ein `ORDER BY` auf
+  eine nicht aggregierte Spalte in so einer Abfrage ab, die Forschungsseite
+  konnte ab Netzwerk-Stufe 1 also abbrechen. Jetzt eine einfache Summe. Tests.
 - 🔴→✅ **XSS-Audit Spielereingaben** (gefixt). Geprüft wurden die von
   Spielern gesetzten Texte und ihr Weg in die rund 250 `{!! !!}`-Ausgaben:
   - **Allianztexte (BBCode):** `BBCodeLib` escaped den Text jetzt vor dem

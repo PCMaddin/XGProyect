@@ -235,12 +235,14 @@ class ResearchQueueService
             return (int) ($planet->buildings->$labCol ?? 0);
         }
 
-        return self::asInt(Buildings::selectRaw('SUM(building_laboratory) AS total_level')
+        // with the network, all laboratories of the player add up (decided;
+        // the former ORDER BY/LIMIT suggested only the best level+1, but
+        // LIMIT does not limit a SUM, and strict MySQL rejects ORDER BY on a
+        // non-aggregated column there)
+        return self::asInt(Buildings::query()
             ->join('planets', 'planet_id', '=', 'building_planet_id')
             ->where('planet_user_id', $user->id)
-            ->orderBy('building_laboratory', 'DESC')
-            ->limit($intergalLevel + 1)
-            ->value('total_level'));
+            ->sum('building_laboratory'));
     }
 
     private function startItem(User $user, ResearchQueue $item): void
