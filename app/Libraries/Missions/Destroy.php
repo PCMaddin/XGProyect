@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
-use App\Libraries\Formulas;
+use App\Services\Game\Formulas\FormulasService;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Libraries\BattleEngine\Core\BattleReport;
 
@@ -156,7 +156,7 @@ class Destroy extends CombatMission
         }
 
         $this->destruction['attempted'] = true;
-        $this->destruction['moonChance'] = Formulas::getMoonDestructionChance($diameter, $deathStars);
+        $this->destruction['moonChance'] = app(FormulasService::class)->getMoonDestructionChance($diameter, $deathStars);
 
         if (mt_rand(0, 100) <= $this->destruction['moonChance']) {
             $this->destruction['destroyed'] = 'moon';
@@ -164,7 +164,7 @@ class Destroy extends CombatMission
             return;
         }
 
-        $this->destruction['dsChance'] = Formulas::getDeathStarsDestructionChance($diameter);
+        $this->destruction['dsChance'] = app(FormulasService::class)->getDeathStarsDestructionChance($diameter);
 
         if (mt_rand(0, 100) <= $this->destruction['dsChance']) {
             $this->destruction['destroyed'] = 'ds';

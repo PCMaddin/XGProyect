@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Game\Formulas\FormulasService;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
@@ -521,7 +522,7 @@ class GalaxyLib
         if (self::asInt($this->currentPlanet['defense_interplanetary_missile'] ?? 0) !== 0 &&
             !$this->isCurrentPlayer() &&
             self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0)) {
-            return $this->isInRange(Formulas::missileRange(self::asInt($this->user['research_impulse_drive'] ?? 0)));
+            return $this->isInRange(app(FormulasService::class)->missileRange(self::asInt($this->user['research_impulse_drive'] ?? 0)));
         }
 
         return false;
@@ -533,7 +534,7 @@ class GalaxyLib
             !$this->isCurrentPlayer() &&
             self::asInt($this->rowData['planet_galaxy'] ?? 0) === self::asInt($this->currentPlanet['planet_galaxy'] ?? 0) &&
             self::asInt($this->currentPlanet['planet_type'] ?? 0) === PlanetTypesEnumerator::MOON) {
-            return $this->isInRange(Formulas::phalanxRange(self::asInt($this->currentPlanet['building_phalanx'] ?? 0)));
+            return $this->isInRange(app(FormulasService::class)->phalanxRange(self::asInt($this->currentPlanet['building_phalanx'] ?? 0)));
         }
 
         return false;

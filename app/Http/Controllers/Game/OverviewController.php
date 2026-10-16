@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
+use App\Libraries\Template;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
@@ -14,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\DevelopmentsLib;
 use App\Libraries\FleetsLib;
 use App\Libraries\Functions;
 use App\Libraries\NoobsProtectionLib;
@@ -116,7 +116,10 @@ class OverviewController extends BaseController
             return $name . '<br><font color="#7f7f7f">(' . $this->formatService->prettyTime((float) $timeToEnd) . ')</font>';
         }
 
-        return DevelopmentsLib::currentBuilding('overview', $building)
+        return Template::render('buildings.build_list_script', [
+            'call_program' => 'overview',
+            'current_page' => $this->developmentsService->setBuildingPage($building),
+        ])
             . $name
             . '<br><div id="blc" class="z">' . $this->formatService->prettyTime((float) $timeToEnd) . '</div>'
             . "\n<script language=\"JavaScript\">"

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Game\Formulas\FormulasService;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\Admin\BackupService;
@@ -18,7 +19,7 @@ use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\PlanetTypesEnumerator;
 use App\Core\Enumerators\ResearchEnumerator as Research;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\DevelopmentsLib as Developments;
+use App\Services\Game\Formulas\DevelopmentsService;
 
 /**
  * The tick: on construction it runs cleanup, backups, fleet missions and the
@@ -342,9 +343,9 @@ class UpdatesLibrary
             $energy_prod = $formula->calculateEnergy($level, $levelFactor, $temperature, (int) self::num($BuildEnergy));
 
             // PLASMA BOOST
-            $metalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'metal');
-            $crystalBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'crystal');
-            $deuteriumBoost = Formulas::getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'deuterium');
+            $metalBoost = app(FormulasService::class)->getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'metal');
+            $crystalBoost = app(FormulasService::class)->getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'crystal');
+            $deuteriumBoost = app(FormulasService::class)->getPlasmaTechnologyBonus(self::numInt($current_user['research_plasma_technology']), 'deuterium');
 
             // PRODUCTION BOOST WITH OFFICERS
             $Caps['planet_metal_perhour'] += $productionService->currentProduction(
@@ -499,7 +500,7 @@ class UpdatesLibrary
 
         if ($Simul == false) {
             // SHIPS AND DEFENSES UPDATE
-            $builded = self::updateHangarQueue($current_user, $current_planet, $ProductionTime);
+            $builded = self::updateHangarQueue($current_planet, $ProductionTime);
             $ship_points = 0;
             $defense_points = 0;
 
@@ -567,7 +568,6 @@ class UpdatesLibrary
     /**
      * Update the hangar queue, ships and defenses that were on queue.
      *
-     * @param array<string, mixed> $current_user
      * @param array<string, mixed> $current_planet
      *
      * @return array<int|string, int>
@@ -577,7 +577,7 @@ class UpdatesLibrary
      * @SuppressWarnings("PHPMD.NPathComplexity")
      * @SuppressWarnings("PHPMD.ElseExpression")
      */
-    private static function updateHangarQueue(array $current_user, array &$current_planet, int $ProductionTime): array
+    private static function updateHangarQueue(array &$current_planet, int $ProductionTime): array
     {
         $resource = app(GameObjectRegistry::class)->names();
 
@@ -598,10 +598,14 @@ class UpdatesLibrary
                 $Item = explode(',', $Array);
 
                 if ($Item[0] != 0) {
-                    $AcumTime = Developments::developmentTime(
-                        $current_user,
-                        $current_planet,
-                        self::numInt($Item[0])
+                    $AcumTime = app(DevelopmentsService::class)->developmentTime(
+                        self::numInt($Item[0]),
+                        0,
+                        self::numInt($current_planet[$resource[Buildings::BUILDING_HANGAR]] ?? 0),
+                        self::numInt($current_planet[$resource[Buildings::BUILDING_NANO_FACTORY]] ?? 0),
+                        0,
+                        0,
+                        false
                     );
                     $BuildArray[$Node] = [$Item[0], $Item[1] ?? 0, $AcumTime];
                 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Game\Formulas\FormulasService;
 use App\Models\Planets;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -34,8 +35,9 @@ class PlanetLib
             return false;
         }
 
-        $planet = Formulas::getPlanetSize($position, $main);
-        $temp = Formulas::setPlanetTemp($position);
+        $formulas = app(FormulasService::class);
+        $planet = $formulas->getPlanetSize($position, $main);
+        $temp = $formulas->setPlanetTemp($position);
         $name = $name === '' ? (string) __('game/global.colony') : $name;
 
         if ($main) {
@@ -51,7 +53,7 @@ class PlanetLib
             'planet_planet' => $position,
             'planet_last_update' => time(),
             'planet_type' => PlanetTypesEnumerator::PLANET,
-            'planet_image' => Formulas::setPlanetImage($system, $position),
+            'planet_image' => $formulas->setPlanetImage($system, $position),
             'planet_diameter' => $planet['planet_diameter'],
             'planet_field_max' => $planet['planet_field_max'],
             'planet_temp_min' => $temp['min'],
@@ -118,7 +120,7 @@ class PlanetLib
      */
     private function buildMoonData(int $galaxy, int $system, int $position, int $owner, string $name, int $chance, int $size, int $maxFields, int $minTemp, int $maxTemp): array
     {
-        $temp = Formulas::setPlanetTemp($position);
+        $temp = app(FormulasService::class)->setPlanetTemp($position);
         $diameter = $chance === 0 ? $size : mt_rand(2000 + ($chance * 100), 6000 + ($chance * 200));
         $diameter = $diameter === 0 ? mt_rand(2000, 6000) : $diameter;
 

@@ -17,7 +17,6 @@ use App\Core\Enumerators\BuildingsEnumerator as Buildings;
 use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Libraries\DevelopmentsLib;
 use App\Services\Game\Formulas\FormulasService;
 use App\Libraries\Functions;
 use App\Libraries\Users;
@@ -178,6 +177,36 @@ class ShipyardController extends BaseController
     }
 
     /**
+     * The price of one unit, each resource in green, or in red with the
+     * amount missing as its title.
+     */
+    private function priceText(int $itemId): string
+    {
+        $titles = [
+            'metal' => __('game/global.metal'),
+            'crystal' => __('game/global.crystal'),
+            'deuterium' => __('game/global.deuterium'),
+            'energy_max' => __('game/global.energy'),
+        ];
+        $text = (string) __('game/buildings.require');
+
+        foreach ($this->developmentsService->developmentPrice($itemId, 0, false) as $resource => $cost) {
+            if ($cost <= 0 || !isset($titles[$resource])) {
+                continue;
+            }
+
+            $available = (float) $this->planetInt('planet_' . $resource);
+            $text .= $titles[$resource] . ': ';
+            $text .= $cost > $available
+                ? '<b style="color:red;"> <t title="-' . $this->formatService->prettyNumber($cost - $available) . '"><span class="noresources">'
+                    . $this->formatService->prettyNumber($cost) . '</span></t></b> '
+                : '<b style="color:lime;">' . $this->formatService->prettyNumber($cost) . '</b> ';
+        }
+
+        return $text;
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private function buildListOfItems(): array
@@ -186,8 +215,8 @@ class ShipyardController extends BaseController
             'element' => $itemId,
             'element_name' => __('game/' . $this->langFile . '.' . $this->objectName($itemId)),
             'element_description' => $this->getItemDescription($itemId),
-            'element_price' => DevelopmentsLib::formatedDevelopmentPrice($this->user, $this->planet, $itemId, false),
-            'building_time' => DevelopmentsLib::formatedDevelopmentTime($this->getItemTime($itemId), (string) __('game/shipyard.sy_time')),
+            'element_price' => $this->priceText($itemId),
+            'building_time' => '<br>' . __('game/shipyard.sy_time') . $this->formatService->prettyTime($this->getItemTime($itemId)),
             'element_nbre' => $this->getItemAmountWithFormat($itemId),
             'add_element' => $this->getItemInsertBlock($itemId),
         ], array_values($this->allowedStructures));
