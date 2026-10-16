@@ -85,4 +85,7 @@ return [
     // exploration status
     'exp_status_fresh_1' => 'Entry from the communications officers logbook: It seems that this part of the universe has not been explored yet.', // ok
     'exp_status_fresh_2' => 'Entry from the communications officers logbook: It feels great to be the first ones traveling through an unexplored sector.', // ok
+    'exp_status_busy' => 'Entry from the communications officers logbook: It does not seem as if a human has ever been in this part of the galaxy.',
+    'exp_status_crowded' => 'Entry from the communications officers logbook: We found signs of the presence of other expedition fleets.',
+    'exp_status_overrun' => 'Entry from the communications officers logbook: If we feel too unsafe, we can always team up with all the other expeditions flying around here.',
 ];

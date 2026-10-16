@@ -922,13 +922,26 @@ Nachgezogen:
     Ergebnisse, Dunkle Materie (300–400 / 500–700 / ab 1.000), Größen
     89/10/1 %, Technik der Gegner ±3 Stufen, Kampf ohne Trümmerfeld,
     Händlerkurse und -preis.
-  - **Nicht übernommen**: Im Original wird „nichts gefunden“
-    wahrscheinlicher, je öfter ein Gebiet angeflogen wird (Erholung ca. 10
-    Expeditionen am Tag), und eine Spionagesonde meldet das. Das fehlt hier
-    weiter, ebenso Gegenstände; ihre Texte (`exp_status_fresh_*`,
-    `exp_found_object_*`) bleiben ungenutzt.
+  - **Nicht übernommen**: Gegenstände; ihre Texte (`exp_found_object_*`)
+    bleiben ungenutzt.
   - Tests mit festgelegten Zufallszahlen für alle Regeln, der Schiffsfund
     auf MariaDB; alle Ergebnisse im laufenden Spiel ausgelöst und geprüft.
+- ✅ **Belastete Expeditionsgebiete** wie im Original
+  (`ExpeditionAreaService`, neue Tabelle `expedition_areas`).
+  - Jede Expedition erhöht die Belastung ihres Sonnensystems um 1, sie
+    erholt sich um 10 pro Tag.
+  - Bis 10 Expeditionen am Tag bleibt ein Gebiet frisch. Darüber endet eine
+    Expedition öfter mit „nichts gefunden“: +2 % je Expedition über 10,
+    höchstens 90 %. Jede Stunde Haltezeit über die erste ist ein weiterer
+    Versuch (Chance hoch Stunden). Die Stufen und die Erholung stammen aus
+    dem owiki, die Kurve nicht: Dafür nennt das Wiki keine Zahlen.
+  - Mit einer Spionagesonde in der Flotte hängt am Bericht der
+    Logbuch-Eintrag: frisch (bis 10), belebt (bis 25), voll (bis 50),
+    überlaufen. Beim Flottenverlust fehlt er, wie im Original. Die zwei
+    vorhandenen „frisch“-Texte werden jetzt genutzt, drei neue kamen dazu
+    (de/en/es).
+  - Tests für Belastung, Erholung, Chance und Logbuch, auf MariaDB für die
+    ganze Mission; im laufenden Spiel geprüft.
 
 Offen:
 

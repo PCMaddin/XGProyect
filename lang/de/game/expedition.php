@@ -85,4 +85,7 @@ return [
     // exploration status
     'exp_status_fresh_1' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Dieser Teil des Universums scheint noch nicht erforscht zu sein.',
     'exp_status_fresh_2' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Es ist ein großartiges Gefühl, als Erste durch einen unerforschten Sektor zu reisen.',
+    'exp_status_busy' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Es scheint nicht so, als ob jemals ein Mensch in diesem Bereich der Galaxis gewesen wäre.',
+    'exp_status_crowded' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Es wurden Anzeichen für die Präsenz anderer Expeditionsflotten gefunden.',
+    'exp_status_overrun' => 'Eintrag aus dem Logbuch des Kommunikationsoffiziers: Wenn wir uns zu unsicher fühlen, können wir uns ja mit all den anderen Expeditionen, die hier herumfliegen, zusammentun.',
 ];

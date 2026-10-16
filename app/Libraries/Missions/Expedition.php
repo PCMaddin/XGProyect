@@ -9,6 +9,7 @@ use App\Core\GameObjects\GameObjectRegistry;
 use App\Core\GameObjects\Ship;
 use App\Models\UsersStatistics;
 use App\Services\FormatService;
+use App\Services\Game\ExpeditionAreaService;
 use App\Services\Game\MerchantService;
 use App\Services\Game\Formulas\ExpeditionService;
 use App\Services\Game\Formulas\FleetsService;
@@ -16,6 +17,7 @@ use App\Libraries\Functions;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class Expedition extends Missions
 {
@@ -23,10 +25,17 @@ class Expedition extends Missions
     private int $shipExpeditionPoints = 0;
     private int $fleetCapacity = 0;
 
+    /** logbook entry of a probe, added to the next report */
+    private string $logbook = '';
+
+    /** the espionage probe, which reports how busy the area is */
+    private const PROBE = 210;
+
     public function __construct(
         private ExpeditionService $expeditionService,
         private FormatService $formatService,
-        private GameObjectRegistry $registry
+        private GameObjectRegistry $registry,
+        private ExpeditionAreaService $areas,
     ) {
         parent::__construct();
     }
@@ -39,7 +48,7 @@ class Expedition extends Missions
         if (parent::canStartMission($fleet)) {
             $this->setExpeditionPoints($fleet);
 
-            match ($this->expeditionService->getExpeditionResult()) {
+            match ($this->result($fleet)) {
                 'darkMatter' => $this->resultDarkMatter($fleet),
                 'ships' => $this->resultShips($fleet),
                 'resources' => $this->resultResources($fleet),
@@ -58,6 +67,34 @@ class Expedition extends Missions
         if (parent::canCompleteMission($fleet)) {
             $this->completeExpedition($fleet);
         }
+    }
+
+    /**
+     * The result of the expedition. In a busy area it more often finds
+     * nothing (ExpeditionAreaService); a probe in the fleet reports how busy
+     * the area is, except when the fleet is lost.
+     *
+     * @param array<string, mixed> $fleet
+     */
+    private function result(array $fleet): string
+    {
+        $load = $this->areas->visit(
+            self::int($fleet['fleet_end_galaxy']),
+            self::int($fleet['fleet_end_system']),
+            self::int($fleet['fleet_end_stay'])
+        );
+        $result = $this->expeditionService->getExpeditionResult();
+
+        if (mt_rand() / mt_getrandmax() < $this->areas->nothingChance($load, self::holdingTime($fleet))) {
+            $result = 'nothing';
+        }
+
+        $withProbe = (FleetShips::decode(self::str($fleet['fleet_array']))[self::PROBE] ?? 0) > 0;
+        $this->logbook = $withProbe && $result !== 'blackHole'
+            ? self::str(__('game/expedition.' . $this->areas->logbookKey($load)))
+            : '';
+
+        return $result;
     }
 
     /**
@@ -381,6 +418,11 @@ class Expedition extends Missions
      */
     private function expeditionMessage(array $fleet, string $message): void
     {
+        if ($this->logbook !== '') {
+            $message .= '<br><br>' . $this->logbook;
+            $this->logbook = '';
+        }
+
         $subject = sprintf(
             __('game/expedition.exp_report_title'),
             $this->formatService->prettyCoords(self::int($fleet['fleet_end_galaxy']), self::int($fleet['fleet_end_system']), self::int($fleet['fleet_end_planet']))

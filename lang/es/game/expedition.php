@@ -85,4 +85,7 @@ return [
     // exploration status
     'exp_status_fresh_1' => 'Registro en el diario de navegación del oficial de comunicación: Parece como si esta parte del universo no hubiera sido explorada hasta ahora.', // ok
     'exp_status_fresh_2' => 'Registro en el diario de navegación del oficial de comunicación: Es una gran sensación ser el primero en un sector inexplorado.', // ok
+    'exp_status_busy' => 'Registro en el diario de navegación del oficial de comunicación: No parece que ningún ser humano haya estado nunca en esta parte de la galaxia.',
+    'exp_status_crowded' => 'Registro en el diario de navegación del oficial de comunicación: Hemos encontrado indicios de la presencia de otras flotas de expedición.',
+    'exp_status_overrun' => 'Registro en el diario de navegación del oficial de comunicación: Si nos sentimos demasiado inseguros, siempre podemos unirnos a todas las demás expediciones que vuelan por aquí.',
 ];
