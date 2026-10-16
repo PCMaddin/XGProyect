@@ -67,6 +67,7 @@ return [
     'prepare_config' => 'Konfiguration bereit',
     'install' => 'Basistabellen bereit',
     'create' => 'Spieltabellen bereit',
+    'mark_updates' => 'Update-Einträge geschrieben',
     'insert_changelog' => 'Changelog-Einträge eingefügt',
     'insert_languages' => 'Spracheinträge eingefügt',
     'insert_options' => 'Optionen eingefügt',

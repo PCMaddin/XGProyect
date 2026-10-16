@@ -67,6 +67,7 @@ return [
     'prepare_config' => 'Configuración preparada',
     'install' => 'Tablas base listas',
     'create' => 'Tablas del juego listas',
+    'mark_updates' => 'Registros de actualización escritos',
     'insert_changelog' => 'Registros de cambios insertados',
     'insert_languages' => 'Registros de idiomas insertados',
     'insert_options' => 'Registros de opciones insertados',

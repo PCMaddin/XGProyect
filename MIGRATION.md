@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 924 PHPUnit-Tests, dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 950 PHPUnit-Tests (19 davon gegen MariaDB), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Sprachen | Englisch, Spanisch, Deutsch (Schlüssel und Platzhalter per Test gleich) |
 | Smoke-Test | Installer, alle Spiel- und Admin-Seiten in drei Sprachen und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten) |
 
@@ -634,7 +634,9 @@ Baseline-Einträge.
   - **Tabelle `languages`:** `LanguagesTableSeeder` legt `de` an; für
     bestehende Installationen fügt die Migration
     `400/2026_10_16_000001_add_german_language.php` die Zeile hinzu, falls sie
-    fehlt (`php artisan migrate --path=database/migrations/400`).
+    fehlt (`php artisan migrate --path=database/migrations/400`; nach einer
+    Installation mit dem Installer vorher einmal
+    `php artisan xgp:mark-installed-updates`, siehe Smoke-Test).
   - **Changelog im Spiel:** zeigt die Einträge der Serversprache und, wenn es
     in ihr keine gibt (Deutsch), die englischen. Vorher blieb die Seite dann
     leer.
@@ -752,22 +754,75 @@ Gefunden und behoben, jeweils mit Test:
   aktualisiert (Laravel 12.64 → 12.70). Danach liefen alle Tests und der
   Crawl erneut grün.
 
-Offen (bewusst nicht in diesem Schritt):
+Nachgezogen:
 
-- 🟡 **Aktionen per GET-Link** (Bauen/Abbrechen, Forschung, Allianz:
-  Mitglied entfernen, Rang löschen, Buddy-Aktionen) prüfen kein Token. Durch
-  `SameSite=Lax` kann eine fremde Seite sie nicht im Hintergrund auslösen,
-  ein angeklickter Link (etwa im Allianztext) aber schon. Abhilfe: auf
-  POST-Formulare umstellen.
-- 🟡 **Händler „Rohstoffe tauschen“** ist nur eine Oberfläche ohne
-  Funktion, schon im Original; der Preis aus den Admin-Einstellungen wird
-  angezeigt, aber nichts getauscht.
+- 🔴→✅ **Alle Spielaktionen nur noch per POST.** Die Controller lasen
+  Aktionen auch aus der URL, denn `input()`, `has()` und `integer()`
+  enthalten in Laravel die Query. Ein einfacher Link, etwa im Allianztext,
+  in einer Nachricht oder auf einer fremden Seite, konnte deshalb vieles
+  auslösen: bauen, abbrechen, forschen, Verteidigung bauen, Offiziere
+  anheuern, Mitglieder entfernen, Ränge ändern oder löschen,
+  Allianz-Einstellungen ändern, die Allianz auflösen oder übergeben,
+  Buddies annehmen oder löschen, Nachrichten löschen, Planeten umbenennen
+  oder aufgeben.
+  - Jeder schreibende Zweig reagiert jetzt nur auf POST.
+  - Aktions-Links tragen `data-post`. `public/assets/js/post-links.js`
+    schickt sie als POST mit dem Token aus dem `csrf-token`-Meta-Tag;
+    vorhandene Rückfragen bleiben, für Links aus PHP gibt es
+    `FormatService::postLink()`.
+  - Dabei behoben: Die Allianz wurde per GET ohne Rückfrage aufgelöst. Die
+    Übergabe konnte jedes Mitglied mit Admin-Recht an einen beliebigen
+    Spieler vornehmen, jetzt nur noch der Gründer an ein Mitglied mit
+    „Rechter Hand“. Rangänderungen trafen auch Spieler fremder Allianzen.
+    Buddy-Anfragen gingen auch an sich selbst und an nicht existierende
+    Spieler.
+  - `ActionsNeedPostMysqlTest` schickt jede Aktion als GET und prüft, dass
+    die Datenbank unverändert bleibt; beim alten Code ändern 15 der Fälle
+    Daten. Dazu eine POST-Gegenprobe.
+- ✅ **Tests gegen MySQL/MariaDB.** Spielseiten nutzen SQL, das SQLite nicht
+  kennt (`UPDATE … INNER JOIN`, `DELETE` über mehrere Tabellen). Darum
+  blieben die Seiten ungetestet, und der `GROUP BY`-Fehler fiel nicht auf.
+  - `tests/MysqlTestCase` führt solche Tests gegen `MYSQL_TEST_DATABASE`
+    aus (ohne die Variable werden sie übersprungen).
+  - Das CI bekommt einen PHPUnit-Job mit MariaDB-Service.
+  - Der Flottenabfrage-Test läuft auch auf MariaDB und reproduziert mit der
+    alten Abfrage den `ONLY_FULL_GROUP_BY`-Fehler.
+- ✅ **Händler „Rohstoffe tauschen“** umgesetzt (`MerchantService`), nach
+  den vorhandenen Admin-Einstellungen:
+  - Der Ruf kostet `merchant_price` Dunkle Materie. Der Händler kauft den
+    gewählten Rohstoff zu den Basiskursen 3/2/1, mal einem pro Ruf
+    gewürfelten Faktor zwischen Minimum und Maximum. Bei Metall und Faktor
+    0,88 gibt es also 2 · 0,88 / 3 Kristall je Metall.
+  - Das Angebot bleibt beim Spieler (`premium_merchant_offer`, neue Spalte),
+    bis ein Tausch es verbraucht.
+  - Beim Tausch werden der verkaufte Rohstoff und der Platz im Speicher für
+    die erhaltenen Rohstoffe geprüft. Alles läuft in einer Transaktion mit
+    Sperre.
+  - Die Seite zeigt Kurs und freien Speicher und rechnet die Kosten live
+    mit.
+  - Tests für Kurse, Kosten, Ruf und Tausch einschließlich aller
+    Fehlerfälle; im Browser auf MariaDB durchgespielt.
+- 🔴→✅ **Update-Befehl scheiterte nach einer Neuinstallation.** Der
+  Installer baut die Tabellen aus `migrations/install`, trug aber keine der
+  Update-Migrationen aus `migrations/400` ein.
+  `php artisan migrate --path=database/migrations/400` führte deshalb alle
+  Updates seit v3 erneut aus und brach mit „table already exists“ ab.
+  - Der Installer trägt sie jetzt ein (`xgp:mark-installed-updates --all`).
+  - Bestehende Installationen führen **einmal**
+    `php artisan xgp:mark-installed-updates` aus. Das trägt die älteren
+    Updates ein. Die Updates ab `2026_10_16` prüfen selbst, was sie ändern,
+    und laufen danach normal. Mit Test.
+
+Offen:
+
+- 🟡 **Phalanx:** Ein Scan kostet Deuterium und läuft als GET. Der Aufruf
+  öffnet ein Popup, ein fremder Link kann also Deuterium verbrauchen lassen.
+  Der Schaden ist gering, Abhilfe wäre ein POST-Popup.
+- 🟡 **Expeditionsergebnis „Händler“** ist im Code noch nicht umgesetzt
+  und endet wie „nichts gefunden“. Es könnte jetzt einen kostenlosen
+  Händlerruf geben.
 - ℹ️ Neue Allianzen sind standardmäßig geschlossen
   (`alliance_request_notallow = 0` heißt trotz des Namens „keine
   Bewerbungen“). So ist es durchgängig im Code, also eine
   Design-Entscheidung.
-- ℹ️ Nachrichten und Berichte werden als fertiges HTML in der Sprache zum
-  Zeitpunkt des Versands gespeichert. Ältere Nachrichten behalten deshalb
-  ihre alte Sprache und alte Fehler, etwa den rohen Schlüssel im
-  Spionagebericht.
 

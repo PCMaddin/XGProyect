@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Game;
 
 use App\Enums\Module;
 use App\Services\FormatService;
-use App\Services\SettingsService;
+use App\Services\Game\MerchantService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,8 +44,12 @@ class TraderResourcesController extends BaseController
 
     private string $error = '';
 
-    public function __construct(private FormatService $formatService)
-    {
+    private string $success = '';
+
+    public function __construct(
+        private FormatService $formatService,
+        private MerchantService $merchant,
+    ) {
     }
 
     public function __invoke(Request $request): View | RedirectResponse
@@ -63,18 +67,21 @@ class TraderResourcesController extends BaseController
             'planet' => $this->planet,
         ]);
 
-        $redirect = $this->handleRefill($request);
+        $redirect = $this->handleRefill($request) ?? $this->handleMerchant($request);
 
         if ($redirect !== null) {
             return $redirect;
         }
+
+        $this->success = $this->stringOf(session('trader_success'));
 
         return view('trader.overview', array_merge(
             $this->messageDisplay(),
             [
                 'currentMode' => view('trader.resources', [
                     'resourcesList' => $this->buildResourcesSection(),
-                    'exchangePrice' => $this->formatService->prettyNumber(app(SettingsService::class)->getFloat('merchant_price')),
+                    'exchangePrice' => $this->formatService->prettyNumber($this->merchant->price()),
+                    'merchant' => $this->merchantSection(),
                 ])->render(),
             ]
         ));
@@ -128,15 +135,111 @@ class TraderResourcesController extends BaseController
     }
 
     /**
+     * Call the merchant or exchange with him (POST only).
+     */
+    private function handleMerchant(Request $request): ?RedirectResponse
+    {
+        if (!$request->isMethod('post')) {
+            return null;
+        }
+
+        $userId = $this->int($this->user, 'id');
+
+        if ($request->has('call')) {
+            $error = $this->merchant->call($userId, $this->stringOf($request->post('sell')));
+
+            return $this->merchantResult($error === null ? null : [$error, ''], 'tr_merchant_arrived');
+        }
+
+        if ($request->has('exchange')) {
+            $amounts = [];
+
+            foreach (MerchantService::RESOURCES as $resource) {
+                $amounts[$resource] = max(0, $request->integer('get_' . $resource));
+            }
+
+            return $this->merchantResult(
+                $this->merchant->exchange($userId, $this->int($this->planet, 'planet_id'), $amounts),
+                'tr_exchange_done'
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array{0: string, 1: string}|null $error language key and resource
+     */
+    private function merchantResult(?array $error, string $successKey): ?RedirectResponse
+    {
+        if ($error !== null) {
+            $resource = $error[1] !== '' ? (string) __('game/global.' . $error[1]) : '';
+            $this->error = sprintf((string) __('game/trader.' . $error[0]), $resource);
+
+            return null;
+        }
+
+        return redirect(self::REDIRECT_TARGET)->with('trader_success', (string) __('game/trader.' . $successKey));
+    }
+
+    /**
+     * The exchange part of the page: the offer when the merchant is there.
+     *
+     * @return array<string, mixed>
+     */
+    private function merchantSection(): array
+    {
+        $offer = $this->merchant->offer($this->int($this->user, 'id'));
+
+        if ($offer === null) {
+            return ['offer' => false];
+        }
+
+        $sellName = (string) __('game/global.' . $offer['sell']);
+        $buy = [];
+
+        foreach (array_diff(MerchantService::RESOURCES, [$offer['sell']]) as $resource) {
+            $rate = $this->merchant->rate($offer, $resource);
+            $name = (string) __('game/global.' . $resource);
+            $free = max(0, $this->trader->freeStorage($resource));
+
+            $buy[] = [
+                'resource' => $resource,
+                'name' => $name,
+                'rate' => round($rate, 6),
+                'rateText' => sprintf((string) __('game/trader.tr_rate'), $sellName, number_format($rate, 2, ',', '.'), $name),
+                'free' => $this->formatService->prettyNumber($free),
+            ];
+        }
+
+        return [
+            'offer' => true,
+            'offerText' => sprintf((string) __('game/trader.tr_offer'), $sellName),
+            'sellName' => $sellName,
+            'available' => $this->formatService->prettyNumber($this->float($this->planet, 'planet_' . $offer['sell'])),
+            'buy' => $buy,
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     private function messageDisplay(): array
     {
-        if ($this->error === '') {
-            return ['color' => '', 'message' => ''];
+        if ($this->error !== '') {
+            return ['color' => '#ff0000', 'message' => $this->error];
         }
 
-        return ['color' => '#ff0000', 'message' => $this->error];
+        if ($this->success !== '') {
+            return ['color' => 'lime', 'message' => $this->success];
+        }
+
+        return ['color' => '', 'message' => ''];
+    }
+
+    private function stringOf(mixed $value): string
+    {
+        return is_string($value) ? $value : '';
     }
 
     /**

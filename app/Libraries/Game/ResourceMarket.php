@@ -121,6 +121,14 @@ class ResourceMarket
         );
     }
 
+    /**
+     * How much more of the resource fits into the planet's storage.
+     */
+    public function freeStorage(string $resource): float
+    {
+        return $this->productionService->maxStorable($this->storeLevel($resource)) - $this->planetAmount($resource);
+    }
+
     private function isStorageFillable(string $resource, int $percentage): bool
     {
         if ($this->isStorageFull($resource)) {

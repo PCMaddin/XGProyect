@@ -6,6 +6,7 @@ namespace Tests\Unit\App\Http\Controllers\Game;
 
 use App\Http\Controllers\Game\TraderResourcesController;
 use App\Services\FormatService;
+use App\Services\Game\MerchantService;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
@@ -34,7 +35,7 @@ class TraderResourcesControllerTest extends TestCase
     #[DataProvider('refillKeyProvider')]
     public function testParseRefillKeyOnlyAcceptsWhitelistedButtons(string $key, ?array $expected): void
     {
-        $controller = new TraderResourcesController(new FormatService());
+        $controller = new TraderResourcesController(new FormatService(), app(MerchantService::class));
 
         $method = new ReflectionMethod(TraderResourcesController::class, 'parseRefillKey');
 

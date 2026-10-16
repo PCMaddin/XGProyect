@@ -31,6 +31,22 @@ return [
     'tr_call_button' => 'Call merchant',
     'tr_no_enough_storage' => 'Not enough storage capacity.',
     'tr_no_enough_dark_matter' => 'There is not enough dark matter available',
+    'tr_resource' => 'Resource',
+    'tr_free_storage' => 'Free storage',
+    'tr_exchange_rate' => 'Exchange rate',
+    'tr_you_get' => 'You get',
+    'tr_you_pay' => 'You pay',
+    'tr_available' => 'available',
+    'tr_exchange_button' => 'Exchange',
+    'tr_offer' => 'The merchant buys your %s.',
+    'tr_rate' => '1 %s = %s %s',
+    'tr_merchant_arrived' => 'The merchant has arrived.',
+    'tr_exchange_done' => 'Exchange done.',
+    'tr_select_resource' => 'Select the resource you want to sell.',
+    'tr_no_merchant' => 'Call the merchant first.',
+    'tr_nothing_to_exchange' => 'Enter the amounts you want.',
+    'tr_not_enough_resources' => 'Not enough %s.',
+    'tr_no_enough_storage_for' => 'Not enough storage capacity for %s.',
 
     // traderAuctioneer
 

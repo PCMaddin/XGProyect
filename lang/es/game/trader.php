@@ -31,6 +31,22 @@ return [
     'tr_call_button' => 'Llamar al mercader',
     'tr_no_enough_storage' => 'No hay suficiente capacidad de almacenamiento.',
     'tr_no_enough_dark_matter' => 'No hay suficiente materia oscura disponible',
+    'tr_resource' => 'Recurso',
+    'tr_free_storage' => 'Almacenamiento libre',
+    'tr_exchange_rate' => 'Tasa de cambio',
+    'tr_you_get' => 'Recibes',
+    'tr_you_pay' => 'Pagas',
+    'tr_available' => 'disponible',
+    'tr_exchange_button' => 'Intercambiar',
+    'tr_offer' => 'El mercader compra tu %s.',
+    'tr_rate' => '1 %s = %s %s',
+    'tr_merchant_arrived' => 'El mercader ha llegado.',
+    'tr_exchange_done' => 'Intercambio realizado.',
+    'tr_select_resource' => 'Selecciona el recurso que quieres vender.',
+    'tr_no_merchant' => 'Llama primero al mercader.',
+    'tr_nothing_to_exchange' => 'Indica las cantidades que quieres.',
+    'tr_not_enough_resources' => 'No tienes suficiente %s.',
+    'tr_no_enough_storage_for' => 'No hay suficiente capacidad de almacenamiento para %s.',
 
     // traderAuctioneer
 

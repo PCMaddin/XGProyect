@@ -31,6 +31,22 @@ return [
     'tr_call_button' => 'Händler rufen',
     'tr_no_enough_storage' => 'Nicht genügend Speicherkapazität.',
     'tr_no_enough_dark_matter' => 'Es ist nicht genügend Dunkle Materie vorhanden',
+    'tr_resource' => 'Rohstoff',
+    'tr_free_storage' => 'Freier Speicher',
+    'tr_exchange_rate' => 'Kurs',
+    'tr_you_get' => 'Du erhältst',
+    'tr_you_pay' => 'Du zahlst',
+    'tr_available' => 'verfügbar',
+    'tr_exchange_button' => 'Tauschen',
+    'tr_offer' => 'Der Händler kauft dein %s.',
+    'tr_rate' => '1 %s = %s %s',
+    'tr_merchant_arrived' => 'Der Händler ist eingetroffen.',
+    'tr_exchange_done' => 'Tausch abgeschlossen.',
+    'tr_select_resource' => 'Wähle den Rohstoff, den du verkaufen möchtest.',
+    'tr_no_merchant' => 'Rufe zuerst den Händler.',
+    'tr_nothing_to_exchange' => 'Gib die gewünschten Mengen ein.',
+    'tr_not_enough_resources' => 'Nicht genug %s.',
+    'tr_no_enough_storage_for' => 'Nicht genug Speicherkapazität für %s.',
 
     // traderAuctioneer
 
