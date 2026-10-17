@@ -289,7 +289,7 @@ class Fleet4Controller extends BaseController
             . 'p' . $this->asInt($target['planet'] ?? 0)
             . 't' . $this->asInt($target['type'] ?? 0);
 
-        if ($this->asString($target['acs_target'] ?? '') === $targetString && $this->acsGroupCount($group) > 0) {
+        if ($this->asString($target['acs_target'] ?? '') === $targetString && $this->acsGroupCount($group) > 0 && $this->invitedTo($group)) {
             $this->fleetData['fleet_group'] = $group;
 
             return true;
@@ -418,9 +418,14 @@ class Fleet4Controller extends BaseController
         }
     }
 
+    /**
+     * Bugfix: two players without an alliance counted as allies, so anyone
+     * could hold at anyone's planet by posting the mission (the third step
+     * does not offer it).
+     */
     private function isStayAllowed(): bool
     {
-        if ($this->asInt($this->targetData['ally_id'] ?? 0) === $this->userInt('ally_id')) {
+        if ($this->userInt('ally_id') !== 0 && $this->asInt($this->targetData['ally_id'] ?? 0) === $this->userInt('ally_id')) {
             return true;
         }
 
@@ -726,6 +731,15 @@ class Fleet4Controller extends BaseController
         ) : null;
 
         return is_object($row) ? get_object_vars($row) : [];
+    }
+
+    /**
+     * Bugfix: the group came from the form, so a fleet could join any ACS
+     * group whose number and target it knew, without an invitation.
+     */
+    private function invitedTo(int $group): bool
+    {
+        return DB::table('acs_members')->where('acs_group_id', $group)->where('acs_user_id', $this->userInt('id'))->exists();
     }
 
     private function acsGroupCount(int $group): int

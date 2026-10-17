@@ -471,6 +471,14 @@ final class WorldTracker
 
     private string $expeditionTitle = '';
 
+    /** @var array<int, array<int, true>> ACS groups seen: group => owners */
+    public array $groups = [];
+
+    /** missile result messages (attacker and target each get one) and the defences they list as destroyed */
+    public int $missileMessages = 0;
+
+    public int $missileDestroyed = 0;
+
     public function __construct()
     {
         $texts = trans('game/expedition');
@@ -530,9 +538,13 @@ final class WorldTracker
     {
         $seen = [];
 
-        foreach (DB::table('fleets')->get(['fleet_id', 'fleet_owner', 'fleet_mission', 'fleet_mess', 'fleet_amount', 'fleet_start_time', 'fleet_end_time']) as $row) {
+        foreach (DB::table('fleets')->get(['fleet_id', 'fleet_owner', 'fleet_mission', 'fleet_mess', 'fleet_amount', 'fleet_start_time', 'fleet_end_time', 'fleet_group']) as $row) {
             $id = (int) $row->fleet_id;
             $seen[$id] = true;
+
+            if ((int) $row->fleet_group !== 0) {
+                $this->groups[(int) $row->fleet_group][(int) $row->fleet_owner] = true;
+            }
 
             if (!isset($this->fleets[$id])) {
                 $this->fleets[$id] = [
@@ -600,6 +612,12 @@ final class WorldTracker
             $this->messages[$receiver][$kind] = ($this->messages[$receiver][$kind] ?? 0) + 1;
 
             $subject = (string) $row->message_subject;
+
+            if ($subject === __('game/missile.mis_attack')) {
+                $this->missileMessages++;
+                preg_match_all('/\(-([\d.,]+)\)/', (string) $row->message_text, $losses);
+                $this->missileDestroyed += (int) array_sum(array_map(static fn (string $n): int => (int) preg_replace('/\D/', '', $n), $losses[1]));
+            }
 
             if ($this->expeditionTitle !== '' && str_starts_with($subject, $this->expeditionTitle)) {
                 $outcome = $this->classifyExpedition((string) $row->message_text);
@@ -1679,6 +1697,31 @@ final class ReportWriter
                 'boosters_used_on_planets' => (int) DB::table('planet_boosters')->count(),
                 'items_left' => (int) DB::table('user_items')->sum('amount'),
             ],
+            'cooperation' => $this->cooperation(),
+        ];
+    }
+
+    /**
+     * Alliances at the end, ACS groups, battles with more than two players
+     * (ACS or defenders holding at the planet) and missile strikes.
+     *
+     * @return array<string, mixed>
+     */
+    private function cooperation(): array
+    {
+        $alliances = [];
+
+        foreach (DB::table('alliance')->get(['alliance_id', 'alliance_tag', 'alliance_class']) as $alliance) {
+            $alliances[$alliance->alliance_tag . ' (class ' . $alliance->alliance_class . ')'] = DB::table('users')->where('ally_id', $alliance->alliance_id)->pluck('name')->all();
+        }
+
+        return [
+            'alliances' => $alliances,
+            'acs_groups' => count($this->tracker->groups),
+            'acs_groups_joined' => count(array_filter($this->tracker->groups, static fn (array $owners): bool => count($owners) > 1)),
+            'battles_with_more_than_two_players' => count(array_filter($this->tracker->battles, static fn (array $b): bool => count(array_unique(explode(',', $b['owners']))) > 2)),
+            'missile_strikes' => intdiv($this->tracker->missileMessages, 2),
+            'defences_destroyed_by_missiles' => intdiv($this->tracker->missileDestroyed, 2),
         ];
     }
 
@@ -1866,6 +1909,13 @@ final class ReportWriter
             $md[] = '    - ' . $mission . ': `' . json_encode($outcomes) . '`';
         }
 
+        $c = $g['cooperation'];
+        $md[] = '';
+        $md[] = '## Cooperation';
+        $md[] = '';
+        $md[] = '- Alliances: `' . json_encode($c['alliances'], JSON_UNESCAPED_UNICODE) . '`';
+        $md[] = sprintf('- ACS groups: %d (%d joined by allies), battles with more than two players: %d', $c['acs_groups'], $c['acs_groups_joined'], $c['battles_with_more_than_two_players']);
+        $md[] = sprintf('- Missile strikes: %d, defences destroyed by missiles: %d', $c['missile_strikes'], $c['defences_destroyed_by_missiles']);
         $md[] = '';
         $md[] = '## Bots';
         $md[] = '';

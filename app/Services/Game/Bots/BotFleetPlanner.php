@@ -329,7 +329,7 @@ class BotFleetPlanner
      *
      * @return array<string, mixed>
      */
-    private function ownerRow(int $userId): array
+    public function ownerRow(int $userId): array
     {
         $row = DB::table('users AS u')
             ->join('research AS r', 'r.research_user_id', '=', 'u.id')
@@ -592,11 +592,12 @@ class BotFleetPlanner
 
     /**
      * Planets of others a bot may fly against: no admins, no one on
-     * vacation, and players only if the admin allows it.
+     * vacation, no member of its alliance, and players only if the admin
+     * allows it.
      *
      * @param array<string, mixed> $user
      */
-    private function targetQuery(array $user, int $type = PlanetTypes::PLANET): \Illuminate\Database\Query\Builder
+    public function targetQuery(array $user, int $type = PlanetTypes::PLANET): \Illuminate\Database\Query\Builder
     {
         $query = DB::table('planets AS p')
             ->join('users AS u', 'u.id', '=', 'p.planet_user_id')
@@ -610,6 +611,10 @@ class BotFleetPlanner
 
         if (!$this->settings->getBool('bots_attack_players')) {
             $query->where('u.user_is_bot', true);
+        }
+
+        if (self::asInt($user['ally_id'] ?? 0) !== 0) {
+            $query->where('u.ally_id', '<>', self::asInt($user['ally_id']));
         }
 
         return $query;
@@ -629,7 +634,7 @@ class BotFleetPlanner
      * @param array<string, mixed> $user
      * @param array<string, mixed> $target
      */
-    private function targetAllowed(array $user, array $target, int $now): bool
+    public function targetAllowed(array $user, array $target, int $now): bool
     {
         if (self::asInt($target['onlinetime'] ?? 0) < $now - ONE_WEEK) {
             return true;
@@ -650,7 +655,7 @@ class BotFleetPlanner
      *
      * @return array<int, int>
      */
-    private function forces(array $target): array
+    public function forces(array $target): array
     {
         $forces = [];
 

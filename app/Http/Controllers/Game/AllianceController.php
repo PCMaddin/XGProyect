@@ -8,6 +8,7 @@ use App\Enums\AllianceClass;
 use App\Enums\Module;
 use App\Services\Game\AllianceClassService;
 use App\Services\Game\AllianceRankService;
+use App\Services\Game\AllianceService;
 use App\Services\FormatService;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
@@ -63,6 +64,7 @@ class AllianceController extends BaseController
         private FormatService $formatService,
         private TimingService $timingService,
         private AllianceRankService $rankService,
+        private AllianceService $alliances = new AllianceService(),
     ) {
     }
 
@@ -413,7 +415,7 @@ class AllianceController extends BaseController
                 Functions::message($error, $editUrl, 3);
             }
 
-            if ($this->allianceNameExists($name) !== null) {
+            if ($this->alliances->nameTaken($name)) {
                 Functions::message(strtr((string) __('game/alliance.al_name_already_exists'), ['%s' => $name]), $editUrl, 3);
             }
 
@@ -444,7 +446,7 @@ class AllianceController extends BaseController
                 Functions::message($error, $editUrl, 3);
             }
 
-            if ($this->allianceTagExists($tag) !== null) {
+            if ($this->alliances->tagTaken($tag)) {
                 Functions::message(strtr((string) __('game/alliance.al_tag_already_exists'), ['%s' => $tag]), $editUrl, 3);
             }
 
@@ -512,14 +514,10 @@ class AllianceController extends BaseController
         // messages are shown as HTML: escape the player's input
         $text = e($this->asString($request->input('text')));
         $current = $this->alliance->getCurrentAlliance();
-        $allyId = $accept ? $this->allianceId($request) : 0;
 
-        DB::update(
-            $this->prepareSql(
-                'UPDATE `' . USERS . "` SET `ally_request_text` = '', `ally_request` = 0, `ally_id` = ? WHERE `id` = ?;"
-            ),
-            [$allyId, $show]
-        );
+        if (!$this->alliances->answer($show, $this->allianceId($request), $accept)) {
+            return redirect('game.php?page=alliance&mode=admin&edit=requests');
+        }
 
         $verb = $accept ? 'al_has_accepted' : 'al_has_declined';
         $titleKey = $accept ? 'al_you_was_acceted' : 'al_you_was_declined';
@@ -880,10 +878,7 @@ class AllianceController extends BaseController
         $buttonText = (string) __('game/alliance.al_delete_request');
 
         if ($request->isMethod('post') && $request->filled('bcancel')) {
-            DB::update(
-                $this->prepareSql('UPDATE `' . USERS . '` SET `ally_request` = 0 WHERE `id` = ?;'),
-                [$this->userInt('id')]
-            );
+            $this->alliances->withdraw($this->userInt('id'));
 
             $requestText = (string) __('game/alliance.al_request_deleted');
             $buttonText = (string) __('game/alliance.al_continue');
@@ -999,7 +994,7 @@ class AllianceController extends BaseController
             Functions::message($error, $makeUrl, 3);
         }
 
-        if ($this->allianceTagExists($tag) !== null) {
+        if ($this->alliances->tagTaken($tag)) {
             Functions::message(strtr((string) __('game/alliance.al_tag_already_exists'), ['%s' => $tag]), $makeUrl, 3);
         }
 
@@ -1009,43 +1004,11 @@ class AllianceController extends BaseController
             Functions::message($error, $makeUrl, 3);
         }
 
-        if ($this->allianceNameExists($name) !== null) {
+        if ($this->alliances->nameTaken($name)) {
             Functions::message(strtr((string) __('game/alliance.al_name_already_exists'), ['%s' => $name]), $makeUrl, 3);
         }
 
-        $ranks = strtr(
-            '[{"rank":"Founder","rights":{"1":1,"2":1,"3":1,"4":1,"5":1,"6":1,"7":1,"8":1,"9":1}},'
-            . '{"rank":"Newcomer","rights":{"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0}}]',
-            [
-                'Founder' => (string) __('game/alliance.al_founder_rank_text'),
-                'Newcomer' => (string) __('game/alliance.al_new_member_rank_text'),
-            ]
-        );
-
-        // The alliance name and tag are bound as parameters; the legacy code
-        // interpolated them straight into the INSERT.
-        DB::transaction(function () use ($name, $tag, $ranks): void {
-            DB::insert(
-                $this->prepareSql(
-                    'INSERT INTO `' . ALLIANCE . '`
-                        SET `alliance_name` = ?, `alliance_tag` = ?, `alliance_owner` = ?,
-                            `alliance_register_time` = ?, `alliance_ranks` = ?;'
-                ),
-                [$name, $tag, $this->userInt('id'), time(), $ranks]
-            );
-
-            $newAllyId = (int) DB::getPdo()->lastInsertId();
-
-            DB::insert(
-                $this->prepareSql('INSERT INTO `' . ALLIANCE_STATISTICS . '` SET `alliance_statistic_alliance_id` = ?;'),
-                [$newAllyId]
-            );
-
-            DB::update(
-                $this->prepareSql('UPDATE `' . USERS . '` SET `ally_id` = ?, `ally_register_time` = ? WHERE `id` = ?;'),
-                [$newAllyId, time(), $this->userInt('id')]
-            );
-        });
+        $this->alliances->found($this->userInt('id'), $name, $tag, time());
 
         $message = str_replace(['%s', '%d'], [$name, $tag], (string) __('game/alliance.al_created'));
 
@@ -1063,15 +1026,7 @@ class AllianceController extends BaseController
         $text = is_string($raw = $request->input('text')) ? $raw : '';
 
         if ($request->isMethod('post') && $request->filled('send') && $text !== '') {
-            // The request text is bound; the legacy code interpolated it.
-            DB::update(
-                $this->prepareSql(
-                    'UPDATE `' . USERS . '`
-                        SET `ally_request` = ?, `ally_request_text` = ?, `ally_register_time` = ?, `ally_rank_id` = 1
-                    WHERE `id` = ?;'
-                ),
-                [$this->allianceId($request), $text, time(), $this->userInt('id')]
-            );
+            $this->alliances->apply($this->userInt('id'), $this->allianceId($request), $text, time());
 
             Functions::message((string) __('game/alliance.al_request_confirmation_message'), 'game.php?page=alliance', 3);
         }
@@ -1246,26 +1201,6 @@ class AllianceController extends BaseController
 
         // Unreachable: messageBox() renders and short-circuits via HaltWithView.
         return redirect('game.php?page=alliance');
-    }
-
-    private function allianceNameExists(string $name): ?string
-    {
-        $row = DB::selectOne(
-            $this->prepareSql('SELECT `alliance_name` FROM `' . ALLIANCE . '` WHERE `alliance_name` = ?;'),
-            [$name]
-        );
-
-        return is_object($row) ? $this->asString(get_object_vars($row)['alliance_name'] ?? null) : null;
-    }
-
-    private function allianceTagExists(string $tag): ?string
-    {
-        $row = DB::selectOne(
-            $this->prepareSql('SELECT `alliance_tag` FROM `' . ALLIANCE . '` WHERE `alliance_tag` = ?;'),
-            [$tag]
-        );
-
-        return is_object($row) ? $this->asString(get_object_vars($row)['alliance_tag'] ?? null) : null;
     }
 
     /**

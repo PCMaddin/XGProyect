@@ -12,6 +12,7 @@ use App\Enums\AllianceClass;
 use App\Services\Game\WreckFieldService;
 use App\Enums\PlayerClass;
 use App\Services\Game\DeepSpaceDebrisService;
+use App\Services\Game\MissileService;
 use App\Support\FleetShips;
 use App\Services\Game\PlayerClassService;
 use App\Enums\Module;
@@ -583,7 +584,7 @@ class GalaxyController extends BaseController
         }
 
         /** @var array<string, mixed> $targetUser */
-        $this->insertMissileFleet($missilesAmount, $distance, $galaxy, $system, $planet, $target, $this->asInt($targetUser['id'] ?? 0));
+        $this->insertMissileFleet($missilesAmount, $galaxy, $system, $planet, $target, $this->asInt($targetUser['id'] ?? 0));
 
         Functions::message(
             '<b>' . $missilesAmount . '</b>' . __('game/galaxy.gl_missiles_sended') . $this->defenseLabel($target),
@@ -621,55 +622,23 @@ class GalaxyController extends BaseController
 
     private function insertMissileFleet(
         int $amount,
-        int $distance,
         int $galaxy,
         int $system,
         int $planet,
         string $target,
         int $targetOwner
     ): void {
-        $flightTime = (int) round(((30 + (60 * $distance)) * 2500) / max($this->settingsService->getInt('fleet_speed'), 1));
-        $now = time();
-
-        DB::transaction(function () use ($amount, $flightTime, $galaxy, $system, $planet, $target, $targetOwner, $now): void {
-            DB::insert(
-                $this->prepareSql(
-                    'INSERT INTO `' . FLEETS . '` SET
-                        `fleet_owner` = ?, `fleet_mission` = 10, `fleet_amount` = ?, `fleet_array` = ?,
-                        `fleet_start_time` = ?, `fleet_start_galaxy` = ?, `fleet_start_system` = ?,
-                        `fleet_start_planet` = ?, `fleet_start_type` = 1, `fleet_end_time` = ?,
-                        `fleet_end_stay` = 0, `fleet_end_galaxy` = ?, `fleet_end_system` = ?,
-                        `fleet_end_planet` = ?, `fleet_end_type` = 1, `fleet_target_obj` = ?,
-                        `fleet_resource_metal` = 0, `fleet_resource_crystal` = 0, `fleet_resource_deuterium` = 0,
-                        `fleet_target_owner` = ?, `fleet_group` = 0, `fleet_mess` = 0, `fleet_creation` = ?;'
-                ),
-                [
-                    $this->userInt('id'),
-                    $amount,
-                    FleetShips::encode([503 => $amount]),
-                    $now + $flightTime,
-                    $this->planetInt('planet_galaxy'),
-                    $this->planetInt('planet_system'),
-                    $this->planetInt('planet_planet'),
-                    $now + $flightTime + 1,
-                    $galaxy,
-                    $system,
-                    $planet,
-                    $target,
-                    $targetOwner,
-                    $now,
-                ]
-            );
-
-            DB::update(
-                $this->prepareSql(
-                    'UPDATE `' . DEFENSES . '` SET
-                        `defense_interplanetary_missile` = `defense_interplanetary_missile` - ?
-                    WHERE `defense_planet_id` = ?;'
-                ),
-                [$amount, $this->userInt('current_planet')]
-            );
-        });
+        app(MissileService::class)->launch(
+            $this->userInt('id'),
+            $this->userInt('current_planet'),
+            ['galaxy' => $this->planetInt('planet_galaxy'), 'system' => $this->planetInt('planet_system'), 'planet' => $this->planetInt('planet_planet')],
+            ['galaxy' => $galaxy, 'system' => $system, 'planet' => $planet],
+            $amount,
+            // "all" is the first choice (0); stored as text it failed in strict mode
+            is_numeric($target) ? (int) $target : 0,
+            $targetOwner,
+            time()
+        );
     }
 
     private function isValidMissileTarget(string $target): bool

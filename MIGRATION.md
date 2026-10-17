@@ -818,7 +818,8 @@ Baseline-Einträge.
     danach immer die billigste nützliche Stufe. Ein Viertel der Rohstoffe
     über dem doppelten Preis des nächsten Gebäudes geht in die beste
     erlaubte Verteidigung.
-  - Bots handeln nicht (Händler, Auktionen) und bilden keine Allianzen.
+  - Bots handeln nicht (Händler, Auktionen). Allianzen siehe „Bots
+    verbünden sich“.
   - Die Aufräumroutine löscht keine Bots mehr; handelnde Bots sind online.
   - Admin → Bots: Schalter „Bots spielen selbst“ (`bots_play`, Standard an).
 
@@ -995,6 +996,120 @@ Baseline-Einträge.
   Kein bezahlter Händlerruf und kein Container: In 30 Tagen hat kein Bot
   3.500 Dunkle Materie (höchstens 1.801), und der Durchschnittswert eines
   Containers liegt bei dieser Produktion noch unter seinem Preis.
+- ✅ **Bots verbünden sich:** Bots nutzen jetzt Allianzen, Halten,
+  Verbandsangriff und Interplanetarraketen, mit denselben Regeln wie
+  Spieler. Neue Klassen `BotAlliance`, `BotCoordinator`, `BotMissiles`;
+  `BotPlayerService` ruft sie auf (Allianz einmal pro Zug, eine zusätzliche
+  Flotte pro Zug vom Heimatplaneten nach `BotFleetPlanner`).
+  - Allianzen (`BotAlliance`): Ein Bot ohne Allianz bewirbt sich bei der
+    nächsten Bot-Allianz mit Platz (ein Mitglied in derselben Galaxie
+    höchstens 50 Systeme entfernt, höchstens 3 Mitglieder samt
+    Bewerbungen); gibt es keine, aber einen allianzlosen Bot in der Nähe,
+    gründet er eine (Tag/Name nach seinem Heimatsystem, z. B. `B1-76`,
+    Bewerbungen offen). Der Gründer nimmt Bots auf und lehnt Spieler ab,
+    Bots treten keiner Allianz mit Spielern bei: Bots und Spieler teilen nie
+    eine Allianz. Ist die erste Klassenwahl frei (nach 14 Tagen), wählt der
+    Gründer „Krieger“. Eine Bewerbung bei einer verschwundenen, geschlossenen
+    oder vollen Allianz zieht der Bot zurück.
+  - Gründen, Bewerben, Zurückziehen und Beantworten stecken jetzt in
+    `AllianceService`, den die Allianzseite und die Bots nutzen; die Seite
+    verhält sich wie vorher (Prüfungen und Nachrichten bleiben dort).
+  - Halten (Mission 5): Fliegt eine feindliche Angriffs- oder
+    Verbandsangriffsflotte auf den Planeten eines Verbündeten, schickt ein
+    Bot seine Kriegsschiffe dorthin, wenn sie vorher ankommen, und hält bis
+    zwei Stunden nach dem Angriff (höchstens 32 Stunden); sie kämpfen als
+    Verteidiger mit. Wurde ein Verbündeter in den letzten 24 Stunden
+    angegriffen, hält die Hälfte der Kriegsschiffe 8 Stunden an seinem
+    Heimatplaneten. `BotFleetService` erlaubt Halten wie die Flottenseite nur
+    bei Allianzmitgliedern und Buddys, 0–32 Stunden, mit Noob-Schutz.
+  - Verbandsangriff (Missionen 1 und 2): Ein Ziel in höchstens 100 Systemen,
+    das der Bot oder ein Verbündeter in den letzten 3 Stunden ausspioniert
+    hat und verteidigt ist, greift er mit den Verbündeten in der Nähe an,
+    wenn er laut Kampfsimulator (`BotBattleSimulator`, die Kampf-Engine des
+    Spiels) allein verliert, mit den Kriegsschiffen der Helfer aber gewinnt,
+    und die halbe Beute mindestens 5.000 ergibt (beim Zusammenführen von
+    einem groben Kampfwert auf den Simulator umgestellt, den auch der
+    Einzelüberfall nutzt; sonst griff ein Bot allein an, was der
+    Verbandsangriff für zu stark hielt):
+    Er fliegt mit Kriegsschiffen und Transportern für die Beute los, eröffnet
+    die Gruppe wie die Verbandsseite (`acs`, `acs_members`) und lädt die
+    Helfer ein; die treten mit Mission 2 bei, wenn sie die Gruppe um
+    höchstens 30 % ihrer Restflugzeit aufhalten. `send()` hat dafür einen
+    optionalen Gruppenparameter und gleicht die Ankunftszeiten wie
+    `Fleet4Controller` an (spätere Flotte verschiebt die Gruppe). Eine
+    Allianz fliegt nur einen Verbandsangriff zur Zeit, ein in den letzten 24
+    Stunden angegriffenes Ziel bleibt verschont, Verbündete nie (auch
+    `BotFleetPlanner` spioniert und überfällt keine Verbündeten mehr).
+    Die Kriegsschiffe dafür baut die Werft aller Bots (siehe „Bots führen
+    Krieg“); ein eigener Kriegsschiff-Auftrag für Allianz-Bots, den es beim
+    getrennten Entwickeln gab, entfiel beim Zusammenführen.
+  - Raketen (Mission 10): Liegt ein Ziel in Raketenreichweite, spart der
+    Heimatplanet ab Metallmine 18 und Impulstriebwerk 1 für ein Raketensilo
+    bis Stufe 4 (Gebäude, Forschung und Werft des Heimatplaneten warten so
+    lange; zwischen den Minen kam es nie zustande, in der Simulation blieb
+    es sonst bei Stufe 2–3). Dann hält er bis zu 8 Interplanetarraketen
+    (Siloplatz, je Auftrag aus einem Fünftel des Vorrats, erst wenn eine
+    Spionagesonde da ist)
+    und schießt sie wie die Galaxieseite (Silo 4, Impulstriebwerk,
+    Reichweite, gleiche Galaxie, Noob-Schutz, Urlaub) auf die Verteidigung
+    eines ausspionierten Ziels: so viele, wie nötig sind, samt denen, die
+    Abfangraketen abfangen, und nur, wenn sie mindestens ihren eigenen Preis
+    an Verteidigung zerstören. Der Start steckt jetzt in `MissileService`,
+    den auch die Galaxieseite nutzt.
+  - Aufklärung: Allianz-Bots mit Kriegsschiffen und Bots mit Raketen
+    spionieren Ziele bis 100 Systeme, die kein Mitglied in den letzten 6
+    Stunden ausspioniert hat.
+
+  Tests (MariaDB): Nachbarn gründen und füllen eine Allianz, Spieler werden
+  abgelehnt, Bots treten keiner Spielerallianz bei, Kriegerklasse; ein Bot
+  hält bei einem bedrohten Verbündeten und kämpft im Kampfbericht mit; zwei
+  Verbündete fliegen einen synchronisierten Verbandsangriff, der als ein
+  Kampf mit beiden Flotten aufgelöst wird; kein Verbandsangriff auf
+  Verbündete oder Spieler; Raketen zerstören Verteidigung (eine Abfangrakete
+  eingerechnet), billige Verteidigung, Ziele außer Reichweite und
+  Verbündete bleiben verschont; Silo wird nur mit Ziel in Reichweite
+  angespart und bekommt erst mit Sonde Raketen; Allianz-Bots bauen
+  Kriegsschiffe; `AllianceService`; die zwei Fleet4-Prüfungen. Unit:
+  Siloschritt (samt Speicher), Raketenbestellung. Simulator: neuer Abschnitt „Cooperation“
+  (Allianzen, Verbandsgruppen, Kämpfe mit mehr als zwei Spielern,
+  Raketeneinschläge und zerstörte Verteidigung).
+
+  Ergebnis 10 Bots × 1440 h, Seed 42 (`--db=xgp_b_sim`, 55 Minuten):
+  **0 Fehler, 0 Invariantenverletzungen.** Drei Allianzen (3, 3 und 2
+  Bots, alle Krieger; zwei Bots ohne Nachbarn blieben allein), 98
+  Verbandsangriffe (60 mit beigetretenen Verbündeten, 73 ACS-Flotten), 218
+  Halteflüge, 77 Kämpfe mit mehr als zwei Spielern (Verband oder haltende
+  Verteidiger), 17 Raketeneinschläge mit 482 zerstörten Verteidigungsanlagen
+  (der einzige Bot mit einem Fremden in Reichweite), 213 Kampfberichte.
+  Der Krieg kostet: Durchschnitt 12.640 Punkte statt 15.561, 410 statt
+  1.740 Expeditionen (Kriegsschiffe und Raketen gehen den Transportern der
+  Werft vor). Abgestimmt in acht Läufen: Allianzgröße 4 → 3 (sonst lagen
+  keine Fremden in Raketenreichweite), Reichweite 60 → 100 Systeme (sonst
+  fanden sich keine Helfer), eigene Kriegsschiffe für Allianz-Bots (die
+  Werft baute fast nur Transporter, Verbandsangriffe hatten nichts zu
+  fliegen), ein Verbandsangriff pro Allianz zur Zeit und 24 Stunden Ruhe
+  je Ziel (vorher 333 in 60 Tagen), Silo nur mit Ziel in Reichweite und mit
+  Sparen (vorher blieb es bei Stufe 2–3, ohne Ziel kostete das Sparen alle
+  Bots ein Fünftel ihrer Punkte), Raketen aus einem Fünftel des Vorrats
+  (das freie Budget reichte nie für Kristall).
+
+  Nebenbei behobene Fehler (je mit Regressionstest):
+  - Allianz-Bewerbungen: Annehmen/Ablehnen nahm jede Benutzer-ID; ein
+    Allianz-Admin konnte so jeden Spieler in seine Allianz holen
+    (`ally_id` gesetzt) oder per „Ablehnen“ aus dessen Allianz werfen
+    (`ally_id = 0`). Jetzt wird nur eine Bewerbung an diese Allianz
+    beantwortet (`AllianceService::answer`).
+  - `Fleet4Controller::isStayAllowed`: Zwei Spieler ohne Allianz galten als
+    verbündet (0 = 0), Halten bei jedem Fremden ließ sich per Formular
+    erzwingen (Schritt 3 bot es nicht an).
+  - `Fleet4Controller::validateAcs`: Die Gruppe kam aus dem Formular; jeder
+    konnte einem Verband beitreten, dessen Nummer und Ziel er kannte, ohne
+    Einladung. Jetzt nur als Mitglied in `acs_members`.
+
+  Außerdem schrieb die Galaxieseite das Raketenziel „all“ (nur per
+  Formular-Manipulation möglich) als Text in die Ganzzahlspalte
+  `fleet_target_obj`, im Strict-Modus ein Fehler; `MissileService` bekommt
+  jetzt 0 (= alle Verteidigung der Reihe nach).
 - ✅ **Einstellungen einmal pro Anfrage laden:** `SettingsService` war nicht
   als geteilte Instanz gebunden; jedes `app(SettingsService::class)` lud die
   ganze Tabelle `options` neu – im Tick allein etwa 15-mal, auf einer

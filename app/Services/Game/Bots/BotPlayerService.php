@@ -16,7 +16,6 @@ use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\ResearchQueueService;
 use App\Services\SettingsService;
 use App\Support\Concerns\ReadsMixedValues;
-use App\Support\FleetShips;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -25,8 +24,9 @@ use Throwable;
  * planets up to date like a player's page view does, then build, research
  * and order defences through the same queues and rules as players. A bot
  * acts every 10 to 20 minutes; at most a few bots act per tick so no page
- * view gets slow. Their fleets fly as {@see BotFleetPlanner} decides, and
- * they trade as {@see BotTrader} does.
+ * view gets slow. Their fleets fly as {@see BotFleetPlanner} decides, what
+ * they do with their alliance as {@see BotCoordinator} does, and they trade
+ * as {@see BotTrader} does.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -39,18 +39,19 @@ class BotPlayerService
     /** seconds between two ticks that let bots act */
     private const TICK_GAP = 60;
 
-    /** the fleet and defences a bot keeps, against its buildings and research */
-    private const MILITARY_SHARE = 1 / 3;
-
     /** bots acting per tick */
     private const BOTS_PER_TICK = 10;
 
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveParameterList")
+     */
     public function __construct(
         private SettingsService $settings,
         private BotStrategy $strategy,
-        private BotShipyard $shipyard,
+        private BotShipyardTurn $shipyardTurn,
         private BotFleetPlanner $fleetPlanner,
         private BotTrader $trader,
+        private BotCoordinator $coordinator,
         private BuildingQueueService $buildingQueue,
         private ResearchQueueService $researchQueue,
         private DevelopmentDataService $developmentData,
@@ -90,6 +91,9 @@ class BotPlayerService
             $user = $this->userRow($botId);
 
             if ($user !== [] && self::asInt($user['preference_vacation_mode'] ?? 0) === 0) {
+                $this->coordinator->joinAlliance($botId, $now);
+                $user = $this->userRow($botId);
+
                 foreach ($this->planetIds($botId) as $planetId) {
                     $this->playPlanet($user, $planetId, $now);
                 }
@@ -139,7 +143,8 @@ class BotPlayerService
         $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
 
         $this->fleetPlanner->act($user, $this->planetRow($planetId), $reserve, $now);
-        $this->orderShips($user, $planetId, $levels, $reserve, $now);
+        $this->coordinator->act($user, $this->planetRow($planetId), $now);
+        $this->shipyardTurn->act($user, $this->planetRow($planetId), $levels, $reserve, $now);
     }
 
     /**
@@ -155,14 +160,14 @@ class BotPlayerService
         }
 
         $levels = $this->developmentData->levelsFromPlanet($model, $user);
-        $building = $model->planet_type === PlanetTypesEnumerator::MOON
+        $home = $planetId === self::asInt($user['home_planet_id'] ?? 0);
+
+        $moon = $model->planet_type === PlanetTypesEnumerator::MOON;
+        // a home planet saving for its missile silo builds nothing else
+        $silo = $home && !$moon && $this->coordinator->savesForSilo($user, $levels) ? $this->strategy->nextSiloStep($levels, $numbers) : null;
+        $building = $moon
             ? $this->strategy->nextMoonBuilding($levels, $model->planet_field_max - $model->planet_field_current)
-            : $this->strategy->nextBuilding(
-                $levels,
-                $numbers,
-                $planetId === self::asInt($user['home_planet_id'] ?? 0),
-                self::asInt($user['research_current_research'] ?? 0) !== 0
-            );
+            : $silo ?? $this->strategy->nextBuilding($levels, $numbers, $home, self::asInt($user['research_current_research'] ?? 0) !== 0);
 
         if ($building !== null) {
             $this->buildingQueue->add($model, $user, $building);
@@ -190,7 +195,8 @@ class BotPlayerService
 
         $levels = $this->developmentData->levelsFromPlanet($model, $this->userWithResearch($user, $bot));
 
-        if (($levels[Buildings::BUILDING_LABORATORY] ?? 0) === 0) {
+        // a bot saving for its missile silo does not spend on research
+        if (($levels[Buildings::BUILDING_LABORATORY] ?? 0) === 0 || $this->coordinator->savesForSilo($user, $levels)) {
             return;
         }
 
@@ -199,113 +205,6 @@ class BotPlayerService
         if ($tech !== null) {
             $this->researchQueue->add($bot, $model, $this->userWithResearch($user, $bot), $tech, false);
         }
-    }
-
-    /**
-     * Ships and defences, like the shipyard page orders them, while the
-     * shipyard is idle and not being upgraded.
-     *
-     * @param array<string, mixed> $user
-     * @param array<int, int>      $levels
-     * @param array<string, float> $reserve
-     */
-    private function orderShips(array $user, int $planetId, array $levels, array $reserve, int $now): void
-    {
-        $model = Planets::find($planetId);
-        $planet = $this->planetRow($planetId);
-
-        if ($model === null || $planet === [] || !in_array($model->planet_b_hangar_id, ['', '0', null], true) ||
-            $model->buildingQueue()->whereIn('building_id', [Buildings::BUILDING_ROBOT_FACTORY, Buildings::BUILDING_NANO_FACTORY, Buildings::BUILDING_HANGAR])->exists()) {
-            return;
-        }
-
-        // a few orders at once, like a player filling the shipyard
-        $orders = $this->shipyard->orders(
-            $levels,
-            $this->withFlying($this->shipyard->shipsOf($planet), $planet),
-            $planetId === self::asInt($user['home_planet_id'] ?? 0),
-            $this->fleetPlanner->wantsColony($user),
-            $this->fleetPlanner->wasRaided($user, $now),
-            ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
-            $reserve,
-            $this->militaryLags(self::asInt($user['id'] ?? 0))
-        );
-
-        if ($orders === []) {
-            return;
-        }
-
-        $queue = '';
-        $paid = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
-
-        foreach ($orders as [$unit, $amount]) {
-            $queue .= $unit . ',' . $amount . ';';
-
-            foreach ($this->developments->developmentPrice($unit, 0, false) as $resource => $price) {
-                $paid[$resource] = ($paid[$resource] ?? 0.0) + $price * $amount;
-            }
-        }
-
-        DB::update(
-            $this->prepareSql(
-                'UPDATE `' . PLANETS . '` SET
-                    `planet_b_hangar_id` = CONCAT(COALESCE(`planet_b_hangar_id`, \'\'), ?),
-                    `planet_metal` = `planet_metal` - ?,
-                    `planet_crystal` = `planet_crystal` - ?,
-                    `planet_deuterium` = `planet_deuterium` - ?
-                WHERE `planet_id` = ?;'
-            ),
-            [$queue, $paid['metal'], $paid['crystal'], $paid['deuterium'], $planetId]
-        );
-    }
-
-    /**
-     * Whether the fleet and defences are worth less than a third of the
-     * buildings and research (by the statistics' points): then they come
-     * before the next building, as a player builds up a fleet.
-     */
-    private function militaryLags(int $userId): bool
-    {
-        $points = DB::table('users_statistics')->where('user_statistic_user_id', $userId)->first([
-            'user_statistic_buildings_points', 'user_statistic_technology_points', 'user_statistic_ships_points', 'user_statistic_defenses_points',
-        ]);
-
-        if ($points === null) {
-            return false;
-        }
-
-        $economy = self::asFloat($points->user_statistic_buildings_points) + self::asFloat($points->user_statistic_technology_points);
-
-        return self::asFloat($points->user_statistic_ships_points) + self::asFloat($points->user_statistic_defenses_points) < self::MILITARY_SHARE * $economy;
-    }
-
-    /**
-     * The planet's ships plus those flying from it, so ships out on a
-     * mission (probes spying, cargo ships on an expedition) are not built
-     * again.
-     *
-     * @param array<int, int>      $units
-     * @param array<string, mixed> $planet
-     *
-     * @return array<int, int>
-     */
-    private function withFlying(array $units, array $planet): array
-    {
-        $fleets = DB::table('fleets')
-            ->where('fleet_owner', self::asInt($planet['planet_user_id'] ?? 0))
-            ->where('fleet_start_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
-            ->where('fleet_start_system', self::asInt($planet['planet_system'] ?? 0))
-            ->where('fleet_start_planet', self::asInt($planet['planet_planet'] ?? 0))
-            ->where('fleet_start_type', self::asInt($planet['planet_type'] ?? 0))
-            ->pluck('fleet_array');
-
-        foreach ($fleets as $fleet) {
-            foreach (FleetShips::decode(self::asString($fleet)) as $ship => $amount) {
-                $units[$ship] = ($units[$ship] ?? 0) + $amount;
-            }
-        }
-
-        return $units;
     }
 
     /**

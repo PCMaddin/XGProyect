@@ -68,6 +68,11 @@ class BotStrategy
     /** more metal than this many times the crystal in stock is a glut */
     private const METAL_GLUT = 3;
 
+    /** the missile silo comes with this metal mine level, up to the level missiles need */
+    private const SILO_FROM_METAL = 18;
+
+    private const SILO_LEVEL = 4;
+
     private const STORAGES = [
         'metal' => Buildings::BUILDING_METAL_STORE,
         'crystal' => Buildings::BUILDING_CRYSTAL_STORE,
@@ -277,6 +282,38 @@ class BotStrategy
         }
 
         return $lagging;
+    }
+
+    /**
+     * The step towards the missile silo a planet saves for (it never fits
+     * between the mines): its next level, or first the mine or storage its
+     * price needs; null if the silo is not due.
+     *
+     * @param array<int, int>          $levels
+     * @param array<string, float|int> $planet
+     */
+    public function nextSiloStep(array $levels, array $planet): ?int
+    {
+        $silo = Buildings::BUILDING_MISSILE_SILO;
+
+        return $this->wantsSilo($levels)
+            ? $this->producerFor($silo, $levels, $planet) ?? $this->storageFor($silo, $levels, $planet) ?? $silo
+            : null;
+    }
+
+    /**
+     * Whether the planet is ready for its missile silo, up to the level that
+     * launches interplanetary missiles: once impulse drive allows them and
+     * the metal mine is far enough (see BotMissiles).
+     *
+     * @param array<int, int> $levels
+     */
+    public function wantsSilo(array $levels): bool
+    {
+        return ($levels[Research::RESEARCH_IMPULSE_DRIVE] ?? 0) >= 1 &&
+            ($levels[Buildings::BUILDING_METAL_MINE] ?? 0) >= self::SILO_FROM_METAL &&
+            ($levels[Buildings::BUILDING_MISSILE_SILO] ?? 0) < self::SILO_LEVEL &&
+            $this->developments->isDevelopmentAllowed(Buildings::BUILDING_MISSILE_SILO, $levels);
     }
 
     /**
