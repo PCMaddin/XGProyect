@@ -42,6 +42,7 @@
                                     <th>{{ __('admin/premium.pr_orders_package') }}</th>
                                     <th class="text-right">{{ __('admin/premium.pr_orders_dark_matter') }}</th>
                                     <th class="text-right">{{ __('admin/premium.pr_orders_amount') }}</th>
+                                    <th>{{ __('admin/premium.pr_orders_provider') }}</th>
                                     <th>{{ __('admin/premium.pr_orders_status') }}</th>
                                     <th>{{ __('admin/premium.pr_orders_time') }}</th>
                                     <th>{{ __('admin/premium.pr_orders_paid') }}</th>
@@ -69,9 +70,54 @@
                                         <td><code>{{ $order['package'] }}</code></td>
                                         <td class="text-right">{{ number_format($order['dark_matter'], 0, '', '.') }}</td>
                                         <td class="text-right">{{ $order['amount'] }}</td>
+                                        <td>
+                                            {{ __('admin/premium.pr_payment_method_' . $order['provider']) }}
+                                            @if ($order['provider_amount'] !== '')
+                                                <br><small>{{ $order['provider_amount'] }} · <code>{{ $order['memo'] }}</code></small>
+                                            @endif
+                                        </td>
                                         <td><span class="badge {{ $badge }}">{{ __('admin/premium.pr_status_' . $order['status']) }}</span></td>
                                         <td>{{ $order['created_at'] }}</td>
                                         <td>{{ $order['paid_at'] }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </x-admin.card>
+
+            <x-admin.card
+                :title="__('admin/premium.pr_wax_transfers')"
+                icon="fas fa-coins"
+                :badge="count($transfers)"
+                :flush="true"
+            >
+                @if ($transfers === [])
+                    <x-admin.empty-state icon="fas fa-coins" :message="__('admin/premium.pr_wax_transfers_none')" />
+                @else
+                    <p class="px-3 pt-3 small text-muted">{{ __('admin/premium.pr_wax_transfers_help') }}</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0" id="wax-transfers">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>{{ __('admin/premium.pr_orders_time') }}</th>
+                                    <th>{{ __('admin/premium.pr_wax_from') }}</th>
+                                    <th class="text-right">{{ __('admin/premium.pr_orders_amount') }}</th>
+                                    <th>{{ __('admin/premium.pr_wax_memo') }}</th>
+                                    <th>#</th>
+                                    <th>{{ __('admin/premium.pr_orders_status') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($transfers as $transfer)
+                                    <tr>
+                                        <td title="{{ $transfer['trx_id'] }}">{{ $transfer['time'] }}</td>
+                                        <td><code>{{ $transfer['from'] }}</code></td>
+                                        <td class="text-right">{{ $transfer['amount'] }}</td>
+                                        <td><code>{{ $transfer['memo'] }}</code></td>
+                                        <td>{{ $transfer['order_id'] }}</td>
+                                        <td><span class="badge {{ $transfer['result'] === 'credited' ? 'badge-success' : 'badge-warning' }}">{{ __('admin/premium.pr_wax_result_' . $transfer['result']) }}</span></td>
                                     </tr>
                                 @endforeach
                             </tbody>

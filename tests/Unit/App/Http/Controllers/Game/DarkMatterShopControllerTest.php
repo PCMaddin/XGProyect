@@ -59,15 +59,14 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $this->assertSame(799, $shop->package('dm_50k')?->price);
     }
 
-    public function testPlay2WinHasNoShopAndNoButtonInAUniverse(): void
+    public function testPlay2WinHasNoShopAndNoButton(): void
     {
         $this->mode('play2win');
         app(SettingsService::class)->write('premium_url', 'https://shop.example.org/dm');
 
         $shop = app(DarkMatterShop::class);
         $this->assertFalse($shop->isOpen());
-        // a server without universes keeps the link it had
-        $this->assertSame('https://shop.example.org/dm', $shop->buyUrl());
+        $this->assertSame('', $shop->buyUrl());
 
         $this->inUniverse('andromeda');
         $this->assertSame('', app(DarkMatterShop::class)->buyUrl());
@@ -126,7 +125,9 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $packages = $view->getData()['packages'];
         $this->assertIsArray($packages);
         $this->assertCount(4, $packages);
-        $this->assertSame(['id' => 'dm_10k', 'dark_matter' => '10.000', 'price' => '1.99 €'], $packages[0]);
+        // WAX is not offered here: no price in WAX
+        $this->assertSame(['id' => 'dm_10k', 'dark_matter' => '10.000', 'price' => '1.99 €', 'wax' => ''], $packages[0]);
+        $this->assertSame(['stripe'], $view->getData()['methods']);
     }
 
     public function testAClosedShopRefusesEveryRequest(): void
@@ -256,6 +257,111 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $this->assertSame('10.000 dark matter have been credited to your account.', $view->getData()['status_text']);
 
         $this->assertRefused(Request::create('/game.php?page=darkmatter&order=' . $foreign->id), 'game/darkmatter.dm_order_not_found');
+    }
+
+    public function testTheUniverseChoosesTheWaysToPay(): void
+    {
+        $settings = app(SettingsService::class);
+
+        $settings->write('payment_methods', 'wax');
+        $this->assertSame(['wax'], app(DarkMatterShop::class)->allowedMethods());
+        // no WAX account on the server: no way to pay, no shop
+        $this->assertSame([], app(DarkMatterShop::class)->methods());
+        $this->assertFalse(app(DarkMatterShop::class)->isOpen());
+
+        config(['premium.wax.account' => 'xgpshop']);
+        $this->assertSame(['wax'], app(DarkMatterShop::class)->methods());
+        $this->assertTrue(app(DarkMatterShop::class)->isOpen());
+
+        $settings->write('payment_methods', 'wax, stripe, paypal');
+        $this->assertSame(['stripe', 'wax'], app(DarkMatterShop::class)->methods());
+
+        $settings->write('payment_methods', '');
+        $settings->write('premium_url', 'https://shop.example.org/dm');
+        $this->assertFalse(app(DarkMatterShop::class)->isOpen());
+        $this->assertSame('https://shop.example.org/dm', app(DarkMatterShop::class)->buyUrl());
+    }
+
+    public function testAWayToPayTheUniverseDoesNotOfferIsRefused(): void
+    {
+        config(['premium.wax.account' => 'xgpshop']);
+        Http::fake();
+
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_unknown_method');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'paypal']), 'game/darkmatter.dm_unknown_method');
+
+        Http::assertNothingSent();
+        $this->assertSame(0, DarkMatterOrder::count());
+    }
+
+    public function testBuyingWithWaxQuotesThePriceAndShowsWhatToTransfer(): void
+    {
+        $this->waxShop();
+        Http::fake(['rates.example.org/*' => Http::response(['wax' => ['eur' => 0.004]])]);
+
+        $view = $this->page(Request::create('/game.php?page=darkmatter'));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $view);
+        $this->assertSame(['stripe', 'wax'], $view->getData()['methods']);
+        $this->assertSame('1997.50 WAX', $view->getData()['packages'][1]['wax']);
+
+        $response = $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'method' => 'wax', 'price' => '1']));
+
+        $order = DarkMatterOrder::sole();
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertStringEndsWith('game.php?page=darkmatter&order=' . $order->id, $response->getTargetUrl());
+        $this->assertSame(
+            ['wax', 799, 'eur', 199_750_000_000, 'WAX', 'xgp:andromeda:' . $order->id, DarkMatterOrder::PENDING],
+            [$order->provider, $order->amount, $order->currency, $order->provider_amount, $order->provider_currency, $order->provider_session, $order->status]
+        );
+        $this->assertEqualsWithDelta(time() + 1800, $order->expires_at, 5);
+
+        $page = $this->page(Request::create('/game.php?page=darkmatter&order=' . $order->id));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $page);
+        $wax = $page->getData()['wax'];
+        $this->assertIsArray($wax);
+        $this->assertSame(['xgpshop', '1997.50 WAX', '1997.50000000 WAX', 'xgp:andromeda:' . $order->id], [$wax['account'], $wax['amount'], $wax['quantity'], $wax['memo']]);
+        $this->assertSame('pending', $page->getData()['status']);
+        $this->assertTrue($page->getData()['refresh']);
+        $this->assertSame(__('game/darkmatter.dm_status_wax_pending'), $page->getData()['status_text']);
+        // the rate was read once
+        Http::assertSentCount(1);
+    }
+
+    public function testAWaxQuoteThatRanOutIsShownExpired(): void
+    {
+        $this->waxShop();
+        $order = $this->order(DarkMatterOrder::PENDING, self::PLAYER);
+        DB::table('dark_matter_orders')->where('id', $order->id)->update([
+            'provider' => 'wax', 'provider_amount' => 100, 'provider_session' => 'xgp:andromeda:' . $order->id, 'expires_at' => time() - 1,
+        ]);
+
+        $page = $this->page(Request::create('/game.php?page=darkmatter&order=' . $order->id));
+
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $page);
+        $this->assertSame(['expired', null, false], [$page->getData()['status'], $page->getData()['wax'], $page->getData()['refresh']]);
+        $this->assertSame(__('game/darkmatter.dm_status_wax_expired'), $page->getData()['status_text']);
+        // the transfer may still come: the order stays open for xgp:wax:check
+        $this->assertSame(DarkMatterOrder::PENDING, $order->fresh()?->status);
+    }
+
+    public function testWithoutAWaxRateNothingIsOrdered(): void
+    {
+        $this->waxShop();
+        Http::fake(['rates.example.org/*' => Http::response('Too Many Requests', 429)]);
+
+        $view = $this->page(Request::create('/game.php?page=darkmatter'));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $view);
+        $this->assertSame('', $view->getData()['packages'][0]['wax']);
+
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_wax_rate_failed');
+        $this->assertSame(DarkMatterOrder::FAILED, DarkMatterOrder::sole()->status);
+    }
+
+    private function waxShop(): void
+    {
+        config(['premium.wax.account' => 'xgpshop', 'premium.wax.rate_url' => 'https://rates.example.org/price?vs=:currency', 'premium.wax.markup' => 0, 'cache.default' => 'array']);
+        app(SettingsService::class)->write('payment_methods', 'stripe,wax');
+        $this->inUniverse('andromeda');
     }
 
     private function page(Request $request): Response | \Illuminate\Contracts\View\View

@@ -14,4 +14,7 @@ return [
     'lb_play' => 'Spelen',
     'lb_closed' => 'Beëindigd',
     'lb_switch' => 'Universum wisselen',
+    'lb_payments' => 'Betaling: :methods',
+    'lb_payment_stripe' => 'kaart',
+    'lb_payment_wax' => 'WAX',
 ];

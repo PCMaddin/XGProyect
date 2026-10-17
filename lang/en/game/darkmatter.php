@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Buy dark matter',
-    'dm_intro' => 'Dark matter is paid securely through Stripe. It is credited to your account as soon as Stripe confirms the payment, usually within seconds.',
+    'dm_intro_stripe' => 'Dark matter is paid securely through Stripe. It is credited to your account as soon as Stripe confirms the payment, usually within seconds.',
+    'dm_intro_wax' => 'Or with WAX: transfer the amount shown, with the memo of the order, to the shop\'s account. The dark matter is credited once the transfer is final, usually within a few minutes.',
     'dm_price' => 'Price',
-    'dm_buy' => 'Buy',
+    'dm_buy_stripe' => 'Pay by card',
+    'dm_buy_wax' => 'Pay with WAX',
     'dm_back' => 'Back to the officers',
     'dm_package_name' => ':amount dark matter',
     'dm_decimal_mark' => '.',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'The payment was refunded.',
     'dm_cancelled' => 'You cancelled the payment. Nothing was charged.',
     'dm_reload' => 'Reload',
+    'dm_unknown_method' => 'This way to pay is not offered here.',
+    'dm_wax_rate_failed' => 'The WAX rate cannot be read right now. Nothing was ordered, please try again later.',
+    'dm_wax_about' => 'about :amount',
+    'dm_wax_howto' => 'Transfer exactly this amount with this memo by :until, for example with WAX Cloud Wallet or Anchor:',
+    'dm_wax_account' => 'To account',
+    'dm_wax_amount' => 'Amount',
+    'dm_wax_memo' => 'Memo',
+    'dm_wax_memo_warning' => 'Without this memo, or after the deadline, nothing is credited automatically. The admin will help then.',
+    'dm_status_wax_pending' => 'Waiting for your WAX transfer ...',
+    'dm_status_wax_expired' => 'The offer has expired. Please order again; the admin checks a transfer already sent.',
 ];

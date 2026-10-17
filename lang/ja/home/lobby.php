@@ -14,4 +14,7 @@ return [
     'lb_play' => 'プレイ',
     'lb_closed' => '終了',
     'lb_switch' => 'ユニバースを変更',
+    'lb_payments' => '支払い：:methods',
+    'lb_payment_stripe' => 'カード',
+    'lb_payment_wax' => 'WAX',
 ];

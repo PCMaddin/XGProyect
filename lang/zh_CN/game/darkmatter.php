@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => '购买暗物质',
-    'dm_intro' => '暗物质通过 Stripe 安全支付。Stripe 确认付款后（通常在几秒内）即会存入您的账户。',
+    'dm_intro_stripe' => '暗物质通过 Stripe 安全支付。Stripe 确认付款后（通常在几秒内）即会存入您的账户。',
+    'dm_intro_wax' => '也可以用 WAX 支付：将显示的金额连同订单备注转账到商店账户。转账确认后（通常几分钟内）暗物质即会存入。',
     'dm_price' => '价格',
-    'dm_buy' => '购买',
+    'dm_buy_stripe' => '银行卡支付',
+    'dm_buy_wax' => '用 WAX 支付',
     'dm_back' => '返回军官',
     'dm_package_name' => '暗物质 :amount',
     'dm_decimal_mark' => '.',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => '付款已退款。',
     'dm_cancelled' => '您已取消付款。未产生任何扣款。',
     'dm_reload' => '刷新',
+    'dm_unknown_method' => '此处不提供这种支付方式。',
+    'dm_wax_rate_failed' => '目前无法获取 WAX 汇率。未创建订单，请稍后再试。',
+    'dm_wax_about' => '约 :amount',
+    'dm_wax_howto' => '请在 :until 前，用此备注准确转账此金额（例如使用 WAX Cloud Wallet 或 Anchor）：',
+    'dm_wax_account' => '收款账户',
+    'dm_wax_amount' => '金额',
+    'dm_wax_memo' => '备注',
+    'dm_wax_memo_warning' => '缺少此备注或超过期限的转账不会自动入账，届时请联系管理员。',
+    'dm_status_wax_pending' => '正在等待您的 WAX 转账 ...',
+    'dm_status_wax_expired' => '报价已过期。请重新下单；已发送的转账将由管理员核查。',
 ];

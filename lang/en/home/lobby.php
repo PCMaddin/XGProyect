@@ -14,4 +14,7 @@ return [
     'lb_play' => 'Play',
     'lb_closed' => 'Ended',
     'lb_switch' => 'Change universe',
+    'lb_payments' => 'Payment: :methods',
+    'lb_payment_stripe' => 'card',
+    'lb_payment_wax' => 'WAX',
 ];

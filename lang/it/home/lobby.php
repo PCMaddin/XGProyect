@@ -14,4 +14,7 @@ return [
     'lb_play' => 'Gioca',
     'lb_closed' => 'Terminato',
     'lb_switch' => 'Cambia universo',
+    'lb_payments' => 'Pagamento: :methods',
+    'lb_payment_stripe' => 'carta',
+    'lb_payment_wax' => 'WAX',
 ];

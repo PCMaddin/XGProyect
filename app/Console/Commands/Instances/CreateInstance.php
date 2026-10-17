@@ -20,6 +20,7 @@ class CreateInstance extends Command
         {slug : short name, in the lobby cookie and the database name (a-z, 0-9, -)}
         {--name= : name shown in the lobby, default: the slug}
         {--mode=play2win : pay2win (dark matter for money) or play2win (no purchase)}
+        {--payments=stripe : ways to pay in pay2win: stripe, wax or stripe,wax}
         {--database= : database of the universe, default: xgp_uni_<slug>}
         {--admin-name= : administrator of the universe}
         {--admin-email=}
@@ -43,12 +44,13 @@ class CreateInstance extends Command
 
         try {
             $provisioner->validate($instance);
+            $options = ['payment_methods' => $provisioner->paymentMethods($this->text('payments'))] + $this->universeOptions();
             $provisioner->create(
                 $instance,
                 $this->text('admin-name') ?: self::str($this->ask('Administrator name')),
                 $this->text('admin-email') ?: self::str($this->ask('Administrator e-mail')),
                 $this->text('admin-password') ?: self::str($this->secret('Administrator password')),
-                $this->universeOptions(),
+                $options,
             );
         } catch (Throwable $e) {
             $this->error($e->getMessage());

@@ -1274,9 +1274,8 @@ Baseline-Einträge.
   - Regel für den Button „Dunkle Materie erhalten“ (`DarkMatterShop`):
     Pay2Win **und** beide Stripe-Schlüssel gesetzt → Button zum eigenen
     Shop (`game.php?page=darkmatter`). Pay2Win ohne Stripe → wie bisher
-    `premium_url`, falls eingetragen. Play2Win → kein Shop, kein Button;
-    nur ein Server ohne Universen (kein `InstanceContext`) behält eine
-    eingetragene `premium_url` wie bisher. Ist der Shop zu, antworten
+    `premium_url`, falls eingetragen. Play2Win → kein Shop, kein Button
+    (ohne Ausnahme, seit es die Zahlungsarten je Universum gibt). Ist der Shop zu, antworten
     Shop-Seite und Kauf-POST mit einer Meldung und zurück zur Premium-Seite.
   - Pakete in `config/premium.php` (Standard: 10.000 DM 1,99 €, 50.000
     7,99 €, 120.000 16,99 €, 300.000 34,99 €; Preise in Cent, Währung
@@ -1359,6 +1358,69 @@ Baseline-Einträge.
     `spieler3`): ohne `STRIPE_SECRET` kein Button und die Shop-Seite lehnt
     ab; mit Test-Schlüsseln Button und Paketliste (1,99 € … 34,99 €);
     Webhook mit falscher Signatur → 400 ohne Session-Cookie.
+- ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
+  legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
+  (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer
+  Zahlungsart, die das Universum erlaubt **und** der Server eingerichtet
+  hat (Stripe-Schlüssel bzw. `XGP_WAX_ACCOUNT`). Play2Win zeigt nie einen
+  Kauf-Button.
+  - *Festlegen:* `xgp:instance:create --payments=stripe,wax`,
+    `xgp:instance:update --payments=wax|none`, `XGP_MONTHLY_PAYMENTS` für
+    den Monatsstart, im Admin unter Premium als Häkchen (mit Hinweis, was
+    in der `.env` fehlt). Die Lobby zeigt bei Pay2Win die Zahlungsarten.
+  - *Preis:* Die Pakete bleiben in Euro; der WAX-Preis wird zum aktuellen
+    Kurs umgerechnet (CoinGecko, 5 Minuten gecacht, optional
+    `XGP_WAX_MARKUP` Prozent Aufschlag) und auf 0,01 WAX aufgerundet.
+    Das Angebot gilt 30 Minuten.
+  - *Kauf:* Der Spieler wählt „Mit WAX zahlen“ und sieht Konto, genauen
+    Betrag und Memo (`xgp:<universum>:<bestellung>`, ohne Universen
+    `xgp:<bestellung>`), zum Beispiel für WAX Cloud Wallet oder Anchor. Die
+    Seite lädt sich alle 30 Sekunden neu, bis gutgeschrieben ist. Ist der
+    Kurs nicht abrufbar, wird nichts bestellt.
+  - *Gutschrift:* `xgp:wax:check` läuft per Scheduler jede Minute. Er liest
+    die Überweisungen an das Shop-Konto von einem Hyperion-Server
+    (Standard `wax.eosusa.io`, `XGP_WAX_API`) und verbucht jede genau
+    einmal, aber erst wenn ihr Block unumkehrbar ist.
+    - Es zählt nur echtes WAX (`eosio.token`, 8 Nachkommastellen). Ein
+      Fremd-Token, das sich „WAX“ nennt, zählt nicht.
+    - Das Universum aus dem Memo wird aktiviert, dort wird die Bestellung
+      gutgeschrieben.
+    - Ergebnisse: gutgeschrieben, zu spät, zu wenig, Bestellung nicht
+      offen (z. B. doppelt bezahlt), unbekanntes Memo, Spieler gelöscht.
+      Alles außer der Gutschrift entscheidet der Admin: von Hand
+      gutschreiben oder zurücksenden.
+    - Die Überweisungen stehen in `wax_transfers` in der Basisdatenbank
+      (zentrale Migration) und erscheinen in der Admin-Bestellliste. Der
+      nächste Lauf macht dort weiter, wo der letzte aufgehört hat.
+  - *Schema:* Migration `000035` (install und 400) ergänzt
+    `dark_matter_orders` um `provider_amount`, `provider_currency` und
+    `expires_at`. Migration `000036` legt die Option `payment_methods`
+    (Standard `stripe`) an.
+  - *Tests:*
+    - `WaxChainTest`: Lesen, Fremd-Token, exakte Beträge, Anfrage an
+      Hyperion, Fehler.
+    - `WaxRatesTest`: Umrechnung, Aufrunden, Aufschlag, Cache, fehlender
+      Kurs.
+    - `WaxPaymentsTest`:
+      - einmalige Gutschrift;
+      - Warten auf den unumkehrbaren Block;
+      - alle Ergebnisarten einschließlich ausgehender Überweisungen und
+        Fremd-Token;
+      - Fortsetzen und Seitenweise lesen.
+    - Shop-Tests für Zahlungsarten, WAX-Kauf, Ablauf und fehlenden Kurs.
+    - Admin-Tests für Häkchen und die Überweisungsliste.
+    - `WaxPaymentsUniverseMysqlTest`: Gutschrift nur im Universum des
+      Memos.
+    - Befehle: `--payments`, Prüfung und `none`.
+    - Lobby: Anzeige der Zahlungsarten.
+    - Mutationsproben: ohne die Prüfung des Token-Vertrags bzw. des
+      Empfängers schlagen die Tests fehl.
+  - *Live geprüft:*
+    - Shop und Bestellseite mit echtem Kurs (1,99 € ≈ 471,92 WAX).
+    - `xgp:wax:check` gegen die echte Kette (ein aktives Fremdkonto):
+      340 bzw. 418 Überweisungen gelesen, alle korrekt als unbekannt
+      verbucht; der zweite Lauf setzte nahtlos fort.
+    - Crawl aller Seiten ohne neue Treffer.
 
 ## Smoke-Test gegen eine echte Datenbank
 

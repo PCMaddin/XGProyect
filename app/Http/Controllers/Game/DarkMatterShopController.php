@@ -9,12 +9,17 @@ use App\Libraries\Functions;
 use App\Models\DarkMatterOrder;
 use App\Models\User;
 use App\Services\FormatService;
+use App\Services\TimingService;
 use App\Services\Instances\InstanceContext;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\DarkMatterPackage;
 use App\Services\Premium\DarkMatterShop;
 use App\Services\Premium\StripeCheckout;
 use App\Services\Premium\StripeException;
+use App\Services\Premium\WaxChain;
+use App\Services\Premium\WaxException;
+use App\Services\Premium\WaxPayments;
+use App\Services\Premium\WaxRates;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,10 +28,13 @@ use LogicException;
 
 /**
  * game.php?page=darkmatter: the dark matter shop of a Pay2Win universe.
- * Lists the packages; a POST of one opens an order and sends the player to
- * Stripe Checkout; Stripe sends them back to the order's page, which shows
- * whether the payment has arrived (the webhook credits it). Closed (Play2Win
- * or no Stripe keys): a message and back to the premium page.
+ * Lists the packages with the ways to pay the universe offers. Stripe: a
+ * POST opens an order and sends the player to Stripe Checkout, which sends
+ * them back to the order's page; the webhook credits the payment. WAX: a
+ * POST opens an order with the price converted at the current rate and
+ * shows what to transfer to which account with which memo; xgp:wax:check
+ * credits the transfer. Closed (Play2Win or no way to pay): a message and
+ * back to the premium page.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -41,8 +49,10 @@ class DarkMatterShopController extends BaseController
         private DarkMatterShop $shop,
         private DarkMatterOrders $orders,
         private StripeCheckout $checkout,
+        private WaxRates $rates,
         private InstanceContext $context,
         private FormatService $format,
+        private TimingService $timing,
     ) {
     }
 
@@ -65,11 +75,15 @@ class DarkMatterShopController extends BaseController
             return $this->order($request, $userId);
         }
 
+        $methods = $this->shop->methods();
+
         return view('premium.shop', [
+            'methods' => $methods,
             'packages' => array_values(array_map(fn (DarkMatterPackage $package): array => [
                 'id' => $package->id,
                 'dark_matter' => $this->format->prettyNumber($package->darkMatter),
                 'price' => $this->shop->formatPrice($package->price, $this->shop->currency()),
+                'wax' => in_array(DarkMatterShop::WAX, $methods, true) ? $this->waxPrice($package->price) : '',
             ], $this->shop->packages())),
         ]);
     }
@@ -79,15 +93,24 @@ class DarkMatterShopController extends BaseController
         $id = $request->input('package');
         // only packages of the configuration: the price is never the player's
         $package = $this->shop->package(is_string($id) ? $id : '');
+        $method = $request->input('method', DarkMatterShop::STRIPE);
 
         if ($package === null || $userId <= 0) {
             $this->message('dm_unknown_package', DarkMatterShop::PAGE);
+        }
+
+        if (!in_array($method, $this->shop->methods(), true)) {
+            $this->message('dm_unknown_method', DarkMatterShop::PAGE);
         }
 
         $now = time();
 
         if ($this->orders->pendingSince($userId, $now - self::OPEN_ORDERS_WINDOW) >= self::OPEN_ORDERS_LIMIT) {
             $this->message('dm_too_many_orders', DarkMatterShop::PAGE);
+        }
+
+        if ($method === DarkMatterShop::WAX) {
+            return $this->buyWithWax($userId, $package, $now);
         }
 
         $order = $this->orders->open($userId, $package, $this->shop->currency(), $now);
@@ -111,6 +134,47 @@ class DarkMatterShopController extends BaseController
         return redirect()->away($session['url'], 303);
     }
 
+    /**
+     * Opens a WAX order at the current rate and shows what to transfer.
+     */
+    private function buyWithWax(int $userId, DarkMatterPackage $package, int $now): RedirectResponse
+    {
+        $order = $this->orders->open($userId, $package, $this->shop->currency(), $now, DarkMatterShop::WAX);
+
+        try {
+            $units = $this->rates->units($package->price, $order->currency);
+        } catch (WaxException $e) {
+            report($e);
+            $this->orders->fail($order);
+            $this->message('dm_wax_rate_failed', DarkMatterShop::PAGE);
+        }
+
+        $minutes = config('premium.wax.quote_minutes');
+        $memo = WaxPayments::memo($this->context->current()->slug ?? '', $order->id);
+        $this->orders->quoteWax($order, $units, $memo, $now + (is_int($minutes) ? $minutes : 30) * 60);
+
+        return redirect('game.php?page=darkmatter&order=' . $order->id);
+    }
+
+    /**
+     * About what a price comes to in WAX; empty if the rate cannot be read.
+     */
+    private function waxPrice(int $cents): string
+    {
+        try {
+            return WaxRates::format($this->rates->units($cents, $this->shop->currency()), $this->decimalMark());
+        } catch (WaxException) {
+            return '';
+        }
+    }
+
+    private function decimalMark(): string
+    {
+        $mark = __('game/darkmatter.dm_decimal_mark');
+
+        return is_string($mark) ? $mark : '.';
+    }
+
     private function order(Request $request, int $userId): View
     {
         $order = $this->orders->findForUser($request->integer('order'), $userId);
@@ -120,16 +184,27 @@ class DarkMatterShopController extends BaseController
         }
 
         $cancelled = $request->query('cancelled') !== null;
+        $wax = $order->provider === DarkMatterShop::WAX;
+        // a WAX quote that ran out: a transfer now is left to the admin
+        $status = $wax && $order->status === DarkMatterOrder::PENDING && time() > ($order->expires_at ?? 0) ? DarkMatterOrder::EXPIRED : $order->status;
+        $text = $wax && in_array($status, [DarkMatterOrder::PENDING, DarkMatterOrder::EXPIRED], true) ? 'dm_status_wax_' . $status : 'dm_status_' . $status;
 
         return view('premium.order', [
             'order_id' => $order->id,
             'dark_matter' => $this->format->prettyNumber($order->dark_matter),
             'price' => $this->shop->formatPrice($order->amount, $order->currency),
-            'status' => $order->status,
-            'status_text' => (string) __('game/darkmatter.dm_status_' . $order->status, ['amount' => $this->format->prettyNumber($order->dark_matter)]),
-            'cancelled' => $cancelled && $order->status === DarkMatterOrder::PENDING,
-            // waiting for the webhook: look again in a moment
-            'refresh' => !$cancelled && $order->status === DarkMatterOrder::PENDING,
+            'status' => $status,
+            'status_text' => (string) __('game/darkmatter.' . $text, ['amount' => $this->format->prettyNumber($order->dark_matter)]),
+            'cancelled' => $cancelled && $status === DarkMatterOrder::PENDING,
+            // waiting for the webhook or the transfer: look again in a moment
+            'refresh' => !$cancelled && $status === DarkMatterOrder::PENDING,
+            'wax' => $wax && $status === DarkMatterOrder::PENDING ? [
+                'account' => $this->shop->waxAccount(),
+                'amount' => WaxRates::format($order->provider_amount ?? 0, '.'),
+                'quantity' => number_format(($order->provider_amount ?? 0) / WaxChain::UNITS, 8, '.', '') . ' ' . WaxChain::SYMBOL,
+                'memo' => $order->provider_session ?? '',
+                'until' => $this->timing->formatExtendedDate($order->expires_at ?? 0),
+            ] : null,
         ]);
     }
 

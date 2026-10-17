@@ -23,6 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $created_at
  * @property int|null $paid_at
  * @property int|null $refunded_at
+ * @property int|null $provider_amount what to transfer in the provider's smallest unit (WAX: 1e-8)
+ * @property string|null $provider_currency
+ * @property int|null $expires_at until when a WAX quote holds
  */
 class DarkMatterOrder extends Model
 {
@@ -60,6 +63,9 @@ class DarkMatterOrder extends Model
         'created_at',
         'paid_at',
         'refunded_at',
+        'provider_amount',
+        'provider_currency',
+        'expires_at',
     ];
 
     /**
@@ -73,6 +79,8 @@ class DarkMatterOrder extends Model
         'created_at' => 'int',
         'paid_at' => 'int',
         'refunded_at' => 'int',
+        'provider_amount' => 'int',
+        'expires_at' => 'int',
     ];
 
     /** @return BelongsTo<User, $this> */

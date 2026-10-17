@@ -10,7 +10,9 @@
             <img src="{{ asset('assets/upload/skins/xgproyect/premium/DMaterie.jpg') }}" width="120" height="120" alt=""/>
         </td>
         <td class="l" colspan="3">
-            {{ __('game/darkmatter.dm_intro') }}
+            @foreach ($methods as $method)
+                <p>{{ __('game/darkmatter.dm_intro_' . $method) }}</p>
+            @endforeach
         </td>
     </tr>
     <tr>
@@ -29,13 +31,19 @@
         </th>
         <th>
             <strong style="color:lime;">{{ $package['price'] }}</strong>
+            @if ($package['wax'] !== '')
+                <br/><small>{{ __('game/darkmatter.dm_wax_about', ['amount' => $package['wax']]) }}</small>
+            @endif
         </th>
         <th>
-            <form action="game.php?page=darkmatter" method="post">
+            @foreach ($methods as $method)
+            <form action="game.php?page=darkmatter" method="post" style="margin:2px 0;">
                 @csrf
                 <input type="hidden" name="package" value="{{ $package['id'] }}"/>
-                <input type="submit" value="{{ __('game/darkmatter.dm_buy') }}"/>
+                <input type="hidden" name="method" value="{{ $method }}"/>
+                <input type="submit" value="{{ __('game/darkmatter.dm_buy_' . $method) }}"/>
             </form>
+            @endforeach
         </th>
     </tr>
     @endforeach

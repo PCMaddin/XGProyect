@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Kup ciemną materię',
-    'dm_intro' => 'Ciemna materia jest opłacana bezpiecznie przez Stripe. Zostanie dopisana do konta, gdy tylko Stripe potwierdzi płatność, zwykle w ciągu kilku sekund.',
+    'dm_intro_stripe' => 'Ciemna materia jest opłacana bezpiecznie przez Stripe. Zostanie dopisana do konta, gdy tylko Stripe potwierdzi płatność, zwykle w ciągu kilku sekund.',
+    'dm_intro_wax' => 'Albo w WAX: przelej podaną kwotę z memo zamówienia na konto sklepu. Ciemna materia zostanie dopisana, gdy przelew będzie ostateczny, zwykle w ciągu kilku minut.',
     'dm_price' => 'Cena',
-    'dm_buy' => 'Kup',
+    'dm_buy_stripe' => 'Zapłać kartą',
+    'dm_buy_wax' => 'Zapłać w WAX',
     'dm_back' => 'Powrót do oficerów',
     'dm_package_name' => ':amount ciemnej materii',
     'dm_decimal_mark' => ',',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'Płatność została zwrócona.',
     'dm_cancelled' => 'Płatność została anulowana. Nic nie zostało pobrane.',
     'dm_reload' => 'Odśwież',
+    'dm_unknown_method' => 'Ta forma płatności nie jest tu dostępna.',
+    'dm_wax_rate_failed' => 'Kurs WAX jest teraz niedostępny. Nic nie zamówiono, spróbuj ponownie później.',
+    'dm_wax_about' => 'ok. :amount',
+    'dm_wax_howto' => 'Przelej dokładnie tę kwotę z tym memo do :until, na przykład przez WAX Cloud Wallet lub Anchor:',
+    'dm_wax_account' => 'Na konto',
+    'dm_wax_amount' => 'Kwota',
+    'dm_wax_memo' => 'Memo',
+    'dm_wax_memo_warning' => 'Bez tego memo lub po terminie nic nie zostanie dopisane automatycznie. Wtedy pomoże admin.',
+    'dm_status_wax_pending' => 'Czekam na twój przelew WAX ...',
+    'dm_status_wax_expired' => 'Oferta wygasła. Złóż nowe zamówienie; admin sprawdzi już wysłany przelew.',
 ];

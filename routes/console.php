@@ -27,3 +27,9 @@ Schedule::command('xgp:instance:monthly')
     ->monthlyOn(1, '00:05')
     ->when(static fn (): bool => (bool) config('instances.monthly.enabled'))
     ->withoutOverlapping();
+
+// dark matter paid in WAX, see config/premium.php
+Schedule::command('xgp:wax:check')
+    ->everyMinute()
+    ->when(static fn (): bool => (string) config('premium.wax.account') !== '')
+    ->withoutOverlapping();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Instances;
 
+use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\Console\Kernel as Artisan;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -122,10 +123,12 @@ class InstanceProvisioner
     /**
      * Changes name, mode or status; the mode is an option of the universe too.
      *
-     * @param array{name?: string, mode?: string, status?: string} $changes
+     * @param array{name?: string, mode?: string, status?: string, payments?: string} $changes
      */
     public function change(Instance $instance, array $changes): Instance
     {
+        $payments = isset($changes['payments']) ? $this->paymentMethods($changes['payments']) : null;
+
         $changed = new Instance(
             $instance->slug,
             $changes['name'] ?? $instance->name,
@@ -136,8 +139,10 @@ class InstanceProvisioner
         );
         $this->validate($changed);
 
-        if ($changed->mode !== $instance->mode) {
-            $this->context->runIn($changed, fn () => $this->writeOptions(['premium_mode' => $changed->mode]));
+        $options = array_filter(['premium_mode' => $changed->mode !== $instance->mode ? $changed->mode : null, 'payment_methods' => $payments], static fn (?string $value): bool => $value !== null);
+
+        if ($options !== []) {
+            $this->context->runIn($changed, fn () => $this->writeOptions($options));
         }
 
         $this->registry->update($instance->slug, ['name' => $changed->name, 'mode' => $changed->mode, 'status' => $changed->status]);
@@ -151,6 +156,24 @@ class InstanceProvisioner
     public function migrate(Instance $instance): string
     {
         return $this->context->runIn($instance, fn (): string => $this->run('migrate', ['--path' => 'database/migrations/400', '--force' => true]));
+    }
+
+    /**
+     * The ways to pay of a universe, checked: "stripe", "wax", "stripe,wax"
+     * or "" (none).
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
+    public function paymentMethods(string $list): string
+    {
+        $named = array_filter(array_map('trim', explode(',', strtolower($list))), static fn (string $method): bool => $method !== '');
+        $known = DarkMatterShop::parseMethods($list);
+
+        if (count($known) !== count(array_unique($named))) {
+            throw new InvalidArgumentException('The ways to pay are ' . implode(', ', DarkMatterShop::METHODS) . '.');
+        }
+
+        return implode(',', $known);
     }
 
     public function validate(Instance $instance): void

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Comprar materia oscura',
-    'dm_intro' => 'La materia oscura se paga de forma segura con Stripe. Se abona en tu cuenta en cuanto Stripe confirma el pago, normalmente en segundos.',
+    'dm_intro_stripe' => 'La materia oscura se paga de forma segura con Stripe. Se abona en tu cuenta en cuanto Stripe confirma el pago, normalmente en segundos.',
+    'dm_intro_wax' => 'O con WAX: transfiere el importe indicado, con el memo del pedido, a la cuenta de la tienda. La materia oscura se abona cuando la transferencia es definitiva, normalmente en pocos minutos.',
     'dm_price' => 'Precio',
-    'dm_buy' => 'Comprar',
+    'dm_buy_stripe' => 'Pagar con tarjeta',
+    'dm_buy_wax' => 'Pagar con WAX',
     'dm_back' => 'Volver a los oficiales',
     'dm_package_name' => ':amount de materia oscura',
     'dm_decimal_mark' => ',',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'El pago ha sido reembolsado.',
     'dm_cancelled' => 'Has cancelado el pago. No se ha cobrado nada.',
     'dm_reload' => 'Recargar',
+    'dm_unknown_method' => 'Esta forma de pago no está disponible aquí.',
+    'dm_wax_rate_failed' => 'Ahora mismo no se puede consultar el cambio de WAX. No se ha pedido nada, inténtalo más tarde.',
+    'dm_wax_about' => 'aprox. :amount',
+    'dm_wax_howto' => 'Transfiere exactamente este importe con este memo antes de :until, por ejemplo con WAX Cloud Wallet o Anchor:',
+    'dm_wax_account' => 'A la cuenta',
+    'dm_wax_amount' => 'Importe',
+    'dm_wax_memo' => 'Memo',
+    'dm_wax_memo_warning' => 'Sin este memo, o pasado el plazo, no se abona automáticamente. En ese caso te ayuda el admin.',
+    'dm_status_wax_pending' => 'Esperando tu transferencia de WAX ...',
+    'dm_status_wax_expired' => 'La oferta ha caducado. Haz un pedido nuevo; el admin revisa una transferencia ya enviada.',
 ];

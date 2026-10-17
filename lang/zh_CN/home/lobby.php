@@ -14,4 +14,7 @@ return [
     'lb_play' => '进入',
     'lb_closed' => '已结束',
     'lb_switch' => '切换宇宙',
+    'lb_payments' => '支付：:methods',
+    'lb_payment_stripe' => '银行卡',
+    'lb_payment_wax' => 'WAX',
 ];

@@ -20,7 +20,8 @@ class UpdateInstance extends Command
         {slug}
         {--name=}
         {--mode= : pay2win or play2win}
-        {--status= : open or closed}';
+        {--status= : open or closed}
+        {--payments= : ways to pay in pay2win: stripe, wax, stripe,wax or none}';
 
     /** @var string */
     protected $description = 'Change the name, mode or status of a universe';
@@ -40,9 +41,14 @@ class UpdateInstance extends Command
             ['name' => $this->option('name'), 'mode' => $this->option('mode'), 'status' => $this->option('status')],
             static fn (mixed $value): bool => is_string($value) && $value !== ''
         );
+        $payments = $this->option('payments');
+
+        if (is_string($payments)) {
+            $changes['payments'] = $payments === 'none' ? '' : $payments;
+        }
 
         try {
-            /** @var array{name?: string, mode?: string, status?: string} $changes */
+            /** @var array{name?: string, mode?: string, status?: string, payments?: string} $changes */
             $changed = $provisioner->change($instance, $changes);
         } catch (Throwable $e) {
             $this->error($e->getMessage());

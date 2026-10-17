@@ -41,6 +41,9 @@
                         @endif
                     </div>
                     <div class="meta">{{ __('home/lobby.lb_mode_' . $universe['mode'] . '_explained') }}</div>
+                    @if ($universe['payments'] !== [])
+                        <div class="meta payments">{{ __('home/lobby.lb_payments', ['methods' => implode(', ', array_map(static fn (string $method): string => __('home/lobby.lb_payment_' . $method), $universe['payments']))]) }}</div>
+                    @endif
                 </div>
                 @if ($universe['open'])
                     <form method="POST" action="{{ route('lobby.choose', ['slug' => $universe['slug']]) }}">

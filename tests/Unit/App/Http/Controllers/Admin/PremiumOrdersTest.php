@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\SettingsService;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
@@ -76,6 +77,58 @@ class PremiumOrdersTest extends DatabaseTestCase
 
         app()->forgetScopedInstances();
         $this->assertSame('pay2win', app(SettingsService::class)->getString('premium_mode'));
+    }
+
+    public function testTheAdminChoosesTheWaysToPay(): void
+    {
+        config(['premium.wax.account' => 'xgpshop', 'premium.stripe.secret' => '', 'premium.stripe.webhook_secret' => '']);
+
+        $this->actingAs($this->admin)->get('/admin/premium')
+            ->assertOk()
+            ->assertSee('name="payment_methods[]"', false)
+            ->assertSee('STRIPE_SECRET / STRIPE_WEBHOOK_SECRET missing in .env')
+            ->assertSee('set up');
+
+        $this->actingAs($this->admin)->post('/admin/premium', ['payment_methods_form' => '1', 'payment_methods' => ['wax', 'stripe']]);
+        $this->assertSame('stripe,wax', DB::table('options')->where('name', 'payment_methods')->value('value'));
+
+        // all boxes unticked: none
+        $this->actingAs($this->admin)->post('/admin/premium', ['payment_methods_form' => '1']);
+        $this->assertSame('', DB::table('options')->where('name', 'payment_methods')->value('value'));
+
+        $this->actingAs($this->admin)->post('/admin/premium', ['payment_methods_form' => '1', 'payment_methods' => ['paypal']]);
+        $this->assertSame('', DB::table('options')->where('name', 'payment_methods')->value('value'));
+
+        // another form of the page leaves them alone
+        DB::table('options')->where('name', 'payment_methods')->update(['value' => 'wax']);
+        $this->actingAs($this->admin)->post('/admin/premium', ['registration_dark_matter' => '100']);
+        $this->assertSame('wax', DB::table('options')->where('name', 'payment_methods')->value('value'));
+    }
+
+    public function testTheWaxTransfersAreListed(): void
+    {
+        Artisan::call('migrate', ['--database' => 'central', '--path' => 'database/migrations/central', '--force' => true]);
+        DB::connection('central')->table('wax_transfers')->insert([
+            ['sequence' => 1, 'trx_id' => str_repeat('a', 64), 'block_num' => 10, 'block_time' => time(), 'from_account' => 'player.wam', 'units' => 46_676_000_000,
+                'memo' => 'xgp:1', 'universe' => null, 'order_id' => 1, 'result' => 'credited', 'checked_at' => time()],
+            ['sequence' => 2, 'trx_id' => str_repeat('b', 64), 'block_num' => 11, 'block_time' => time(), 'from_account' => 'other.wam', 'units' => 150_000_000,
+                'memo' => 'thanks', 'universe' => null, 'order_id' => null, 'result' => 'unknown', 'checked_at' => time()],
+        ]);
+
+        $this->actingAs($this->admin)->get('/admin/premium/orders')
+            ->assertOk()
+            ->assertSee('WAX transfers')
+            ->assertSee('466.76 WAX')
+            ->assertSee('other.wam')
+            ->assertSee('unknown memo')
+            ->assertSee('credited');
+    }
+
+    public function testWithoutTheTransferTableTheOrdersStillShow(): void
+    {
+        $this->actingAs($this->admin)->get('/admin/premium/orders')
+            ->assertOk()
+            ->assertSee('No WAX transfers yet.');
     }
 
     private function order(int $userId, string $package, int $amount, string $status): void

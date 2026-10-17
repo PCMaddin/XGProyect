@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Donkere materie kopen',
-    'dm_intro' => 'Donkere materie wordt veilig betaald via Stripe. Het wordt op je account bijgeschreven zodra Stripe de betaling bevestigt, meestal binnen enkele seconden.',
+    'dm_intro_stripe' => 'Donkere materie wordt veilig betaald via Stripe. Het wordt op je account bijgeschreven zodra Stripe de betaling bevestigt, meestal binnen enkele seconden.',
+    'dm_intro_wax' => 'Of met WAX: maak het getoonde bedrag met het memo van de bestelling over naar het account van de winkel. De donkere materie wordt bijgeschreven zodra de overboeking definitief is, meestal binnen enkele minuten.',
     'dm_price' => 'Prijs',
-    'dm_buy' => 'Kopen',
+    'dm_buy_stripe' => 'Betalen met kaart',
+    'dm_buy_wax' => 'Betalen met WAX',
     'dm_back' => 'Terug naar de officieren',
     'dm_package_name' => ':amount donkere materie',
     'dm_decimal_mark' => ',',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'De betaling is terugbetaald.',
     'dm_cancelled' => 'Je hebt de betaling geannuleerd. Er is niets afgeschreven.',
     'dm_reload' => 'Vernieuwen',
+    'dm_unknown_method' => 'Deze betaalmethode wordt hier niet aangeboden.',
+    'dm_wax_rate_failed' => 'De WAX-koers is nu niet op te vragen. Er is niets besteld, probeer het later opnieuw.',
+    'dm_wax_about' => 'ca. :amount',
+    'dm_wax_howto' => 'Maak precies dit bedrag met dit memo over vóór :until, bijvoorbeeld met WAX Cloud Wallet of Anchor:',
+    'dm_wax_account' => 'Naar account',
+    'dm_wax_amount' => 'Bedrag',
+    'dm_wax_memo' => 'Memo',
+    'dm_wax_memo_warning' => 'Zonder dit memo, of na de termijn, wordt niets automatisch bijgeschreven. Dan helpt de admin.',
+    'dm_status_wax_pending' => 'Wachten op je WAX-overboeking ...',
+    'dm_status_wax_expired' => 'Het aanbod is verlopen. Bestel opnieuw; de admin controleert een al verzonden overboeking.',
 ];

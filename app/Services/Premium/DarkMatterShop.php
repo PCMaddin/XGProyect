@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Premium;
 
 use App\Services\Instances\Instance;
-use App\Services\Instances\InstanceContext;
 use App\Services\SettingsService;
 
 /**
@@ -13,27 +12,81 @@ use App\Services\SettingsService;
  *
  * The rule:
  * - The shop is open only in a Pay2Win universe (option premium_mode) with
- *   both Stripe keys set (STRIPE_SECRET, STRIPE_WEBHOOK_SECRET); the "get
- *   dark matter" button then leads to it.
- * - Pay2Win without Stripe: the button links to the option premium_url, if
- *   set (a shop of the operator's own), as before.
- * - Play2Win: nothing can be bought and there is no button, except in a
- *   server without universes, where a premium_url that was set stays linked
- *   as before.
+ *   a way to pay that the universe allows (option payment_methods) and the
+ *   server has set up: Stripe (STRIPE_SECRET and STRIPE_WEBHOOK_SECRET) or
+ *   WAX (XGP_WAX_ACCOUNT). The "get dark matter" button then leads to it.
+ * - Pay2Win without one: the button links to the option premium_url, if
+ *   set (a shop of the operator's own).
+ * - Play2Win: nothing can be bought and there is no button.
+ *
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  */
 class DarkMatterShop
 {
     public const PAGE = 'game.php?page=darkmatter';
 
-    public function __construct(
-        private SettingsService $settings,
-        private InstanceContext $context,
-    ) {
+    public const STRIPE = 'stripe';
+    public const WAX = 'wax';
+    public const METHODS = [self::STRIPE, self::WAX];
+
+    public function __construct(private SettingsService $settings)
+    {
     }
 
     public function isOpen(): bool
     {
-        return $this->isPay2Win() && $this->stripeConfigured() && $this->packages() !== [];
+        return $this->isPay2Win() && $this->methods() !== [] && $this->packages() !== [];
+    }
+
+    /**
+     * The ways to pay here: allowed in the universe and set up on the server.
+     *
+     * @return list<string>
+     */
+    public function methods(): array
+    {
+        return array_values(array_filter($this->allowedMethods(), fn (string $method): bool => $this->configured($method)));
+    }
+
+    /**
+     * The ways to pay the universe allows (option payment_methods).
+     *
+     * @return list<string>
+     */
+    public function allowedMethods(): array
+    {
+        return self::parseMethods($this->option('payment_methods'));
+    }
+
+    /**
+     * The known ways to pay in a list like "stripe, wax".
+     *
+     * @return list<string>
+     */
+    public static function parseMethods(string $list): array
+    {
+        $named = array_map(static fn (string $method): string => strtolower(trim($method)), explode(',', $list));
+
+        return array_values(array_intersect(self::METHODS, $named));
+    }
+
+    public function configured(string $method): bool
+    {
+        return match ($method) {
+            self::STRIPE => $this->stripeConfigured(),
+            self::WAX => $this->waxAccount() !== '',
+            default => false,
+        };
+    }
+
+    /**
+     * The shop's WAX account, or empty if none (or not a valid name) is set.
+     */
+    public function waxAccount(): string
+    {
+        $account = self::config('premium.wax.account');
+
+        return preg_match('/^[a-z1-5.]{1,12}$/', $account) === 1 ? $account : '';
     }
 
     public function isPay2Win(): bool
@@ -57,11 +110,7 @@ class DarkMatterShop
             return self::PAGE;
         }
 
-        if ($this->isPay2Win() || $this->context->current() === null) {
-            return $this->option('premium_url');
-        }
-
-        return '';
+        return $this->isPay2Win() ? $this->option('premium_url') : '';
     }
 
     /**

@@ -14,4 +14,7 @@ return [
     'lb_play' => 'Jogar',
     'lb_closed' => 'Encerrado',
     'lb_switch' => 'Trocar de universo',
+    'lb_payments' => 'Pagamento: :methods',
+    'lb_payment_stripe' => 'cartão',
+    'lb_payment_wax' => 'WAX',
 ];

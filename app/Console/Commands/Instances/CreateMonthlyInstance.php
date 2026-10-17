@@ -47,7 +47,8 @@ class CreateMonthlyInstance extends Command
         $instance = new Instance($slug, strtr(self::config('name'), $placeholders), $provisioner->databaseFor($slug), self::config('mode'), Instance::OPEN, $time);
 
         try {
-            $provisioner->create($instance, self::config('admin.name'), self::config('admin.email'), self::config('admin.password'), $this->universeOptions());
+            $options = ['payment_methods' => $provisioner->paymentMethods(self::config('payments'))] + $this->universeOptions();
+            $provisioner->create($instance, self::config('admin.name'), self::config('admin.email'), self::config('admin.password'), $options);
         } catch (Throwable $e) {
             report($e);
             $this->error($e->getMessage());

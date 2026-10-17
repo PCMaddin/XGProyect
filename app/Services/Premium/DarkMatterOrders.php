@@ -16,10 +16,11 @@ use Illuminate\Support\Facades\DB;
  * figures) credits nothing.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  */
 class DarkMatterOrders
 {
-    public function open(int $userId, DarkMatterPackage $package, string $currency, int $now): DarkMatterOrder
+    public function open(int $userId, DarkMatterPackage $package, string $currency, int $now, string $provider = DarkMatterShop::STRIPE): DarkMatterOrder
     {
         return DarkMatterOrder::create([
             'user_id' => $userId,
@@ -27,10 +28,23 @@ class DarkMatterOrders
             'dark_matter' => $package->darkMatter,
             'amount' => $package->price,
             'currency' => $currency,
-            'provider' => 'stripe',
+            'provider' => $provider,
             'status' => DarkMatterOrder::PENDING,
             'created_at' => $now,
         ]);
+    }
+
+    /**
+     * A WAX order: the amount to transfer, the memo that names the order
+     * (kept as its session, unique) and until when the quote holds.
+     */
+    public function quoteWax(DarkMatterOrder $order, int $units, string $memo, int $expiresAt): void
+    {
+        $order->provider_amount = $units;
+        $order->provider_currency = WaxChain::SYMBOL;
+        $order->provider_session = $memo;
+        $order->expires_at = $expiresAt;
+        $order->save();
     }
 
     public function attachSession(DarkMatterOrder $order, string $sessionId): void

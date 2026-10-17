@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'ダークマターを購入',
-    'dm_intro' => 'ダークマターの支払いはStripeを通じて安全に行われます。Stripeが支払いを確認するとすぐに（通常は数秒以内に）アカウントに付与されます。',
+    'dm_intro_stripe' => 'ダークマターの支払いはStripeを通じて安全に行われます。Stripeが支払いを確認するとすぐに（通常は数秒以内に）アカウントに付与されます。',
+    'dm_intro_wax' => 'WAXでも支払えます：表示された金額を、注文のメモを付けてショップのアカウントへ送金してください。送金が確定すると（通常は数分以内）ダークマターが付与されます。',
     'dm_price' => '価格',
-    'dm_buy' => '購入',
+    'dm_buy_stripe' => 'カードで支払う',
+    'dm_buy_wax' => 'WAXで支払う',
     'dm_back' => 'オフィサーに戻る',
     'dm_package_name' => 'ダークマター :amount',
     'dm_decimal_mark' => '.',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => '支払いは返金されました。',
     'dm_cancelled' => '支払いをキャンセルしました。請求は発生していません。',
     'dm_reload' => '再読み込み',
+    'dm_unknown_method' => 'この支払い方法はここでは利用できません。',
+    'dm_wax_rate_failed' => '現在WAXのレートを取得できません。注文は行われていません。しばらくしてから再度お試しください。',
+    'dm_wax_about' => '約 :amount',
+    'dm_wax_howto' => ':until までに、このメモを付けてちょうどこの金額を送金してください（例：WAX Cloud Wallet や Anchor）：',
+    'dm_wax_account' => '送金先アカウント',
+    'dm_wax_amount' => '金額',
+    'dm_wax_memo' => 'メモ',
+    'dm_wax_memo_warning' => 'このメモがない場合や期限後の送金は自動で付与されません。その場合は管理者が対応します。',
+    'dm_status_wax_pending' => 'WAXの送金を待っています ...',
+    'dm_status_wax_expired' => 'この見積もりは期限切れです。もう一度注文してください。すでに送金した場合は管理者が確認します。',
 ];

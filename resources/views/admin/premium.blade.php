@@ -46,6 +46,30 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>
+                                {{ __('admin/premium.pr_payment_methods') }}
+                                <i class="fas fa-question-circle text-gray-400" data-toggle="popover"
+                                    data-trigger="hover" data-content="{{ __('admin/premium.pr_payment_methods_help') }}"></i>
+                            </td>
+                            <td>
+                                <input type="hidden" name="payment_methods_form" value="1">
+                                @foreach ($payment_methods as $method)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_methods[]" value="{{ $method['name'] }}"
+                                            id="payment_method_{{ $method['name'] }}" @checked($method['allowed'])>
+                                        <label class="form-check-label" for="payment_method_{{ $method['name'] }}">
+                                            {{ __('admin/premium.pr_payment_method_' . $method['name']) }}
+                                            @if ($method['configured'])
+                                                <span class="badge badge-success">{{ __('admin/premium.pr_payment_method_ready') }}</span>
+                                            @else
+                                                <span class="badge badge-warning text-wrap text-left">{{ __('admin/premium.pr_payment_method_missing_' . $method['name']) }}</span>
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </td>
+                        </tr>
+                        <tr>
                             <td>{{ __('admin/premium.pr_shop') }}</td>
                             <td>
                                 @if ($shop_status === 'open')
@@ -53,7 +77,7 @@
                                 @elseif ($shop_status === 'closed_play2win')
                                     <span class="badge badge-secondary">{{ __('admin/premium.pr_shop_closed_play2win') }}</span>
                                 @else
-                                    <span class="badge badge-warning">{{ __('admin/premium.pr_shop_closed_stripe') }}</span>
+                                    <span class="badge badge-warning">{{ __('admin/premium.pr_shop_closed_methods') }}</span>
                                 @endif
                                 <a href="{{ route('admin.premium.orders') }}" class="ml-2">
                                     <i class="fas fa-receipt fa-sm mr-1"></i>{{ __('admin/premium.pr_orders_show') }}

@@ -23,6 +23,9 @@ class PremiumRequest extends FormRequest
         return [
             'premium_url' => ['nullable', 'url', 'max:254'],
             'premium_mode' => ['nullable', 'in:pay2win,play2win'],
+            'payment_methods' => ['nullable', 'array'],
+            'payment_methods.*' => ['string', 'in:stripe,wax'],
+            'payment_methods_form' => ['nullable'],
             'registration_dark_matter' => ['nullable', 'integer', 'min:0'],
             'merchant_price' => ['nullable', 'numeric', 'min:0'],
             'merchant_base_min_exchange_rate' => ['nullable', 'numeric', 'min:0'],

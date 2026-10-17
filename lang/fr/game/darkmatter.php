@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Acheter de la matière noire',
-    'dm_intro' => 'La matière noire est payée en toute sécurité via Stripe. Elle est créditée sur ton compte dès que Stripe confirme le paiement, généralement en quelques secondes.',
+    'dm_intro_stripe' => 'La matière noire est payée en toute sécurité via Stripe. Elle est créditée sur ton compte dès que Stripe confirme le paiement, généralement en quelques secondes.',
+    'dm_intro_wax' => 'Ou en WAX : transfère le montant indiqué, avec le mémo de la commande, sur le compte de la boutique. La matière noire est créditée dès que le transfert est définitif, généralement en quelques minutes.',
     'dm_price' => 'Prix',
-    'dm_buy' => 'Acheter',
+    'dm_buy_stripe' => 'Payer par carte',
+    'dm_buy_wax' => 'Payer en WAX',
     'dm_back' => 'Retour aux officiers',
     'dm_package_name' => ':amount de matière noire',
     'dm_decimal_mark' => ',',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'Le paiement a été remboursé.',
     'dm_cancelled' => 'Tu as annulé le paiement. Rien n\'a été débité.',
     'dm_reload' => 'Actualiser',
+    'dm_unknown_method' => 'Ce moyen de paiement n\'est pas proposé ici.',
+    'dm_wax_rate_failed' => 'Le cours du WAX est indisponible pour le moment. Rien n\'a été commandé, réessaie plus tard.',
+    'dm_wax_about' => 'env. :amount',
+    'dm_wax_howto' => 'Transfère exactement ce montant avec ce mémo avant :until, par exemple avec WAX Cloud Wallet ou Anchor :',
+    'dm_wax_account' => 'Vers le compte',
+    'dm_wax_amount' => 'Montant',
+    'dm_wax_memo' => 'Mémo',
+    'dm_wax_memo_warning' => 'Sans ce mémo, ou après le délai, rien n\'est crédité automatiquement. L\'admin t\'aidera alors.',
+    'dm_status_wax_pending' => 'En attente de ton transfert WAX ...',
+    'dm_status_wax_expired' => 'L\'offre a expiré. Passe une nouvelle commande ; l\'admin vérifie un transfert déjà envoyé.',
 ];

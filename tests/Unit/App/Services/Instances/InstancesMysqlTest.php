@@ -79,6 +79,7 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame(0, DB::table('users')->count());
         $this->assertSame(['Admin1', '3'], $this->inUniverse('xgp_test_u1', 'SELECT name, authlevel FROM xgp_users'));
         $this->assertSame(['pay2win'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'premium_mode'"));
+        $this->assertSame(['stripe,wax'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'payment_methods'"));
         $this->assertSame(['Universe One'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'game_name'"));
         $this->assertSame(['5000'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'game_speed'"));
         // the language of the base game, unless one is given
@@ -116,15 +117,27 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame('Renamed', $universe->name);
         $this->assertSame(['play2win'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'premium_mode'"));
         $this->command('xgp:instance:update', ['slug' => 'u1', '--mode' => 'free'])->assertFailed();
+
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--payments' => 'none'])->assertSuccessful();
+        $this->assertSame([''], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'payment_methods'"));
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--payments' => 'wax'])->assertSuccessful();
+        $this->assertSame(['wax'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'payment_methods'"));
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--payments' => 'paypal'])->expectsOutputToContain('ways to pay')->assertFailed();
+        $this->assertSame(['wax'], $this->inUniverse('xgp_test_u1', "SELECT value FROM xgp_options WHERE name = 'payment_methods'"));
     }
 
     public function testTheLobbySendsPlayersToTheChosenUniverse(): void
     {
         $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        $this->createUniverse('u2', 'xgp_test_u2', Instance::PAY2WIN)->assertSuccessful();
+        // newest first: u2 opened a day after u1
+        app(InstanceRegistry::class)->update('u1', ['opened_at' => time() - 86400]);
+        config(['premium.wax.account' => 'xgpshop', 'premium.stripe.secret' => '', 'premium.stripe.webhook_secret' => '']);
 
         // without a choice every page leads to the lobby
         $this->get('/')->assertRedirect(route('lobby.index'));
-        $this->get('/universes')->assertOk()->assertSee('Universe One')->assertSee('Players: 1');
+        // how dark matter is paid: only in Pay2Win, only the ways set up on the server
+        $this->get('/universes')->assertOk()->assertSee('Universe One')->assertSee('Players: 1')->assertSeeInOrder(['Universe Two', 'Payment: WAX', 'Universe One'])->assertDontSee('card');
 
         $choice = $this->post('/universes/u1');
         $choice->assertRedirect(route('home.index'))->assertPlainCookie(SelectInstance::COOKIE, 'u1');
@@ -187,6 +200,7 @@ class InstancesMysqlTest extends MysqlTestCase
             '--admin-email' => 'admin@example.com',
             '--admin-password' => 'secret-password',
             '--option' => ['game_speed=5000'],
+            '--payments' => 'wax,stripe',
         ]);
     }
 

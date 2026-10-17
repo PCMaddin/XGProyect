@@ -21,6 +21,8 @@ return [
         'slug' => env('XGP_MONTHLY_SLUG', ':year-:month'),
         'name' => env('XGP_MONTHLY_NAME', 'Universe :year-:month'),
         'mode' => env('XGP_MONTHLY_MODE', 'play2win'),
+        // ways to pay in a pay2win universe: stripe, wax or stripe,wax
+        'payments' => env('XGP_MONTHLY_PAYMENTS', 'stripe'),
         'options' => env('XGP_MONTHLY_OPTIONS', ''),
         'keep_open' => (int) env('XGP_MONTHLY_KEEP_OPEN', 0),
         'admin' => [

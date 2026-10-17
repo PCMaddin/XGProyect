@@ -8,6 +8,7 @@ use App\Http\Middleware\SelectInstance;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
@@ -39,8 +40,7 @@ class LobbyController extends BaseController
                 'mode' => $instance->mode,
                 'open' => $instance->isOpen(),
                 'opened_at' => $instance->openedAt,
-                'players' => $this->players($instance),
-            ], $this->registry->all()),
+            ] + $this->facts($instance), $this->registry->all()),
             'chosen' => request()->cookie(SelectInstance::COOKIE),
         ]);
     }
@@ -57,17 +57,22 @@ class LobbyController extends BaseController
     }
 
     /**
-     * The players of a universe (bots not counted); null if its database
-     * cannot be read.
+     * The players of a universe (bots not counted) and how dark matter is
+     * paid there; no players (null) if its database cannot be read.
+     *
+     * @return array{players: int|null, payments: list<string>}
      */
-    private function players(Instance $instance): ?int
+    private function facts(Instance $instance): array
     {
         try {
-            return $this->context->runIn($instance, static fn (): int => DB::table('users')->where('user_is_bot', false)->count());
+            return $this->context->runIn($instance, static fn (): array => [
+                'players' => DB::table('users')->where('user_is_bot', false)->count(),
+                'payments' => $instance->mode === Instance::PAY2WIN ? app(DarkMatterShop::class)->methods() : [],
+            ]);
         } catch (Throwable $e) {
             report($e);
 
-            return null;
+            return ['players' => null, 'payments' => []];
         }
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 return [
     'dm_title' => 'Dunkle Materie kaufen',
-    'dm_intro' => 'Dunkle Materie wird sicher über Stripe bezahlt. Sie wird deinem Konto gutgeschrieben, sobald Stripe die Zahlung bestätigt, meist innerhalb von Sekunden.',
+    'dm_intro_stripe' => 'Dunkle Materie wird sicher über Stripe bezahlt. Sie wird deinem Konto gutgeschrieben, sobald Stripe die Zahlung bestätigt, meist innerhalb von Sekunden.',
+    'dm_intro_wax' => 'Oder mit WAX: Du überweist den angezeigten Betrag mit dem Memo der Bestellung an das Konto des Shops. Die Dunkle Materie wird gutgeschrieben, sobald die Überweisung endgültig ist, meist nach wenigen Minuten.',
     'dm_price' => 'Preis',
-    'dm_buy' => 'Kaufen',
+    'dm_buy_stripe' => 'Mit Karte zahlen',
+    'dm_buy_wax' => 'Mit WAX zahlen',
     'dm_back' => 'Zurück zu den Offizieren',
     'dm_package_name' => ':amount Dunkle Materie',
     'dm_decimal_mark' => ',',
@@ -24,4 +26,14 @@ return [
     'dm_status_refunded' => 'Die Zahlung wurde erstattet.',
     'dm_cancelled' => 'Du hast die Zahlung abgebrochen. Es wurde nichts abgebucht.',
     'dm_reload' => 'Neu laden',
+    'dm_unknown_method' => 'Diese Zahlungsart gibt es hier nicht.',
+    'dm_wax_rate_failed' => 'Der WAX-Kurs ist gerade nicht abrufbar. Es wurde nichts bestellt, bitte versuche es später erneut.',
+    'dm_wax_about' => 'ca. :amount',
+    'dm_wax_howto' => 'Überweise genau diesen Betrag mit diesem Memo bis :until, zum Beispiel mit WAX Cloud Wallet oder Anchor:',
+    'dm_wax_account' => 'An Konto',
+    'dm_wax_amount' => 'Betrag',
+    'dm_wax_memo' => 'Memo',
+    'dm_wax_memo_warning' => 'Ohne dieses Memo oder nach Ablauf der Frist wird nicht automatisch gutgeschrieben. Dann hilft der Admin.',
+    'dm_status_wax_pending' => 'Warte auf deine WAX-Überweisung ...',
+    'dm_status_wax_expired' => 'Das Angebot ist abgelaufen. Bitte bestelle neu; eine schon gesendete Überweisung prüft der Admin.',
 ];
