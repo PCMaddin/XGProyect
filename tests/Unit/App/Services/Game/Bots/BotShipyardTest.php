@@ -38,11 +38,8 @@ class BotShipyardTest extends TestCase
         // paid from the whole stock, the reserve for the next building notwithstanding
         $this->assertSame([Ships::SHIP_COLONY_SHIP, 1], $this->shipyard->order($levels, [], true, true, false, self::STOCK, self::STOCK, 1000));
 
-        // not enough crystal: the shipyard does not wait for it
-        $this->assertSame(
-            [Ships::SHIP_ESPIONAGE_PROBE, 3],
-            $this->shipyard->order($levels, [], true, true, false, ['metal' => 100000, 'crystal' => 15000, 'deuterium' => 100000], [], 1000)
-        );
+        // not enough crystal: the shipyard saves for it and builds nothing else
+        $this->assertNull($this->shipyard->order($levels, [], true, true, false, ['metal' => 100000, 'crystal' => 15000, 'deuterium' => 100000], [], 1000));
 
         // a colony does not build colony ships
         $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 4], $this->shipyard->order($levels, [], false, true, false, self::STOCK, [], 1000));

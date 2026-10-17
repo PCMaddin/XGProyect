@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\DB;
  * Where a bot's ships fly. At most one fleet per planet and turn:
  *
  * - the home planet founds colonies (as many as astrophysics allows, on a
- *   free position close to home), sends recyclers to debris fields nearby,
+ *   free position close to home), sends recyclers to debris fields nearby
+ *   (both within 10 systems; targets within 100, the nearest first),
  *   sends death stars against the moons of targets it outguns, raids
  *   targets it has spied on and found weak, spies on the nearest other
  *   players and sends spare cargo ships on expeditions;
@@ -42,8 +43,11 @@ class BotFleetPlanner
     use PreparesSql;
     use ReadsMixedValues;
 
-    /** systems around the home planet a bot looks at */
+    /** systems around the home planet a bot looks at for colonies and debris */
     private const RANGE = 10;
+
+    /** systems around the home planet a bot spies on and attacks, the nearest first */
+    private const TARGET_RANGE = 100;
 
     /** a target is spied on again after this long */
     private const SPY_AGAIN = 6 * 3600;
@@ -404,7 +408,7 @@ class BotFleetPlanner
             ->join('ships AS s', 's.ship_planet_id', '=', 'p.planet_id')
             ->addSelect('d.*', 's.*')
             ->where('p.planet_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
-            ->whereBetween('p.planet_system', [$system - self::RANGE, $system + self::RANGE])
+            ->whereBetween('p.planet_system', [$system - self::TARGET_RANGE, $system + self::TARGET_RANGE])
             ->whereNotExists(fn ($fleets) => $fleets->from('fleets AS f')
                 ->where('f.fleet_owner', $userId)
                 ->where('f.fleet_mission', Missions::DESTROY)
@@ -542,7 +546,7 @@ class BotFleetPlanner
             static fn (object $row): array => get_object_vars($row),
             $this->targetQuery($user)
                 ->where('p.planet_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
-                ->whereBetween('p.planet_system', [$system - self::RANGE, $system + self::RANGE])
+                ->whereBetween('p.planet_system', [$system - self::TARGET_RANGE, $system + self::TARGET_RANGE])
                 ->orderByRaw('ABS(' . $this->column('p.planet_system') . ' - ?)', [$system])
                 ->orderBy('p.planet_planet')
                 ->limit(30)

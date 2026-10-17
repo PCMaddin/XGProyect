@@ -54,7 +54,8 @@ class BotShipyard
 
     /**
      * The next shipyard order, or null. A wanted colony ship comes first,
-     * paid from the whole stock. A planet raided lately puts all its stock
+     * paid from the whole stock (the buildings' reserve does not hold it
+     * back, other ships and defences wait for it). A planet raided lately puts all its stock
      * above the reserve into defences. Otherwise ships and then defences
      * share the spare budget.
      *
@@ -67,10 +68,10 @@ class BotShipyard
      */
     public function order(array $levels, array $ships, bool $home, bool $wantsColony, bool $raided, array $stock, array $reserve, int $maxPerOrder): ?array
     {
+        // a wanted colony ship is saved for: no other ship or defence meanwhile
         if ($home && $wantsColony && ($ships[Ships::SHIP_COLONY_SHIP] ?? 0) === 0 &&
-            $this->developments->isDevelopmentAllowed(Ships::SHIP_COLONY_SHIP, $levels) &&
-            $this->affordable(Ships::SHIP_COLONY_SHIP, $stock) > 0) {
-            return [Ships::SHIP_COLONY_SHIP, 1];
+            $this->developments->isDevelopmentAllowed(Ships::SHIP_COLONY_SHIP, $levels)) {
+            return $this->affordable(Ships::SHIP_COLONY_SHIP, $stock) > 0 ? [Ships::SHIP_COLONY_SHIP, 1] : null;
         }
 
         $defence = $raided ? $this->defenceOrder($levels, $this->aboveReserve($stock, $reserve), $maxPerOrder, $ships, 2) : null;
