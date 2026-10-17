@@ -45,6 +45,7 @@ class BotStrategy
         [Research::RESEARCH_ASTROPHYSICS, 3],
         [Research::RESEARCH_LASER_TECHNOLOGY, 6],
         [Research::RESEARCH_IONIC_TECHNOLOGY, 2],
+        [Research::RESEARCH_IMPULSE_DRIVE, 4],
     ];
 
     /** what the cheapest step is picked from after the opening */
@@ -63,6 +64,9 @@ class BotStrategy
         Research::RESEARCH_HYPERSPACE_TECHNOLOGY,
         Research::RESEARCH_ASTROPHYSICS,
     ];
+
+    /** more metal than this many times the crystal in stock is a glut */
+    private const METAL_GLUT = 3;
 
     private const STORAGES = [
         'metal' => Buildings::BUILDING_METAL_STORE,
@@ -185,7 +189,7 @@ class BotStrategy
             $energy < 15 + $energyMax * 0.1 ? $this->powerPlants($levels) : [],
             $this->fullStorages($planet),
             $this->laggingFacilities($levels, $metal, $hasLab && !$researching),
-            $this->mines($levels, $metal)
+            $this->mines($levels, $metal, $planet)
         );
     }
 
@@ -276,15 +280,24 @@ class BotStrategy
     }
 
     /**
-     * Crystal two and deuterium four levels behind metal, then metal.
+     * Crystal two and deuterium four levels behind metal, then metal. While
+     * metal piles up (more than three times the crystal in stock) the bot
+     * builds no more metal mine but the crystal mine.
      *
-     * @param array<int, int> $levels
+     * @param array<int, int>          $levels
+     * @param array<string, float|int> $planet
      *
      * @return list<int>
      */
-    private function mines(array $levels, int $metal): array
+    private function mines(array $levels, int $metal, array $planet): array
     {
-        if (($levels[Buildings::BUILDING_CRYSTAL_MINE] ?? 0) < $metal - 2) {
+        $crystal = $levels[Buildings::BUILDING_CRYSTAL_MINE] ?? 0;
+
+        if ((float) ($planet['planet_metal'] ?? 0) > self::METAL_GLUT * (float) ($planet['planet_crystal'] ?? 0) && $crystal <= $metal) {
+            return [Buildings::BUILDING_CRYSTAL_MINE];
+        }
+
+        if ($crystal < $metal - 2) {
             return [Buildings::BUILDING_CRYSTAL_MINE, Buildings::BUILDING_METAL_MINE];
         }
 

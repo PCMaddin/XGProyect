@@ -69,6 +69,20 @@ class BotStrategyTest extends TestCase
         $this->assertSame(Buildings::BUILDING_CRYSTAL_MINE, $this->strategy->nextBuilding($levels, $this->planet(500, -300), true, false));
     }
 
+    public function testAMetalGlutBuildsCrystalInstead(): void
+    {
+        $levels = [Buildings::BUILDING_METAL_MINE => 5, Buildings::BUILDING_CRYSTAL_MINE => 4, Buildings::BUILDING_ROBOT_FACTORY => 1,
+            Buildings::BUILDING_HANGAR => 1, Buildings::BUILDING_LABORATORY => 2, Buildings::BUILDING_DEUTERIUM_SINTETIZER => 1];
+        $planet = $this->planet(500, -300);
+
+        $this->assertSame(Buildings::BUILDING_METAL_MINE, $this->strategy->nextBuilding($levels, $planet, true, false));
+
+        // 8,000 metal against 2,000 crystal: no more metal mine
+        $planet['planet_metal'] = 8000;
+        $planet['planet_crystal'] = 2000;
+        $this->assertSame(Buildings::BUILDING_CRYSTAL_MINE, $this->strategy->nextBuilding($levels, $planet, true, false));
+    }
+
     public function testLaggingFacilitiesComeBeforeTheMines(): void
     {
         $levels = [Buildings::BUILDING_METAL_MINE => 6, Buildings::BUILDING_CRYSTAL_MINE => 5];
@@ -144,7 +158,7 @@ class BotStrategyTest extends TestCase
         $done = [Buildings::BUILDING_LABORATORY => 10, Buildings::BUILDING_HANGAR => 5, Research::RESEARCH_ENERGY_TECHNOLOGY => 3, Research::RESEARCH_COMBUSTION_DRIVE => 3,
             Research::RESEARCH_ESPIONAGE_TECHNOLOGY => 4, Research::RESEARCH_COMPUTER_TECHNOLOGY => 2, Research::RESEARCH_LASER_TECHNOLOGY => 6,
             Research::RESEARCH_WEAPONS_TECHNOLOGY => 2, Research::RESEARCH_SHIELDING_TECHNOLOGY => 2, Research::RESEARCH_ARMOUR_TECHNOLOGY => 2,
-            Research::RESEARCH_IMPULSE_DRIVE => 3, Research::RESEARCH_IONIC_TECHNOLOGY => 2, Research::RESEARCH_ASTROPHYSICS => 3];
+            Research::RESEARCH_IMPULSE_DRIVE => 4, Research::RESEARCH_IONIC_TECHNOLOGY => 2, Research::RESEARCH_ASTROPHYSICS => 3];
 
         // after the opening: the cheapest next level, shielding 3 (3,200) before computer technology 3 (3,200 too, later in the list)
         $this->assertSame(Research::RESEARCH_SHIELDING_TECHNOLOGY, $this->strategy->nextResearch($done));
