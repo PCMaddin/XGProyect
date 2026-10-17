@@ -30,8 +30,9 @@ use Illuminate\Support\Facades\DB;
  * players (option bots_attack_players); admins, players on vacation and
  * those under noob protection are left alone. A raid follows a spy report:
  * when the probe has arrived, the bot judges the target by what the report
- * shows (resources, ships, defences) and attacks only an undefended planet
- * or one its warships outgun twice.
+ * shows (resources, ships, defences) and attacks an undefended planet, or a
+ * defended one when the battle simulator (the game's own engine) says its
+ * warships win and the loot and debris cover their losses.
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
@@ -56,9 +57,6 @@ class BotFleetPlanner
     /** a raid must bring at least this much */
     private const MIN_LOOT = 5000;
 
-    /** how much stronger the bot's warships must be than the target's ships and defences */
-    private const SUPERIORITY = 2;
-
     /** a debris field worth the recyclers' flight */
     private const MIN_DEBRIS = 10000;
 
@@ -75,13 +73,14 @@ class BotFleetPlanner
 
     private const WARSHIPS = [
         Ships::SHIP_LIGHT_FIGHTER, Ships::SHIP_HEAVY_FIGHTER, Ships::SHIP_CRUISER, Ships::SHIP_BATTLESHIP,
-        Ships::SHIP_BATTLECRUISER, Ships::SHIP_BOMBER, Ships::SHIP_DESTROYER,
+        Ships::SHIP_BATTLECRUISER, Ships::SHIP_BOMBER, Ships::SHIP_DESTROYER, Ships::SHIP_REAPER, Ships::SHIP_DEATHSTAR,
     ];
 
     public function __construct(
         private BotFleetService $sender,
         private BotShipyard $shipyard,
         private BotStrategy $strategy,
+        private BotBattleSimulator $simulator,
         private DevelopmentsService $developments,
         private FleetsService $fleets,
         private SettingsService $settings,
@@ -233,19 +232,14 @@ class BotFleetPlanner
 
         foreach ($this->reportedTargets($user, $now) as $target) {
             $warships = $this->available($planet, self::WARSHIPS);
-            $defended = $this->shipyard->combatValue($this->forces($target)) > 0;
-
-            if ($defended && $this->shipyard->combatValue($warships) < self::SUPERIORITY * $this->shipyard->combatValue($this->forces($target))) {
-                continue;
-            }
-
+            $forces = $this->forces($target);
             $loot = self::LOOT_SHARE * (self::asFloat($target['planet_metal'] ?? 0) + self::asFloat($target['planet_crystal'] ?? 0) + self::asFloat($target['planet_deuterium'] ?? 0));
 
-            if ($loot < self::MIN_LOOT || !$this->targetAllowed($user, $target, $now)) {
+            if (!$this->targetAllowed($user, $target, $now) || ($forces === [] ? $loot < self::MIN_LOOT : !$this->worthFighting($warships, $user, $forces, $loot, $target))) {
                 continue;
             }
 
-            $fleet = $this->cargoFor($cargoShips, $loot, $user) + ($defended ? $warships : []);
+            $fleet = $this->cargoFor($cargoShips, $loot, $user) + ($forces !== [] ? $warships : []);
 
             return $this->sender->send($user, $planet, $fleet, $this->coordinates($target), Missions::ATTACK, [], 0, $now);
         }
@@ -311,6 +305,39 @@ class BotFleetPlanner
     }
 
     /**
+     * What the battle simulator says: the warships win, and the loot and
+     * the debris (which the recyclers bring in) cover their losses.
+     *
+     * @param array<int, int>      $warships
+     * @param array<string, mixed> $user
+     * @param array<int, int>      $forces the target's ships and defences
+     * @param array<string, mixed> $target the target planet with its owner's id
+     */
+    private function worthFighting(array $warships, array $user, array $forces, float $loot, array $target): bool
+    {
+        $battle = $this->simulator->simulate($warships, $user, $forces, $this->ownerRow(self::asInt($target['planet_user_id'] ?? 0)));
+
+        return $battle['won'] && $battle['lost'] <= $loot + $battle['debris'];
+    }
+
+    /**
+     * The target owner's combat technologies and class, as a deep spy
+     * report shows them.
+     *
+     * @return array<string, mixed>
+     */
+    private function ownerRow(int $userId): array
+    {
+        $row = DB::table('users AS u')
+            ->join('research AS r', 'r.research_user_id', '=', 'u.id')
+            ->leftJoin('alliance AS a', 'a.alliance_id', '=', 'u.ally_id')
+            ->where('u.id', $userId)
+            ->first(['u.id', 'u.player_class', 'a.alliance_class', 'r.research_weapons_technology', 'r.research_shielding_technology', 'r.research_armour_technology']);
+
+        return $row === null ? ['id' => $userId] : get_object_vars($row);
+    }
+
+    /**
      * Recyclers bring in the nearest debris field nobody of the bot's
      * recyclers is flying to yet.
      *
@@ -372,7 +399,7 @@ class BotFleetPlanner
 
         $system = self::asInt($planet['planet_system'] ?? 0);
         $userId = self::asInt($user['id'] ?? 0);
-        $fleet = $this->available($planet, [...self::WARSHIPS, Ships::SHIP_DEATHSTAR]);
+        $fleet = $this->available($planet, self::WARSHIPS);
         $moons = $this->targetQuery($user, PlanetTypes::MOON)
             ->join('defenses AS d', 'd.defense_planet_id', '=', 'p.planet_id')
             ->join('ships AS s', 's.ship_planet_id', '=', 'p.planet_id')
@@ -392,8 +419,10 @@ class BotFleetPlanner
         foreach ($moons as $row) {
             $moon = get_object_vars($row);
 
-            if ($this->shipyard->combatValue($fleet) >= self::SUPERIORITY * $this->shipyard->combatValue($this->forces($moon)) &&
-                $this->targetAllowed($user, $moon, $now)) {
+            $forces = $this->forces($moon);
+            $won = $forces === [] || $this->simulator->simulate($fleet, $user, $forces, $this->ownerRow(self::asInt($moon['planet_user_id'] ?? 0)))['won'];
+
+            if ($won && $this->targetAllowed($user, $moon, $now)) {
                 return $this->sender->send($user, $planet, $fleet, $this->coordinates($moon, PlanetTypes::MOON), Missions::DESTROY, [], 0, $now);
             }
         }
