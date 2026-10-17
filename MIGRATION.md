@@ -902,6 +902,49 @@ Baseline-Einträge.
   verfrühte Rückkehr, Gegenstand, Schwarzes Loch, Händler), 2.228
   Transporte, 770 Spionageflüge, 24 Überfälle, 128 Kampfberichte,
   Trümmerfelder auch im tiefen Raum. Laufzeit 39 Minuten.
+- ✅ **Bots führen Krieg, Monde entstehen:** In 24 Überfällen der ersten
+  Simulation entstand kein Mond – kein Fehler: die Bots überfielen nur
+  unverteidigte Ziele, es gab keine Trümmer (Mondchance 1 % je 100.000
+  Trümmer, höchstens 20 %). Damit echte Schlachten entstehen, wurde die
+  Bot-Logik in mehreren Simulationsrunden nachgeschärft:
+  - **Kampfsimulator:** Vor einem Angriff auf ein verteidigtes Ziel rechnet
+    der Bot den Kampf mit der Kampf-Engine des Spiels (OPBE) durch, mit
+    der ganzen Flotte (auch den Transportern), den Kampftechniken beider
+    Seiten und Schnellfeuer (`BotBattleSimulator`, ändert nichts).
+    Angegriffen wird, wenn er gewinnt und Beute plus Trümmer die Verluste
+    decken; ohne Transporter auch nur des Kampfes wegen.
+  - **Werft:** Recycler, Kreuzer, Schwere und Leichte Jäger; bis zu vier
+    Aufträge verschiedener Einheiten pro Zug; Schiffe im Einsatz zählen
+    mit (vorher bestellte die Werft jede Runde eine Sonde nach, weil die
+    Sonden unterwegs waren, und baute nichts anderes). Liegen Flotten- und
+    Verteidigungspunkte unter einem Drittel der Gebäude- und
+    Forschungspunkte, bezahlt der ganze Vorrat die Werft, sonst ein
+    Viertel über der doppelten Gebäude-Reserve. Verteidigung hat eine
+    Obergrenze je Metallminenstufe (doppelt nach einem Überfall), damit
+    nicht alles Metall in Raketenwerfer geht.
+  - **Wirtschaft:** Bei mehr als dreimal so viel Metall wie Kristall auf
+    Lager baut der Bot die Kristallmine statt der Metallmine (vorher fehlte
+    allen das Kristall für Schiffe). Für ein gewünschtes Kolonieschiff wird
+    gespart.
+  - **Reichweite:** Spionage, Angriffe und Mondzerstörung bis 100 Systeme
+    (die Bots lagen im Schnitt 50 Systeme auseinander), Kolonien und
+    Trümmerfelder bis 10.
+  - **Recycler** bergen Trümmerfelder in der Nähe; **Monde** werden vom
+    Heimatplaneten mit genau dem beliefert, was der nächste Ausbau kostet,
+    und bauen Mondbasis und Sensorphalanx; **Todessterne** fliegen gegen
+    Monde von Zielen, wenn der Kampfsimulator den Sieg vorhersagt.
+  - **Simulator:** `--grant=STUNDE:SCHIFF:ANZAHL[:BOTS]` gibt Bots Schiffe
+    wie ein Admin (Todessterne sind bei Geschwindigkeit 1 in Wochen nicht
+    erreichbar); `--moon-unit=N` hebt die Mondchance für Testläufe (die
+    Engine-Konstante `MOON_UNIT_PROB` ist dafür vorbelegbar, im Spiel
+    bleibt sie 100.000).
+
+  Tests: Kampfsimulator (Unit), Werft (Kriegsflotte, Obergrenzen, mehrere
+  Aufträge, Militär-Vorrang), Angriff auf ein verteidigtes Ziel mit
+  Trümmern, Kampf ohne Transporter, Recycler, Mondbelieferung und
+  Mondbasis, Todessterne gegen einen Mond, Schiffe im Einsatz (MariaDB).
+  Probelauf 720 h: 0 Fehler, 445 Kämpfe, 392 Angriffsflotten, Recycler im
+  Einsatz, der erste Mond in einem der Läufe.
 - ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
   Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
   Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten
