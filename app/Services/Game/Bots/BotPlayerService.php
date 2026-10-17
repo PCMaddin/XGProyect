@@ -39,6 +39,9 @@ class BotPlayerService
     /** seconds between two ticks that let bots act */
     private const TICK_GAP = 60;
 
+    /** the fleet and defences a bot keeps, against its buildings and research */
+    private const MILITARY_SHARE = 1 / 3;
+
     /** bots acting per tick */
     private const BOTS_PER_TICK = 10;
 
@@ -136,8 +139,7 @@ class BotPlayerService
         $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
 
         $this->fleetPlanner->act($user, $this->planetRow($planetId), $reserve, $now);
-        $production = ['metal' => $numbers['planet_metal_perhour'] ?? 0.0, 'crystal' => $numbers['planet_crystal_perhour'] ?? 0.0, 'deuterium' => $numbers['planet_deuterium_perhour'] ?? 0.0];
-        $this->orderShips($user, $planetId, $levels, $reserve, $production, $now);
+        $this->orderShips($user, $planetId, $levels, $reserve, $now);
     }
 
     /**
@@ -206,9 +208,8 @@ class BotPlayerService
      * @param array<string, mixed> $user
      * @param array<int, int>      $levels
      * @param array<string, float> $reserve
-     * @param array<string, float> $production per hour
      */
-    private function orderShips(array $user, int $planetId, array $levels, array $reserve, array $production, int $now): void
+    private function orderShips(array $user, int $planetId, array $levels, array $reserve, int $now): void
     {
         $model = Planets::find($planetId);
         $planet = $this->planetRow($planetId);
@@ -227,7 +228,7 @@ class BotPlayerService
             ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
             $reserve,
             MAX_FLEET_OR_DEFS_PER_ROW,
-            $production
+            $this->militaryLags(self::asInt($user['id'] ?? 0))
         );
 
         if ($order === null) {
@@ -254,6 +255,26 @@ class BotPlayerService
                 $planetId,
             ]
         );
+    }
+
+    /**
+     * Whether the fleet and defences are worth less than a third of the
+     * buildings and research (by the statistics' points): then they come
+     * before the next building, as a player builds up a fleet.
+     */
+    private function militaryLags(int $userId): bool
+    {
+        $points = DB::table('users_statistics')->where('user_statistic_user_id', $userId)->first([
+            'user_statistic_buildings_points', 'user_statistic_technology_points', 'user_statistic_ships_points', 'user_statistic_defenses_points',
+        ]);
+
+        if ($points === null) {
+            return false;
+        }
+
+        $economy = self::asFloat($points->user_statistic_buildings_points) + self::asFloat($points->user_statistic_technology_points);
+
+        return self::asFloat($points->user_statistic_ships_points) + self::asFloat($points->user_statistic_defenses_points) < self::MILITARY_SHARE * $economy;
     }
 
     /**

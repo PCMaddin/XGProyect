@@ -36,28 +36,28 @@ class BotShipyardTest extends TestCase
         $levels = $this->developed();
 
         // paid from the whole stock, the reserve for the next building notwithstanding
-        $this->assertSame([Ships::SHIP_COLONY_SHIP, 1], $this->shipyard->order($levels, [], true, true, false, self::STOCK, self::STOCK, 1000));
+        $this->assertSame([Ships::SHIP_COLONY_SHIP, 1], $this->shipyard->order($levels, [], true, true, false, self::STOCK, self::STOCK, 1000, false));
 
         // not enough crystal: the shipyard saves for it and builds nothing else
-        $this->assertNull($this->shipyard->order($levels, [], true, true, false, ['metal' => 100000, 'crystal' => 15000, 'deuterium' => 100000], [], 1000));
+        $this->assertNull($this->shipyard->order($levels, [], true, true, false, ['metal' => 100000, 'crystal' => 15000, 'deuterium' => 100000], [], 1000, false));
 
         // a colony does not build colony ships
-        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 4], $this->shipyard->order($levels, [], false, true, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 4], $this->shipyard->order($levels, [], false, true, false, self::STOCK, [], 1000, false));
     }
 
     public function testProbesThenCargoThenFightersThenDefences(): void
     {
         $levels = $this->developed();
 
-        $this->assertSame([Ships::SHIP_ESPIONAGE_PROBE, 3], $this->shipyard->order($levels, [], true, false, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_ESPIONAGE_PROBE, 3], $this->shipyard->order($levels, [], true, false, false, self::STOCK, [], 1000, false));
         // a quarter of the stock: 25,000 metal pays 12 cargo ships of the 24 wanted
-        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 12], $this->shipyard->order($levels, [Ships::SHIP_ESPIONAGE_PROBE => 3], true, false, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_SMALL_CARGO_SHIP, 12], $this->shipyard->order($levels, [Ships::SHIP_ESPIONAGE_PROBE => 3], true, false, false, self::STOCK, [], 1000, false));
 
         $ships = [Ships::SHIP_ESPIONAGE_PROBE => 3, Ships::SHIP_SMALL_CARGO_SHIP => 24];
-        $this->assertSame([Ships::SHIP_LIGHT_FIGHTER, 8], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000));
+        $this->assertSame([Ships::SHIP_LIGHT_FIGHTER, 8], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000, false));
 
         $ships[Ships::SHIP_LIGHT_FIGHTER] = 36;
-        $this->assertSame([Defenses::DEFENSE_LIGHT_LASER, 16], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000));
+        $this->assertSame([Defenses::DEFENSE_LIGHT_LASER, 16], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, [], 1000, false));
     }
 
     public function testTheWarFleetGrowsWithTheEconomy(): void
@@ -70,12 +70,12 @@ class BotShipyardTest extends TestCase
         $ships = [Ships::SHIP_ESPIONAGE_PROBE => 3, Ships::SHIP_SMALL_CARGO_SHIP => 32, Ships::SHIP_LIGHT_FIGHTER => 48];
         $stock = ['metal' => 1000000, 'crystal' => 1000000, 'deuterium' => 1000000];
 
-        $this->assertSame([Ships::SHIP_RECYCLER, 4], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000));
+        $this->assertSame([Ships::SHIP_RECYCLER, 4], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
         $ships[Ships::SHIP_RECYCLER] = 4;
-        $this->assertSame([Ships::SHIP_HEAVY_FIGHTER, 32], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000));
+        $this->assertSame([Ships::SHIP_HEAVY_FIGHTER, 32], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
         $ships[Ships::SHIP_HEAVY_FIGHTER] = 32;
         // 20 wanted (five per metal mine level above 12), a quarter of the metal pays 12
-        $this->assertSame([Ships::SHIP_CRUISER, 12], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000));
+        $this->assertSame([Ships::SHIP_CRUISER, 12], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
     }
 
     public function testDefencesStopAtTheirCap(): void
@@ -99,7 +99,7 @@ class BotShipyardTest extends TestCase
         // 60,000 metal and 20,000 crystal above the reserve: 40 light lasers
         $this->assertSame(
             [Defenses::DEFENSE_LIGHT_LASER, 40],
-            $this->shipyard->order($levels, [], true, false, true, self::STOCK, ['metal' => 40000, 'crystal' => 80000], 1000)
+            $this->shipyard->order($levels, [], true, false, true, self::STOCK, ['metal' => 40000, 'crystal' => 80000], 1000, false)
         );
     }
 
@@ -115,42 +115,25 @@ class BotShipyardTest extends TestCase
         $this->assertSame([Defenses::DEFENSE_ROCKET_LAUNCHER, 1], $this->shipyard->defenceOrder($lasers, ['metal' => 3000, 'crystal' => 100], 1000));
     }
 
-    public function testAQuarterAboveTheNextBuildingButAtLeastAShareOfTheProduction(): void
+    public function testOnlyResourcesAboveTheNextBuildingAreSpent(): void
     {
         $this->assertSame(
             ['metal' => 500.0, 'crystal' => 0.0, 'deuterium' => 250.0],
             $this->shipyard->spareBudget(['metal' => 10000, 'crystal' => 1000, 'deuterium' => 1000], ['metal' => 4000, 'crystal' => 2000])
         );
-
-        // 30 % of a quarter hour's production, never more than the stock
-        $this->assertSame(
-            ['metal' => 750.0, 'crystal' => 300.0, 'deuterium' => 250.0],
-            $this->shipyard->spareBudget(['metal' => 10000, 'crystal' => 1000, 'deuterium' => 1000], ['metal' => 4000, 'crystal' => 2000], ['metal' => 10000, 'crystal' => 4000, 'deuterium' => 100])
-        );
-        $this->assertSame(
-            ['metal' => 100.0, 'crystal' => 0.0, 'deuterium' => 0.0],
-            $this->shipyard->spareBudget(['metal' => 100], ['metal' => 4000], ['metal' => 10000])
-        );
     }
 
-    public function testCombatValue(): void
+    public function testWhileTheMilitaryLagsTheWholeStockPaysTheFleet(): void
     {
-        $this->assertSame(0.0, $this->shipyard->combatValue([]));
-        // missiles and unknown ids do not fight
-        $this->assertSame(0.0, $this->shipyard->combatValue([Defenses::DEFENSE_INTERPLANETARY_MISSILE => 10, 999 => 5]));
+        $levels = $this->developed();
+        $ships = [Ships::SHIP_ESPIONAGE_PROBE => 3, Ships::SHIP_SMALL_CARGO_SHIP => 24];
+        $reserve = ['metal' => 90000, 'crystal' => 90000];
 
-        $rockets = $this->shipyard->combatValue([Defenses::DEFENSE_ROCKET_LAUNCHER => 10]);
-        $this->assertGreaterThan(0.0, $rockets);
-        $this->assertEqualsWithDelta(2 * $rockets, $this->shipyard->combatValue([Defenses::DEFENSE_ROCKET_LAUNCHER => 20]), 0.001);
-        $this->assertGreaterThan(
-            $this->shipyard->combatValue([Ships::SHIP_SMALL_CARGO_SHIP => 1]),
-            $this->shipyard->combatValue([Ships::SHIP_LIGHT_FIGHTER => 1])
-        );
+        // saving for a building: nothing left for fighters
+        $this->assertNull($this->shipyard->order($levels, $ships, true, false, false, self::STOCK, $reserve, 1000, false));
 
-        $this->assertArrayHasKey(Ships::SHIP_LIGHT_FIGHTER, $this->shipyard->combatUnits());
-        $this->assertArrayHasKey(Defenses::DEFENSE_ROCKET_LAUNCHER, $this->shipyard->combatUnits());
-        $this->assertArrayNotHasKey(Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, $this->shipyard->combatUnits());
-        $this->assertSame('ship_small_cargo_ship', $this->shipyard->column(Ships::SHIP_SMALL_CARGO_SHIP));
+        // the military lags: 100,000 metal pay 33 light fighters, though 36 are wanted
+        $this->assertSame([Ships::SHIP_LIGHT_FIGHTER, 33], $this->shipyard->order($levels, $ships, true, false, false, self::STOCK, $reserve, 1000, true));
     }
 
     /**
