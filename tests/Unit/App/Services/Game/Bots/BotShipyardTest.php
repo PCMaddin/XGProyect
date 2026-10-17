@@ -72,10 +72,28 @@ class BotShipyardTest extends TestCase
 
         $this->assertSame([Ships::SHIP_RECYCLER, 4], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
         $ships[Ships::SHIP_RECYCLER] = 4;
-        $this->assertSame([Ships::SHIP_HEAVY_FIGHTER, 32], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
-        $ships[Ships::SHIP_HEAVY_FIGHTER] = 32;
         // 20 wanted (five per metal mine level above 12), a quarter of the metal pays 12
         $this->assertSame([Ships::SHIP_CRUISER, 12], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
+        $ships[Ships::SHIP_CRUISER] = 20;
+        $this->assertSame([Ships::SHIP_HEAVY_FIGHTER, 32], $this->shipyard->order($levels, $ships, true, false, false, $stock, [], 1000, false));
+    }
+
+    public function testSeveralOrdersATurnEachPaidBeforeTheNext(): void
+    {
+        $levels = $this->developed();
+
+        // the military lags, 100,000 each: probes, all 24 cargo ships, then light fighters for the
+        // 52,000 metal left; the rest of the fighters is next turn's
+        $this->assertSame(
+            [[Ships::SHIP_ESPIONAGE_PROBE, 3], [Ships::SHIP_SMALL_CARGO_SHIP, 24], [Ships::SHIP_LIGHT_FIGHTER, 17]],
+            $this->shipyard->orders($levels, [], true, false, false, self::STOCK, [], true)
+        );
+
+        // economy first: a quarter of the rest buys only part of the cargo ships, and that ends the turn
+        $this->assertSame(
+            [[Ships::SHIP_ESPIONAGE_PROBE, 3], [Ships::SHIP_SMALL_CARGO_SHIP, 12]],
+            $this->shipyard->orders($levels, [], true, false, false, self::STOCK, [], false)
+        );
     }
 
     public function testDefencesStopAtTheirCap(): void

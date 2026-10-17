@@ -43,6 +43,9 @@ class BotShipyard
         Defenses::DEFENSE_ROCKET_LAUNCHER => 10,
     ];
 
+    /** shipyard orders per turn */
+    private const ORDERS_PER_TURN = 4;
+
     /** missiles do not fight */
     private const NOT_FIGHTING = [Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, Defenses::DEFENSE_INTERPLANETARY_MISSILE];
 
@@ -92,6 +95,41 @@ class BotShipyard
         }
 
         return $this->defenceOrder($levels, $budget, $maxPerOrder, $ships);
+    }
+
+    /**
+     * Up to a few orders of different units at once, each paid before the
+     * next is chosen, as a player fills the shipyard.
+     *
+     * @param array<int, int>          $levels
+     * @param array<int, int>          $ships         ships and defences on the planet and flying from it
+     * @param array<string, float|int> $stock
+     * @param array<string, float|int> $reserve
+     *
+     * @return list<array{0: int, 1: int}>
+     */
+    public function orders(array $levels, array $ships, bool $home, bool $wantsColony, bool $raided, array $stock, array $reserve, bool $militaryFirst): array
+    {
+        $orders = [];
+
+        for ($next = 0; $next < self::ORDERS_PER_TURN; $next++) {
+            $order = $this->order($levels, $ships, $home, $wantsColony, $raided, $stock, $reserve, MAX_FLEET_OR_DEFS_PER_ROW, $militaryFirst);
+
+            // the same unit again would only be the rest of the budget
+            if ($order === null || in_array($order[0], array_column($orders, 0), true)) {
+                break;
+            }
+
+            [$unit, $amount] = $order;
+            $orders[] = $order;
+            $ships[$unit] = ($ships[$unit] ?? 0) + $amount;
+
+            foreach ($this->developments->developmentPrice($unit, 0, false) as $resource => $price) {
+                $stock[$resource] = (float) ($stock[$resource] ?? 0) - $price * $amount;
+            }
+        }
+
+        return $orders;
     }
 
     /**
@@ -263,9 +301,9 @@ class BotShipyard
             Ships::SHIP_ESPIONAGE_PROBE => 3,
             Ships::SHIP_SMALL_CARGO_SHIP => min(40, 2 * $metal),
             Ships::SHIP_RECYCLER => min(10, intdiv($metal, 4)),
-            Ships::SHIP_LIGHT_FIGHTER => min(60, 3 * $metal),
-            Ships::SHIP_HEAVY_FIGHTER => min(40, 2 * $metal),
             Ships::SHIP_CRUISER => min(100, max(0, 5 * ($metal - 12))),
+            Ships::SHIP_HEAVY_FIGHTER => min(40, 2 * $metal),
+            Ships::SHIP_LIGHT_FIGHTER => min(60, 3 * $metal),
         ];
     }
 

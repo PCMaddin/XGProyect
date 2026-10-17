@@ -237,12 +237,12 @@ class BotFleetPlanner
             $loot = self::LOOT_SHARE * (self::asFloat($target['planet_metal'] ?? 0) + self::asFloat($target['planet_crystal'] ?? 0) + self::asFloat($target['planet_deuterium'] ?? 0));
 
             $unarmed = $forces === [] && ($cargoShips === [] || $loot < self::MIN_LOOT);
+            // the cargo ships fly into the battle too
+            $fleet = $this->cargoFor($cargoShips, $loot, $user) + ($forces !== [] ? $warships : []);
 
-            if ($unarmed || !$this->targetAllowed($user, $target, $now) || ($forces !== [] && !$this->worthFighting($warships, $user, $forces, $loot, $target))) {
+            if ($unarmed || !$this->targetAllowed($user, $target, $now) || ($forces !== [] && !$this->worthFighting($fleet, $user, $forces, $loot, $target))) {
                 continue;
             }
-
-            $fleet = $this->cargoFor($cargoShips, $loot, $user) + ($forces !== [] ? $warships : []);
 
             return $this->sender->send($user, $planet, $fleet, $this->coordinates($target), Missions::ATTACK, [], 0, $now);
         }
@@ -308,17 +308,17 @@ class BotFleetPlanner
     }
 
     /**
-     * What the battle simulator says: the warships win, and the loot and
+     * What the battle simulator says: the fleet wins, and the loot and
      * the debris (which the recyclers bring in) cover their losses.
      *
-     * @param array<int, int>      $warships
+     * @param array<int, int>      $fleet  the whole attacking fleet
      * @param array<string, mixed> $user
      * @param array<int, int>      $forces the target's ships and defences
      * @param array<string, mixed> $target the target planet with its owner's id
      */
-    private function worthFighting(array $warships, array $user, array $forces, float $loot, array $target): bool
+    private function worthFighting(array $fleet, array $user, array $forces, float $loot, array $target): bool
     {
-        $battle = $this->simulator->simulate($warships, $user, $forces, $this->ownerRow(self::asInt($target['planet_user_id'] ?? 0)));
+        $battle = $this->simulator->simulate($fleet, $user, $forces, $this->ownerRow(self::asInt($target['planet_user_id'] ?? 0)));
 
         return $battle['won'] && $battle['lost'] <= $loot + $battle['debris'];
     }

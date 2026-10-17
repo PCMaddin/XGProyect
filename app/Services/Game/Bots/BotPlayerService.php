@@ -219,7 +219,8 @@ class BotPlayerService
             return;
         }
 
-        $order = $this->shipyard->order(
+        // a few orders at once, like a player filling the shipyard
+        $orders = $this->shipyard->orders(
             $levels,
             $this->withFlying($this->shipyard->shipsOf($planet), $planet),
             $planetId === self::asInt($user['home_planet_id'] ?? 0),
@@ -227,16 +228,23 @@ class BotPlayerService
             $this->fleetPlanner->wasRaided($user, $now),
             ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
             $reserve,
-            MAX_FLEET_OR_DEFS_PER_ROW,
             $this->militaryLags(self::asInt($user['id'] ?? 0))
         );
 
-        if ($order === null) {
+        if ($orders === []) {
             return;
         }
 
-        [$unit, $amount] = $order;
-        $price = $this->developments->developmentPrice($unit, 0, false);
+        $queue = '';
+        $paid = ['metal' => 0.0, 'crystal' => 0.0, 'deuterium' => 0.0];
+
+        foreach ($orders as [$unit, $amount]) {
+            $queue .= $unit . ',' . $amount . ';';
+
+            foreach ($this->developments->developmentPrice($unit, 0, false) as $resource => $price) {
+                $paid[$resource] = ($paid[$resource] ?? 0.0) + $price * $amount;
+            }
+        }
 
         DB::update(
             $this->prepareSql(
@@ -247,13 +255,7 @@ class BotPlayerService
                     `planet_deuterium` = `planet_deuterium` - ?
                 WHERE `planet_id` = ?;'
             ),
-            [
-                $unit . ',' . $amount . ';',
-                ($price['metal'] ?? 0) * $amount,
-                ($price['crystal'] ?? 0) * $amount,
-                ($price['deuterium'] ?? 0) * $amount,
-                $planetId,
-            ]
+            [$queue, $paid['metal'], $paid['crystal'], $paid['deuterium'], $planetId]
         );
     }
 
