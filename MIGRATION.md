@@ -893,6 +893,15 @@ Baseline-Einträge.
   reproduzierbar. 10 Bots × 1440 h × 10-Minuten-Schritte dauern etwa 25
   Minuten. Beispiel:
   `php -d memory_limit=2G tools/simulate-bots.php --db=xgp_sim --bots=10 --hours=1440 --seed=42`
+
+  Ergebnis 10 Bots × 1440 h (60 Spieltage), Seed 42, mit allen Bot-Fixes:
+  **0 Fehler, 0 Invariantenverletzungen.** Durchschnitt 15.561 Punkte
+  (Bots nur mit Gebäuden: 4.933). 29 Kolonien (alle Bots bis auf einen am
+  Limit von Astrophysik 5), 1.740 Expeditionen mit allen Ergebnisarten
+  (Rohstoffe, Schiffe, Dunkle Materie, Piraten, Aliens, Verzögerung,
+  verfrühte Rückkehr, Gegenstand, Schwarzes Loch, Händler), 2.228
+  Transporte, 770 Spionageflüge, 24 Überfälle, 128 Kampfberichte,
+  Trümmerfelder auch im tiefen Raum. Laufzeit 39 Minuten.
 - ✅ **Keine externen Inhalte mehr:** Spiel, Admin-Panel, Installer und
   E-Mails luden Inhalte von fremden Servern, und jeder Aufruf verriet diesen
   Servern, wer wo spielt:
