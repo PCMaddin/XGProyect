@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Journal des modifications',
+    'ch_new_item' => 'Ajouter une entrée',
+    'ch_sub_title' => 'D’ici, vous pouvez modifier la liste des changements (changelog) de votre serveur. Cette section se trouve dans le menu de gauche du jeu.',
+    'ch_general' => 'Liste des changements',
+    'ch_date' => 'Date de l’entrée',
+    'ch_version' => 'Version de l’entrée',
+    'ch_language' => 'Langue de l’entrée',
+    'ch_language_locked' => 'La langue ne peut plus être modifiée après la création.',
+    'ch_translations' => 'Traductions',
+    'ch_edit_translation' => 'Modifier la traduction',
+    'ch_delete_translation' => 'Supprimer la traduction',
+    'ch_actions' => 'Actions',
+    'ch_the_description' => 'Description',
+    'ch_edit_this' => 'Modifier cette entrée',
+    'ch_delete_this' => 'Supprimer cette entrée',
+    'ch_delete_confirm' => 'Voulez-vous vraiment supprimer cette entrée ?',
+    'ch_add_action' => 'Ajouter une nouvelle entrée',
+    'ch_edit_action' => 'Modifier l’entrée : %s',
+    'ch_version_info' => 'Exemples de versions valides :<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Choisir la langue',
+    'ch_characters' => 'caractères',
+    'ch_save' => 'Enregistrer l’entrée',
+    'ch_back' => 'Retour à la liste',
+    'ch_no_entries' => 'Aucune entrée pour le moment. Ajoutez la première !',
+    'ch_description_placeholder' => 'Décrivez les changements apportés par cette version...',
+    'ch_entry_details' => 'Détails de l’entrée',
+    'ch_action_add_done' => 'Entrée ajoutée avec succès !',
+    'ch_action_edit_done' => 'Entrée modifiée avec succès !',
+    'ch_action_delete_done' => 'Entrée supprimée avec succès !',
+];

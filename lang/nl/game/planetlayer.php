@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'In dit menu kun je planeten en manen hernoemen, planeten verplaatsen of ze helemaal opgeven.',
+    'rename' => 'Hernoemen',
+    'new_planet_name' => 'Nieuwe planeetnaam',
+    'new_moon_name' => 'Nieuwe maannaam',
+    'abandon_homeplanet' => 'Thuisplaneet opgeven',
+    'abandon_homeplanet_button' => 'Thuisplaneet opgeven',
+    'abandon_colony' => 'Kolonie opgeven',
+    'abandon_colony_button' => 'Kolonie opgeven',
+    'abandon_moon' => 'Maan opgeven',
+    'abandon_moon_button' => 'Maan opgeven',
+    'abandon_homeplanet_unique' => 'Je kunt je thuisplaneet niet opgeven zolang je nog geen andere planeet hebt gekoloniseerd.',
+    'abandon_homeplanet_with_colonies' => 'Als je je thuisplaneet opgeeft, kom je bij het inloggen direct op je volgende kolonie uit.',
+    'abandon_confirm_message' => 'Bevestig het verwijderen van planeet :coords met je wachtwoord',
+    'abandon_confirm' => 'Bevestigen',
+    'rename_error' => 'Speciale tekens zijn niet toegestaan!',
+    'rename_success' => 'De planeet heet nu: :name',
+    'wrong_password' => 'Onjuist wachtwoord!',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => 'Een planeet met vlootbewegingen kan niet worden opgegeven',
+    'rp_planet_abandoned' => 'Planeet opgegeven',
+    'rp_wrong_pass' => 'Onjuist wachtwoord, vul het opnieuw in.',
+
+    'rl_title' => 'Planeet verplaatsen',
+    'rl_description' => 'Voor %s donkere materie verhuizen de planeet en haar maan binnen 24 uur naar een vrije positie in hetzelfde bereik (1-3, 4-12, 13-15). De donkere materie wordt pas bij de verhuizing afgeschreven. Tot dan mag er op planeet en maan niets worden gebouwd, onderzocht of op de werf geproduceerd, en mag geen eigen vloot ervandaan vertrekken of ernaartoe vliegen. De schepen volgen zonder brandstof met hun normale vliegtijd, het puinveld blijft achter en de sprongpoort ligt 24 uur stil. De vakantiemodus annuleert de verhuizing.',
+    'rl_target' => 'Bestemming',
+    'rl_start' => 'Verplaatsen',
+    'rl_running' => 'De planeet verhuist naar %s op %s.',
+    'rl_cancel' => 'Verhuizing annuleren',
+    'rl_started' => 'De verhuizing is gestart.',
+    'rl_cancelled' => 'De verhuizing is geannuleerd.',
+    'rl_error_planet' => 'Deze planeet kan niet worden verplaatst.',
+    'rl_error_running' => 'De planeet wordt al verplaatst.',
+    'rl_error_target' => 'Ongeldige bestemming.',
+    'rl_error_band' => 'De bestemming moet in hetzelfde positiebereik liggen (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'De bestemming is bezet of gereserveerd.',
+    'rl_error_vacation' => 'In vakantiemodus kun je niet verhuizen.',
+    'rl_error_dark_matter' => 'Je hebt niet genoeg donkere materie.',
+    'rl_error_building' => 'Er wordt gebouwd op de planeet of maan.',
+    'rl_error_research' => 'Er wordt onderzocht op de planeet of maan.',
+    'rl_error_shipyard' => 'De werf van de planeet of maan heeft opdrachten.',
+    'rl_error_fleets' => 'Eigen vloten vliegen van of naar de planeet of maan.',
+    'rl_error_wreck_field' => 'Het ruimtedok herstelt schepen of ze wachten om in dienst te worden genomen.',
+    'rl_from' => 'Beheer',
+    'rl_subject' => 'Verhuizing',
+    'rl_done' => 'De planeet is verhuisd naar %s. De schepen volgen.',
+    'rl_failed' => 'De verhuizing naar %s is mislukt: %s',
+];

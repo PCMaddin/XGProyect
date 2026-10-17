@@ -3,6 +3,7 @@
 @section('content')
 <x-notice width="519px" :color="$color" :message="$message" />
 <form action="game.php?page=preferences" method="post" role="form">
+    @csrf
     <table role="presentation" width="519px">
         <tbody>
             <tr>
@@ -81,6 +82,12 @@
                 <th>{{ __('game/preferences.pr_number_espionage_probes') }}:</th>
                 <th>
                     <input type="number" name="preference_spy_probes" value="{{ $preference_spy_probes }}" size="3" minlength="1" min="1" max="99" pattern="[0-9]*"/>
+                </th>
+            </tr>
+            <tr {!! $hide_vacation_invalid !!}>
+                <th>{{ __('game/preferences.pr_fleet_escape') }}:</th>
+                <th>
+                    <input type="checkbox" name="preference_fleet_escape"{{ $preference_fleet_escape ? ' checked' : '' }}/>
                 </th>
             </tr>
             <tr {!! $hide_vacation_invalid !!}>

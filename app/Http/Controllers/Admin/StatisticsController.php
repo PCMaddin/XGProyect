@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\StatisticsRequest;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 class StatisticsController extends AdminSettingsController
 {

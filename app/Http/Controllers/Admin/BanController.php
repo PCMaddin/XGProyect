@@ -122,6 +122,9 @@ class BanController extends BaseController
             ->first();
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     private function upsertBan(int $userId, int $adminId, string $details, Carbon $until, bool $vacationMode): void
     {
         DB::transaction(function () use ($userId, $adminId, $details, $until, $vacationMode) {

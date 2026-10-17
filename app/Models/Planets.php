@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
+ * @property int                         $planet_id
  * @property string                      $planet_name
  * @property string                      $planet_b_hangar_id
  * @property string                      $planet_b_building_id
@@ -27,9 +28,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int                         $planet_b_tech_id   tech ID currently being researched (legacy cache)
  * @property int                         $planet_b_hangar
  * @property Collection<int,BuildingQueue> $buildingQueue
+ * @property int    $planet_debris_metal
+ * @property int    $planet_debris_crystal
  * @property int    $planet_diameter
  * @property int    $planet_field_current
  * @property int    $planet_field_max
+ * @property int    $planet_item_fields
  * @property int    $planet_temp_min
  * @property int    $planet_temp_max
  * @property int    $planet_metal_perhour
@@ -45,6 +49,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $planet_ship_solar_satellite_percent
  * @property int    $planet_last_jump_time
  * @property int    $planet_invisible_start_time
+ * @property int    $planet_relocate_galaxy
+ * @property int    $planet_relocate_system
+ * @property int    $planet_relocate_planet
+ * @property int    $planet_relocate_at
  * @property float  $planet_metal
  * @property float  $planet_crystal
  * @property float  $planet_deuterium
@@ -109,6 +117,10 @@ class Planets extends Model
         'planet_debris_metal',
         'planet_debris_crystal',
         'planet_invisible_start_time',
+        'planet_relocate_galaxy',
+        'planet_relocate_system',
+        'planet_relocate_planet',
+        'planet_relocate_at',
     ];
 
     /**
@@ -127,6 +139,9 @@ class Planets extends Model
      */
     protected $casts = [
         'planet_name' => 'string',
+        'planet_b_building_id' => 'string',
+        'planet_debris_metal' => 'int',
+        'planet_debris_crystal' => 'int',
         'planet_user_id' => 'int',
         'planet_galaxy' => 'int',
         'planet_system' => 'int',
@@ -161,6 +176,10 @@ class Planets extends Model
         'planet_ship_solar_satellite_percent' => 'int',
         'planet_last_jump_time' => 'int',
         'planet_invisible_start_time' => 'int',
+        'planet_relocate_galaxy' => 'int',
+        'planet_relocate_system' => 'int',
+        'planet_relocate_planet' => 'int',
+        'planet_relocate_at' => 'int',
     ];
 
     /**

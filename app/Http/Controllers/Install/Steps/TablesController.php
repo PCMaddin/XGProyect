@@ -40,6 +40,9 @@ class TablesController extends BaseController
                 'prepare_config' => ['config:clear', []],
                 'install' => ['migrate:install', []],
                 'create' => ['migrate', ['--path' => 'database/migrations/install', '--force' => true]],
+                // the install schema is the current state: record the update
+                // migrations as run, or the next update runs them again
+                'mark_updates' => ['xgp:mark-installed-updates', ['--all' => true]],
                 'insert_changelog' => ['db:seed', ['--class' => 'ChangelogTableSeeder', '--force' => true]],
                 'insert_languages' => ['db:seed', ['--class' => 'LanguagesTableSeeder', '--force' => true]],
                 'insert_options' => ['db:seed', ['--class' => 'OptionsTableSeeder', '--force' => true]],

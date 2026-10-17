@@ -30,6 +30,7 @@ return [
         'building_laboratory' => 'Se necesita un laboratorio de investigación para conducir la investigación en nuevas tecnologías.',
         'building_terraformer' => 'El Terraformer es necesario para habilitar áreas inaccesibles de tu planeta para edificar infraestructuras.',
         'building_ally_deposit' => 'El depósito de la alianza ofrece la posibilidad de repostar a las flotas aliadas que estén estacionadas en la órbita ayudando a defender.',
+        'building_space_dock' => 'El muelle espacial repara naves de los campos de restos que quedan tras grandes batallas sobre el planeta.',
         'building_mondbasis' => 'Dado que la luna no tiene atmósfera, se necesita una base lunar para generar espacio habitable.',
         'building_phalanx' => 'Usando el sensor phalanx, las flotas de otros imperios pueden ser descubiertas y observadas. Cuanto mayor sea la cadena de sensores phalanx, mayor el rango que pueda escanear.',
         'building_jump_gate' => 'El saltos cuánticos son transmisores enormes que son capaces de enviar grandes flotas a través del universo sin perdida de tiempo.',

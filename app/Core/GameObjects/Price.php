@@ -13,6 +13,7 @@ class Price
         private int $energy = 0,
         private int $energyMax = 0,
         private float $factor = 1,
+        private float $energyFactor = 0,
     ) {
     }
 
@@ -44,6 +45,14 @@ class Price
     public function getFactor(): float
     {
         return $this->factor;
+    }
+
+    /**
+     * The factor of the energy cost; the general factor unless set.
+     */
+    public function getEnergyFactor(): float
+    {
+        return $this->energyFactor > 0 ? $this->energyFactor : $this->factor;
     }
 
     /**

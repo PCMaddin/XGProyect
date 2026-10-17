@@ -15,7 +15,35 @@
             <property name="reportLevel" value="12" />
         </properties>
     </rule>
-    <rule ref="rulesets/cleancode.xml" />
+    <rule ref="rulesets/cleancode.xml">
+        <exclude name="StaticAccess" />
+    </rule>
+    <!-- Laravel facades and Carbon factories are static by design. -->
+    <rule ref="rulesets/cleancode.xml/StaticAccess">
+        <properties>
+            <property name="exceptions" value="
+                    \Illuminate\Support\Facades\App,
+                    \Illuminate\Support\Facades\Artisan,
+                    \Illuminate\Support\Facades\Auth,
+                    \Illuminate\Support\Facades\Broadcast,
+                    \Illuminate\Support\Facades\Config,
+                    \Illuminate\Support\Facades\DB,
+                    \Illuminate\Support\Facades\Event,
+                    \Illuminate\Support\Facades\File,
+                    \Illuminate\Support\Facades\Hash,
+                    \Illuminate\Support\Facades\Http,
+                    \Illuminate\Support\Facades\Mail,
+                    \Illuminate\Support\Facades\RateLimiter,
+                    \Illuminate\Support\Facades\Route,
+                    \Illuminate\Support\Facades\Session,
+                    \Illuminate\Support\Facades\Storage,
+                    \Illuminate\Support\Facades\URL,
+                    \Illuminate\Support\Facades\Validator,
+                    \Illuminate\Support\Facades\View,
+                    \Carbon\Carbon
+                " />
+        </properties>
+    </rule>
     <rule ref="rulesets/controversial.xml" />
     <rule ref="rulesets/design.xml" />
     <rule ref="rulesets/naming.xml">

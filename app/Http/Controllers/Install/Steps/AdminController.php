@@ -14,8 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Core\Enumerators\UserRanksEnumerator;
+use App\Libraries\PlanetLib;
 
 class AdminController extends BaseController
 {
@@ -33,12 +33,15 @@ class AdminController extends BaseController
         );
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function doCheck(AdminRequest $request): RedirectResponse
     {
         try {
             DB::beginTransaction();
 
-            $newUser = User::create(array_merge(
+            $newUser = new User(array_merge(
                 $request->validated(),
                 [
                     'name' => $request->validated()['username'],
@@ -50,9 +53,10 @@ class AdminController extends BaseController
                     'current_page' => $request->getRequestUri(),
                     'register_time' => time(),
                     'onlinetime' => time(),
-                    'authlevel' => UserRanksEnumerator::ADMIN,
                 ]
             ));
+            $newUser->authlevel = UserRanksEnumerator::ADMIN;
+            $newUser->save();
 
             $newUser->preferences()->create();
             $newUser->premium()->create();

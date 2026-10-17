@@ -29,19 +29,22 @@ return [
     'exp_primitive_enemy_6' => 'The expedition reports tough battles against undefined pirate ships.', // ok
     'exp_primitive_enemy_8' => 'We ran straight into an ambush set by some Star Buccaneers! A fight couldn\'t be avoided.', // ok
 
+    'exp_pirates_name' => 'Pirates',
+    'exp_aliens_name' => 'Aliens',
+
     // found advanced enemy
     'exp_advanced_enemy_1' => 'Some exotic looking ships attacked the expedition fleet without warning!', // ok
     'exp_advanced_enemy_2' => 'Your expedition fleet had an unfriendly first contact with an unknown species.', // ok
 
     // found trader
-    'exp_trader' => 'Your expedition fleet made contact with a friendly alien race. They announced that they would send a representative with goods to trade to your worlds.', // ok
+    'exp_trader' => 'Your expedition fleet made contact with a friendly alien race. They announced that they would send a representative with goods to trade to your worlds.<br><br>Your next call of the merchant (trader) is free.', // ok
 
     // found dark matter
-    'exp_dm_1' => 'The expedition followed some odd signals to an asteroid. In the asteroids core a small amount of Dark Matter was found. The asteroid was taken and the explorers are attempting to extract the Dark Matter.<br><br>Dark Matter %s have been captured.', // ok
-    'exp_dm_2' => 'Our expedition took over a ghost ship which was transporting a small amount of Dark Matter. We didn\'t find any hints of what happened to the original crew of the ship, but our technicians where able to rescue the Dark Matter.<br><br>Dark Matter %s have been captured.', // ok
-    'exp_dm_3' => 'We found the remains of an alien ship. We found a little container with some Dark Matter on a shelf in the Cargo hold!.<br><br>Dark Matter %s have been captured.', // ok
-    'exp_dm_4' => 'We met an odd alien on the shelf of a small ship who gave us a case with Dark Matter in exchange for some simple mathematical calculations.<br><br>Dark Matter %s have been captured.', // ok
-    'exp_dm_5' => 'The expedition was able to capture and store some Dark Matter.<br><br>Dark Matter %s have been captured.', // ok
+    'exp_dm_1' => 'The expedition followed some odd signals to an asteroid. In the asteroids core a small amount of Dark Matter was found. The asteroid was taken and the explorers are attempting to extract the Dark Matter.<br><br>%s %s have been captured.', // ok
+    'exp_dm_2' => 'Our expedition took over a ghost ship which was transporting a small amount of Dark Matter. We didn\'t find any hints of what happened to the original crew of the ship, but our technicians where able to rescue the Dark Matter.<br><br>%s %s have been captured.', // ok
+    'exp_dm_3' => 'We found the remains of an alien ship. We found a little container with some Dark Matter on a shelf in the Cargo hold!.<br><br>%s %s have been captured.', // ok
+    'exp_dm_4' => 'We met an odd alien on the shelf of a small ship who gave us a case with Dark Matter in exchange for some simple mathematical calculations.<br><br>%s %s have been captured.', // ok
+    'exp_dm_5' => 'The expedition was able to capture and store some Dark Matter.<br><br>%s %s have been captured.', // ok
 
     // delay
     'exp_delay_1' => 'Your expedition went into a sector full of particle storms. This set the energy stores to overload and most of the ships main systems crashed. Your mechanics where able to avoid the worst, but the expedition is going to return with a big delay.', // ok
@@ -66,7 +69,7 @@ return [
     'exp_nothing_5' => 'Besides some quaint, small pets from a unknown marsh planet, this expedition brings nothing thrilling back from the trip.', // ok
     'exp_nothing_6' => 'Our expedition team came across a strange colony that had been abandoned eons ago. After landing, our crew started to suffer from a high fever caused by an alien virus. It has been learned that this virus wiped out the entire civilization on the planet. Our expedition team is heading home to treat the sickened crew members. Unfortunately we had to abort the mission and we come home empty handed.', // ok
     'exp_nothing_7' => 'A strange computer virus attacked the navigation system shortly after parting our home system. This caused the expedition fleet to fly in circles. Needless to say that the expedition wasn\'t really successful.', // ok
-    'exp_nothing_8' => '',
+    'exp_nothing_8' => 'Celebrating the captain\'s birthday on that desert planet was probably not a good idea. A terrible, unknown fever confined most of the expedition crew to the sick bay for the rest of the journey. The expedition failed for lack of crew.',
     'exp_nothing_9' => 'A failure in the flagships reactor core nearly destroys the entire expedition fleet. Fortunately the technicians were more than competent and could avoid the worst. The repairs took quite some time and forced the expedition to return without having accomplished its goal.', // ok
     'exp_nothing_10' => 'Despite the first, very promising scans of this sector, we unfortunately returned empty handed.', // ok
     'exp_nothing_11' => 'Your expedition has learnt about the extensive emptiness of space. There was not even one small asteroid or radiation or particle that could have made this expedition interesting.', // ok
@@ -78,9 +81,11 @@ return [
 
     // lost ships
     'exp_lost_1' => 'The only thing left from the expedition was the following radio transmission: Zzzrrt Oh no! Krrrzzzzt That zrrrtrzt looks krgzzzz like ... AHH! Krzzzzzzzztzzzz...<br><br><br><br><br><br>Transmission terminated', // ok
-    'exp_lost_2' => '',
 
     // exploration status
     'exp_status_fresh_1' => 'Entry from the communications officers logbook: It seems that this part of the universe has not been explored yet.', // ok
     'exp_status_fresh_2' => 'Entry from the communications officers logbook: It feels great to be the first ones traveling through an unexplored sector.', // ok
+    'exp_status_busy' => 'Entry from the communications officers logbook: It does not seem as if a human has ever been in this part of the galaxy.',
+    'exp_status_crowded' => 'Entry from the communications officers logbook: We found signs of the presence of other expedition fleets.',
+    'exp_status_overrun' => 'Entry from the communications officers logbook: If we feel too unsafe, we can always team up with all the other expeditions flying around here.',
 ];

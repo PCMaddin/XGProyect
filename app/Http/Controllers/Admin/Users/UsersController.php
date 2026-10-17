@@ -16,9 +16,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
-use Xgp\App\Libraries\Functions;
-use Xgp\App\Libraries\Users as UsersLibrary;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Libraries\Functions;
+use App\Libraries\Users as UsersLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -167,27 +167,29 @@ class UsersController extends BaseController
     /** @SuppressWarnings("PHPMD.StaticAccess") */
     public function updateInfo(UserInfoRequest $request, User $user): RedirectResponse
     {
-        /** @var array{username: string, email: string, authlevel: int, home_planet_id: int, current_planet: int, ally_id: int, password?: string} $validated */
+        /** @var array{username: string, email: string, authlevel: int|string, home_planet_id: int|string, current_planet: int|string, ally_id: int|string, password?: string} $validated */
         $validated = $request->validated();
 
         /** @var User $actor */
         $actor = Auth::user();
         $actorLevel = $actor->authlevel;
         $isSelf = $actor->id === $user->id;
-        $newLevel = $validated['authlevel'];
+        // form values arrive as strings
+        $newLevel = (int) $validated['authlevel'];
 
         if ($isSelf || $newLevel > $actorLevel) {
             session()->flash('danger', __('admin/users.us_error_authlevel'));
             return redirect()->route('admin.users.info', $user->id);
         }
 
-        $newAllyId = $validated['ally_id'];
+        // compared with the stored id as int: as a string every save counted
+        // as joining the alliance (rank back to newcomer, new join date)
+        $newAllyId = (int) $validated['ally_id'];
         $allyChanged = (int) $user->ally_id !== $newAllyId;
 
         $updateData = [
             'name' => $validated['username'],
             'email' => $validated['email'],
-            'authlevel' => $newLevel,
             'home_planet_id' => $validated['home_planet_id'],
             'current_planet' => $validated['current_planet'],
             'ally_id' => $newAllyId,
@@ -205,12 +207,15 @@ class UsersController extends BaseController
             $updateData['ally_register_time'] = 0;
         }
 
+        // the model's password mutator hashes it (hashing here as well made
+        // the new password unusable)
         if (!empty($validated['password'])) {
-            /** @SuppressWarnings("PHPMD.StaticAccess") */
-            $updateData['password'] = Functions::hash($validated['password']);
+            $updateData['password'] = $validated['password'];
         }
 
-        $user->update($updateData);
+        $user->fill($updateData);
+        $user->authlevel = $newLevel;
+        $user->save();
 
         if ($actor->id !== $user->id) {
             DB::table('sessions')->where('user_id', $user->id)->delete();

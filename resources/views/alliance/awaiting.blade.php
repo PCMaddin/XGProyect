@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="" method="POST" role="form">
+    @csrf
     <table width="519" role="presentation">
         <tr>
             <td role="heading" aria-level="2" class="c" colspan="2">{{ __('game/alliance.al_your_request_title') }}</td>

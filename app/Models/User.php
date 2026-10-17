@@ -37,6 +37,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string             $ally_request_text
  * @property int                $ally_register_time
  * @property int                $ally_rank_id
+ * @property int                $player_class
+ * @property bool               $user_is_bot
+ * @property int                $user_bot_next_action
  * @property Ban|null           $ban
  * @property Planets            $planets
  * @property Preferences        $preferences
@@ -53,7 +56,8 @@ class User extends Authenticatable
     use Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable. Not the rank (authlevel):
+     * it is only set explicitly, so no request data can grant one.
      *
     * @var list<string>
      */
@@ -61,7 +65,6 @@ class User extends Authenticatable
         'name',
         'password',
         'email',
-        'authlevel',
         'home_planet_id',
         'galaxy',
         'system',
@@ -120,6 +123,9 @@ class User extends Authenticatable
         'ally_request_text' => 'string',
         'ally_register_time' => 'int',
         'ally_rank_id' => 'int',
+        'player_class' => 'int',
+        'user_is_bot' => 'bool',
+        'user_bot_next_action' => 'int',
     ];
 
     /**

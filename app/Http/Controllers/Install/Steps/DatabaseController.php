@@ -16,7 +16,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use PDO;
-use Xgp\App\Helpers\StringsHelper;
+use App\Helpers\StringsHelper;
 
 class DatabaseController extends BaseController
 {
@@ -34,6 +34,9 @@ class DatabaseController extends BaseController
         );
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function doCheck(DatabaseRequest $request): RedirectResponse
     {
         /** @var array<string, scalar|null> $config */
@@ -77,7 +80,11 @@ class DatabaseController extends BaseController
             ->with('success', __('install/install.db_connect_success'));
     }
 
-    /** @param array<string, scalar|null> $config */
+    /**
+     * @param array<string, scalar|null> $config
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     private function writeConfigFile(array $config): bool
     {
         $file = 'xgp-db-config.php';

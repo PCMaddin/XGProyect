@@ -108,6 +108,36 @@
                 </x-admin.card-collapsible>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <x-admin.card-collapsible id="collapseScrap" :title="__('admin/premium.pr_scrap')" icon="fas fa-recycle">
+                    <x-admin.settings-table>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_base_rate') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_base_rate"
+                                    value="{{ $merchant_scrap_base_rate }}" min="0" max="100" step="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_max_rate') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_max_rate"
+                                    value="{{ $merchant_scrap_max_rate }}" min="0" max="100" step="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_bargain_price') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_bargain_price"
+                                    value="{{ $merchant_scrap_bargain_price }}" min="0" step="1">
+                            </td>
+                        </tr>
+                    </x-admin.settings-table>
+                </x-admin.card-collapsible>
+            </div>
+        </div>
     </form>
 </div>
 @endsection

@@ -27,7 +27,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use RuntimeException;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")

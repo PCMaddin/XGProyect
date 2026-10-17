@@ -19,13 +19,12 @@ class Welcome extends Mailable
     use SerializesModels;
 
     /**
-     * Create a new message instance.
+     * Create a new message instance. The password is not part of it: the
+     * player chose it, and it was sent back in plain text.
      */
     public function __construct(
         public string $userName,
-        public string $userPass
     ) {
-        //
     }
 
     /**

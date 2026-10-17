@@ -7,12 +7,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @property int     $acs_id
  * @property string  $acs_name
  * @property int     $acs_owner
  * @property int     $acs_galaxy
  * @property int     $acs_system
  * @property int     $acs_planet
- * @property boolean $acs_planet_type
+ * @property int     $acs_planet_type
  */
 class Acs extends Model
 {
@@ -64,7 +65,7 @@ class Acs extends Model
         'acs_galaxy' => 'int',
         'acs_system' => 'int',
         'acs_planet' => 'int',
-        'acs_planet_type' => 'boolean',
+        'acs_planet_type' => 'int',
     ];
 
     /**

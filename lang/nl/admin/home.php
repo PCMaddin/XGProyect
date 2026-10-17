@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => 'Welkom bij XG Proyect',
+    'hm_sub_title' => 'Bedankt dat je XG Proyect als OGame-kloon hebt gekozen. Dit scherm geeft je een snel overzicht van de statistieken van je server. Met de links links op dit scherm beheer je elk onderdeel van je server. Elke pagina legt uit hoe je de functies gebruikt.',
+    'hm_server_statistics' => 'Serverstatistieken',
+    'hm_number_users' => 'Aantal gebruikers',
+    'hm_number_alliances' => 'Aantal allianties',
+    'hm_number_planets' => 'Aantal planeten',
+    'hm_number_moons' => 'Aantal manen',
+    'hm_number_fleets' => 'Aantal vloten',
+    'hm_number_reports' => 'Aantal rapporten',
+    'hm_average_user_points' => 'Gemiddelde punten per speler',
+    'hm_average_alliance_points' => 'Gemiddelde punten per alliantie',
+    'hm_database_size' => 'Databasegrootte',
+    'hm_database_server' => 'Databaseserver',
+    'hm_php_version' => 'PHP-versie',
+    'hm_server_version' => 'XGP-versie',
+    'hm_error' => 'Alarm!',
+    'hm_warning' => 'Let op!',
+    'hm_ok' => 'OK!',
+    'hm_debug_mode' => 'Debugmodus staat aan (APP_DEBUG=true in .env): foutpagina’s tonen broncode, query’s en verzoekgegevens aan elke bezoeker. Zet op een openbare server APP_DEBUG=false en APP_ENV=production.',
+    'hm_install_file_detected' => 'Map install/ gevonden. Om veiligheidsredenen moet je die hernoemen of verwijderen.',
+    'hm_config_file_writable' => 'Je configuratiebestand (xgp-db-config.php) is voor iedereen beschrijfbaar. We raden sterk aan de rechten op 640 of minstens 644 te zetten.',
+    'hm_errors' => 'Er zijn fouten op je server. Bekijk ze <a href="/admin/errors">hier</a>',
+    'hm_old_version' => 'Er is een nieuwe versie beschikbaar. Klik <a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">hier</a> om die te downloaden.',
+    'hm_all_ok' => 'Geen updates of meldingen',
+    'hm_update_required' => 'De versies van je systeem en database verschillen, <a href="/admin/update"><strong>werk nu bij!</strong></a> om problemen te voorkomen.',
+    'hm_credits' => 'Credits',
+    'hm_proyect_leader' => 'Projectleiders',
+    'hm_principal_contributors' => 'Belangrijkste bijdragers',
+    'hm_extensions' => 'Bibliotheken / extensies',
+    'hm_thanks_to' => 'Met speciale dank aan',
+];

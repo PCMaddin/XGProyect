@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'このプレイヤーへの申請はすでに存在します！',
+    'bu_cannot_request_yourself' => '自分自身にフレンド申請はできません',
+    'bu_request_message' => '申請メッセージ',
+    'bu_player' => '名前',
+    'bu_request_text' => '申請文',
+    'bu_characters' => '文字',
+    'bu_back' => '戻る',
+    'bu_send' => '送信',
+    'bu_cancel_request' => '申請を取り消す',
+    'bu_accept' => '承認',
+    'bu_decline' => '拒否',
+    'bu_delete' => '削除',
+    'bu_buddy_list' => 'フレンドリスト',
+    'bu_requests' => '申請',
+    'bu_alliance' => '同盟',
+    'bu_coords' => '座標',
+    'bu_text' => 'テキスト',
+    'bu_action' => '操作',
+    'bu_my_requests' => '自分の申請',
+    'bu_partners' => 'フレンド',
+    'bu_estate' => '状態',
+    'bu_deleted_title' => 'フレンド解除',
+    'bu_deleted_text' => 'プレイヤー %u があなたをフレンドリストから削除しました。',
+    'bu_accepted_title' => '申請が承認されました',
+    'bu_accepted_text' => 'プレイヤー %u があなたのフレンド申請を承認しました。',
+    'bu_rejected_title' => '申請が拒否されました',
+    'bu_rejected_text' => 'プレイヤー %u があなたのフレンド申請を拒否しました。',
+    'bu_to_accept_title' => '新しいフレンド申請',
+    'bu_to_accept_text' => 'プレイヤー %u からフレンド申請が届きました。',
+];

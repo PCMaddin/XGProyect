@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => '更新履歴',
+    'ch_new_item' => '新しい項目を追加',
+    'ch_sub_title' => 'ここではサーバーの更新履歴（changelog）を編集できます。このセクションはゲームの左メニューにあります。',
+    'ch_general' => '更新履歴一覧',
+    'ch_date' => '項目の日付',
+    'ch_version' => '項目のバージョン',
+    'ch_language' => '項目の言語',
+    'ch_language_locked' => '作成後に言語は変更できません。',
+    'ch_translations' => '翻訳',
+    'ch_edit_translation' => '翻訳を編集',
+    'ch_delete_translation' => '翻訳を削除',
+    'ch_actions' => '操作',
+    'ch_the_description' => '説明',
+    'ch_edit_this' => 'この項目を編集',
+    'ch_delete_this' => 'この項目を削除',
+    'ch_delete_confirm' => 'この項目を削除してもよろしいですか？',
+    'ch_add_action' => '新しい項目を追加',
+    'ch_edit_action' => '項目を編集: %s',
+    'ch_version_info' => '有効なバージョンの例:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => '言語を選択',
+    'ch_characters' => '文字',
+    'ch_save' => '項目を保存',
+    'ch_back' => '一覧に戻る',
+    'ch_no_entries' => '更新履歴の項目はまだありません。最初の項目を追加しましょう！',
+    'ch_description_placeholder' => 'このバージョンで行われた変更を記述してください...',
+    'ch_entry_details' => '項目の詳細',
+    'ch_action_add_done' => '項目を追加しました！',
+    'ch_action_edit_done' => '項目を編集しました！',
+    'ch_action_delete_done' => '項目を削除しました！',
+];

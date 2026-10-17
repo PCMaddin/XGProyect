@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace App\Services\Game;
 
 use App\Core\GameObjects\GameObjectRegistry;
+use App\Enums\PlayerClass;
 use App\Models\Buildings;
 use App\Models\Planets;
 use App\Models\ResearchQueue;
 use App\Models\User;
 use App\Models\UsersStatistics;
 use App\Services\Game\Formulas\DevelopmentsService;
+use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Collection;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
-use Xgp\App\Core\Enumerators\ResearchEnumerator;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\ResearchEnumerator;
+use App\Libraries\StatisticsLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -22,6 +24,8 @@ use Xgp\App\Libraries\StatisticsLibrary;
  */
 class ResearchQueueService
 {
+    use ReadsMixedValues;
+
     public const MAX_QUEUE_SIZE = 5;
 
     public function __construct(
@@ -52,12 +56,12 @@ class ResearchQueueService
 
         $techCol = $this->registry->get($techId)->getName();
         $alreadyQueued = $queue->where('tech_id', $techId)->count();
-        $currentLevel = (int) ($userData[$techCol] ?? 0);
+        $currentLevel = self::asInt($userData[$techCol] ?? 0);
         $levelForCalc = $currentLevel + $alreadyQueued;
 
         $labLevel = $this->labLevel($user, $planet);
-        $astrophysicsCol = $this->registry->get(ResearchEnumerator::research_astrophysics)->getName();
-        $astrophysicsLevel = (int) ($userData[$astrophysicsCol] ?? 0);
+        $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
+        $astrophysicsLevel = self::asInt($userData[$astrophysicsCol] ?? 0);
 
         $duration = $this->developmentsService->developmentTime(
             $techId,
@@ -66,7 +70,8 @@ class ResearchQueueService
             0,
             $labLevel,
             $astrophysicsLevel,
-            $technocrateActive
+            $technocrateActive,
+            PlayerClass::fromInt($user->player_class)
         );
 
         $endTime = (int) $queue->last()?->end_time + $duration;
@@ -132,7 +137,7 @@ class ResearchQueueService
 
         if ($remaining->isNotEmpty()) {
             $currentTime = time();
-            $astrophysicsCol = $this->registry->get(ResearchEnumerator::research_astrophysics)->getName();
+            $astrophysicsCol = $this->registry->get(ResearchEnumerator::RESEARCH_ASTROPHYSICS)->getName();
             $astrophysicsLevel = (int) $user->research->$astrophysicsCol;
             $technocrateActive = $user->premium->premium_officier_technocrat > $currentTime;
 
@@ -221,23 +226,50 @@ class ResearchQueueService
         }
     }
 
+    /**
+     * Shorten the running research and those after it by up to $seconds
+     * (item "newtron"). False when nothing is being researched.
+     */
+    public function speedUp(int $userId, int $seconds): bool
+    {
+        $queue = ResearchQueue::where('user_id', $userId)->orderBy('position')->get();
+        $first = $queue->first();
+
+        if (!$first instanceof ResearchQueue || $first->end_time <= time()) {
+            return false;
+        }
+
+        $cut = min($seconds, $first->end_time - time());
+
+        foreach ($queue as $item) {
+            $item->end_time -= $cut;
+            $item->save();
+        }
+
+        Planets::where('planet_id', $first->planet_id)->update(['planet_b_tech' => $first->end_time]);
+
+        return true;
+    }
+
     public function labLevel(User $user, Planets $planet): int
     {
-        $intergalCol = $this->registry->get(ResearchEnumerator::research_intergalactic_research_network)->getName();
+        $intergalCol = $this->registry->get(ResearchEnumerator::RESEARCH_INTERGALACTIC_RESEARCH_NETWORK)->getName();
         $intergalLevel = (int) $user->research->$intergalCol;
 
         if ($intergalLevel < 1) {
             $labCol = $this->registry->get(BuildingsEnumerator::BUILDING_LABORATORY)->getName();
 
-            return (int) ($planet->buildings?->$labCol ?? 0);
+            return (int) ($planet->buildings->$labCol ?? 0);
         }
 
-        return (int) Buildings::selectRaw('SUM(building_laboratory) AS total_level')
+        // with the network, all laboratories of the player add up (decided;
+        // the former ORDER BY/LIMIT suggested only the best level+1, but
+        // LIMIT does not limit a SUM, and strict MySQL rejects ORDER BY on a
+        // non-aggregated column there)
+        return self::asInt(Buildings::query()
             ->join('planets', 'planet_id', '=', 'building_planet_id')
             ->where('planet_user_id', $user->id)
-            ->orderBy('building_laboratory', 'DESC')
-            ->limit($intergalLevel + 1)
-            ->value('total_level');
+            ->sum('building_laboratory'));
     }
 
     private function startItem(User $user, ResearchQueue $item): void
@@ -298,7 +330,8 @@ class ResearchQueueService
             0,
             $this->labLevel($user, $planet),
             $astrophysicsLevel,
-            $technocrateActive
+            $technocrateActive,
+            PlayerClass::fromInt($user->player_class)
         );
     }
 

@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => '你可以通过此菜单重命名星球和月球、迁移星球或彻底放弃它们。',
+    'rename' => '重命名',
+    'new_planet_name' => '新的星球名称',
+    'new_moon_name' => '新的月球名称',
+    'abandon_homeplanet' => '放弃母星',
+    'abandon_homeplanet_button' => '放弃母星',
+    'abandon_colony' => '放弃殖民地',
+    'abandon_colony_button' => '放弃殖民地',
+    'abandon_moon' => '放弃月球',
+    'abandon_moon_button' => '放弃月球',
+    'abandon_homeplanet_unique' => '在殖民其他星球之前，你不能放弃母星。',
+    'abandon_homeplanet_with_colonies' => '如果放弃母星，登录时你将直接进入下一颗殖民星球。',
+    'abandon_confirm_message' => '请输入密码以确认删除星球 :coords',
+    'abandon_confirm' => '确认',
+    'rename_error' => '不能使用特殊字符！',
+    'rename_success' => '星球已重命名为: :name',
+    'wrong_password' => '密码错误！',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => '有舰队往来的星球无法放弃',
+    'rp_planet_abandoned' => '星球已放弃',
+    'rp_wrong_pass' => '密码错误，请重新输入。',
+
+    'rl_title' => '迁移星球',
+    'rl_description' => '花费 %s 暗物质，星球及其月球将在 24 小时后迁移到同一范围（1-3、4-12、13-15）内的空闲位置。暗物质只在星球迁移时扣除。在此之前，星球和月球上不能建造、研究或在造船厂生产，自己的舰队也不能从那里出发或飞往那里。舰船会以正常飞行时间无需燃料地跟随，废墟场留在原处，跳跃门会休眠 24 小时。开启假期模式会取消迁移。',
+    'rl_target' => '目标',
+    'rl_start' => '迁移',
+    'rl_running' => '星球将迁移到 %s，时间为 %s。',
+    'rl_cancel' => '取消迁移',
+    'rl_started' => '迁移已开始。',
+    'rl_cancelled' => '迁移已取消。',
+    'rl_error_planet' => '这颗星球无法迁移。',
+    'rl_error_running' => '这颗星球已在迁移中。',
+    'rl_error_target' => '目标位置无效。',
+    'rl_error_band' => '目标必须位于同一位置范围（1-3、4-12、13-15）内。',
+    'rl_error_taken' => '目标位置已被占用或预留。',
+    'rl_error_vacation' => '假期模式下无法迁移。',
+    'rl_error_dark_matter' => '暗物质不足。',
+    'rl_error_building' => '星球或月球上正在建造。',
+    'rl_error_research' => '星球或月球上正在研究。',
+    'rl_error_shipyard' => '星球或月球的造船厂有订单。',
+    'rl_error_fleets' => '有自己的舰队从星球或月球出发或正飞往那里。',
+    'rl_error_wreck_field' => '太空船坞正在修复舰船，或舰船正在等待重新服役。',
+    'rl_from' => '管理',
+    'rl_subject' => '迁移',
+    'rl_done' => '星球已迁移到 %s。舰船正在跟随。',
+    'rl_failed' => '迁移到 %s 失败: %s',
+];

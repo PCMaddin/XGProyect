@@ -2,7 +2,7 @@
     <tbody>
         <tr>
             <td class="c" align="center">
-                <a href="{{ $tearDown['url'] }}">{{ $tearDown['label'] }}</a>
+                <a href="{{ $tearDown['url'] }}" data-post>{{ $tearDown['label'] }}</a>
             </td>
         </tr>
         <tr>

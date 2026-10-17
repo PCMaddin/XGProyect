@@ -11,7 +11,6 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Services\SettingsService;
-use Illuminate\Support\Facades\URL;
 
 class Recover extends Mailable
 {
@@ -22,9 +21,8 @@ class Recover extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public string $userPass
+        public string $resetUrl
     ) {
-        //
     }
 
     /**
@@ -50,7 +48,7 @@ class Recover extends Mailable
             markdown: 'emails.account.recover',
             with: [
                 'gameName' => app(SettingsService::class)->getString('game_name'),
-                'gameUrl' => URL::to('/'),
+                'minutes' => config('auth.passwords.users.expire'),
             ],
         );
     }

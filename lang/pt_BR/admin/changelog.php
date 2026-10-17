@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Histórico de mudanças',
+    'ch_new_item' => 'Adicionar entrada',
+    'ch_sub_title' => 'Daqui você pode editar a lista de mudanças (changelog) do seu servidor. Essa seção fica no menu à esquerda do jogo.',
+    'ch_general' => 'Lista de mudanças',
+    'ch_date' => 'Data da entrada',
+    'ch_version' => 'Versão da entrada',
+    'ch_language' => 'Idioma da entrada',
+    'ch_language_locked' => 'O idioma não pode ser alterado depois da criação.',
+    'ch_translations' => 'Traduções',
+    'ch_edit_translation' => 'Editar tradução',
+    'ch_delete_translation' => 'Excluir tradução',
+    'ch_actions' => 'Ações',
+    'ch_the_description' => 'Descrição',
+    'ch_edit_this' => 'Editar esta entrada',
+    'ch_delete_this' => 'Excluir esta entrada',
+    'ch_delete_confirm' => 'Tem certeza de que deseja excluir esta entrada?',
+    'ch_add_action' => 'Adicionar nova entrada',
+    'ch_edit_action' => 'Editar entrada: %s',
+    'ch_version_info' => 'Exemplos de versões válidas:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Escolher idioma',
+    'ch_characters' => 'caracteres',
+    'ch_save' => 'Salvar entrada',
+    'ch_back' => 'Voltar à lista',
+    'ch_no_entries' => 'Ainda não há entradas. Adicione a primeira!',
+    'ch_description_placeholder' => 'Descreva as mudanças desta versão...',
+    'ch_entry_details' => 'Detalhes da entrada',
+    'ch_action_add_done' => 'Entrada adicionada com sucesso!',
+    'ch_action_edit_done' => 'Entrada editada com sucesso!',
+    'ch_action_delete_done' => 'Entrada excluída com sucesso!',
+];

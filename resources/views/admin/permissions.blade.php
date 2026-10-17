@@ -34,7 +34,7 @@
                                             <th class="pl-4 align-middle" style="width:40%;">{{ __('admin/permissions.pr_module') }}</th>
                                             @foreach ($item['roles_list'] as $roleId => $role)
                                             <th class="text-center align-middle" style="width:20%;">
-                                                @if ($roleId === \Xgp\App\Core\Enumerators\UserRanksEnumerator::ADMIN)
+                                                @if ($roleId === \App\Core\Enumerators\UserRanksEnumerator::ADMIN)
                                                     <i class="fas fa-lock fa-xs mr-1 text-muted"></i><span class="text-muted">{{ $role['role_name'] }}</span>
                                                 @else
                                                     {{ $role['role_name'] }}

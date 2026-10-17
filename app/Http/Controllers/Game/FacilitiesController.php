@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Game;
 
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 class FacilitiesController extends BuildingsController
 {

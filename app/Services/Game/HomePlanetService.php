@@ -6,7 +6,7 @@ namespace App\Services\Game;
 
 use App\Models\Planets;
 use App\Models\User;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 class HomePlanetService
 {

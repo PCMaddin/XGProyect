@@ -10,6 +10,11 @@
         </td>
     </tr>
     {!! $newMessage !!}
+    @if ($wreckField)
+    <tr>
+        <th colspan="4"><a href="game.php?page=spacedock">{{ __('game/spacedock.sd_wreck_field_notice') }}</a></th>
+    </tr>
+    @endif
     <tr>
         <th scope="row">{{ __('game/overview.ov_server_time') }}</th>
         <th role="cell" colspan="3">{{ $dateTime }}</th>

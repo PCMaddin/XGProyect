@@ -13,7 +13,7 @@ return [
     'gn_danger_title' => 'Alert!',
     'gn_warning_title' => 'Warning!',
     'gn_success_title' => 'Ok!',
-    'gn_info_title' => '',
+    'gn_info_title' => 'Info!',
     'ge_yes' => 'YES',
     'ge_no' => 'NO',
     'gn_enabled' => 'Enabled',

@@ -13,8 +13,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Libraries\PlanetLib;
 
 /**
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")

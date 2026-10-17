@@ -29,6 +29,8 @@ Route::prefix('home/ajax')->group(function () {
 Route::prefix('account')->group(function () {
     Route::get('/recover', RecoverController::class)->name('account.recover');
     Route::post('/recover', [RecoverController::class, 'recover']);
+    Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
+    Route::post('/reset', [RecoverController::class, 'reset'])->name('account.reset.update');
 });
 
 Route::prefix('admin')->group(function () {
@@ -91,6 +93,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/planets', [Admin\PlanetsController::class, 'update'])->name('admin.planets.update');
             Route::get('/bots', [Admin\BotsController::class, 'index'])->name('admin.bots');
             Route::post('/bots', [Admin\BotsController::class, 'generate'])->name('admin.bots.generate');
+            Route::post('/bots/play', [Admin\BotsController::class, 'play'])->name('admin.bots.play');
             Route::get('/expeditions', [Admin\ExpeditionsController::class, 'index'])->name('admin.expeditions');
             Route::post('/expeditions', [Admin\ExpeditionsController::class, 'update'])->name('admin.expeditions.update');
             Route::get('/premium', [Admin\PremiumController::class, 'index'])->name('admin.premium');

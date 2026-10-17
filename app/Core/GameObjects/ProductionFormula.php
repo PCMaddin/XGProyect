@@ -69,20 +69,4 @@ class ProductionFormula
     {
         return ($this->energyFormula)($level, $levelFactor, $planetTemp, $energyTech);
     }
-
-    /**
-     * Get the legacy-compatible array format for backward compatibility.
-     *
-     * @return array{metal: int, crystal: int, deuterium: int, energy: int, factor: float}
-     */
-    public function toLegacyArray(): array
-    {
-        return [
-            'metal' => $this->baseMetal,
-            'crystal' => $this->baseCrystal,
-            'deuterium' => $this->baseDeuterium,
-            'energy' => 0,
-            'factor' => $this->factor,
-        ];
-    }
 }

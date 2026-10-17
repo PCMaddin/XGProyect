@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class BannedController extends BaseController
 {
@@ -32,7 +32,7 @@ class BannedController extends BaseController
         $bannedPlayers = $bans->map(fn (Ban $ban) => [
             'player' => $ban->user->name,
             'reason' => $ban->details,
-            'since' => $this->timingService->formatExtendedDate($ban->created_at->timestamp),
+            'since' => $ban->created_at !== null ? $this->timingService->formatExtendedDate($ban->created_at->getTimestamp()) : '-',
             'until' => $ban->until !== null
                 ? $this->timingService->formatExtendedDate($ban->until)
                 : '∞',

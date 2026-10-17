@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => 'Witaj w XG Proyect',
+    'hm_sub_title' => 'Dziękujemy za wybór XG Proyect jako ulubionego klona OGame. Ten ekran daje szybki przegląd statystyk twojego serwera. Linki po lewej stronie pozwalają kontrolować każdy aspekt serwera. Każda strona zawiera instrukcje korzystania z narzędzi.',
+    'hm_server_statistics' => 'Statystyki serwera',
+    'hm_number_users' => 'Liczba użytkowników',
+    'hm_number_alliances' => 'Liczba sojuszy',
+    'hm_number_planets' => 'Liczba planet',
+    'hm_number_moons' => 'Liczba księżyców',
+    'hm_number_fleets' => 'Liczba flot',
+    'hm_number_reports' => 'Liczba raportów',
+    'hm_average_user_points' => 'Średnie punkty użytkowników',
+    'hm_average_alliance_points' => 'Średnie punkty sojuszy',
+    'hm_database_size' => 'Rozmiar bazy danych',
+    'hm_database_server' => 'Serwer bazy danych',
+    'hm_php_version' => 'Wersja PHP',
+    'hm_server_version' => 'Wersja XGP',
+    'hm_error' => 'Alarm!',
+    'hm_warning' => 'Uwaga!',
+    'hm_ok' => 'OK!',
+    'hm_debug_mode' => 'Tryb debugowania jest włączony (APP_DEBUG=true w .env): strony błędów pokazują każdemu odwiedzającemu kod źródłowy, zapytania i dane żądań. Na publicznym serwerze ustaw APP_DEBUG=false i APP_ENV=production.',
+    'hm_install_file_detected' => 'Wykryto katalog install/. Ze względów bezpieczeństwa musisz zmienić jego nazwę lub go usunąć.',
+    'hm_config_file_writable' => 'Twój plik konfiguracyjny (xgp-db-config.php) jest zapisywalny dla wszystkich. Zdecydowanie zalecamy zmianę uprawnień na 640 lub co najmniej 644.',
+    'hm_errors' => 'Na twoim serwerze występują błędy. Możesz je zobaczyć, klikając <a href="/admin/errors">tutaj</a>',
+    'hm_old_version' => 'Dostępna jest nowa wersja. Kliknij <a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">tutaj</a>, aby ją pobrać.',
+    'hm_all_ok' => 'Brak aktualizacji i alarmów',
+    'hm_update_required' => 'Wersje systemu i bazy danych się różnią, <a href="/admin/update"><strong>zaktualizuj teraz!</strong></a>, aby uniknąć problemów.',
+    'hm_credits' => 'Podziękowania',
+    'hm_proyect_leader' => 'Kierownicy projektu',
+    'hm_principal_contributors' => 'Główni współtwórcy',
+    'hm_extensions' => 'Biblioteki / rozszerzenia',
+    'hm_thanks_to' => 'Specjalne podziękowania dla',
+];

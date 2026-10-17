@@ -35,7 +35,7 @@ class LoginController extends BaseController
 
             // check suspension status
             $ban = $authUser->ban;
-            if ($ban !== null && $ban->until->timestamp <= time()) {
+            if ($ban !== null && $ban->hasExpired()) {
                 $ban->delete();
             }
 

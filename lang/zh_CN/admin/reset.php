@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => '重置宇宙',
+    're_sub_title' => '你可以在这里重置宇宙的各个部分，或者彻底清空一切。此操作无法撤销 — 请务必先做好备份。',
+    're_reset_universe_confirmation' => '点击确定后，所选项目将被清零。此操作无法撤销，数据库备份由你自行负责。重置整个宇宙时不会删除账号。',
+    're_defenses_and_ships' => '造船厂和防御',
+    're_defenses' => '重置防御',
+    're_ships' => '重置舰船',
+    're_reset_hangar' => '重置造船厂和防御队列',
+    're_buldings' => '建筑',
+    're_buildings_pl' => '重置星球建筑',
+    're_buildings_lu' => '重置月球建筑',
+    're_reset_buldings' => '重置建造队列',
+    're_inve_ofis' => '研究和军官',
+    're_ofici' => '重置军官',
+    're_investigations' => '重置研究',
+    're_reset_invest' => '重置进行中的研究',
+    're_resources' => '资源',
+    're_resources_dark' => '重置暗物质',
+    're_resources_met_cry' => '重置金属、晶体和重氢',
+    're_general' => '常规',
+    're_reset_moons' => '重置月球',
+    're_reset_notes' => '重置笔记',
+    're_reset_rw' => '重置战斗报告',
+    're_reset_buddies' => '重置好友列表',
+    're_reset_allys' => '重置联盟',
+    're_reset_fleets' => '重置舰队',
+    're_reset_banned' => '重置封禁用户',
+    're_reset_messages' => '重置消息',
+    're_reset_statpoints' => '重置统计',
+    're_reset_all' => '重置整个宇宙',
+    're_reset_h1' => '重置选项',
+    're_reset_excess' => '选项已重置',
+    're_reset_go' => '重置',
+];

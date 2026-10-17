@@ -8,6 +8,7 @@
     }
 </script>
 <form action="game.php?page=fleet4" method="post" onsubmit='this.submit.disabled = true;' role="form">
+    @csrf
     <input type="hidden" name="thisresource1"  value="{{ $this_metal }}" />
     <input type="hidden" name="thisresource2"  value="{{ $this_crystal }}" />
     <input type="hidden" name="thisresource3"  value="{{ $this_deuterium }}" />
@@ -79,6 +80,19 @@
                     <tr height="20">
                         <th role="cell" colspan="3">&nbsp;</th>
                     </tr>
+                    @if ($loot_priority)
+                    <tr height="20">
+                        <th scope="row">{{ __('game/fleet.fl_loot_priority') }}</th>
+                        <th role="cell" colspan="2">
+                            <select name="loot_priority">
+                                <option value="">{{ __('game/fleet.fl_loot_priority_default') }}</option>
+                                @foreach (['mcd', 'mdc', 'cmd', 'cdm', 'dmc', 'dcm'] as $order)
+                                <option value="{{ $order }}">{{ implode(' > ', array_map(fn (string $letter): string => __('game/global.' . ['m' => 'metal', 'c' => 'crystal', 'd' => 'deuterium'][$letter]), str_split($order))) }}</option>
+                                @endforeach
+                            </select>
+                        </th>
+                    </tr>
+                    @endif
                     {!! $stay_block !!}
                 </table>
             </th>

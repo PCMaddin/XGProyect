@@ -21,6 +21,7 @@ return [
     'hm_error' => '¡Alerta!',
     'hm_warning' => '¡Advertencia!',
     'hm_ok' => '¡Ok!',
+    'hm_debug_mode' => 'El modo de depuración está activado (APP_DEBUG=true en .env): las páginas de error muestran código, consultas y datos de la petición a cualquier visitante. En un servidor público usa APP_DEBUG=false y APP_ENV=production.',
     'hm_install_file_detected' => 'Se detecto el directorio install/. Por razones se seguridad recomendamos eliminarlo.',
     'hm_config_file_writable' => 'Tu archivo xgp-db-config.php puede ser escrito. Te recomendamos que cambies los permisos a 640 o al menos a 644.',
     'hm_errors' => 'Hay errores en tu servidor. Puedes verlos haciendo <a href="/admin/errors">click aquí</a>',

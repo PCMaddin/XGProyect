@@ -68,6 +68,8 @@ sail up -d
 
 If you already created your own `.env`, those values may be different. Check that file because it overrides `.env.example`.
 
+`.env.example` is set up for a public server (`APP_ENV=production`, `APP_DEBUG=false`). For local development set `APP_ENV=local` and `APP_DEBUG=true` in your `.env` to get detailed error pages and the debug bar; never on a public server, since error pages then show source code, queries and request data to every visitor.
+
 ## Mailpit
 
 Mailpit captures outgoing emails locally so you can inspect them from a simple web UI.

@@ -1,0 +1,731 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Libraries;
+
+use App\Core\GameObjects\GameObjectInterface;
+use App\Core\GameObjects\GameObjectRegistry;
+use App\Services\SettingsService;
+use Illuminate\Support\Facades\DB;
+use App\Core\Concerns\PreparesSql;
+
+/**
+ * Rebuilds the per-user and per-alliance statistics points and ranks. The two
+ * ranking routines are large, sequential batch queries; their complexity is
+ * intrinsic and suppressed rather than split.
+ *
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ */
+class StatisticsLibrary
+{
+    use PreparesSql;
+
+    private const USER_POINT_COLUMNS = [
+        'buildings' => 'user_statistic_buildings_points',
+        'defenses' => 'user_statistic_defenses_points',
+        'ships' => 'user_statistic_ships_points',
+        'research' => 'user_statistic_technology_points',
+    ];
+
+    private const PLANET_POINT_TABLES = [
+        'buildings' => 'building',
+        'defenses' => 'defense',
+        'ships' => 'ship',
+    ];
+
+    private static ?GameObjectRegistry $registry = null;
+
+    private int $time = 0;
+    private ?int $pointDivisor = null;
+
+    public static function calculatePoints(int | string $element, int | string $level, string $type = ''): int
+    {
+        $level = (int) $level;
+        $currentLevel = $type === 'tech' ? $level : max($level - 1, 0);
+
+        $price = self::registry()->get((int) $element)->getPrice();
+        $resourcesTotal = $price->getMetal() + $price->getCrystal() + $price->getDeuterium();
+        $levelMultiplier = pow($price->getFactor(), $currentLevel);
+        $points = ($resourcesTotal * $levelMultiplier) / max(1, app(SettingsService::class)->getInt('stat_points'));
+
+        return (int) $points;
+    }
+
+    private static function registry(): GameObjectRegistry
+    {
+        if (self::$registry === null) {
+            self::$registry = app(GameObjectRegistry::class);
+        }
+
+        return self::$registry;
+    }
+
+    /**
+     * Rebuild the user points for a specific structure type. The planet id is
+     * accepted for call-site compatibility but not used — points are always
+     * recomputed for the whole user.
+     */
+    public function rebuildPoints(int $userId, int $planetId, string $what): bool
+    {
+        unset($planetId);
+
+        if (!isset(self::USER_POINT_COLUMNS[$what])) {
+            return false;
+        }
+
+        DB::table('users_statistics')->updateOrInsert(
+            ['user_statistic_user_id' => $userId],
+            $this->calculateSingleCategoryPointColumns($userId, $what)
+        );
+
+        return true;
+    }
+
+    public function rebuildAllPoints(): void
+    {
+        foreach (DB::table('users')->select('id')->orderBy('id')->cursor() as $user) {
+            DB::table('users_statistics')->updateOrInsert(
+                ['user_statistic_user_id' => (int) $user->id],
+                $this->calculateUserPointColumns((int) $user->id)
+            );
+        }
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    private function calculateUserPointColumns(int $userId): array
+    {
+        $points = [];
+
+        foreach (self::USER_POINT_COLUMNS as $category => $column) {
+            $points[$column] = $this->calculateUserCategoryPoints($userId, $category);
+        }
+
+        $points['user_statistic_military_points'] = $points['user_statistic_ships_points'] + $points['user_statistic_defenses_points'];
+
+        return $points;
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    private function calculateSingleCategoryPointColumns(int $userId, string $category): array
+    {
+        $points = [self::USER_POINT_COLUMNS[$category] => $this->calculateUserCategoryPoints($userId, $category)];
+
+        if (in_array($category, ['ships', 'defenses'], true)) {
+            $points['user_statistic_military_points'] = $this->calculateUserCategoryPoints($userId, 'ships')
+                + $this->calculateUserCategoryPoints($userId, 'defenses');
+        }
+
+        return $points;
+    }
+
+    private function calculateUserCategoryPoints(int $userId, string $category): float
+    {
+        if ($category === 'research') {
+            $row = DB::table('research')
+                ->where('research_user_id', $userId)
+                ->first();
+
+            return $row === null ? 0.0 : $this->calculateRowsPoints([(array) $row]);
+        }
+
+        if (!isset(self::PLANET_POINT_TABLES[$category])) {
+            return 0.0;
+        }
+
+        $singular = self::PLANET_POINT_TABLES[$category];
+        $rows = DB::table($category)
+            ->join('planets', $category . '.' . $singular . '_planet_id', '=', 'planets.planet_id')
+            ->where('planets.planet_user_id', $userId)
+            ->where('planets.planet_destroyed', 0)
+            ->select($category . '.*')
+            ->get()
+            ->map(static fn ($row): array => (array) $row);
+
+        return $this->calculateRowsPoints($rows);
+    }
+
+    /**
+     * @param iterable<array<string, mixed>|object> $rows
+     */
+    private function calculateRowsPoints(iterable $rows): float
+    {
+        $points = 0.0;
+        $objects = self::registry()->all();
+
+        foreach ($rows as $row) {
+            $points += $this->calculateRowPoints((array) $row, $objects);
+        }
+
+        return $points;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @param iterable<int, GameObjectInterface> $objects
+     */
+    private function calculateRowPoints(array $row, iterable $objects): float
+    {
+        $points = 0.0;
+
+        foreach ($objects as $object) {
+            $column = $object->getName();
+
+            if (!isset($row[$column])) {
+                continue;
+            }
+
+            $points += $this->calculateObjectPoints($object->getId(), $this->toInt($row[$column]));
+        }
+
+        return $points;
+    }
+
+    private function toInt(mixed $value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
+    }
+
+    private function calculateObjectPoints(int $objectId, int $level): float
+    {
+        if ($level <= 0) {
+            return 0.0;
+        }
+
+        $price = self::registry()->get($objectId)->getPrice();
+        $resourcesTotal = $price->getMetal() + $price->getCrystal() + $price->getDeuterium();
+        $factor = $price->getFactor();
+        $multiplier = ($factor === 1.0)
+            ? $level
+            : (pow($factor, $level) - 1) / ($factor - 1);
+
+        return ($resourcesTotal * $multiplier) / $this->pointDivisor();
+    }
+
+    private function pointDivisor(): int
+    {
+        if ($this->pointDivisor === null) {
+            $this->pointDivisor = max(1, app(SettingsService::class)->getInt('stat_points'));
+        }
+
+        return $this->pointDivisor;
+    }
+
+    /**
+     * @return array{
+     *     initial_memory: array{0: float, 1: float},
+     *     stats_time: int,
+     *     totaltime: float,
+     *     memory_peak: array{0: float, 1: float},
+     *     end_memory: array{0: float, 1: float}
+     * }
+     */
+    public function makeStats(): array
+    {
+        $this->time = time();
+        $starttime = microtime(true);
+
+        $result = [];
+        $result['initial_memory'] = [round(memory_get_usage() / 1024, 1), round(memory_get_usage(true) / 1024, 1)];
+
+        $this->rebuildAllPoints();
+        $this->makeUserRank();
+        $this->makeMilitaryRanks();
+        $this->makeAllyRank();
+
+        $endtime = microtime(true);
+
+        $result['stats_time'] = $this->time;
+        $result['totaltime'] = ($endtime - $starttime);
+        $result['memory_peak'] = [round(memory_get_peak_usage() / 1024, 1), round(memory_get_peak_usage(true) / 1024, 1)];
+        $result['end_memory'] = [round(memory_get_usage() / 1024, 1), round(memory_get_usage(true) / 1024, 1)];
+
+        return $result;
+    }
+
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.CamelCaseVariableName")
+     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
+     */
+    private function makeUserRank(): void
+    {
+        // GET ALL DATA FROM THE USERS TO UPDATE
+        $all_stats_data = array_map(
+            fn ($row) => (array) $row,
+            DB::select(
+                $this->prepareSql(
+                    'SELECT
+                        us.`user_statistic_user_id`,
+                        us.`user_statistic_technology_rank`,
+                        us.`user_statistic_technology_points`,
+                        us.`user_statistic_buildings_rank`,
+                        us.`user_statistic_buildings_points`,
+                        us.`user_statistic_defenses_rank`,
+                        us.`user_statistic_defenses_points`,
+                        us.`user_statistic_ships_rank`,
+                        us.`user_statistic_ships_points`,
+                        us.`user_statistic_military_rank`,
+                        us.`user_statistic_military_points`,
+                        us.`user_statistic_honor_rank`,
+                        us.`user_statistic_honor_points`,
+                        us.`user_statistic_total_rank`,
+                        (
+                            us.`user_statistic_buildings_points`
+                            + us.`user_statistic_military_points`
+                            + us.`user_statistic_technology_points`
+                        ) AS total_points
+                    FROM ' . USERS_STATISTICS . ' us
+                    INNER JOIN ' . USERS . ' AS u
+                        ON us.`user_statistic_user_id` = u.`id` AND u.`authlevel` <= ' . app(SettingsService::class)->getInt('stat_admin_level') . '
+                    ORDER BY us.`user_statistic_user_id` ASC;'
+                )
+            )
+        );
+
+        // ANY USER ?
+        if (empty($all_stats_data)) {
+            return;
+        }
+
+        $tech = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $build = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $defs = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $ships = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $military = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $honor = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $total = ['old_rank' => [], 'points' => []];
+
+        // BUILD ALL THE ARRAYS
+        foreach ($all_stats_data as $CurUser) {
+            $tech['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_technology_rank'];
+            $tech['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_technology_points'];
+
+            $build['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_buildings_rank'];
+            $build['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_buildings_points'];
+
+            $defs['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_defenses_rank'];
+            $defs['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_defenses_points'];
+
+            $ships['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_ships_rank'];
+            $ships['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_ships_points'];
+
+            $military['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_military_rank'];
+            $military['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_military_points'];
+
+            $honor['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_honor_rank'];
+            $honor['points'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_honor_points'];
+
+            $total['old_rank'][$CurUser['user_statistic_user_id']] = $CurUser['user_statistic_total_rank'];
+            $total['points'][$CurUser['user_statistic_user_id']] = $CurUser['total_points'];
+        }
+
+        // ORDER THEM FROM HIGHEST TO LOWEST
+        arsort($tech['points']);
+        arsort($build['points']);
+        arsort($defs['points']);
+        arsort($ships['points']);
+        arsort($military['points']);
+        arsort($honor['points']);
+        arsort($total['points']);
+
+        // ALL RANKS SHOULD START ON 1
+        $rank = [];
+        $rank['tech'] = 1;
+        $rank['buil'] = 1;
+        $rank['defe'] = 1;
+        $rank['ship'] = 1;
+        $rank['mili'] = 1;
+        $rank['hono'] = 1;
+        $rank['tota'] = 1;
+
+        // TECH
+        foreach ($tech as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $tech['rank'][$userId] = $rank['tech']++;
+                }
+            }
+        }
+
+        // BUILDINGS
+        foreach ($build as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $build['rank'][$userId] = $rank['buil']++;
+                }
+            }
+        }
+
+        // DEFENSES
+        foreach ($defs as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $defs['rank'][$userId] = $rank['defe']++;
+                }
+            }
+        }
+
+        // SHIPS
+        foreach ($ships as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $ships['rank'][$userId] = $rank['ship']++;
+                }
+            }
+        }
+
+        // MILITARY
+        foreach ($military as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $military['rank'][$userId] = $rank['mili']++;
+                }
+            }
+        }
+
+        // HONOUR
+        foreach ($honor['points'] as $userId => $data) {
+            $honor['rank'][$userId] = $rank['hono']++;
+        }
+
+        // UPDATE QUERY
+        $update_query = 'INSERT INTO ' . USERS_STATISTICS . '
+                        (user_statistic_user_id,
+                        user_statistic_buildings_old_rank,
+                        user_statistic_buildings_rank,
+                        user_statistic_defenses_old_rank,
+                        user_statistic_defenses_rank,
+                        user_statistic_ships_old_rank,
+                        user_statistic_ships_rank,
+                        user_statistic_military_old_rank,
+                        user_statistic_military_rank,
+                        user_statistic_honor_old_rank,
+                        user_statistic_honor_rank,
+                        user_statistic_technology_old_rank,
+                        user_statistic_technology_rank,
+                        user_statistic_total_points,
+                        user_statistic_total_old_rank,
+                        user_statistic_total_rank,
+                        user_statistic_update_time) VALUES ';
+
+        // SET VARIABLES
+        $values = '';
+
+        // TOTAL POINTS
+        // UPDATE QUERY DYNAMIC BLOCK
+        foreach ($total as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $userId => $data) {
+                    $values .= '(' . $userId . ',
+                                ' . $build['old_rank'][$userId] . ',
+                                ' . $build['rank'][$userId] . ',
+                                ' . $defs['old_rank'][$userId] . ',
+                                ' . $defs['rank'][$userId] . ',
+                                ' . $ships['old_rank'][$userId] . ',
+                                ' . $ships['rank'][$userId] . ',
+                                ' . $military['old_rank'][$userId] . ',
+                                ' . $military['rank'][$userId] . ',
+                                ' . $honor['old_rank'][$userId] . ',
+                                ' . $honor['rank'][$userId] . ',
+                                ' . $tech['old_rank'][$userId] . ',
+                                ' . $tech['rank'][$userId] . ',
+                                ' . $total['points'][$userId] . ',
+                                ' . $total['old_rank'][$userId] . ',
+                                ' . $rank['tota']++ . ',
+                                ' . $this->time . '),';
+                }
+            }
+        }
+
+        // REMOVE LAST COMMA
+        $values = substr_replace($values, '', -1);
+
+        // FINISH UPDATE QUERY
+        $update_query .= $values;
+        $update_query .= ' ON DUPLICATE KEY UPDATE
+								user_statistic_buildings_old_rank = VALUES(user_statistic_buildings_old_rank),
+								user_statistic_buildings_rank = VALUES(user_statistic_buildings_rank),
+								user_statistic_defenses_old_rank = VALUES(user_statistic_defenses_old_rank),
+								user_statistic_defenses_rank = VALUES(user_statistic_defenses_rank),
+								user_statistic_ships_old_rank = VALUES(user_statistic_ships_old_rank),
+								user_statistic_ships_rank = VALUES(user_statistic_ships_rank),
+                                user_statistic_military_old_rank = VALUES(user_statistic_military_old_rank),
+                                user_statistic_military_rank = VALUES(user_statistic_military_rank),
+                                user_statistic_honor_old_rank = VALUES(user_statistic_honor_old_rank),
+                                user_statistic_honor_rank = VALUES(user_statistic_honor_rank),
+								user_statistic_technology_old_rank = VALUES(user_statistic_technology_old_rank),
+								user_statistic_technology_rank = VALUES(user_statistic_technology_rank),
+								user_statistic_total_points = VALUES(user_statistic_total_points),
+								user_statistic_total_old_rank = VALUES(user_statistic_total_old_rank),
+								user_statistic_total_rank = VALUES(user_statistic_total_rank),
+								user_statistic_update_time = VALUES(user_statistic_update_time);';
+
+        // RUN QUERY
+        DB::statement($this->prepareSql($update_query));
+
+        // MEMORY CLEAN UP
+        unset($all_stats_data, $build, $defs, $ships, $military, $honor, $tech, $rank, $update_query, $values);
+    }
+
+    /**
+     * The ranks of the military points built, destroyed and lost (the
+     * previous rank becomes the old one).
+     */
+    private function makeMilitaryRanks(): void
+    {
+        $adminLevel = app(SettingsService::class)->getInt('stat_admin_level');
+
+        foreach (['built', 'destroyed', 'lost'] as $kind) {
+            $prefix = 'user_statistic_military_' . $kind;
+            $rows = DB::table('users_statistics AS us')
+                ->join('users AS u', 'u.id', '=', 'us.user_statistic_user_id')
+                ->where('u.authlevel', '<=', $adminLevel)
+                ->orderByDesc($prefix . '_points')
+                ->orderBy('us.user_statistic_user_id')
+                ->get(['us.user_statistic_user_id', 'us.' . $prefix . '_rank']);
+            $rank = 1;
+
+            foreach ($rows as $row) {
+                $values = (array) $row;
+                DB::table('users_statistics')->where('user_statistic_user_id', $values['user_statistic_user_id'])->update([
+                    $prefix . '_old_rank' => $values[$prefix . '_rank'],
+                    $prefix . '_rank' => $rank++,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
+     * @SuppressWarnings("PHPMD.CamelCaseVariableName")
+     * @SuppressWarnings("PHPMD.UnusedLocalVariable")
+     */
+    private function makeAllyRank(): void
+    {
+        // GET ALL DATA FROM THE USERS TO UPDATE
+        $all_stats_data = array_map(
+            fn ($row) => (array) $row,
+            DB::select(
+                $this->prepareSql(
+                    'SELECT a.`alliance_id`,
+                    ass.alliance_statistic_technology_rank,
+                    ass.alliance_statistic_buildings_rank,
+                    ass.alliance_statistic_defenses_rank,
+                    ass.alliance_statistic_ships_rank,
+                    ass.alliance_statistic_military_rank,
+                    ass.alliance_statistic_total_rank,
+                    SUM(us.user_statistic_buildings_points) AS buildings_points,
+                    SUM(us.user_statistic_defenses_points) AS defenses_points,
+                    SUM(us.user_statistic_ships_points) AS ships_points,
+                    SUM(us.user_statistic_military_points) AS military_points,
+                    SUM(us.user_statistic_technology_points) AS technology_points,
+                    SUM(us.user_statistic_total_points) AS total_points
+                    FROM ' . ALLIANCE . ' AS a
+                    INNER JOIN ' . USERS . ' AS u
+                        ON a.`alliance_id` = u.`ally_id` AND u.`authlevel` <= ' . app(SettingsService::class)->getInt('stat_admin_level') . '
+                        INNER JOIN ' . USERS_STATISTICS . ' AS us ON us.`user_statistic_user_id` = u.`id`
+                        INNER JOIN ' . ALLIANCE_STATISTICS . ' AS ass ON ass.`alliance_statistic_alliance_id` = a.`alliance_id`
+                    GROUP BY a.`alliance_id`,
+                        ass.alliance_statistic_technology_rank,
+                        ass.alliance_statistic_buildings_rank,
+                        ass.alliance_statistic_defenses_rank,
+                        ass.alliance_statistic_ships_rank,
+                        ass.alliance_statistic_military_rank,
+                        ass.alliance_statistic_total_rank'
+                )
+            )
+        );
+
+        // ANY ALLIANCE ?
+        if (empty($all_stats_data)) {
+            return;
+        }
+
+        $tech = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $build = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $defs = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $ships = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $military = ['old_rank' => [], 'points' => [], 'rank' => []];
+        $total = ['old_rank' => [], 'points' => []];
+
+        // BUILD ALL THE ARRAYS
+        foreach ($all_stats_data as $CurAlliance) {
+            $tech['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_technology_rank'];
+            $tech['points'][$CurAlliance['alliance_id']] = $CurAlliance['technology_points'];
+
+            $build['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_buildings_rank'];
+            $build['points'][$CurAlliance['alliance_id']] = $CurAlliance['buildings_points'];
+
+            $defs['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_defenses_rank'];
+            $defs['points'][$CurAlliance['alliance_id']] = $CurAlliance['defenses_points'];
+
+            $ships['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_ships_rank'];
+            $ships['points'][$CurAlliance['alliance_id']] = $CurAlliance['ships_points'];
+
+            $military['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_military_rank'];
+            $military['points'][$CurAlliance['alliance_id']] = $CurAlliance['military_points'];
+
+            $total['old_rank'][$CurAlliance['alliance_id']] = $CurAlliance['alliance_statistic_total_rank'];
+            $total['points'][$CurAlliance['alliance_id']] = $CurAlliance['total_points'];
+        }
+
+        // ORDER THEM FROM HIGHEST TO LOWEST
+        arsort($tech['points']);
+        arsort($build['points']);
+        arsort($defs['points']);
+        arsort($ships['points']);
+        arsort($military['points']);
+        arsort($total['points']);
+
+        // ALL RANKS SHOULD START ON 1
+        $rank = [];
+        $rank['tech'] = 1;
+        $rank['buil'] = 1;
+        $rank['defe'] = 1;
+        $rank['ship'] = 1;
+        $rank['mili'] = 1;
+        $rank['tota'] = 1;
+
+        // TECH
+        foreach ($tech as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $tech['rank'][$alliance_id] = $rank['tech']++;
+                }
+            }
+        }
+
+        // BUILDINGS
+        foreach ($build as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $build['rank'][$alliance_id] = $rank['buil']++;
+                }
+            }
+        }
+
+        // DEFENSES
+        foreach ($defs as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $defs['rank'][$alliance_id] = $rank['defe']++;
+                }
+            }
+        }
+
+        // SHIPS
+        foreach ($ships as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $ships['rank'][$alliance_id] = $rank['ship']++;
+                }
+            }
+        }
+
+        // MILITARY
+        foreach ($military as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $military['rank'][$alliance_id] = $rank['mili']++;
+                }
+            }
+        }
+
+        // UPDATE QUERY
+        $update_query = 'INSERT INTO ' . ALLIANCE_STATISTICS . '
+							(alliance_statistic_alliance_id,
+								alliance_statistic_buildings_points,
+								alliance_statistic_buildings_old_rank,
+								alliance_statistic_buildings_rank,
+								alliance_statistic_defenses_points,
+								alliance_statistic_defenses_old_rank,
+								alliance_statistic_defenses_rank,
+								alliance_statistic_ships_points,
+								alliance_statistic_ships_old_rank,
+								alliance_statistic_ships_rank,
+                                alliance_statistic_military_points,
+                                alliance_statistic_military_old_rank,
+                                alliance_statistic_military_rank,
+								alliance_statistic_technology_points,
+								alliance_statistic_technology_old_rank,
+								alliance_statistic_technology_rank,
+								alliance_statistic_total_points,
+								alliance_statistic_total_old_rank,
+								alliance_statistic_total_rank,
+								alliance_statistic_update_time) VALUES ';
+
+        // SET VARIABLES
+        $values = '';
+
+        // TOTAL POINTS
+        // UPDATE QUERY DYNAMIC BLOCK
+        foreach ($total as $key => $value) {
+            if ($key == 'points') {
+                foreach ($value as $alliance_id => $data) {
+                    $values .= '(' . $alliance_id . ',
+                                ' . $build['points'][$alliance_id] . ',
+                                ' . $build['old_rank'][$alliance_id] . ',
+                                ' . $build['rank'][$alliance_id] . ',
+                                ' . $defs['points'][$alliance_id] . ',
+                                ' . $defs['old_rank'][$alliance_id] . ',
+                                ' . $defs['rank'][$alliance_id] . ',
+                                ' . $ships['points'][$alliance_id] . ',
+                                ' . $ships['old_rank'][$alliance_id] . ',
+                                ' . $ships['rank'][$alliance_id] . ',
+                                ' . $military['points'][$alliance_id] . ',
+                                ' . $military['old_rank'][$alliance_id] . ',
+                                ' . $military['rank'][$alliance_id] . ',
+                                ' . $tech['points'][$alliance_id] . ',
+                                ' . $tech['old_rank'][$alliance_id] . ',
+                                ' . $tech['rank'][$alliance_id] . ',
+                                ' . $total['points'][$alliance_id] . ',
+                                ' . $total['old_rank'][$alliance_id] . ',
+                                ' . $rank['tota']++ . ',
+                                ' . $this->time . '),';
+                }
+            }
+        }
+
+        // REMOVE LAST COMMA
+        $values = substr_replace($values, '', -1);
+
+        // FINISH UPDATE QUERY
+        $update_query .= $values;
+        $update_query .= ' ON DUPLICATE KEY UPDATE
+                            alliance_statistic_buildings_points = VALUES(alliance_statistic_buildings_points),
+                            alliance_statistic_buildings_old_rank = VALUES(alliance_statistic_buildings_old_rank),
+                            alliance_statistic_buildings_rank = VALUES(alliance_statistic_buildings_rank),
+                            alliance_statistic_defenses_points = VALUES(alliance_statistic_defenses_points),
+                            alliance_statistic_defenses_old_rank = VALUES(alliance_statistic_defenses_old_rank),
+                            alliance_statistic_defenses_rank = VALUES(alliance_statistic_defenses_rank),
+                            alliance_statistic_ships_points = VALUES(alliance_statistic_ships_points),
+                            alliance_statistic_ships_old_rank = VALUES(alliance_statistic_ships_old_rank),
+                            alliance_statistic_ships_rank = VALUES(alliance_statistic_ships_rank),
+                            alliance_statistic_military_points = VALUES(alliance_statistic_military_points),
+                            alliance_statistic_military_old_rank = VALUES(alliance_statistic_military_old_rank),
+                            alliance_statistic_military_rank = VALUES(alliance_statistic_military_rank),
+                            alliance_statistic_technology_points = VALUES(alliance_statistic_technology_points),
+                            alliance_statistic_technology_old_rank = VALUES(alliance_statistic_technology_old_rank),
+                            alliance_statistic_technology_rank = VALUES(alliance_statistic_technology_rank),
+                            alliance_statistic_total_points = VALUES(alliance_statistic_total_points),
+                            alliance_statistic_total_old_rank = VALUES(alliance_statistic_total_old_rank),
+                            alliance_statistic_total_rank = VALUES(alliance_statistic_total_rank),
+                            alliance_statistic_update_time = VALUES(alliance_statistic_update_time);';
+
+        // RUN QUERY
+        DB::statement($this->prepareSql($update_query));
+
+        // MEMORY CLEAN UP
+        unset($all_stats_data, $build, $defs, $ships, $military, $tech, $rank, $update_query, $values);
+    }
+}

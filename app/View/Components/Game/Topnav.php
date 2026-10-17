@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\View\Components\Game;
 
+use App\Services\Game\PlayerClassService;
 use App\Models\Planets;
 use App\Models\User;
 use App\Services\FormatService;
@@ -13,7 +14,7 @@ use App\Services\TimingService;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 class Topnav extends Component
 {
@@ -31,6 +32,8 @@ class Topnav extends Component
 
     /**
      * Get the view / contents that represent the component.
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     public function render(): View | Htmlable | \Closure | string
     {
@@ -50,15 +53,17 @@ class Topnav extends Component
             $planet->planet_energy_max + $planet->planet_energy_used
         ) . ' / ' . $this->formatService->prettyNumber($planet->planet_energy_max);
 
-        if ($planet->planet_metal >= $this->productionService->maxStorable((int) ($planet->building_metal_store ?? 0))) {
+        $storageFactor = app(PlayerClassService::class)->bonusesOf($user->id)->storageFactor();
+
+        if ($planet->planet_metal >= $this->productionService->maxStorable((int) ($planet->building_metal_store ?? 0), $storageFactor)) {
             $metal = $this->formatService->colorRed($metal);
         }
 
-        if ($planet->planet_crystal >= $this->productionService->maxStorable((int) ($planet->building_crystal_store ?? 0))) {
+        if ($planet->planet_crystal >= $this->productionService->maxStorable((int) ($planet->building_crystal_store ?? 0), $storageFactor)) {
             $crystal = $this->formatService->colorRed($crystal);
         }
 
-        if ($planet->planet_deuterium >= $this->productionService->maxStorable((int) ($planet->building_deuterium_tank ?? 0))) {
+        if ($planet->planet_deuterium >= $this->productionService->maxStorable((int) ($planet->building_deuterium_tank ?? 0), $storageFactor)) {
             $deuterium = $this->formatService->colorRed($deuterium);
         }
 
@@ -83,6 +88,8 @@ class Topnav extends Component
 
     /**
      * @return array<int, array{selected: string, value: string, text: string}>
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function buildPlanetList(User $user): array
     {
@@ -95,31 +102,17 @@ class Topnav extends Component
             ['planet_destroyed', '=', 0],
         ]);
 
-        switch ($user->preferences->preference_planet_sort) {
-            case 0: // emergence
-            default:
-                $orderBy = ['planet_id'];
-                break;
-            case 1: // coordinates
-                $orderBy = ['planet_galaxy', 'planet_system', 'planet_planet', 'planet_type'];
-                break;
-            case 2: // alphabet
-                $orderBy = ['planet_name'];
-                break;
-            case 3: // size
-                $orderBy = ['planet_diameter'];
-                break;
-            case 4: // used_fields
-                $orderBy = ['planet_field_current'];
-                break;
-        }
+        $orderBy = match ($user->preferences->preference_planet_sort) {
+            1 => ['planet_galaxy', 'planet_system', 'planet_planet', 'planet_type'], // coordinates
+            2 => ['planet_name'], // alphabet
+            3 => ['planet_diameter'], // size
+            4 => ['planet_field_current'], // used fields
+            default => ['planet_id'], // emergence
+        };
+        $direction = $user->preferences->preference_planet_sort_sequence ? 'desc' : 'asc';
 
         foreach ($orderBy as $order) {
-            if ($user->preferences->preference_planet_sort_sequence) {
-                $allUserPlanets->orderByDesc($order);
-            } else {
-                $allUserPlanets->orderBy($order);
-            }
+            $allUserPlanets->orderBy($order, $direction);
         }
 
         $planetList = [];

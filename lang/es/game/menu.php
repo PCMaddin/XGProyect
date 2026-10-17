@@ -17,6 +17,8 @@ return [
     'lm_defenses' => 'Defensa',
     'lm_officiers' => 'Casino',
     'lm_trader' => 'Mercader',
+    'lm_items' => 'Objetos',
+    'lm_characterclass' => 'Clase',
     'lm_technology' => 'Técnica',
     'lm_messages' => 'Mensajes',
     'lm_alliance' => 'Alianza',

@@ -21,4 +21,7 @@ return [
     'cr_both_won' => 'La batalla termino en empate',
     'cr_stealed_ressources' => 'Botín total: %s metal, %s cristal y %s deuterio.', // ok
     'cr_moonbuilt' => 'Las enormes cantidad de metal y cristal se fusionan y forman un satélite lunar en la orbita del planeta %s [%d:%d:%d]!',
+    'cr_attacker' => 'Atacante',
+    'cr_defender' => 'Defensor',
+    'cr_repaired_defense' => 'Defensa reparada:',
 ];

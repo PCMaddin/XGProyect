@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => '欢迎使用 XG Proyect',
+    'hm_sub_title' => '感谢你选择 XG Proyect 作为你的 OGame 克隆版。此页面可以让你快速概览服务器的各项统计数据。左侧的链接可以让你控制服务器的方方面面。每个页面都附有工具的使用说明。',
+    'hm_server_statistics' => '服务器统计',
+    'hm_number_users' => '用户数',
+    'hm_number_alliances' => '联盟数',
+    'hm_number_planets' => '星球数',
+    'hm_number_moons' => '月球数',
+    'hm_number_fleets' => '舰队数',
+    'hm_number_reports' => '报告数',
+    'hm_average_user_points' => '用户平均积分',
+    'hm_average_alliance_points' => '联盟平均积分',
+    'hm_database_size' => '数据库大小',
+    'hm_database_server' => '数据库服务器',
+    'hm_php_version' => 'PHP 版本',
+    'hm_server_version' => 'XGP 版本',
+    'hm_error' => '警报！',
+    'hm_warning' => '警告！',
+    'hm_ok' => '正常！',
+    'hm_debug_mode' => '调试模式已开启（.env 中 APP_DEBUG=true）: 错误页面会向每位访客显示源代码、查询和请求数据。在公开服务器上请设置 APP_DEBUG=false 和 APP_ENV=production。',
+    'hm_install_file_detected' => '检测到 install/ 目录。出于安全考虑，你必须将其重命名或删除。',
+    'hm_config_file_writable' => '你的配置文件（xgp-db-config.php）当前对所有人可写。强烈建议将权限改为 640，至少改为 644。',
+    'hm_errors' => '你的服务器存在错误。点击<a href="/admin/errors">这里</a>查看',
+    'hm_old_version' => '有新版本可用。点击<a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">这里</a>下载。',
+    'hm_all_ok' => '没有更新或警报',
+    'hm_update_required' => '你的系统版本与数据库版本不同，为避免问题请<a href="/admin/update"><strong>立即更新！</strong></a>',
+    'hm_credits' => '鸣谢',
+    'hm_proyect_leader' => '项目负责人',
+    'hm_principal_contributors' => '主要贡献者',
+    'hm_extensions' => '库 / 扩展',
+    'hm_thanks_to' => '特别感谢',
+];

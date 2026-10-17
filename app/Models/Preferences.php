@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int     $preference_delete_mode
  * @property int     $preference_planet_sort
  * @property int     $preference_planet_sort_sequence
+ * @property int     $preference_fleet_escape
  */
 class Preferences extends Model
 {
@@ -46,6 +47,7 @@ class Preferences extends Model
         'preference_planet_sort_sequence',
         'preference_vacation_mode',
         'preference_delete_mode',
+        'preference_fleet_escape',
     ];
 
     /**
@@ -67,6 +69,7 @@ class Preferences extends Model
         'preference_user_id' => 'int',
         'preference_nickname_change' => 'int',
         'preference_spy_probes' => 'int',
+        'preference_fleet_escape' => 'int',
         'preference_planet_sort' => 'int',
         'preference_planet_sort_sequence' => 'int',
         'preference_vacation_mode' => 'int',

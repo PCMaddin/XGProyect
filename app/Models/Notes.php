@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property int     $note_owner
  * @property int     $note_time
- * @property boolean $note_priority
+ * @property int|null $note_priority  0 unimportant, 1 normal, 2 important
  * @property string  $note_title
  * @property string  $note_text
  */

@@ -193,7 +193,7 @@
                                         <td id="uni_select_box" class="select" style="height:19px;overflow:hidden;">
                                             <span id="uni_name" class="">{{ __('home/welcome.hm_universe_name') }}</span>
                                         </td>
-                                        <td style="width:18px; background: url('{img_path}dropdownmenu_arrow.png') no-repeat scroll 0 0 #8D9AA7;"></td>
+                                        <td style="width:18px; background: url('{{ asset('assets/images/home/dropdownmenu_arrow.png') }}') no-repeat scroll 0 0 #8D9AA7;"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -253,7 +253,7 @@
                             </span>
 						</label>
                         <div onclick="if($.validationEngine.submitValidation(&#39;subscribeForm&#39;)) {document.forms[&#39;subscribeForm&#39;].submit();}">
-                            <input type="submit" onclick="setServerCookie(&#39;subscribeForm&#39;);setUserNameCookie(&#39;subscribeForm&#39;);" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
+                            <input type="submit" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
                         </div>
 					</div>
 				</form>

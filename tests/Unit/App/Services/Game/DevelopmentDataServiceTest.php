@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Game;
 
+use App\Core\Enumerators\ResearchEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Enums\Game\BuildingId;
-use App\Enums\Game\ResearchId;
 use App\Models\Buildings;
 use App\Models\Planets;
 use App\Services\FormatService;
@@ -47,8 +47,8 @@ class DevelopmentDataServiceTest extends TestCase
 
         $levels = $this->service->levelsFromData($planetData, $userData);
 
-        $this->assertSame(6, $levels[BuildingId::Laboratory->value]);
-        $this->assertSame(4, $levels[ResearchId::EnergyTechnology->value]);
+        $this->assertSame(6, $levels[BuildingsEnumerator::BUILDING_LABORATORY]);
+        $this->assertSame(4, $levels[ResearchEnumerator::RESEARCH_ENERGY_TECHNOLOGY]);
     }
 
     public function test_levels_from_planet_uses_loaded_buildings_relation(): void
@@ -62,8 +62,8 @@ class DevelopmentDataServiceTest extends TestCase
             'research_energy_technology' => 5,
         ]);
 
-        $this->assertSame(8, $levels[BuildingId::Laboratory->value]);
-        $this->assertSame(5, $levels[ResearchId::EnergyTechnology->value]);
+        $this->assertSame(8, $levels[BuildingsEnumerator::BUILDING_LABORATORY]);
+        $this->assertSame(5, $levels[ResearchEnumerator::RESEARCH_ENERGY_TECHNOLOGY]);
     }
 
     public function test_planet_resources_supports_array_input(): void

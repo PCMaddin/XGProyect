@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => 'XG Proyect へようこそ',
+    'hm_sub_title' => 'OGame クローンとして XG Proyect をお選びいただきありがとうございます。この画面では、サーバーのさまざまな統計の概要をすばやく確認できます。左側のリンクから、サーバーのあらゆる設定を操作できます。各ページにはツールの使い方が記載されています。',
+    'hm_server_statistics' => 'サーバー統計',
+    'hm_number_users' => 'ユーザー数',
+    'hm_number_alliances' => '同盟数',
+    'hm_number_planets' => '惑星数',
+    'hm_number_moons' => '月の数',
+    'hm_number_fleets' => '艦隊数',
+    'hm_number_reports' => 'レポート数',
+    'hm_average_user_points' => 'ユーザーの平均ポイント',
+    'hm_average_alliance_points' => '同盟の平均ポイント',
+    'hm_database_size' => 'データベースサイズ',
+    'hm_database_server' => 'データベースサーバー',
+    'hm_php_version' => 'PHP バージョン',
+    'hm_server_version' => 'XGP バージョン',
+    'hm_error' => '警告！',
+    'hm_warning' => '注意！',
+    'hm_ok' => 'OK！',
+    'hm_debug_mode' => 'デバッグモードが有効です（.env の APP_DEBUG=true）。エラーページにソースコード、クエリ、リクエストデータがすべての訪問者に表示されます。公開サーバーでは APP_DEBUG=false と APP_ENV=production を設定してください。',
+    'hm_install_file_detected' => 'install/ ディレクトリが検出されました。安全のため、名前を変更するか削除してください。',
+    'hm_config_file_writable' => '設定ファイル（xgp-db-config.php）が誰でも書き込み可能になっています。権限を 640、少なくとも 644 に変更することを強くおすすめします。',
+    'hm_errors' => 'サーバーにエラーがあります。<a href="/admin/errors">こちら</a>をクリックして確認できます',
+    'hm_old_version' => '新しいバージョンがあります。<a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">こちら</a>をクリックしてダウンロードしてください。',
+    'hm_all_ok' => 'アップデートや警告はありません',
+    'hm_update_required' => 'システムと DB のバージョンが異なります。問題を避けるため<a href="/admin/update"><strong>今すぐアップデート！</strong></a>してください。',
+    'hm_credits' => 'クレジット',
+    'hm_proyect_leader' => 'プロジェクトリーダー',
+    'hm_principal_contributors' => '主な貢献者',
+    'hm_extensions' => 'ライブラリ / 拡張機能',
+    'hm_thanks_to' => '特別な感謝',
+];

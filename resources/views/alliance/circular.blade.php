@@ -3,6 +3,7 @@
 @section('content')
 <script type="text/javascript" src="{{ asset('assets/js/cntchar-min.js') }}"></script>
 <form action="game.php?page=alliance&mode=circular&sendmail=1" method="POST" role="form">
+    @csrf
     <table width="530">
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_circular_send_ciruclar') }}</td>

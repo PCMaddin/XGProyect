@@ -7,8 +7,8 @@ namespace App\Services\Admin;
 use App\Services\SettingsService;
 use JsonException;
 use RuntimeException;
-use Xgp\App\Core\Enumerators\AdminPagesEnumerator as AdminPages;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\AdminPagesEnumerator as AdminPages;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 class PermissionsService
 {
@@ -52,7 +52,7 @@ class PermissionsService
 
         foreach ($sections as $sectionId => $section) {
             foreach ($modules[$sectionId] as $module) {
-                foreach ($roles as $role => $name) {
+                foreach (array_keys($roles) as $role) {
                     $permissionsList[] = [
                         'module' => $module,
                         'role' => $role,

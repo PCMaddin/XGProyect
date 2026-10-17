@@ -24,6 +24,7 @@ return [
     'ex_result_early' => 'Early return',
     'ex_result_nothing' => 'Nothing',
     'ex_result_merchant' => 'Merchant',
+    'ex_result_item' => 'Item',
     'ex_result_black_hole' => 'Fleet loss',
 
     'ex_package_small' => 'Small',

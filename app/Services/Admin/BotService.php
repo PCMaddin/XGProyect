@@ -10,8 +10,7 @@ use App\Services\SettingsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Libraries\PlanetLib;
 
 /**
  * Handles the creation and (in the future) the behaviour of bot accounts.
@@ -106,7 +105,6 @@ class BotService
                     'ip_at_reg' => '',
                     'register_time' => $time,
                     'onlinetime' => $time,
-                    'authlevel' => UserRanksEnumerator::PLAYER,
                 ]);
 
                 $bot->preferences()->create();
@@ -121,6 +119,8 @@ class BotService
                 $planetId = (int) DB::getPdo()->lastInsertId();
 
                 User::where('id', $bot->id)->update([
+                    'user_is_bot' => true,
+                    'user_bot_next_action' => $time + random_int(0, 600),
                     'home_planet_id' => $planetId,
                     'current_planet' => $planetId,
                     'galaxy' => $galaxy,

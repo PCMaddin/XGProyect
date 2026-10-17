@@ -49,4 +49,5 @@ return [
     'pr_error_nick_in_use' => '¡Este nick ya está en uso!',
     'pr_error_email_in_use' => '¡Este correo electrónico ya está en uso!',
     'pr_delete_mode_active' => 'Esta cuenta será eliminada el %s',
+    'pr_fleet_escape' => 'La flota huye de atacantes muy superiores (5:1, con almirante 3:1)',
 ];

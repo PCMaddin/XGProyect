@@ -29,6 +29,9 @@ class PremiumRequest extends FormRequest
             'merchant_metal_multiplier' => ['nullable', 'numeric', 'min:0'],
             'merchant_crystal_multiplier' => ['nullable', 'numeric', 'min:0'],
             'merchant_deuterium_multiplier' => ['nullable', 'numeric', 'min:0'],
+            'merchant_scrap_base_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'merchant_scrap_max_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'merchant_scrap_bargain_price' => ['nullable', 'integer', 'min:0'],
         ];
     }
 

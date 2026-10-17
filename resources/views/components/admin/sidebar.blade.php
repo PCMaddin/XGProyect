@@ -2,7 +2,7 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin/home">
         <div class="sidebar-brand-icon">
-            <img src="https://xgproyect.org/wp-content/uploads/2019/10/xgp-new-logo-white.png" alt="XG Proyect Logo"
+            <img src="{{ asset('assets/images/xgp-logo-white.png') }}" alt="XG Proyect Logo"
                 title="XG Proyect" width="150px">
         </div>
     </a>

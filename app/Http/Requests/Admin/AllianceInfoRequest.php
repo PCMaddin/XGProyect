@@ -34,6 +34,7 @@ class AllianceInfoRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:30',
+                'not_regex:/[<>"\'&\\\\]/',
                 Rule::unique('alliance', 'alliance_name')->ignore($allianceId, 'alliance_id'),
             ],
             'alliance_tag' => [
@@ -41,6 +42,7 @@ class AllianceInfoRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:8',
+                'not_regex:/[<>"\'&\\\\]/',
                 Rule::unique('alliance', 'alliance_tag')->ignore($allianceId, 'alliance_id'),
             ],
             'alliance_owner' => [

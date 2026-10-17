@@ -39,8 +39,8 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('install')
                 ->group(base_path('routes/install.php'));
 
-            Route::middleware('legacy')
-                ->group(base_path('routes/legacy.php'));
+            Route::middleware('game')
+                ->group(base_path('routes/game.php'));
         });
     }
 

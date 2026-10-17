@@ -3,6 +3,7 @@
 @section('content')
 <x-notice width="519px" :color="$color" :message="$message" />
 <form autocomplete="off" method="post" name="changenick" id="changenick" action="game.php?page=changenick" role="form">
+    @csrf
     <input type="hidden" name="mode" value="save" />
     <table role="presentation" width="519px">
         <tbody>
