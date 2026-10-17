@@ -140,7 +140,7 @@ class BotCoordinator
         // without a probe it cannot aim: BotShipyard builds probes first
         if (self::asInt($planet['planet_id'] ?? 0) !== self::asInt($user['home_planet_id'] ?? 0) ||
             self::asInt($planet['ship_espionage_probe'] ?? 0) === 0 ||
-            $this->planner->wantsColony($user) || $this->planner->wasRaided($user, $now)) {
+            $this->planner->freeColonySlots($user) > 0 || $this->planner->wasRaided($user, $now)) {
             return null;
         }
 

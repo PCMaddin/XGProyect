@@ -114,12 +114,12 @@ class BotFleetPlanner
     }
 
     /**
-     * Whether the bot may found another colony: astrophysics allows more
-     * than it has and is flying to.
+     * The colonies astrophysics allows beyond those the bot has and is
+     * flying to: the bot wants another while there is one.
      *
      * @param array<string, mixed> $user
      */
-    public function wantsColony(array $user): bool
+    public function freeColonySlots(array $user): int
     {
         $userId = self::asInt($user['id'] ?? 0);
         $colonies = DB::table('planets')
@@ -133,7 +133,7 @@ class BotFleetPlanner
             ->where('fleet_mess', 0)
             ->count();
 
-        return $colonies + $flying < $this->fleets->getMaxColonies(self::asInt($user['research_astrophysics'] ?? 0));
+        return max(0, $this->fleets->getMaxColonies(self::asInt($user['research_astrophysics'] ?? 0)) - $colonies - $flying);
     }
 
     /**
@@ -156,7 +156,7 @@ class BotFleetPlanner
      */
     private function colonize(array $user, array $planet, int $now): bool
     {
-        if (self::asInt($planet['ship_colony_ship'] ?? 0) === 0 || !$this->wantsColony($user)) {
+        if (self::asInt($planet['ship_colony_ship'] ?? 0) === 0 || $this->freeColonySlots($user) === 0) {
             return false;
         }
 

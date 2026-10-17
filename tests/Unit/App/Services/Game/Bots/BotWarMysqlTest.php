@@ -138,6 +138,36 @@ class BotWarMysqlTest extends MysqlTestCase
         $this->assertNotSame('', $hangar, 'the shipyard builds something else');
     }
 
+    public function testWithEveryColonySlotTakenTheBotResearchesAstrophysics(): void
+    {
+        $research = ['research_astrophysics' => 5];
+
+        foreach (['energy_technology', 'computer_technology', 'espionage_technology', 'weapons_technology', 'shielding_technology',
+            'armour_technology', 'laser_technology', 'ionic_technology', 'combustion_drive', 'impulse_drive', 'hyperspace_technology',
+            'plasma_technology'] as $tech) {
+            $research['research_' . $tech] = 9;
+        }
+
+        DB::table('research')->where('research_user_id', $this->bot)->update($research);
+        DB::table('buildings')->where('building_planet_id', $this->planet)->update(['building_laboratory' => 12]);
+        DB::table('planets')->where('planet_id', $this->planet)->update(['planet_metal' => 900000, 'planet_crystal' => 900000, 'planet_deuterium' => 900000]);
+
+        // astrophysics 5 allows three colonies: two are free, the cheapest step comes first
+        app(BotPlayerService::class)->play($this->bot, time());
+        $this->assertNotEquals(124, DB::table('research_queues')->where('user_id', $this->bot)->value('tech_id'));
+
+        DB::table('research_queues')->delete();
+        DB::table('planets')->where('planet_id', $this->planet)->update(['planet_b_tech' => 0, 'planet_b_tech_id' => 0]);
+        DB::table('research')->where('research_user_id', $this->bot)->update(['research_current_research' => 0]);
+
+        foreach ([4, 5, 6] as $position) {
+            (new PlanetLib())->setNewPlanet($this->home['planet_galaxy'], $this->home['planet_system'] === 1 ? 2 : 1, $position, $this->bot, 'Colony');
+        }
+
+        app(BotPlayerService::class)->play($this->bot, time());
+        $this->assertEquals(124, DB::table('research_queues')->where('user_id', $this->bot)->value('tech_id'));
+    }
+
     public function testRecyclersBringInTheDebris(): void
     {
         $this->ships($this->planet, [Ships::SHIP_RECYCLER => 5]);

@@ -17,7 +17,8 @@ use App\Services\Game\Formulas\DevelopmentsService;
  * then the mines (crystal two, deuterium four levels behind metal);
  * of these the most urgent one it can pay now, so it does not sit on its
  * stock waiting for a scarce resource. Research follows a short opening
- * list and then always takes the cheapest useful step. Ships and defences
+ * list and then takes the cheapest useful step, or astrophysics once every
+ * colony slot is taken. Ships and defences
  * are {@see BotShipyard}'s.
  *
  * Only decides; checks the game's own rules (requirements, price) through
@@ -64,6 +65,9 @@ class BotStrategy
         Research::RESEARCH_HYPERSPACE_TECHNOLOGY,
         Research::RESEARCH_ASTROPHYSICS,
     ];
+
+    /** with every colony slot taken, astrophysics may cost this many times the cheapest research */
+    private const ASTROPHYSICS_PRIORITY = 4;
 
     /** more metal than this many times the crystal in stock is a glut */
     private const METAL_GLUT = 3;
@@ -140,10 +144,11 @@ class BotStrategy
 
     /**
      * The next research, or null if nothing on the list is allowed yet.
+     * Without a free colony slot, astrophysics may go first.
      *
      * @param array<int, int> $levels
      */
-    public function nextResearch(array $levels): ?int
+    public function nextResearch(array $levels, int $freeColonySlots = 1): ?int
     {
         foreach (self::OPENING_RESEARCH as [$tech, $target]) {
             if (($levels[$tech] ?? 0) < $target && $this->developments->isDevelopmentAllowed($tech, $levels)) {
@@ -167,7 +172,22 @@ class BotStrategy
             }
         }
 
-        return $cheapest;
+        return $freeColonySlots === 0 && $this->astrophysicsWorthIt($levels, $cheapestCost) ? Research::RESEARCH_ASTROPHYSICS : $cheapest;
+    }
+
+    /**
+     * With every colony slot taken, astrophysics opens the next ones: it
+     * goes first while it costs at most a few times the cheapest step
+     * (its price grows by 1.75 a level, so it is hardly ever the cheapest).
+     *
+     * @param array<int, int> $levels
+     */
+    private function astrophysicsWorthIt(array $levels, float $cheapestCost): bool
+    {
+        $astrophysics = Research::RESEARCH_ASTROPHYSICS;
+
+        return $this->developments->isDevelopmentAllowed($astrophysics, $levels) &&
+            array_sum($this->developments->developmentPrice($astrophysics, $levels[$astrophysics] ?? 0)) <= self::ASTROPHYSICS_PRIORITY * $cheapestCost;
     }
 
     /**

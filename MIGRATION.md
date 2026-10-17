@@ -966,6 +966,18 @@ Baseline-Einträge.
   war von Einzelüberfällen „gesperrt“), das wurde behoben; der Simulator
   zählt seitdem auch zerstörte Monde (das Spiel löscht Berichte nach einer
   Woche).
+- ✅ **Bots forschen Astrophysik, wenn die Kolonie-Plätze voll sind:** Im
+  Langzeitlauf belegte jeder Bot alle Kolonie-Plätze, kam aber nur auf
+  Astrophysik 4–5 (3–4 Planeten nach 60 Tagen): nach der Eröffnungsliste
+  nahm er immer die billigste Forschung, und Astrophysik (Faktor 1,75 je
+  Stufe) ist fast nie die billigste. Jetzt geht Astrophysik vor, sobald kein
+  Kolonie-Platz frei ist (fliegende Kolonieschiffe zählen mit), solange sie
+  höchstens das Vierfache der billigsten Stufe kostet. Tests: Strategie
+  (Unit) und ein Bot-Zug auf MariaDB, der mit freien Plätzen die billigste
+  Stufe und mit vollen Astrophysik erforscht (Mutationsprobe: ohne die
+  Weitergabe der freien Plätze schlägt er fehl). Nebenbei: ein Bot-Test
+  verglich eine Flugzeit mit einem zweiten `time()` und schlug sporadisch
+  fehl, wenn dazwischen die Sekunde wechselte.
 - ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
   Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
   Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten

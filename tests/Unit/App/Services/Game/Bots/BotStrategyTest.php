@@ -55,6 +55,28 @@ class BotStrategyTest extends TestCase
         $this->assertSame(Buildings::BUILDING_SOLAR_PLANT, $this->strategy->nextBuilding($levels, $planet, true, false));
     }
 
+    public function testWithEveryColonySlotTakenAstrophysicsGoesFirst(): void
+    {
+        $levels = [Buildings::BUILDING_LABORATORY => 12, Buildings::BUILDING_HANGAR => 8];
+
+        foreach ([Research::RESEARCH_ENERGY_TECHNOLOGY, Research::RESEARCH_COMPUTER_TECHNOLOGY, Research::RESEARCH_ESPIONAGE_TECHNOLOGY,
+            Research::RESEARCH_WEAPONS_TECHNOLOGY, Research::RESEARCH_SHIELDING_TECHNOLOGY, Research::RESEARCH_ARMOUR_TECHNOLOGY,
+            Research::RESEARCH_LASER_TECHNOLOGY, Research::RESEARCH_IONIC_TECHNOLOGY, Research::RESEARCH_COMBUSTION_DRIVE,
+            Research::RESEARCH_IMPULSE_DRIVE, Research::RESEARCH_HYPERSPACE_TECHNOLOGY, Research::RESEARCH_PLASMA_TECHNOLOGY] as $tech) {
+            $levels[$tech] = 9;
+        }
+
+        $levels[Research::RESEARCH_ASTROPHYSICS] = 5;
+
+        // astrophysics 6 (262,609) is not the cheapest step (153,600), but within four times of it
+        $this->assertNotSame(Research::RESEARCH_ASTROPHYSICS, $this->strategy->nextResearch($levels));
+        $this->assertSame(Research::RESEARCH_ASTROPHYSICS, $this->strategy->nextResearch($levels, 0));
+
+        // astrophysics 8 (804,241) is more than four times: the cheapest step after all
+        $levels[Research::RESEARCH_ASTROPHYSICS] = 7;
+        $this->assertNotSame(Research::RESEARCH_ASTROPHYSICS, $this->strategy->nextResearch($levels, 0));
+    }
+
     public function testWithEnoughEnergyTheMetalMineComesFirst(): void
     {
         $levels = [Buildings::BUILDING_METAL_MINE => 1, Buildings::BUILDING_SOLAR_PLANT => 2];

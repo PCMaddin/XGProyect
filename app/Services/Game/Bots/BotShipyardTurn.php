@@ -63,7 +63,7 @@ class BotShipyardTurn
             $levels,
             $this->withFlying($this->shipyard->shipsOf($planet), $planet),
             $model->planet_id === self::asInt($user['home_planet_id'] ?? 0),
-            $this->planner->wantsColony($user),
+            $this->planner->freeColonySlots($user) > 0,
             $this->planner->wasRaided($user, $now),
             ['metal' => $stock['metal'] - $paid['metal'], 'crystal' => $stock['crystal'] - $paid['crystal'], 'deuterium' => $stock['deuterium'] - $paid['deuterium']],
             $reserve,

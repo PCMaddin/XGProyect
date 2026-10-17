@@ -274,14 +274,15 @@ class BotCoordinatorMysqlTest extends MysqlTestCase
             app(SystemEspionageService::class)->record($bot, $this->home($spied), time() - 60);
         }
 
-        app(BotPlayerService::class)->play($bot, time());
+        $now = time();
+        app(BotPlayerService::class)->play($bot, $now);
 
         $missiles = $this->fleet($bot, Missions::MISSILE);
         $this->assertSame(110, $missiles['fleet_end_system']);
         // one to be intercepted, one for 50 rocket launchers (hull 200 each, a missile hits 12,000 and more)
         $this->assertSame(2, $missiles['fleet_amount']);
         $this->assertSame(3, $this->value('defenses', 'defense_planet_id', $this->home($bot), 'defense_interplanetary_missile'));
-        $this->assertSame((30 + 60 * 10), $missiles['fleet_start_time'] - time());
+        $this->assertSame((30 + 60 * 10), $missiles['fleet_start_time'] - $now);
 
         DB::table('fleets')->where('fleet_id', $missiles['fleet_id'])->update(['fleet_start_time' => time() - 1]);
         (new MissionControlLib())->arrivingFleets();

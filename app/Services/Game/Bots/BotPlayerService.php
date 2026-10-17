@@ -200,7 +200,7 @@ class BotPlayerService
             return;
         }
 
-        $tech = $this->strategy->nextResearch($levels);
+        $tech = $this->strategy->nextResearch($levels, $this->fleetPlanner->freeColonySlots($user));
 
         if ($tech !== null) {
             $this->researchQueue->add($bot, $model, $this->userWithResearch($user, $bot), $tech, false);
