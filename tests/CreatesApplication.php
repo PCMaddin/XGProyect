@@ -25,6 +25,8 @@ trait CreatesApplication
         $app['config']->set([
             'database.default' => 'sqlite',
             'database.connections.sqlite.database' => ':memory:',
+            // the registry of the universes too (AppServiceProvider copied the game's connection)
+            'database.connections.central' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => ''],
             'INSTALLED' => 'false',
         ]);
 

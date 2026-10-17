@@ -69,6 +69,7 @@ class OptionsTableSeeder extends Seeder
             ['name' => 'expedition_fleet_delay_3_weight', 'value' => '1000', 'type' => 'int'],
             ['name' => 'expedition_fleet_delay_5_weight', 'value' => '100', 'type' => 'int'],
             ['name' => 'premium_url', 'value' => '', 'type' => 'string'],
+            ['name' => 'premium_mode', 'value' => 'play2win', 'type' => 'string'],
             ['name' => 'merchant_price', 'value' => '3500', 'type' => 'int'],
             ['name' => 'auto_backup', 'value' => '0', 'type' => 'int'],
             ['name' => 'last_backup', 'value' => '0', 'type' => 'int'],
