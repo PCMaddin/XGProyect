@@ -9,6 +9,8 @@ use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Core\Enumerators\PlanetTypesEnumerator as PlanetTypes;
 use App\Core\Enumerators\ShipsEnumerator as Ships;
 use App\Libraries\NoobsProtectionLib;
+use App\Core\Enumerators\BuildingsEnumerator as Buildings;
+use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\SettingsService;
 use App\Support\Concerns\ReadsMixedValues;
@@ -18,9 +20,10 @@ use Illuminate\Support\Facades\DB;
  * Where a bot's ships fly. At most one fleet per planet and turn:
  *
  * - the home planet founds colonies (as many as astrophysics allows, on a
- *   free position close to home), raids targets it has spied on and found
- *   weak, spies on the nearest other players and sends spare cargo ships
- *   on expeditions;
+ *   free position close to home), sends recyclers to debris fields nearby,
+ *   sends death stars against the moons of targets it outguns, raids
+ *   targets it has spied on and found weak, spies on the nearest other
+ *   players and sends spare cargo ships on expeditions;
  * - colonies ship what they do not need to the home planet.
  *
  * Bots attack only other bots unless the admin allows them to attack
@@ -28,7 +31,7 @@ use Illuminate\Support\Facades\DB;
  * those under noob protection are left alone. A raid follows a spy report:
  * when the probe has arrived, the bot judges the target by what the report
  * shows (resources, ships, defences) and attacks only an undefended planet
- * or one its warships outgun three times.
+ * or one its warships outgun twice.
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
@@ -53,6 +56,12 @@ class BotFleetPlanner
     /** a raid must bring at least this much */
     private const MIN_LOOT = 5000;
 
+    /** how much stronger the bot's warships must be than the target's ships and defences */
+    private const SUPERIORITY = 2;
+
+    /** a debris field worth the recyclers' flight */
+    private const MIN_DEBRIS = 10000;
+
     /** the share of the stock a raid plunders */
     private const LOOT_SHARE = 0.5;
 
@@ -72,6 +81,8 @@ class BotFleetPlanner
     public function __construct(
         private BotFleetService $sender,
         private BotShipyard $shipyard,
+        private BotStrategy $strategy,
+        private DevelopmentsService $developments,
         private FleetsService $fleets,
         private SettingsService $settings,
     ) {
@@ -91,6 +102,9 @@ class BotFleetPlanner
         }
 
         $this->colonize($user, $planet, $now) ||
+            $this->supplyMoon($user, $planet, $reserve, $now) ||
+            $this->recycle($user, $planet, $now) ||
+            $this->destroyMoon($user, $planet, $now) ||
             $this->raid($user, $planet, $now) ||
             $this->spy($user, $planet, $now) ||
             $this->expedition($user, $planet, $now);
@@ -221,7 +235,7 @@ class BotFleetPlanner
             $warships = $this->available($planet, self::WARSHIPS);
             $defended = $this->shipyard->combatValue($this->forces($target)) > 0;
 
-            if ($defended && $this->shipyard->combatValue($warships) < 3 * $this->shipyard->combatValue($this->forces($target))) {
+            if ($defended && $this->shipyard->combatValue($warships) < self::SUPERIORITY * $this->shipyard->combatValue($this->forces($target))) {
                 continue;
             }
 
@@ -234,6 +248,154 @@ class BotFleetPlanner
             $fleet = $this->cargoFor($cargoShips, $loot, $user) + ($defended ? $warships : []);
 
             return $this->sender->send($user, $planet, $fleet, $this->coordinates($target), Missions::ATTACK, [], 0, $now);
+        }
+
+        return false;
+    }
+
+    /**
+     * A moon produces nothing: the home planet ships what the moon's next
+     * building still lacks, from its stock above the reserve.
+     *
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $planet
+     * @param array<string, float> $reserve
+     */
+    private function supplyMoon(array $user, array $planet, array $reserve, int $now): bool
+    {
+        $userId = self::asInt($user['id'] ?? 0);
+        $cargoShips = $this->available($planet, self::CARGO_SHIPS);
+        $moon = DB::table('planets AS p')
+            ->join('buildings AS b', 'b.building_planet_id', '=', 'p.planet_id')
+            ->where('p.planet_user_id', $userId)
+            ->where('p.planet_type', PlanetTypes::MOON)
+            ->where('p.planet_destroyed', 0)
+            ->whereNotExists(fn ($fleets) => $fleets->from('fleets AS f')
+                ->where('f.fleet_owner', $userId)
+                ->where('f.fleet_mission', Missions::TRANSPORT)
+                ->where('f.fleet_end_type', PlanetTypes::MOON)
+                ->whereColumn('f.fleet_end_galaxy', 'p.planet_galaxy')
+                ->whereColumn('f.fleet_end_system', 'p.planet_system')
+                ->whereColumn('f.fleet_end_planet', 'p.planet_planet'))
+            ->first();
+
+        if ($moon === null || $cargoShips === []) {
+            return false;
+        }
+
+        $moon = get_object_vars($moon);
+        $levels = [
+            Buildings::BUILDING_MONDBASIS => self::asInt($moon['building_mondbasis'] ?? 0),
+            Buildings::BUILDING_PHALANX => self::asInt($moon['building_phalanx'] ?? 0),
+        ];
+        $next = $this->strategy->nextMoonBuilding($levels, self::asInt($moon['planet_field_max'] ?? 0) - self::asInt($moon['planet_field_current'] ?? 0));
+        $space = $this->sender->capacity($cargoShips, self::asInt($user['research_hyperspace_technology'] ?? 0), $user);
+        $cargo = [];
+
+        foreach ($this->developments->developmentPrice($next, $levels[$next]) as $resource => $amount) {
+            $missing = (int) ceil(max(0, $amount - self::asFloat($moon['planet_' . $resource] ?? 0)));
+            $spare = (int) max(0, self::asFloat($planet['planet_' . $resource] ?? 0) - ($reserve[$resource] ?? 0) - ($resource === 'deuterium' ? 1000 : 0));
+
+            if ($missing > $spare) {
+                return false;
+            }
+
+            $cargo[$resource] = $missing;
+        }
+
+        if (array_sum($cargo) === 0 || array_sum($cargo) > $space) {
+            return false;
+        }
+
+        return $this->sender->send($user, $planet, $cargoShips, $this->coordinates($moon, PlanetTypes::MOON), Missions::TRANSPORT, $cargo, 0, $now);
+    }
+
+    /**
+     * Recyclers bring in the nearest debris field nobody of the bot's
+     * recyclers is flying to yet.
+     *
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $planet
+     */
+    private function recycle(array $user, array $planet, int $now): bool
+    {
+        $recyclers = self::asInt($planet['ship_recycler'] ?? 0);
+        $system = self::asInt($planet['planet_system'] ?? 0);
+        $userId = self::asInt($user['id'] ?? 0);
+
+        if ($recyclers === 0) {
+            return false;
+        }
+
+        $field = DB::table('planets AS p')
+            ->where('p.planet_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
+            ->whereBetween('p.planet_system', [$system - self::RANGE, $system + self::RANGE])
+            ->where('p.planet_type', PlanetTypes::PLANET)
+            ->whereRaw($this->column('p.planet_debris_metal') . ' + ' . $this->column('p.planet_debris_crystal') . ' >= ?', [self::MIN_DEBRIS])
+            ->whereNotExists(fn ($fleets) => $fleets->from('fleets AS f')
+                ->where('f.fleet_owner', $userId)
+                ->where('f.fleet_mission', Missions::RECYCLE)
+                ->whereColumn('f.fleet_end_galaxy', 'p.planet_galaxy')
+                ->whereColumn('f.fleet_end_system', 'p.planet_system')
+                ->whereColumn('f.fleet_end_planet', 'p.planet_planet'))
+            ->orderByRaw('ABS(' . $this->column('p.planet_system') . ' - ?)', [$system])
+            ->first(['p.planet_galaxy', 'p.planet_system', 'p.planet_planet', 'p.planet_debris_metal', 'p.planet_debris_crystal']);
+
+        if ($field === null) {
+            return false;
+        }
+
+        $each = max(1, $this->sender->capacity([Ships::SHIP_RECYCLER => 1], self::asInt($user['research_hyperspace_technology'] ?? 0), $user));
+        $debris = self::asFloat($field->planet_debris_metal) + self::asFloat($field->planet_debris_crystal);
+        $target = [
+            'galaxy' => self::asInt($field->planet_galaxy),
+            'system' => self::asInt($field->planet_system),
+            'planet' => self::asInt($field->planet_planet),
+            'type' => PlanetTypes::DEBRIS,
+        ];
+
+        return $this->sender->send($user, $planet, [Ships::SHIP_RECYCLER => min($recyclers, (int) ceil($debris / $each))], $target, Missions::RECYCLE, [], 0, $now);
+    }
+
+    /**
+     * Death stars and the war fleet attack the nearest moon of a target
+     * they outgun, to destroy it.
+     *
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $planet
+     */
+    private function destroyMoon(array $user, array $planet, int $now): bool
+    {
+        if (self::asInt($planet['ship_deathstar'] ?? 0) === 0) {
+            return false;
+        }
+
+        $system = self::asInt($planet['planet_system'] ?? 0);
+        $userId = self::asInt($user['id'] ?? 0);
+        $fleet = $this->available($planet, [...self::WARSHIPS, Ships::SHIP_DEATHSTAR]);
+        $moons = $this->targetQuery($user, PlanetTypes::MOON)
+            ->join('defenses AS d', 'd.defense_planet_id', '=', 'p.planet_id')
+            ->join('ships AS s', 's.ship_planet_id', '=', 'p.planet_id')
+            ->addSelect('d.*', 's.*')
+            ->where('p.planet_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
+            ->whereBetween('p.planet_system', [$system - self::RANGE, $system + self::RANGE])
+            ->whereNotExists(fn ($fleets) => $fleets->from('fleets AS f')
+                ->where('f.fleet_owner', $userId)
+                ->where('f.fleet_mission', Missions::DESTROY)
+                ->whereColumn('f.fleet_end_galaxy', 'p.planet_galaxy')
+                ->whereColumn('f.fleet_end_system', 'p.planet_system')
+                ->whereColumn('f.fleet_end_planet', 'p.planet_planet'))
+            ->orderByRaw('ABS(' . $this->column('p.planet_system') . ' - ?)', [$system])
+            ->limit(5)
+            ->get();
+
+        foreach ($moons as $row) {
+            $moon = get_object_vars($row);
+
+            if ($this->shipyard->combatValue($fleet) >= self::SUPERIORITY * $this->shipyard->combatValue($this->forces($moon)) &&
+                $this->targetAllowed($user, $moon, $now)) {
+                return $this->sender->send($user, $planet, $fleet, $this->coordinates($moon, PlanetTypes::MOON), Missions::DESTROY, [], 0, $now);
+            }
         }
 
         return false;
@@ -402,13 +564,13 @@ class BotFleetPlanner
      *
      * @param array<string, mixed> $user
      */
-    private function targetQuery(array $user): \Illuminate\Database\Query\Builder
+    private function targetQuery(array $user, int $type = PlanetTypes::PLANET): \Illuminate\Database\Query\Builder
     {
         $query = DB::table('planets AS p')
             ->join('users AS u', 'u.id', '=', 'p.planet_user_id')
             ->join('preferences AS pr', 'pr.preference_user_id', '=', 'u.id')
             ->select('p.*', 'u.user_is_bot', 'u.onlinetime')
-            ->where('p.planet_type', PlanetTypes::PLANET)
+            ->where('p.planet_type', $type)
             ->where('p.planet_destroyed', 0)
             ->where('p.planet_user_id', '<>', self::asInt($user['id'] ?? 0))
             ->where('u.authlevel', 0)
@@ -529,13 +691,13 @@ class BotFleetPlanner
      *
      * @return array{galaxy: int, system: int, planet: int, type: int}
      */
-    private function coordinates(array $target): array
+    private function coordinates(array $target, int $type = PlanetTypes::PLANET): array
     {
         return [
             'galaxy' => self::asInt($target['planet_galaxy'] ?? 0),
             'system' => self::asInt($target['planet_system'] ?? 0),
             'planet' => self::asInt($target['planet_planet'] ?? 0),
-            'type' => PlanetTypes::PLANET,
+            'type' => $type,
         ];
     }
 }

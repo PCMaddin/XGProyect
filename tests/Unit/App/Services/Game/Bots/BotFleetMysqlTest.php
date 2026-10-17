@@ -147,7 +147,7 @@ class BotFleetMysqlTest extends MysqlTestCase
 
     public function testARaidedBotBuildsDefencesFirst(): void
     {
-        DB::table('buildings')->where('building_planet_id', $this->planet)->update(['building_hangar' => 2]);
+        DB::table('buildings')->where('building_planet_id', $this->planet)->update(['building_hangar' => 2, 'building_metal_mine' => 10]);
         DB::table('planets')->where('planet_id', $this->planet)->update(['planet_metal' => 30000]);
         $raid = ['report_owners' => $this->other . ',' . $this->bot, 'report_rid' => 'raid', 'report_content' => '', 'report_destroyed' => 1, 'report_time' => time() - 3600];
 

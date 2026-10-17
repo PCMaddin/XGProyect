@@ -15,8 +15,9 @@ use App\Services\Game\Formulas\DevelopmentsService;
 /**
  * What a bot's shipyard builds: a colony ship when astrophysics allows a
  * colony, defences first after a raid, then a few probes, cargo ships for
- * expeditions, raids and transports and light fighters; what the budget
- * does not spend on ships goes into the best defence allowed.
+ * expeditions, raids and transports, recyclers and a war fleet of light
+ * and heavy fighters and cruisers; what the budget does not spend on ships
+ * goes into the best defence allowed, up to a cap per metal mine level.
  *
  * Also rates fleets and defences for the bots' raids.
  */
@@ -30,6 +31,16 @@ class BotShipyard
         Defenses::DEFENSE_HEAVY_LASER,
         Defenses::DEFENSE_LIGHT_LASER,
         Defenses::DEFENSE_ROCKET_LAUNCHER,
+    ];
+
+    /** defences per metal mine level, so the metal does not all go into rocket launchers */
+    private const DEFENCE_CAPS = [
+        Defenses::DEFENSE_PLASMA_TURRET => 0.25,
+        Defenses::DEFENSE_GAUSS_CANNON => 1,
+        Defenses::DEFENSE_ION_CANNON => 1,
+        Defenses::DEFENSE_HEAVY_LASER => 2,
+        Defenses::DEFENSE_LIGHT_LASER => 8,
+        Defenses::DEFENSE_ROCKET_LAUNCHER => 10,
     ];
 
     /** missiles do not fight */
@@ -48,7 +59,7 @@ class BotShipyard
      * share the spare budget.
      *
      * @param array<int, int>          $levels  levels by object id
-     * @param array<int, int>          $ships   ships on the planet by id
+     * @param array<int, int>          $ships   ships and defences on the planet by id
      * @param array<string, float|int> $stock   metal, crystal, deuterium
      * @param array<string, float|int> $reserve what the next building costs
      *
@@ -62,7 +73,7 @@ class BotShipyard
             return [Ships::SHIP_COLONY_SHIP, 1];
         }
 
-        $defence = $raided ? $this->defenceOrder($levels, $this->aboveReserve($stock, $reserve), $maxPerOrder) : null;
+        $defence = $raided ? $this->defenceOrder($levels, $this->aboveReserve($stock, $reserve), $maxPerOrder, $ships, 2) : null;
 
         if ($defence !== null) {
             return $defence;
@@ -78,25 +89,32 @@ class BotShipyard
             }
         }
 
-        return $this->defenceOrder($levels, $budget, $maxPerOrder);
+        return $this->defenceOrder($levels, $budget, $maxPerOrder, $ships);
     }
 
     /**
-     * The best defence the budget pays for and how many, or null.
+     * The best defence the budget pays for and how many, or null. With the
+     * defences on the planet given, each kind stops at its cap per metal
+     * mine level (twice that after a raid).
      *
      * @param array<int, int>          $levels
      * @param array<string, float|int> $budget metal, crystal, deuterium
+     * @param array<int, int>|null     $units  ships and defences on the planet, null: no caps
      *
      * @return array{0: int, 1: int}|null
      */
-    public function defenceOrder(array $levels, array $budget, int $maxPerOrder): ?array
+    public function defenceOrder(array $levels, array $budget, int $maxPerOrder, ?array $units = null, int $capFactor = 1): ?array
     {
+        $metal = $levels[Buildings::BUILDING_METAL_MINE] ?? 0;
+
         foreach (self::DEFENCES as $defence) {
             if (!$this->developments->isDevelopmentAllowed($defence, $levels)) {
                 continue;
             }
 
-            $amount = min($this->affordable($defence, $budget), $maxPerOrder);
+            $room = $units === null ? PHP_INT_MAX
+                : (int) floor(self::DEFENCE_CAPS[$defence] * $metal * $capFactor) - ($units[$defence] ?? 0);
+            $amount = min($this->affordable($defence, $budget), $maxPerOrder, $room);
 
             if ($amount > 0) {
                 return [$defence, $amount];
@@ -189,7 +207,7 @@ class BotShipyard
     }
 
     /**
-     * The ships on a planet row, by id.
+     * The ships and defences on a planet row, by id.
      *
      * @param array<string, mixed> $planet
      *
@@ -199,7 +217,7 @@ class BotShipyard
     {
         $ships = [];
 
-        foreach ($this->registry->ships()->keys() as $ship) {
+        foreach ($this->registry->ships()->keys()->merge($this->registry->defenses()->keys()) as $ship) {
             $amount = $planet[$this->column($ship)] ?? 0;
             $ships[$ship] = is_numeric($amount) ? (int) $amount : 0;
         }
@@ -228,10 +246,15 @@ class BotShipyard
             return [Ships::SHIP_SMALL_CARGO_SHIP => min(10, max(1, intdiv($metal, 3)))];
         }
 
+        // the war fleet: cruisers beat rocket launchers and light fighters,
+        // recyclers bring the debris of the battles home
         return [
             Ships::SHIP_ESPIONAGE_PROBE => 3,
             Ships::SHIP_SMALL_CARGO_SHIP => min(40, 2 * $metal),
-            Ships::SHIP_LIGHT_FIGHTER => min(50, 2 * $metal),
+            Ships::SHIP_RECYCLER => min(10, intdiv($metal, 4)),
+            Ships::SHIP_LIGHT_FIGHTER => min(60, 3 * $metal),
+            Ships::SHIP_HEAVY_FIGHTER => min(40, 2 * $metal),
+            Ships::SHIP_CRUISER => min(100, max(0, 5 * ($metal - 12))),
         ];
     }
 

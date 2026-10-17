@@ -114,6 +114,22 @@ class BotStrategy
     }
 
     /**
+     * The next building on a moon: a lunar base whenever the fields run
+     * out, a sensor phalanx up to level 3, then more lunar base.
+     *
+     * @param array<int, int> $levels
+     */
+    public function nextMoonBuilding(array $levels, int $freeFields): int
+    {
+        if ($freeFields > 1 && ($levels[Buildings::BUILDING_PHALANX] ?? 0) < 3 &&
+            $this->developments->isDevelopmentAllowed(Buildings::BUILDING_PHALANX, $levels)) {
+            return Buildings::BUILDING_PHALANX;
+        }
+
+        return Buildings::BUILDING_MONDBASIS;
+    }
+
+    /**
      * The next research, or null if nothing on the list is allowed yet.
      *
      * @param array<int, int> $levels

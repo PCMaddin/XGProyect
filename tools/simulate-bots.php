@@ -27,6 +27,10 @@
  *   --galaxy-to=G      last galaxy bots are placed in (default 1)
  *   --option=K=V       overwrite a game option (table options) after the
  *                      install, repeatable (e.g. --option=game_speed=25000)
+ *   --grant=H:SHIP:N   scenario: at simulated hour H every bot gets N ships
+ *                      of id SHIP on its home planet, as an admin could give
+ *                      them (e.g. --grant=480:214:2 for two death stars, which
+ *                      bots cannot reach at speed 1 in a few weeks), repeatable
  *   --report=PATH      Markdown report (default storage/simulations/
  *                      sim-<db>-<date>.md); the JSON and the game log go next
  *                      to it (.json, .log)
@@ -181,7 +185,8 @@ final class ClockShim
 final class Options
 {
     /**
-     * @param array<string, string> $gameOptions
+     * @param array<string, string>        $gameOptions
+     * @param list<array{0: int, 1: int, 2: int}> $grants hour, ship id, amount
      */
     public function __construct(
         public readonly string $database,
@@ -200,6 +205,7 @@ final class Options
         public readonly int $dbPort,
         public readonly string $dbUser,
         public readonly string $dbPass,
+        public readonly array $grants = [],
     ) {
     }
 
@@ -207,7 +213,7 @@ final class Options
     {
         $opts = getopt('', [
             'db:', 'bots:', 'hours:', 'step:', 'seed:', 'start:', 'galaxy-from:', 'galaxy-to:',
-            'option:', 'report:', 'profile', 'self-test', 'help', 'db-host:', 'db-port:', 'db-user:', 'db-pass:',
+            'option:', 'report:', 'profile', 'self-test', 'help', 'db-host:', 'db-port:', 'db-user:', 'db-pass:', 'grant:',
         ]);
 
         if ($opts === false || isset($opts['help'])) {
@@ -232,6 +238,18 @@ final class Options
 
             [$name, $value] = explode('=', $pair, 2);
             $gameOptions[$name] = $value;
+        }
+
+        $grants = [];
+        $rawGrants = $opts['grant'] ?? [];
+
+        foreach (is_array($rawGrants) ? $rawGrants : [$rawGrants] as $grant) {
+            if (!is_string($grant) || preg_match('/^(\d+):(\d+):(\d+)$/', $grant, $parts) !== 1) {
+                fwrite(STDERR, "--grant expects HOUR:SHIP_ID:AMOUNT\n");
+                exit(2);
+            }
+
+            $grants[] = [(int) $parts[1], (int) $parts[2], (int) $parts[3]];
         }
 
         $seedGiven = self::str($opts, 'seed', '');
@@ -259,6 +277,7 @@ final class Options
             self::int($opts, 'db-port', 3306),
             self::str($opts, 'db-user', 'xgp'),
             self::str($opts, 'db-pass', 'xgp'),
+            $grants,
         );
 
         if ($options->bots < 1 || $options->hours < 1 || $options->step < 1 || $options->galaxyFrom < 1 || $options->galaxyTo < $options->galaxyFrom) {
@@ -1037,6 +1056,9 @@ final class Simulator
 
     private int $adminId = 0;
 
+    /** @var array<int, bool> grants already given, by their index */
+    private array $granted = [];
+
     /** @var list<string> */
     private array $shimmed;
 
@@ -1088,6 +1110,7 @@ final class Simulator
             }
 
             $this->guarded('tracking', fn () => $this->tracker->afterTick(SimClock::now()));
+            $this->guarded('grants', fn () => $this->grantDue());
 
             if (SimClock::now() >= $nextDay || SimClock::now() >= $end || $this->stop) {
                 $this->guarded('daily checks', fn () => $this->daily());
@@ -1378,6 +1401,27 @@ final class Simulator
 
         if ($lastRun !== SimClock::now()) {
             throw new RuntimeException(sprintf('Clock shim not effective: bots_last_run=%d, simulated time=%d.', $lastRun, SimClock::now()));
+        }
+    }
+
+    /**
+     * Scenario grants: ships every bot gets on its home planet at an hour.
+     */
+    private function grantDue(): void
+    {
+        $hour = intdiv(SimClock::now() - $this->options->start, 3600);
+        $names = app(\App\Core\GameObjects\GameObjectRegistry::class)->names();
+
+        foreach ($this->options->grants as $index => [$at, $ship, $amount]) {
+            if ($hour < $at || isset($this->granted[$index])) {
+                continue;
+            }
+
+            $this->granted[$index] = true;
+            $column = $names[$ship] ?? throw new RuntimeException('--grant: unknown ship id ' . $ship);
+            $homes = User::whereIn('id', $this->botIds)->pluck('home_planet_id')->all();
+            DB::table('ships')->whereIn('ship_planet_id', $homes)->increment($column, $amount);
+            $this->say(sprintf('Scenario at sim h %d: every bot got %d × %s.', $hour, $amount, $column));
         }
     }
 

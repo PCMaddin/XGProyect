@@ -146,12 +146,15 @@ class BotPlayerService
             return;
         }
 
-        $building = $this->strategy->nextBuilding(
-            $this->developmentData->levelsFromPlanet($model, $user),
-            $numbers,
-            $planetId === self::asInt($user['home_planet_id'] ?? 0),
-            self::asInt($user['research_current_research'] ?? 0) !== 0
-        );
+        $levels = $this->developmentData->levelsFromPlanet($model, $user);
+        $building = $model->planet_type === PlanetTypesEnumerator::MOON
+            ? $this->strategy->nextMoonBuilding($levels, $model->planet_field_max - $model->planet_field_current)
+            : $this->strategy->nextBuilding(
+                $levels,
+                $numbers,
+                $planetId === self::asInt($user['home_planet_id'] ?? 0),
+                self::asInt($user['research_current_research'] ?? 0) !== 0
+            );
 
         if ($building !== null) {
             $this->buildingQueue->add($model, $user, $building);
@@ -308,7 +311,7 @@ class BotPlayerService
     private function planetIds(int $botId): array
     {
         $ids = Planets::where('planet_user_id', $botId)
-            ->where('planet_type', PlanetTypesEnumerator::PLANET)
+            ->whereIn('planet_type', [PlanetTypesEnumerator::PLANET, PlanetTypesEnumerator::MOON])
             ->where('planet_destroyed', 0)
             ->pluck('planet_id')
             ->all();
