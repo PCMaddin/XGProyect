@@ -115,12 +115,21 @@ class BotShipyardTest extends TestCase
         $this->assertSame([Defenses::DEFENSE_ROCKET_LAUNCHER, 1], $this->shipyard->defenceOrder($lasers, ['metal' => 3000, 'crystal' => 100], 1000));
     }
 
-    public function testAQuarterAboveTheNextBuildingButAtLeastAFifthIsSpent(): void
+    public function testAQuarterAboveTheNextBuildingButAtLeastAShareOfTheProduction(): void
     {
-        // metal: (10,000 - 2 × 4,000) / 4 = 500, but a fifth is 2,000; deuterium: 250 above a fifth
         $this->assertSame(
-            ['metal' => 2000.0, 'crystal' => 200.0, 'deuterium' => 250.0],
+            ['metal' => 500.0, 'crystal' => 0.0, 'deuterium' => 250.0],
             $this->shipyard->spareBudget(['metal' => 10000, 'crystal' => 1000, 'deuterium' => 1000], ['metal' => 4000, 'crystal' => 2000])
+        );
+
+        // 30 % of a quarter hour's production, never more than the stock
+        $this->assertSame(
+            ['metal' => 750.0, 'crystal' => 300.0, 'deuterium' => 250.0],
+            $this->shipyard->spareBudget(['metal' => 10000, 'crystal' => 1000, 'deuterium' => 1000], ['metal' => 4000, 'crystal' => 2000], ['metal' => 10000, 'crystal' => 4000, 'deuterium' => 100])
+        );
+        $this->assertSame(
+            ['metal' => 100.0, 'crystal' => 0.0, 'deuterium' => 0.0],
+            $this->shipyard->spareBudget(['metal' => 100], ['metal' => 4000], ['metal' => 10000])
         );
     }
 

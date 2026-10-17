@@ -43,6 +43,12 @@ class BotShipyard
         Defenses::DEFENSE_ROCKET_LAUNCHER => 10,
     ];
 
+    /** the share of the production that goes into ships and defences at least */
+    private const FLEET_SHARE = 0.3;
+
+    /** a bot acts every 10 to 20 minutes */
+    private const TURN_HOURS = 0.25;
+
     /** missiles do not fight */
     private const NOT_FIGHTING = [Defenses::DEFENSE_ANTI_BALLISTIC_MISSILE, Defenses::DEFENSE_INTERPLANETARY_MISSILE];
 
@@ -62,11 +68,12 @@ class BotShipyard
      * @param array<int, int>          $levels  levels by object id
      * @param array<int, int>          $ships   ships and defences on the planet by id
      * @param array<string, float|int> $stock   metal, crystal, deuterium
-     * @param array<string, float|int> $reserve what the next building costs
+     * @param array<string, float|int> $reserve    what the next building costs
+     * @param array<string, float|int> $production metal, crystal, deuterium per hour
      *
      * @return array{0: int, 1: int}|null
      */
-    public function order(array $levels, array $ships, bool $home, bool $wantsColony, bool $raided, array $stock, array $reserve, int $maxPerOrder): ?array
+    public function order(array $levels, array $ships, bool $home, bool $wantsColony, bool $raided, array $stock, array $reserve, int $maxPerOrder, array $production = []): ?array
     {
         // a wanted colony ship is saved for: no other ship or defence meanwhile
         if ($home && $wantsColony && ($ships[Ships::SHIP_COLONY_SHIP] ?? 0) === 0 &&
@@ -80,7 +87,7 @@ class BotShipyard
             return $defence;
         }
 
-        $budget = $this->spareBudget($stock, $reserve);
+        $budget = $this->spareBudget($stock, $reserve, $production);
 
         foreach ($this->shipTargets($levels, $home) as $ship => $target) {
             $amount = min($target - ($ships[$ship] ?? 0), $this->affordable($ship, $budget), $maxPerOrder);
@@ -128,21 +135,24 @@ class BotShipyard
     /**
      * What is left for ships and defences: a quarter of the stock above
      * twice the price of the next building, so the economy grows first, but
-     * at least a fifth of the stock, so a bot saving for an expensive
-     * building still builds its fleet.
+     * at least the turn's share of the production (about 30 % of it over
+     * time), so a bot saving for an expensive building still builds its
+     * fleet.
      *
      * @param array<string, float|int> $stock
      * @param array<string, float|int> $reserve
+     * @param array<string, float|int> $production per hour
      *
      * @return array<string, float>
      */
-    public function spareBudget(array $stock, array $reserve): array
+    public function spareBudget(array $stock, array $reserve, array $production = []): array
     {
         $budget = [];
 
         foreach (['metal', 'crystal', 'deuterium'] as $resource) {
             $stocked = (float) ($stock[$resource] ?? 0);
-            $budget[$resource] = max(0.0, ($stocked - 2 * (float) ($reserve[$resource] ?? 0)) / 4, $stocked / 5);
+            $share = min($stocked, max(0.0, (float) ($production[$resource] ?? 0)) * self::FLEET_SHARE * self::TURN_HOURS);
+            $budget[$resource] = max(0.0, ($stocked - 2 * (float) ($reserve[$resource] ?? 0)) / 4, $share);
         }
 
         return $budget;

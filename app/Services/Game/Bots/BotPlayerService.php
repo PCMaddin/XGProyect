@@ -135,7 +135,8 @@ class BotPlayerService
         $reserve = $next === null ? [] : $this->developments->developmentPrice($next, $levels[$next] ?? 0);
 
         $this->fleetPlanner->act($user, $this->planetRow($planetId), $reserve, $now);
-        $this->orderShips($user, $planetId, $levels, $reserve, $now);
+        $production = ['metal' => $numbers['planet_metal_perhour'] ?? 0.0, 'crystal' => $numbers['planet_crystal_perhour'] ?? 0.0, 'deuterium' => $numbers['planet_deuterium_perhour'] ?? 0.0];
+        $this->orderShips($user, $planetId, $levels, $reserve, $production, $now);
     }
 
     /**
@@ -204,8 +205,9 @@ class BotPlayerService
      * @param array<string, mixed> $user
      * @param array<int, int>      $levels
      * @param array<string, float> $reserve
+     * @param array<string, float> $production per hour
      */
-    private function orderShips(array $user, int $planetId, array $levels, array $reserve, int $now): void
+    private function orderShips(array $user, int $planetId, array $levels, array $reserve, array $production, int $now): void
     {
         $model = Planets::find($planetId);
         $planet = $this->planetRow($planetId);
@@ -223,7 +225,8 @@ class BotPlayerService
             $this->fleetPlanner->wasRaided($user, $now),
             ['metal' => $model->planet_metal, 'crystal' => $model->planet_crystal, 'deuterium' => $model->planet_deuterium],
             $reserve,
-            MAX_FLEET_OR_DEFS_PER_ROW
+            MAX_FLEET_OR_DEFS_PER_ROW,
+            $production
         );
 
         if ($order === null) {
