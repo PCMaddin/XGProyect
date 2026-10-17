@@ -126,7 +126,9 @@ class BotShipyard
 
     /**
      * What is left for ships and defences: a quarter of the stock above
-     * twice the price of the next building, so the economy grows first.
+     * twice the price of the next building, so the economy grows first, but
+     * at least a fifth of the stock, so a bot saving for an expensive
+     * building still builds its fleet.
      *
      * @param array<string, float|int> $stock
      * @param array<string, float|int> $reserve
@@ -138,7 +140,8 @@ class BotShipyard
         $budget = [];
 
         foreach (['metal', 'crystal', 'deuterium'] as $resource) {
-            $budget[$resource] = max(0.0, ((float) ($stock[$resource] ?? 0) - 2 * (float) ($reserve[$resource] ?? 0)) / 4);
+            $stocked = (float) ($stock[$resource] ?? 0);
+            $budget[$resource] = max(0.0, ($stocked - 2 * (float) ($reserve[$resource] ?? 0)) / 4, $stocked / 5);
         }
 
         return $budget;

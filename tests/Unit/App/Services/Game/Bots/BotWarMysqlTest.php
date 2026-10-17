@@ -105,6 +105,17 @@ class BotWarMysqlTest extends MysqlTestCase
         $this->assertGreaterThan(0, $target['planet_debris_metal']);
     }
 
+    public function testWithoutCargoShipsTheWarshipsStillFight(): void
+    {
+        $this->ships($this->planet, [Ships::SHIP_CRUISER => 40]);
+        DB::table('defenses')->where('defense_planet_id', $this->otherPlanet)->update(['defense_rocket_launcher' => 20]);
+        app(SystemEspionageService::class)->record($this->bot, $this->otherPlanet, time() - 60);
+
+        app(BotPlayerService::class)->play($this->bot, time());
+
+        $this->assertSame(40, $this->fleet(Missions::ATTACK)['fleet_amount']);
+    }
+
     public function testRecyclersBringInTheDebris(): void
     {
         $this->ships($this->planet, [Ships::SHIP_RECYCLER => 5]);

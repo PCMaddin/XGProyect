@@ -226,16 +226,15 @@ class BotFleetPlanner
     {
         $cargoShips = $this->available($planet, self::CARGO_SHIPS);
 
-        if ($cargoShips === []) {
-            return false;
-        }
-
+        // without cargo ships only a fight is worth it (the recyclers bring in the debris)
         foreach ($this->reportedTargets($user, $now) as $target) {
             $warships = $this->available($planet, self::WARSHIPS);
             $forces = $this->forces($target);
             $loot = self::LOOT_SHARE * (self::asFloat($target['planet_metal'] ?? 0) + self::asFloat($target['planet_crystal'] ?? 0) + self::asFloat($target['planet_deuterium'] ?? 0));
 
-            if (!$this->targetAllowed($user, $target, $now) || ($forces === [] ? $loot < self::MIN_LOOT : !$this->worthFighting($warships, $user, $forces, $loot, $target))) {
+            $unarmed = $forces === [] && ($cargoShips === [] || $loot < self::MIN_LOOT);
+
+            if ($unarmed || !$this->targetAllowed($user, $target, $now) || ($forces !== [] && !$this->worthFighting($warships, $user, $forces, $loot, $target))) {
                 continue;
             }
 
