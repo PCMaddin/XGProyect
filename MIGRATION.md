@@ -946,6 +946,26 @@ Baseline-Einträge.
   Mondbasis, Todessterne gegen einen Mond, Schiffe im Einsatz (MariaDB).
   Probelauf 720 h: 0 Fehler, 445 Kämpfe, 392 Angriffsflotten, Recycler im
   Einsatz, der erste Mond in einem der Läufe.
+- ✅ **Langzeitlauf mit allen Bot-Funktionen:** 10 Bots × 1440 h (60
+  Spieltage), Seed 42, Todessterne für 3 Bots ab Tag 40
+  (`--grant=960:214:3:3`), Mondchance ×100 (`--moon-unit=1000`), 84
+  Minuten: **0 Fehler, 0 Invariantenverletzungen.**
+  - Krieg: 1.215 Kampfberichte, 965 Angriffsflotten, 4 Verbandsangriffe
+    (2 mit Verbündeten), 275 Kämpfe mit mehr als zwei Spielern, 545
+    Halteflüge, 31 Raketenangriffe (1.776 Verteidigungsanlagen zerstört),
+    317 Recyclerflüge.
+  - Monde: 14 entstanden, 4 von Todessternen zerstört (9
+    Zerstörungsflüge); Monde wurden beliefert und ausgebaut.
+  - Wirtschaft und Handel: 23 Kolonien, 3.464 Expeditionen mit allen
+    Ergebnisarten, 1.324 Transporte, 18 bezahlte Händleraufrufe und 26
+    Tauschgeschäfte, 442 Auktionsgebote (307 gewonnen), 4 Import/Export-
+    Container, 260 eingesetzte Gegenstände.
+  - Allianzen: 3 (3, 3 und 2 Bots, alle Klasse Krieger).
+
+  Im ersten Abschlusslauf kam kein Verbandsangriff zustande (jedes Ziel
+  war von Einzelüberfällen „gesperrt“), das wurde behoben; der Simulator
+  zählt seitdem auch zerstörte Monde (das Spiel löscht Berichte nach einer
+  Woche).
 - ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
   Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
   Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten
