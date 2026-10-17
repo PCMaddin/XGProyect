@@ -32,6 +32,7 @@ class GameController extends BaseController
         'changenick' => Game\ChangenickController::class,
         'chat' => Game\ChatController::class,
         'combatreport' => Game\CombatreportController::class,
+        'darkmatter' => Game\DarkMatterShopController::class,
         'defenses' => Game\DefensesController::class,
         'empire' => Game\EmpireController::class,
         'facilities' => Game\FacilitiesController::class,

@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Game;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\OfficerService;
-use App\Services\SettingsService;
+use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -61,8 +61,8 @@ class PremiumController extends BaseController
         }
 
         return view('premium.view', [
-            // without a shop of the server's own there is nothing to buy
-            'premium_pay_url' => app(SettingsService::class)->getString('premium_url'),
+            // the shop of the universe, the operator's own (premium_url) or no button
+            'premium_pay_url' => app(DarkMatterShop::class)->buyUrl(),
             'officier_list' => $this->buildOfficiersList(),
         ]);
     }

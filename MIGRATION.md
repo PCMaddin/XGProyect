@@ -1268,6 +1268,97 @@ Baseline-Einträge.
   keine), Spiel (Übersicht, Forschung, Werft, Rangliste, Imperium) und die
   gerenderte Willkommens-Mail: keine Anfrage verlässt `127.0.0.1`, Logo und
   Schrift laden.
+- ✅ **Dunkle Materie kaufen (Stripe, nur Pay2Win):** Spieler eines
+  Pay2Win-Universums (Option `premium_mode`) kaufen Dunkle Materie über
+  Stripe Checkout; gutgeschrieben wird automatisch per Webhook.
+  - Regel für den Button „Dunkle Materie erhalten“ (`DarkMatterShop`):
+    Pay2Win **und** beide Stripe-Schlüssel gesetzt → Button zum eigenen
+    Shop (`game.php?page=darkmatter`). Pay2Win ohne Stripe → wie bisher
+    `premium_url`, falls eingetragen. Play2Win → kein Shop, kein Button;
+    nur ein Server ohne Universen (kein `InstanceContext`) behält eine
+    eingetragene `premium_url` wie bisher. Ist der Shop zu, antworten
+    Shop-Seite und Kauf-POST mit einer Meldung und zurück zur Premium-Seite.
+  - Pakete in `config/premium.php` (Standard: 10.000 DM 1,99 €, 50.000
+    7,99 €, 120.000 16,99 €, 300.000 34,99 €; Preise in Cent, Währung
+    `STRIPE_CURRENCY`, Standard EUR). Der Kauf nimmt vom Spieler nur die
+    Paket-ID; Menge, Preis und Währung kommen aus der Konfiguration.
+  - Tabelle `dark_matter_orders` in der Datenbank des Universums
+    (Migration `000034` in `install` und `400`): Spieler, Paket, Menge,
+    Betrag (Cent), Währung, Provider, Checkout-Session (eindeutig),
+    Payment-Intent, Status `pending`/`paid`/`expired`/`failed`/`refunded`,
+    Zeiten als Unix-Sekunden. Modell `DarkMatterOrder`.
+  - Kauf (POST mit CSRF): offene Bestellung, dann Checkout-Session über
+    Stripes REST-API mit Laravels HTTP-Client (keine neue Abhängigkeit;
+    `mode=payment`, `price_data`, Metadaten Bestellung/Spieler/Universum
+    auch am Payment-Intent, `success_url`/`cancel_url` auf die
+    Bestellseite des aktuellen Hosts, Ablauf nach 1 h, Idempotency-Key)
+    und Weiterleitung zu Stripe. Ist Stripe nicht erreichbar oder lehnt ab,
+    wird die Bestellung `failed` und der Spieler sieht eine Meldung (nie
+    500; geloggt werden nur Status, Fehlertyp und -code, nie Schlüssel
+    oder Stripes Fehlertext). Höchstens 5 offene Bestellungen je 15
+    Minuten. Die Bestellseite zeigt „warte auf Bestätigung“ (lädt alle 5 s
+    neu) bis zum Webhook, dann die gutgeschriebene Menge.
+  - Webhook `POST /stripe/webhook` (`routes/webhooks.php`, eigene
+    Middleware-Gruppe `webhook` ohne Session, Cookies, CSRF und Login, vor
+    der Catch-all-Route des Spiels; zusätzlich in der CSRF-Ausnahme).
+    `StripeSignature` prüft `Stripe-Signature` (`t=…,v1=…`, HMAC-SHA256
+    über `"{t}.{Body}"`, `hash_equals`, mehrere `v1` erlaubt, älter als 5
+    Minuten abgelehnt) → sonst 400. `StripeWebhookHandler`: nennt die
+    Session ein Universum, wird es per `InstanceRegistry` gesucht und mit
+    `InstanceContext::runIn()` aktiviert, bevor die Spiel-Datenbank
+    angefasst wird (unbekannt → 400 und Log). `checkout.session.completed`
+    (bezahlt) und `…async_payment_succeeded`: in einer Transaktion wird die
+    Bestellung nur bezahlt, wenn sie offen ist und Session, Betrag und
+    Währung passen, und nur dann `premium_dark_matter` erhöht; doppelt
+    gesendete Ereignisse schreiben nichts gut. `…expired` und
+    `…async_payment_failed`: offene Bestellung → `expired`.
+    `charge.refunded` (nur volle Erstattung): Bestellung → `refunded`,
+    abgezogen wird, was der Spieler noch hat (nie unter 0); da die Charge
+    die Metadaten nicht sicher trägt, wird das Universum notfalls über die
+    Payment-Intent-ID in allen Universen gesucht. Teil-Erstattungen bleiben
+    beim Admin.
+  - Admin → Premium: Auswahl Pay2Win/Play2Win (bei mehreren Universen nur
+    angezeigt, dort setzt sie die Kommandozeile), Shop-Status und Seite
+    „Bestellungen“ (`/admin/premium/orders`: die letzten 200 mit Spieler,
+    Paket, Menge, Betrag, Status, Zeiten; Umsatz der bezahlten je Währung).
+  - Texte in allen 10 Sprachen (`game/darkmatter.php`, `admin/premium.php`).
+  - Einrichtung für den Betreiber: (1) Stripe-Dashboard → Entwickler →
+    API-Schlüssel: geheimen Schlüssel als `STRIPE_SECRET` in die `.env`
+    (`sk_test_…` zum Testen, `sk_live_…` live). (2) Entwickler → Webhooks →
+    Endpunkt `https://<Domain>/stripe/webhook` mit den Ereignissen
+    `checkout.session.completed`, `checkout.session.expired`,
+    `checkout.session.async_payment_succeeded`,
+    `checkout.session.async_payment_failed` und `charge.refunded`; dessen
+    Signing-Secret (`whsec_…`) als `STRIPE_WEBHOOK_SECRET`. Ein Endpunkt
+    reicht für alle Universen. (3) Optional `STRIPE_CURRENCY`, Pakete in
+    `config/premium.php` anpassen (neue Preise = neue Paket-ID).
+    (4) `php artisan config:clear` bzw. Konfiguration neu cachen,
+    Migrationen ausführen. (5) Im Universum `premium_mode` auf `pay2win`
+    (Admin → Premium bzw. Kommandozeile). Lokal testen: `stripe listen
+    --forward-to localhost/stripe/webhook` liefert ein eigenes `whsec_…`.
+  - ⚠️ Wer Dunkle Materie für echtes Geld verkauft, braucht die
+    Rechtstexte: Impressum, AGB, Datenschutzerklärung (Stripe als
+    Auftragsverarbeiter) und eine Widerrufsbelehrung für digitale Inhalte
+    (inkl. Zustimmung zum vorzeitigen Erlöschen des Widerrufsrechts vor dem
+    Kauf). Sie sind nicht Teil dieser Änderung.
+  - Tests: `StripeSignatureTest` (gültig, verändert, falsches Secret,
+    alter/zukünftiger Zeitstempel, mehrere `v1`), `StripeWebhookControllerTest`
+    (Route ohne Session/CSRF, einmalige Gutschrift bei Wiederholung,
+    falscher Betrag/Währung/Session, unbezahlt → async, abgelaufen,
+    Erstattung nie unter 0, falsche/alte Signatur, ohne Secret, unbekanntes
+    Universum), `DarkMatterShopControllerTest` (Regeln Pay2Win/Play2Win/
+    ohne Schlüssel, Pakete, Checkout mit `Http::fake` inkl. aller Felder und
+    Universum in den Metadaten, Fremdpreise ignoriert, Stripe-Fehler und
+    nicht erreichbar → Meldung, Bestell-Limit, fremde Bestellung),
+    `PremiumOrdersTest` (Admin-Liste, Umsatz, Modus speichern), auf MariaDB
+    `DarkMatterShopMysqlTest` (ganzer Kauf über die Spielseiten bis zur
+    Gutschrift, geschlossener Shop) und `StripeWebhookUniverseMysqlTest`
+    (Webhook schreibt im Universum `xgp_test_shop` gut, gleiche
+    Bestellnummer in der Basis bleibt unberührt; unbekanntes Universum;
+    Erstattung findet das Universum). Im Browser (eigener Server, Spieler
+    `spieler3`): ohne `STRIPE_SECRET` kein Button und die Shop-Seite lehnt
+    ab; mit Test-Schlüsseln Button und Paketliste (1,99 € … 34,99 €);
+    Webhook mit falscher Signatur → 400 ohne Session-Cookie.
 
 ## Smoke-Test gegen eine echte Datenbank
 

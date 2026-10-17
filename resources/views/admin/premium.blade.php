@@ -30,6 +30,37 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>
+                                {{ __('admin/premium.pr_premium_mode') }}
+                                <i class="fas fa-question-circle text-gray-400" data-toggle="popover"
+                                    data-trigger="hover" data-content="{{ __('admin/premium.pr_premium_mode_help') }}"></i>
+                            </td>
+                            <td>
+                                <select class="form-control" name="premium_mode" @disabled(!$premium_mode_editable)>
+                                    <option value="play2win" @selected($premium_mode === 'play2win')>{{ __('admin/premium.pr_premium_mode_play2win') }}</option>
+                                    <option value="pay2win" @selected($premium_mode === 'pay2win')>{{ __('admin/premium.pr_premium_mode_pay2win') }}</option>
+                                </select>
+                                @if (!$premium_mode_editable)
+                                    <small class="form-text text-muted">{{ __('admin/premium.pr_premium_mode_cli') }}</small>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_shop') }}</td>
+                            <td>
+                                @if ($shop_status === 'open')
+                                    <span class="badge badge-success">{{ __('admin/premium.pr_shop_open') }}</span>
+                                @elseif ($shop_status === 'closed_play2win')
+                                    <span class="badge badge-secondary">{{ __('admin/premium.pr_shop_closed_play2win') }}</span>
+                                @else
+                                    <span class="badge badge-warning">{{ __('admin/premium.pr_shop_closed_stripe') }}</span>
+                                @endif
+                                <a href="{{ route('admin.premium.orders') }}" class="ml-2">
+                                    <i class="fas fa-receipt fa-sm mr-1"></i>{{ __('admin/premium.pr_orders_show') }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>{{ __('admin/premium.pr_pay_url') }}</td>
                             <td>
                                 <input class="form-control" type="url" name="premium_url"

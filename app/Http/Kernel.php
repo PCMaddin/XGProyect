@@ -68,6 +68,11 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\ServerLanguage::class,
         ],
 
+        // payment providers (routes/webhooks.php): no session, cookies or CSRF token
+        'webhook' => [
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',

@@ -39,6 +39,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('install')
                 ->group(base_path('routes/install.php'));
 
+            // before the game's catch-all route
+            Route::middleware('webhook')
+                ->group(base_path('routes/webhooks.php'));
+
             Route::middleware('game')
                 ->group(base_path('routes/game.php'));
         });
