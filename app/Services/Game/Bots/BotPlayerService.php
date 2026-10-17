@@ -16,6 +16,7 @@ use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\ResearchQueueService;
 use App\Services\SettingsService;
 use App\Support\Concerns\ReadsMixedValues;
+use App\Support\FleetShips;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -219,7 +220,7 @@ class BotPlayerService
 
         $order = $this->shipyard->order(
             $levels,
-            $this->shipyard->shipsOf($planet),
+            $this->withFlying($this->shipyard->shipsOf($planet), $planet),
             $planetId === self::asInt($user['home_planet_id'] ?? 0),
             $this->fleetPlanner->wantsColony($user),
             $this->fleetPlanner->wasRaided($user, $now),
@@ -253,6 +254,35 @@ class BotPlayerService
                 $planetId,
             ]
         );
+    }
+
+    /**
+     * The planet's ships plus those flying from it, so ships out on a
+     * mission (probes spying, cargo ships on an expedition) are not built
+     * again.
+     *
+     * @param array<int, int>      $units
+     * @param array<string, mixed> $planet
+     *
+     * @return array<int, int>
+     */
+    private function withFlying(array $units, array $planet): array
+    {
+        $fleets = DB::table('fleets')
+            ->where('fleet_owner', self::asInt($planet['planet_user_id'] ?? 0))
+            ->where('fleet_start_galaxy', self::asInt($planet['planet_galaxy'] ?? 0))
+            ->where('fleet_start_system', self::asInt($planet['planet_system'] ?? 0))
+            ->where('fleet_start_planet', self::asInt($planet['planet_planet'] ?? 0))
+            ->where('fleet_start_type', self::asInt($planet['planet_type'] ?? 0))
+            ->pluck('fleet_array');
+
+        foreach ($fleets as $fleet) {
+            foreach (FleetShips::decode(self::asString($fleet)) as $ship => $amount) {
+                $units[$ship] = ($units[$ship] ?? 0) + $amount;
+            }
+        }
+
+        return $units;
     }
 
     /**

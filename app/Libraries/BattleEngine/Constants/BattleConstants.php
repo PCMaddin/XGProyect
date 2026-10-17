@@ -68,7 +68,11 @@ if (!defined('DEFENSE_DEBRIS_FACTOR')) {
 }
 
 define('POINT_UNIT', 1000); //Ogame point = 1000 resources.
-define('MOON_UNIT_PROB', 100000);
+// a test run (tools/simulate-bots.php --moon-unit) may set a higher moon chance
+if (!defined('MOON_UNIT_PROB')) {
+    define('MOON_UNIT_PROB', 100000);
+}
+
 define('MAX_MOON_PROB', 20); //max probability to moon creation.
 define('MOON_MIN_START_SIZE', 2000);
 define('MOON_MAX_START_SIZE', 6000);

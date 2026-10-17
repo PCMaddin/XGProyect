@@ -116,6 +116,28 @@ class BotWarMysqlTest extends MysqlTestCase
         $this->assertSame(40, $this->fleet(Missions::ATTACK)['fleet_amount']);
     }
 
+    public function testShipsOnAMissionAreNotBuiltAgain(): void
+    {
+        DB::table('buildings')->where('building_planet_id', $this->planet)->update(['building_hangar' => 3, 'building_metal_mine' => 10]);
+        DB::table('research')->where('research_user_id', $this->bot)->update(['research_espionage_technology' => 2]);
+        DB::table('planets')->where('planet_id', $this->planet)->update(['planet_metal' => 20000, 'planet_crystal' => 20000]);
+        $this->ships($this->planet, [Ships::SHIP_ESPIONAGE_PROBE => 2]);
+        // the third probe is out spying
+        DB::table('fleets')->insert([
+            'fleet_owner' => $this->bot, 'fleet_mission' => Missions::SPY, 'fleet_amount' => 1, 'fleet_array' => serialize([Ships::SHIP_ESPIONAGE_PROBE => 1]),
+            'fleet_start_galaxy' => $this->home['planet_galaxy'], 'fleet_start_system' => $this->home['planet_system'], 'fleet_start_planet' => $this->home['planet_planet'],
+            'fleet_start_type' => PlanetTypes::PLANET, 'fleet_start_time' => time() + 600, 'fleet_end_time' => time() + 1200,
+            'fleet_end_galaxy' => $this->home['planet_galaxy'], 'fleet_end_system' => 1, 'fleet_end_planet' => 1, 'fleet_end_type' => PlanetTypes::PLANET,
+        ]);
+
+        app(BotPlayerService::class)->play($this->bot, time());
+
+        $hangar = DB::table('planets')->where('planet_id', $this->planet)->value('planet_b_hangar_id');
+        $this->assertIsString($hangar);
+        $this->assertStringStartsNotWith(Ships::SHIP_ESPIONAGE_PROBE . ',', $hangar);
+        $this->assertNotSame('', $hangar, 'the shipyard builds something else');
+    }
+
     public function testRecyclersBringInTheDebris(): void
     {
         $this->ships($this->planet, [Ships::SHIP_RECYCLER => 5]);

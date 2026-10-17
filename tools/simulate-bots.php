@@ -33,6 +33,9 @@
  *                      an admin could give them (e.g. --grant=480:214:3:3 for
  *                      three death stars for three bots, which bots cannot
  *                      reach at speed 1 in a few weeks), repeatable
+ *   --moon-unit=N      test acceleration: 1 % moon chance per N debris instead
+ *                      of the game's 100,000 (still at most 20 %), so moon
+ *                      creation and destruction happen in a short run
  *   --report=PATH      Markdown report (default storage/simulations/
  *                      sim-<db>-<date>.md); the JSON and the game log go next
  *                      to it (.json, .log)
@@ -208,6 +211,7 @@ final class Options
         public readonly string $dbUser,
         public readonly string $dbPass,
         public readonly array $grants = [],
+        public readonly int $moonUnit = 0,
     ) {
     }
 
@@ -215,7 +219,7 @@ final class Options
     {
         $opts = getopt('', [
             'db:', 'bots:', 'hours:', 'step:', 'seed:', 'start:', 'galaxy-from:', 'galaxy-to:',
-            'option:', 'report:', 'profile', 'self-test', 'help', 'db-host:', 'db-port:', 'db-user:', 'db-pass:', 'grant:',
+            'option:', 'report:', 'profile', 'self-test', 'help', 'db-host:', 'db-port:', 'db-user:', 'db-pass:', 'grant:', 'moon-unit:',
         ]);
 
         if ($opts === false || isset($opts['help'])) {
@@ -280,6 +284,7 @@ final class Options
             self::str($opts, 'db-user', 'xgp'),
             self::str($opts, 'db-pass', 'xgp'),
             $grants,
+            self::int($opts, 'moon-unit', 0),
         );
 
         if ($options->bots < 1 || $options->hours < 1 || $options->step < 1 || $options->galaxyFrom < 1 || $options->galaxyTo < $options->galaxyFrom) {
@@ -1219,6 +1224,10 @@ final class Simulator
 
     private function bootLaravel(): void
     {
+        if ($this->options->moonUnit > 0) {
+            \define('MOON_UNIT_PROB', $this->options->moonUnit);
+        }
+
         $app = require $this->root . '/bootstrap/app.php';
         $app->make(Kernel::class)->bootstrap();
 
