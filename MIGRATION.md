@@ -902,6 +902,56 @@ Baseline-Einträge.
   verfrühte Rückkehr, Gegenstand, Schwarzes Loch, Händler), 2.228
   Transporte, 770 Spionageflüge, 24 Überfälle, 128 Kampfberichte,
   Trümmerfelder auch im tiefen Raum. Laufzeit 39 Minuten.
+- ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
+  Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
+  Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten
+  (`MerchantService::call/exchange`, `AuctionService::current/bid`,
+  `ImportExportService::buy`, `ItemService::use`). Neue Klassen
+  `BotTrader`, `BotBidder` und `BotTradeRules` (reine Rechenregeln), in
+  `BotPlayerService::play()` nur ein Aufruf. Bedarf ist, was das nächste
+  Gebäude und die nächste Forschung kosten (soweit sie nicht schon laufen);
+  Überschuss ist der Vorrat darüber, Fehlbetrag der Bedarf darüber hinaus.
+  Rohstoffe werden in Metalleinheiten verglichen (1 : 1,5 : 3).
+  - Händler: nur wenn die eigenen Minen für einen Fehlbetrag länger als
+    6 Stunden bräuchten. Ein Angebot, das der Bot schon hat (von einer
+    Expedition), nutzt er, wenn der Händler einen Rohstoff kauft, von dem er
+    übrig hat. Sonst ruft er ihn für Dunkle Materie zum Kauf seines größten
+    Überschusses, wenn die Hälfte davon den ganzen Fehlbetrag auch zum
+    schlechtesten Kurs (`merchant_base_min_exchange_rate`, neu
+    `MerchantService::lowestFactor()`) bezahlt, und höchstens alle
+    6 Stunden (`RateLimiter`). Er kauft bis zum Doppelten des Fehlbetrags,
+    für höchstens die Hälfte des Überschusses und nur, was ins Lager passt.
+  - Auktionator: mit großem Überschuss (Wert einer Tagesproduktion des
+    Planeten, mindestens 50.000) bietet der Bot im Rohstoff seines größten
+    Überschusses: zuerst ein Viertel seines Limits, überboten 10 % (mindestens
+    1.000) über dem Höchstgebot, bis zum Limit. Limit: ein Viertel des
+    Überschusses (bisherige Gebote eingerechnet), nie mehr, als der
+    Gegenstand ihm wert ist – ein Booster die Mehrproduktion seiner Woche,
+    Kraken/Detroid/Newtron die Produktion der gesparten Zeit.
+  - Import/Export: mit großem Überschuss kauft er den Container des Tages,
+    wenn ein unbekannter Gegenstand dieser Stufe im Schnitt den Preis wert
+    ist und dieser im Limit liegt. Tauschen nie (gleiche Stufe, gleicher
+    Erwartungswert, kostet Dunkle Materie).
+  - Gegenstände (gewonnen, gekauft, von Expeditionen) setzt er auf dem
+    Heimatplaneten ein; was gerade nicht wirkt (nichts im Bau, anderer
+    Booster aktiv), wartet. Feld-Gegenstände und M.O.O.N.S. bleiben liegen.
+  - Schrotthändler: bewusst nicht – er zahlt nur einen Teil des Preises,
+    und Bots bauen Schiffe und Verteidigung für einen Zweck.
+
+  Admin-Erklärung `bo_play_explanation` in allen 10 Sprachen ergänzt.
+  Der Simulator zählt die Händleraktionen aus den Schreibzugriffen (der
+  Händler führt kein Protokoll) und zeigt sie unter „Trading“. Tests:
+  Regeln (Unit), auf MariaDB Händlerruf mit Tausch und Sperre für
+  6 Stunden, Expeditionsangebot ohne Dunkle Materie, kein Handel ohne
+  Überschuss, Bieten und Überbieten zweier Bots, Aufgeben ohne Überschuss,
+  Einsatz des gewonnenen Boosters, Container einmal am Tag, Einsatz eines
+  Gegenstands im Bot-Zug. Simulation 10 Bots × 720 h, Seed 42: **0 Fehler,
+  0 Invariantenverletzungen**; 24 Auktionen, 23 Gebote und 2 Erhöhungen
+  (205.184 Metalleinheiten), 21 von Bots gewonnen, 16 Gegenstände
+  eingesetzt (8 Booster), 1 Händlertausch mit einem Expeditionsangebot.
+  Kein bezahlter Händlerruf und kein Container: In 30 Tagen hat kein Bot
+  3.500 Dunkle Materie (höchstens 1.801), und der Durchschnittswert eines
+  Containers liegt bei dieser Produktion noch unter seinem Preis.
 - ✅ **Einstellungen einmal pro Anfrage laden:** `SettingsService` war nicht
   als geteilte Instanz gebunden; jedes `app(SettingsService::class)` lud die
   ganze Tabelle `options` neu – im Tick allein etwa 15-mal, auf einer

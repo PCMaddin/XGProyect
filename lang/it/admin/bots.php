@@ -15,7 +15,7 @@ return [
     'bo_partial' => 'Solo :count bot su :requested sono stati creati; l’area scelta è quasi piena.',
     'bo_none' => 'Nessun bot creato. L’area scelta è piena.',
     'bo_play_title' => 'I bot giocano da soli',
-    'bo_play_explanation' => 'Ogni 10-20 minuti ogni bot gioca come un giocatore prudente: sviluppa energia, miniere, depositi e strutture, fa ricerca sul pianeta madre, costruisce navi e difese con le risorse in eccesso, fonda colonie, invia spedizioni, porta a casa le risorse delle colonie, spia i vicini e razzia i bersagli deboli. I bot attaccano solo altri bot, a meno che qui sotto tu non permetta loro di attaccare anche i giocatori; amministratori, giocatori in vacanza e sotto protezione principianti vengono risparmiati. I bot restano attivi e non vengono eliminati come account inattivi.',
+    'bo_play_explanation' => 'Ogni 10-20 minuti ogni bot gioca come un giocatore prudente: sviluppa energia, miniere, depositi e strutture, fa ricerca sul pianeta madre, costruisce navi e difese con le risorse in eccesso, fonda colonie, invia spedizioni, porta a casa le risorse delle colonie, spia i vicini e razzia i bersagli deboli. Scambia le risorse in eccesso dal mercante con quelle che gli mancano per il prossimo sviluppo, fa offerte al banditore, compra il container di import/export e usa i suoi oggetti. I bot attaccano solo altri bot, a meno che qui sotto tu non permetta loro di attaccare anche i giocatori; amministratori, giocatori in vacanza e sotto protezione principianti vengono risparmiati. I bot restano attivi e non vengono eliminati come account inattivi.',
     'bo_play_label' => 'I bot giocano',
     'bo_play_attack_players' => 'I bot attaccano anche i giocatori',
     'bo_play_count' => 'Bot nell’universo',

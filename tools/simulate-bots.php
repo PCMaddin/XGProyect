@@ -978,9 +978,13 @@ final class Profiler
 
     public float $queryMs = 0.0;
 
+    /** @var array<string, int> trader actions, told by their writes (the merchant keeps no record) */
+    public array $trades = [];
+
     public function listen(): void
     {
         DB::listen(function (QueryExecuted $query): void {
+            $this->countTrade($query);
             $this->queryCount++;
             $this->queryMs += $query->time;
             $key = mb_substr((string) preg_replace(['/\s+/', "/'(?:[^'\\\\]|\\\\.)*'/", '/\b\d+(\.\d+)?\b/', '/(\?|N)(, ?(\?|N))+/'], [' ', "'…'", 'N', '…'], $query->sql), 0, 220);
@@ -989,6 +993,25 @@ final class Profiler
             $entry['ms'] += $query->time;
             $this->queries[$key] = $entry;
         });
+    }
+
+    private function countTrade(QueryExecuted $query): void
+    {
+        $sql = $query->sql;
+        $offer = str_starts_with($sql, 'update `xgp_premium`') && str_contains($sql, 'premium_merchant_offer');
+        $kind = match (true) {
+            $offer && str_contains($sql, 'premium_dark_matter - ') => 'merchant_calls',
+            $offer => ($query->bindings[0] ?? null) === null ? 'merchant_exchanges' : 'merchant_expedition_offers',
+            str_starts_with($sql, 'insert into `xgp_auction_bids`') => 'auction_bids',
+            str_starts_with($sql, 'update `xgp_auction_bids`') => 'auction_raises',
+            str_contains($sql, '`xgp_import_exports` set `bought`') => 'containers_bought',
+            str_contains($sql, '`xgp_user_items` set `amount` = `amount` -') => 'items_used',
+            default => null,
+        };
+
+        if ($kind !== null) {
+            $this->trades[$kind] = ($this->trades[$kind] ?? 0) + 1;
+        }
     }
 
     public function phase(string $name, callable $run): void
@@ -1637,6 +1660,13 @@ final class ReportWriter
             'users' => (int) DB::table('users')->count(),
             'planets' => (int) DB::table('planets')->where('planet_destroyed', 0)->count(),
             'messages_by_kind' => $this->messageTotals(),
+            'trading' => $this->profiler->trades + [
+                'auctions' => (int) DB::table('auctions')->count(),
+                'auctions_won' => (int) DB::table('auctions')->whereNotNull('winner_id')->count(),
+                'auction_bid_value' => (int) DB::table('auction_bids')->sum('value'),
+                'boosters_used_on_planets' => (int) DB::table('planet_boosters')->count(),
+                'items_left' => (int) DB::table('user_items')->sum('amount'),
+            ],
         ];
     }
 
@@ -1816,6 +1846,7 @@ final class ReportWriter
         $md[] = '- Debris fields: `' . json_encode($g['debris_fields']) . '`, deep space debris: `' . json_encode($g['deep_space_debris']) . '`';
         $md[] = '- Expeditions by outcome: `' . json_encode($g['expeditions_by_outcome']) . '`';
         $md[] = '- Messages by kind: `' . json_encode($g['messages_by_kind']) . '`';
+        $md[] = '- Trading: `' . json_encode($g['trading']) . '`';
         $md[] = '- Users ' . $g['users'] . ', planets and moons ' . $g['planets'] . ', admin points ' . $g['admin_points'];
         $md[] = '- Fleets by mission and outcome (outcome is inferred from when the fleet row vanished):';
 

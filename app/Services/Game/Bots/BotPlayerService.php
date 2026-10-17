@@ -24,7 +24,8 @@ use Throwable;
  * planets up to date like a player's page view does, then build, research
  * and order defences through the same queues and rules as players. A bot
  * acts every 10 to 20 minutes; at most a few bots act per tick so no page
- * view gets slow. Their fleets fly as {@see BotFleetPlanner} decides.
+ * view gets slow. Their fleets fly as {@see BotFleetPlanner} decides, and
+ * they trade as {@see BotTrader} does.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -45,6 +46,7 @@ class BotPlayerService
         private BotStrategy $strategy,
         private BotShipyard $shipyard,
         private BotFleetPlanner $fleetPlanner,
+        private BotTrader $trader,
         private BuildingQueueService $buildingQueue,
         private ResearchQueueService $researchQueue,
         private DevelopmentDataService $developmentData,
@@ -87,6 +89,8 @@ class BotPlayerService
                 foreach ($this->planetIds($botId) as $planetId) {
                     $this->playPlanet($user, $planetId, $now);
                 }
+
+                $this->trader->act($user, self::asInt($user['home_planet_id'] ?? 0), $now);
             }
         } catch (Throwable $e) {
             report($e);

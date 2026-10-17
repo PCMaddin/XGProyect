@@ -44,6 +44,14 @@ class MerchantService
     }
 
     /**
+     * The worst factor a call can draw.
+     */
+    public function lowestFactor(): float
+    {
+        return $this->settings->getFloat('merchant_base_min_exchange_rate');
+    }
+
+    /**
      * The player's current offer, if he called the merchant.
      *
      * @return array{sell: string, factor: float}|null
@@ -203,7 +211,7 @@ class MerchantService
 
     private function drawFactor(): float
     {
-        $min = $this->settings->getFloat('merchant_base_min_exchange_rate');
+        $min = $this->lowestFactor();
         $max = max($min, $this->settings->getFloat('merchant_base_max_exchange_rate'));
 
         return round($min + (mt_rand() / mt_getrandmax()) * ($max - $min), 2);
