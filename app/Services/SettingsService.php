@@ -8,6 +8,11 @@ use App\Models\Options;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * The game options (table options), loaded once and kept for the request
+ * or job (bound as scoped). Writes go to the table and to the loaded
+ * values, so a value written is read back at once.
+ */
 class SettingsService
 {
     /**
@@ -78,6 +83,11 @@ class SettingsService
                     ['name' => $key],
                     ['value' => $value]
                 );
+
+            if ($this->settings !== []) {
+                $this->settings[$key] ??= new Options(['name' => $key]);
+                $this->settings[$key]->value = is_bool($value) ? (string) (int) $value : (is_scalar($value) ? (string) $value : '');
+            }
 
             return true;
         }

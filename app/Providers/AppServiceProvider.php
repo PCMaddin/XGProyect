@@ -18,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(GameObjectRegistry::class);
+        // the options are read many times per request (the tick alone about
+        // 15 times); load them once per request or job, not per use
+        $this->app->scoped(SettingsService::class);
     }
 
     /**

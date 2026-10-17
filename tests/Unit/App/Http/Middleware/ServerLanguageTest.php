@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Http\Middleware;
 
 use App\Http\Middleware\ServerLanguage;
-use App\Models\Options;
+use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -39,8 +39,7 @@ class ServerLanguageTest extends DatabaseTestCase
 
     private function localeWith(string $language): string
     {
-        Options::where('name', 'lang')->delete();
-        Options::insert(['name' => 'lang', 'value' => $language, 'type' => 'string']);
+        app(SettingsService::class)->write('lang', $language);
         App::setLocale('en');
 
         $locale = '';

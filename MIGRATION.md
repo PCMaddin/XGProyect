@@ -902,6 +902,17 @@ Baseline-Einträge.
   verfrühte Rückkehr, Gegenstand, Schwarzes Loch, Händler), 2.228
   Transporte, 770 Spionageflüge, 24 Überfälle, 128 Kampfberichte,
   Trümmerfelder auch im tiefen Raum. Laufzeit 39 Minuten.
+- ✅ **Einstellungen einmal pro Anfrage laden:** `SettingsService` war nicht
+  als geteilte Instanz gebunden; jedes `app(SettingsService::class)` lud die
+  ganze Tabelle `options` neu – im Tick allein etwa 15-mal, auf einer
+  Spielseite 24- bis 54-mal (Galaxie). Jetzt ist er `scoped` gebunden
+  (einmal pro Anfrage bzw. Job, auch unter Octane und Queue-Workern), und
+  `write()` aktualisiert die geladenen Werte mit, damit ein geschriebener
+  Wert sofort gelesen wird. Gemessen über das MariaDB-Abfrageprotokoll:
+  2–4 Optionsabfragen pro Seite statt 24–54; der Simulator läuft 10 %
+  schneller bei identischem Spielverlauf. Alle Schreibzugriffe im Code laufen
+  über `write()`; zwei Tests, die Optionen mitten im Test direkt in die
+  Tabelle schrieben, tun das jetzt auch. Neuer `SettingsServiceTest`.
 - ✅ **Keine externen Inhalte mehr:** Spiel, Admin-Panel, Installer und
   E-Mails luden Inhalte von fremden Servern, und jeder Aufruf verriet diesen
   Servern, wer wo spielt:

@@ -8,6 +8,7 @@ use App\Models\BuildingQueue;
 use App\Models\Buildings;
 use App\Models\Planets;
 use App\Services\Game\BuildingQueueService;
+use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\DatabaseTestCase;
@@ -147,7 +148,7 @@ class BuildingQueueServiceTest extends DatabaseTestCase
         $this->assertFalse($this->service()->add($planet, [], self::METAL_MINE, 'build'));
         $this->assertTrue($this->service()->add($planet, [], BuildingsEnum::BUILDING_SPACE_DOCK, 'build'));
 
-        DB::table('options')->insert(['name' => 'stat_points', 'value' => '1000', 'type' => '32']);
+        app(SettingsService::class)->write('stat_points', 1000);
         BuildingQueue::query()->update(['end_time' => time() - 1]);
         $planet = $planet->fresh() ?? $planet;
         $this->service()->processCompletions($planet, []);
