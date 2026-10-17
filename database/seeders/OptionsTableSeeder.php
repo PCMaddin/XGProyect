@@ -68,7 +68,7 @@ class OptionsTableSeeder extends Seeder
             ['name' => 'expedition_fleet_delay_2_weight', 'value' => '8900', 'type' => 'int'],
             ['name' => 'expedition_fleet_delay_3_weight', 'value' => '1000', 'type' => 'int'],
             ['name' => 'expedition_fleet_delay_5_weight', 'value' => '100', 'type' => 'int'],
-            ['name' => 'premium_url', 'value' => 'https://www.xgproyect.org/game.php?page=premium', 'type' => 'string'],
+            ['name' => 'premium_url', 'value' => '', 'type' => 'string'],
             ['name' => 'merchant_price', 'value' => '3500', 'type' => 'int'],
             ['name' => 'auto_backup', 'value' => '0', 'type' => 'int'],
             ['name' => 'last_backup', 'value' => '0', 'type' => 'int'],

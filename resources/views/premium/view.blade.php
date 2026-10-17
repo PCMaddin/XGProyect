@@ -25,9 +25,7 @@
             </div>
         </td>
         <td class="l" style="width:90px;text-align:center; vertical-align:middle;">
-            <a id='darkmatter2' href='{{ $premium_pay_url }}' style='cursor:pointer; text-align:center;width:100px;height:60px;'><br>
-                <div id='darkmatter2'><strong>{{ __('game/officier.of_get_darkmatter') }}</strong></div>
-            </a>
+            @include('premium.buy', ['url' => $premium_pay_url])
         </td>
     </tr>
     <tr>

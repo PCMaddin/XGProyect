@@ -61,7 +61,8 @@ class PremiumController extends BaseController
         }
 
         return view('premium.view', [
-            'premium_pay_url' => app(SettingsService::class)->getString('premium_url') ?: 'game.php?page=premium',
+            // without a shop of the server's own there is nothing to buy
+            'premium_pay_url' => app(SettingsService::class)->getString('premium_url'),
             'officier_list' => $this->buildOfficiersList(),
         ]);
     }

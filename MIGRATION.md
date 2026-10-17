@@ -978,6 +978,15 @@ Baseline-Einträge.
   Weitergabe der freien Plätze schlägt er fehl). Nebenbei: ein Bot-Test
   verglich eine Flugzeit mit einem zweiten `time()` und schlug sporadisch
   fehl, wenn dazwischen die Sekunde wechselte.
+- ✅ **Kauf-Button für Dunkle Materie nur mit eigenem Shop:** Der Button
+  „Dunkle Materie erhalten“ auf der Premium-Seite verlinkte standardmäßig
+  auf `https://www.xgproyect.org/game.php?page=premium`, die Seite des
+  Originalprojekts, auf der niemand etwas für diesen Server kaufen kann.
+  Der Standard von `premium_url` ist jetzt leer, und ohne eingetragene URL
+  zeigt die Seite den Button nicht (eigenes Teil-Template
+  `premium/buy.blade.php`). Migration `000032` leert in bestehenden
+  Installationen nur den alten Standard (http/https, mit und ohne `www`);
+  eine selbst eingetragene Shop-URL bleibt. Test: `PremiumBuyLinkTest`.
 - ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
   Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
   Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten
