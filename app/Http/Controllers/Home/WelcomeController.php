@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Home;
 
+use App\Services\Instances\InstanceContext;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -32,6 +33,9 @@ class WelcomeController extends BaseController
                     'userName' => '',
                     'userEmail' => '',
                     'forumUrl' => $this->settingsService->getString('forum_url'),
+                    // with several universes: which one this is, and the way back to the lobby
+                    'universe' => app(InstanceContext::class)->current()?->name,
+                    'universe_name' => app(InstanceContext::class)->current()->name ?? __('home/welcome.hm_universe_name'),
                 ],
                 $this->getErrors($request)
             )

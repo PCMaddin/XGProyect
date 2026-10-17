@@ -987,6 +987,69 @@ Baseline-Einträge.
   `premium/buy.blade.php`). Migration `000032` leert in bestehenden
   Installationen nur den alten Standard (http/https, mit und ohne `www`);
   eine selbst eingetragene Shop-URL bleibt. Test: `PremiumBuyLinkTest`.
+- ✅ **Mehrere Universen in getrennten Datenbanken (Lobby):** Ein Server
+  betreibt jetzt beliebig viele Universen, jedes in einer eigenen
+  Datenbank mit eigenen Konten, Optionen, Sitzungen und eigenem Cache.
+  - *Registry:* Tabelle `instances` in der Basisdatenbank (Verbindung
+    `central`, Kopie der Spielverbindung; Migration unter
+    `database/migrations/central`). Spalten: Slug, Name, Datenbank,
+    Modus `pay2win`/`play2win`, Status `open`/`closed`, Startzeit. Ohne
+    Einträge läuft der Server wie bisher als ein einziges Universum.
+  - *Umschalten:* Die Middleware `SelectInstance` liest das Cookie
+    `xgp_universe` (unverschlüsselt) und setzt vor dem Sitzungsstart
+    Datenbank und Cache-Präfix auf das gewählte Universum
+    (`InstanceContext::activate`, verwirft auch die request-weiten
+    Dienste wie die Optionen). Ohne Wahl, bei unbekanntem oder beendetem
+    Universum geht es zur Lobby. Ausgenommen sind `/universes` und
+    `/stripe/*`.
+  - *Lobby `/universes`:* Liste der Universen (neueste zuerst) mit Modus
+    und Erklärung, Startdatum und Spielerzahl ohne Bots; beendete
+    Universen werden als „Beendet“ gezeigt. Die Startseite zeigt den
+    Namen des Universums und den Link „Universum wechseln“; Sprachdateien
+    `home/lobby` in allen zehn Sprachen.
+  - *Befehle:*
+    - `xgp:instance:create {slug} --name --mode --database --admin-name
+      --admin-email --admin-password --option=name=value`: legt die
+      Datenbank an (Standard `xgp_uni_<slug>`). Danach laufen dieselben
+      Schritte wie im Installer, ohne Löschen: Tabellen, Update-Migrationen
+      als gelaufen markiert, Changelog, Sprachen, Optionen und
+      Administrator auf 1:1:1. Gesetzt werden `game_name` und
+      `premium_mode`; Sprache und Zeitzone kommen aus dem Basisspiel.
+      Der Befehl verweigert eine Datenbank, die schon ein Spiel enthält
+      oder einem anderen Universum gehört.
+    - `xgp:instance:adopt` übernimmt das bisher installierte Spiel als
+      Universum.
+    - `xgp:instance:list` zeigt die Universen.
+    - `xgp:instance:update --name --mode --status` ändert ein Universum.
+      Der Modus wird auch als Option in die Datenbank des Universums
+      geschrieben.
+    - `xgp:instance:migrate {slug?}` führt die Update-Migrationen in einem
+      oder allen Universen aus.
+  - *Monatlicher Start:* `xgp:instance:monthly` legt das Universum des
+    Monats an, gesteuert über `config/instances.php` bzw. die Variablen
+    `XGP_MONTHLY_*`: Slug und Name mit `:year`, `:month` und `:number`,
+    Modus, Optionen, Administrator und `keep_open` (schließt alle bis auf
+    die neuesten N Universen). Der Befehl kann gefahrlos erneut laufen.
+    Der Scheduler startet ihn am Ersten des Monats um 00:05, wenn
+    `XGP_MONTHLY_ENABLED=true` gesetzt ist; dafür braucht der Server den
+    Cron-Eintrag `* * * * * php artisan schedule:run`.
+  - *Nebenbei:* Das Anlegen des Administrators ist aus dem Installer in
+    `AdminAccount` gezogen; Installer und Befehle teilen es.
+  - *Gemeinsam bleiben:* die Logdateien (`storage/logs`) und die
+    Admin-Fehlerliste, die sie liest.
+  - *Tests:* `InstancesMysqlTest` auf MariaDB:
+    - Anlegen mit eigener Datenbank, Admin und Optionen.
+    - Abweisen doppelter Slugs, fremder Datenbanken, ungültiger Slugs
+      und von Datenbanken, die schon ein Spiel enthalten.
+    - Moduswechsel in Registry und Universum.
+    - Lobby, Cookie und Umschalten der Datenbank je Request.
+    - Unbekannte und beendete Universen.
+    - Übernehmen des bestehenden Spiels.
+    - Monatsstart einschließlich Wiederholung und Schließen.
+  - *Live geprüft:* Lobby und Wechsel zwischen zwei Universen mit
+    getrennten Admins. Beide wurden komplett gecrawlt (alle Spiel- und
+    Admin-Seiten) und zeigen dieselben drei bekannten Treffer wie im
+    Einzelbetrieb.
 - ✅ **Bots handeln:** Bots nutzen jetzt den Händler, den Auktionator und
   Import/Export, einmal pro Zug nach den Planeten und mit dem Vorrat des
   Heimatplaneten, über dieselben Service-Methoden wie die Händlerseiten

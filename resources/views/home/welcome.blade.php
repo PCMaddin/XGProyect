@@ -150,7 +150,7 @@
 			            <label for="serverLogin">{{ __('home/welcome.hm_universe') }}</label>
                         <div class="black-border">
                             <select class="js_uniUrl" id="serverLogin" name="uni">
-                                <option value="0">{{ __('home/welcome.hm_universe_name') }}</option>
+                                <option value="0">{{ $universe_name }}</option>
                             </select>
                         </div>
 			        </div>
@@ -191,7 +191,7 @@
                                 <tbody>
                                     <tr>
                                         <td id="uni_select_box" class="select" style="height:19px;overflow:hidden;">
-                                            <span id="uni_name" class="">{{ __('home/welcome.hm_universe_name') }}</span>
+                                            <span id="uni_name" class="">{{ $universe_name }}</span>
                                         </td>
                                         <td style="width:18px; background: url('{{ asset('assets/images/home/dropdownmenu_arrow.png') }}') no-repeat scroll 0 0 #8D9AA7;"></td>
                                     </tr>
@@ -201,11 +201,11 @@
                             <div id="uni_selection" style="display: none;">
                                 <script type="text/javascript">
                                 <!--
-                                    select_uni('{{ $basePath }}'.replace('http://', '').replace('https://', ''), '{{ __('home/welcome.hm_universe_name') }}','');
+                                    select_uni('{{ $basePath }}'.replace('http://', '').replace('https://', ''), @js($universe_name),'');
                                 //-->
                                 </script>
-                                <div id="row-0" class="server-row " title="" onclick="select_uni('{{ $basePath }}','{{ __('home/welcome.hm_universe_name') }}');" onmouseover="highlightRow(&#39;row-0&#39;);this.style.cursor=&#39;pointer&#39;" onmouseout="unHighlightRow(&#39;row-0&#39;);">
-                                    <span class="uni_span ">{{ __('home/welcome.hm_universe_name') }}</span>
+                                <div id="row-0" class="server-row " title="" onclick="select_uni('{{ $basePath }}',@js($universe_name));" onmouseover="highlightRow(&#39;row-0&#39;);this.style.cursor=&#39;pointer&#39;" onmouseout="unHighlightRow(&#39;row-0&#39;);">
+                                    <span class="uni_span ">{{ $universe_name }}</span>
                                 </div>
                             </div>
                         </div>
@@ -279,6 +279,9 @@
 	</div>
 	<div id="footer">
 	    <div id="footerContent">
+            @if ($universe !== null)
+            <p id="universe">{{ $universe }} · <a href="{{ route('lobby.index') }}">{{ __('home/lobby.lb_switch') }}</a></p>
+            @endif
             <p id="copyright">Powered by <a href="https://xgproyect.org/" target="_blank" title="XG Proyect {{ config('version.files') }}">XG Proyect</a> © 2008 - {{ now()->year }}.</p>
         </div>
 	</div>

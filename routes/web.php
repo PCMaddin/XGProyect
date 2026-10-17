@@ -12,7 +12,11 @@ use App\Http\Controllers\Home\Ajax\MediaController;
 use App\Http\Controllers\Home\LoginController;
 use App\Http\Controllers\Home\RegisterController;
 use App\Http\Controllers\Home\WelcomeController;
+use App\Http\Controllers\Lobby\LobbyController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/universes', [LobbyController::class, 'index'])->name('lobby.index');
+Route::post('/universes/{slug}', [LobbyController::class, 'choose'])->name('lobby.choose');
 
 Route::prefix('/')->group(function () {
     Route::get('/', WelcomeController::class)->name('home.index');

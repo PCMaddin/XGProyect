@@ -42,6 +42,14 @@ class InstanceRegistry
     }
 
     /**
+     * Reads again whether universes are registered.
+     */
+    public function refresh(): void
+    {
+        $this->enabled = null;
+    }
+
+    /**
      * @return list<Instance>
      */
     public function all(): array
