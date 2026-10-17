@@ -295,8 +295,10 @@ class BotCoordinator
     }
 
     /**
-     * A target for an ACS attack: defended, worth the flight, not attacked
-     * in the last day and not protected as a noob.
+     * A target for an ACS attack: defended, worth the flight, not hit by an
+     * ACS attack in the last day (raids alone do not count: in a busy
+     * universe nearly every target is raided daily) and not protected as a
+     * noob.
      *
      * @param array<string, mixed> $user
      * @param array<string, mixed> $target
@@ -305,7 +307,7 @@ class BotCoordinator
     private function needsAllies(array $user, array $target, array $forces, float $loot, int $now): bool
     {
         return $forces !== [] && $loot >= self::MIN_LOOT &&
-            !$this->raided(self::asInt($target['planet_user_id'] ?? 0), $now) && $this->planner->targetAllowed($user, $target, $now);
+            !$this->hitByAcs(self::asInt($target['planet_user_id'] ?? 0), $now) && $this->planner->targetAllowed($user, $target, $now);
     }
 
     /**
@@ -522,6 +524,19 @@ class BotCoordinator
      * Whether the player was attacked in the last day: a combat report lists
      * the defender last.
      */
+    /**
+     * Whether the player defended against several attackers in the last day:
+     * the combat report lists the attackers first and the defender last.
+     */
+    private function hitByAcs(int $userId, int $now): bool
+    {
+        return DB::table('reports')
+            ->where('report_time', '>', $now - self::RAID_MEMORY)
+            ->where('report_owners', 'like', '%,' . $userId)
+            ->pluck('report_owners')
+            ->contains(static fn (mixed $owners): bool => substr_count(self::asString($owners), ',') >= 2);
+    }
+
     private function raided(int $userId, int $now): bool
     {
         return DB::table('reports')

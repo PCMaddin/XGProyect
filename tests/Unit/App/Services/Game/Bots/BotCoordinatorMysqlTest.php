@@ -185,6 +185,8 @@ class BotCoordinatorMysqlTest extends MysqlTestCase
         DB::table('defenses')->where('defense_planet_id', $this->home($target))->update(['defense_rocket_launcher' => 35]);
         DB::table('planets')->where('planet_id', $this->home($target))->update(['planet_metal' => 60000, 'planet_crystal' => 30000]);
         app(SystemEspionageService::class)->record($member, $this->home($target), time() - 60);
+        // a raid by someone alone an hour ago does not spare the target
+        DB::table('reports')->insert(['report_owners' => '99,' . $target, 'report_rid' => 'raid', 'report_content' => '', 'report_destroyed' => 0, 'report_time' => time() - 3600]);
 
         app(BotPlayerService::class)->play($leader, time());
 
@@ -213,6 +215,25 @@ class BotCoordinatorMysqlTest extends MysqlTestCase
         $this->assertLessThan(35, $this->value('defenses', 'defense_planet_id', $this->home($target), 'defense_rocket_launcher'));
         $this->assertFalse(DB::table('acs')->where('acs_id', $group)->exists());
         $this->assertSame(2, DB::table('fleets')->where('fleet_group', $group)->where('fleet_mess', 1)->count());
+    }
+
+    public function testATargetHitByAnAcsAttackIsSparedForADay(): void
+    {
+        [$leader, $member, $target] = $this->bots;
+        $this->place($leader, 100, 4);
+        $this->place($member, 98, 4);
+        $this->place($target, 105, 8);
+        $this->ally([$leader, $member]);
+        $this->ships($this->home($leader), [Ships::SHIP_LIGHT_FIGHTER => 30]);
+        $this->ships($this->home($member), [Ships::SHIP_LIGHT_FIGHTER => 30]);
+        DB::table('defenses')->where('defense_planet_id', $this->home($target))->update(['defense_rocket_launcher' => 35]);
+        DB::table('planets')->where('planet_id', $this->home($target))->update(['planet_metal' => 60000, 'planet_crystal' => 30000]);
+        app(SystemEspionageService::class)->record($member, $this->home($target), time() - 60);
+        DB::table('reports')->insert(['report_owners' => '98,99,' . $target, 'report_rid' => 'acs', 'report_content' => '', 'report_destroyed' => 0, 'report_time' => time() - 3600]);
+
+        app(BotPlayerService::class)->play($leader, time());
+
+        $this->assertSame(0, DB::table('fleets')->where('fleet_group', '<>', 0)->count());
     }
 
     public function testNoAcsAttackOnAnAllyOrAPlayer(): void

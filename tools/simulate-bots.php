@@ -466,6 +466,9 @@ final class WorldTracker
     /** @var list<array{time: int, owner: int, type: int, coords: string}> */
     public array $newPlanets = [];
 
+    /** @var array<int, int> moons marked destroyed (the cleanup deletes them a day later), by id: sim time */
+    public array $destroyedMoons = [];
+
     /** @var array<string, string> expedition message prefix => outcome */
     private array $expeditionTexts = [];
 
@@ -630,6 +633,10 @@ final class WorldTracker
     {
         $rows = DB::table('planets')->where('planet_id', '>', $this->lastPlanetId)->orderBy('planet_id')
             ->get(['planet_id', 'planet_user_id', 'planet_type', 'planet_galaxy', 'planet_system', 'planet_planet']);
+
+        foreach (DB::table('planets')->where('planet_type', 3)->where('planet_destroyed', '>', 0)->pluck('planet_id') as $moonId) {
+            $this->destroyedMoons[(int) $moonId] ??= $now;
+        }
 
         foreach ($rows as $row) {
             $this->lastPlanetId = max($this->lastPlanetId, (int) $row->planet_id);
@@ -1684,6 +1691,7 @@ final class ReportWriter
             'expeditions_by_outcome' => $expeditions,
             'colonizations' => $colonies,
             'moons_created' => $moons,
+            'moons_destroyed' => count($this->tracker->destroyedMoons),
             'debris_fields' => (array) $debris,
             'deep_space_debris' => (array) $deepSpace,
             'admin_points' => round((float) DB::table('users_statistics')->where('user_statistic_user_id', $adminId)->value('user_statistic_total_points'), 1),
@@ -1897,7 +1905,7 @@ final class ReportWriter
         $md[] = '## World';
         $md[] = '';
         $md[] = sprintf('- Battle reports: %d (%d over after the first round)', $g['battle_reports'], $g['battle_reports_attacker_destroyed']);
-        $md[] = '- Colonizations: ' . $g['colonizations'] . ', moons created: ' . $g['moons_created'];
+        $md[] = '- Colonizations: ' . $g['colonizations'] . ', moons created: ' . $g['moons_created'] . ', moons destroyed: ' . $g['moons_destroyed'];
         $md[] = '- Debris fields: `' . json_encode($g['debris_fields']) . '`, deep space debris: `' . json_encode($g['deep_space_debris']) . '`';
         $md[] = '- Expeditions by outcome: `' . json_encode($g['expeditions_by_outcome']) . '`';
         $md[] = '- Messages by kind: `' . json_encode($g['messages_by_kind']) . '`';
