@@ -72,6 +72,13 @@
                     <input type="submit" name="apply_settings" value="{{ __('game/preferences.pr_use_settings') }}"/>
                 </th>
             </tr>
+            <tr>
+                <th role="heading" aria-level="2" colspan="2">{{ __('game/preferences.pr_two_factor') }}</th>
+            </tr>
+            <tr>
+                <th id="two-factor-status" style="color:{{ $two_factor ? 'lime' : 'orange' }};">{{ $two_factor ? __('account/two_factor.tf_status_on') : __('account/two_factor.tf_status_off') }}</th>
+                <th><a href="{{ route('account.security') }}">{{ __('game/preferences.pr_two_factor_manage') }}</a></th>
+            </tr>
             <tr {!! $hide_vacation_invalid !!}>
                 <td role="heading" aria-level="2" class="c" colspan="2">{{ __('game/preferences.pr_general') }}</td>
             </tr>

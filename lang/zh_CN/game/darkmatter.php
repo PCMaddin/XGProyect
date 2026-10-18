@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => '缺少此备注或超过期限的转账不会自动入账，届时请联系管理员。',
     'dm_status_wax_pending' => '正在等待您的 WAX 转账 ...',
     'dm_status_wax_expired' => '报价已过期。请重新下单；已发送的转账将由管理员核查。',
+    'dm_two_factor_hint' => '购买前请保护你的账户：开启两步验证后，仅凭密码无人能动你购买的暗物质。',
+    'dm_two_factor_link' => '立即设置',
 ];

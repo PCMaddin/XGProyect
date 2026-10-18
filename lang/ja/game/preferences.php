@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => 'このメールアドレスはすでに使用されています！',
     'pr_delete_mode_active' => 'このアカウントは %s に削除されます',
     'pr_fleet_escape' => '圧倒的な攻撃側から艦隊を退避させる（5:1、アドミラル雇用時は 3:1）',
+    'pr_two_factor' => '2段階認証',
+    'pr_two_factor_manage' => '設定と管理',
 ];

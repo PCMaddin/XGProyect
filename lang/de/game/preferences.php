@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => 'Die E-Mail-Adresse wird bereits verwendet!',
     'pr_delete_mode_active' => 'Dieses Konto wird am %s gelöscht',
     'pr_fleet_escape' => 'Flotte flieht vor übermächtigen Angreifern (5:1, mit Admiral 3:1)',
+    'pr_two_factor' => 'Zwei-Faktor-Anmeldung',
+    'pr_two_factor_manage' => 'Einrichten und verwalten',
 ];

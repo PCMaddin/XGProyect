@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => 'Ingame email already in use!',
     'pr_delete_mode_active' => 'This account will be deleted on %s',
     'pr_fleet_escape' => 'Fleet flees from overwhelming attackers (5:1, with admiral 3:1)',
+    'pr_two_factor' => 'Two-factor sign-in',
+    'pr_two_factor_manage' => 'Set up and manage',
 ];

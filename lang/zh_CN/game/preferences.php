@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => '该电子邮箱已在游戏中被使用！',
     'pr_delete_mode_active' => '此账号将于 %s 被删除',
     'pr_fleet_escape' => '舰队面对压倒性的进攻方时撤离（5:1，有海军上将时 3:1）',
+    'pr_two_factor' => '两步验证',
+    'pr_two_factor_manage' => '设置和管理',
 ];

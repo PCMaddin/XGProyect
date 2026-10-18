@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => 'Dit e-mailadres is in het spel al in gebruik!',
     'pr_delete_mode_active' => 'Dit account wordt verwijderd op %s',
     'pr_fleet_escape' => 'Vloot vlucht voor overweldigende aanvallers (5:1, met admiraal 3:1)',
+    'pr_two_factor' => 'Tweestapsaanmelding',
+    'pr_two_factor_manage' => 'Instellen en beheren',
 ];

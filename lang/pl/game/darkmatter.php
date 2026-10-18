@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => 'Bez tego memo lub po terminie nic nie zostanie dopisane automatycznie. Wtedy pomoże admin.',
     'dm_status_wax_pending' => 'Czekam na twój przelew WAX ...',
     'dm_status_wax_expired' => 'Oferta wygasła. Złóż nowe zamówienie; admin sprawdzi już wysłany przelew.',
+    'dm_two_factor_hint' => 'Zabezpiecz konto przed zakupem: dzięki logowaniu dwuetapowemu nikt nie dostanie się do kupionej ciemnej materii samym hasłem.',
+    'dm_two_factor_link' => 'Skonfiguruj teraz',
 ];

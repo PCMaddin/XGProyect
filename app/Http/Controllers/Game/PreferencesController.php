@@ -69,6 +69,7 @@ class PreferencesController extends BaseController
         return array_merge(
             [
                 'gameTitle' => $this->settingsService->getString('game_name'),
+                'two_factor' => $user->hasTwoFactor(),
             ],
             $this->messageData($submitted, $error),
             $this->userData($user, $preferences),

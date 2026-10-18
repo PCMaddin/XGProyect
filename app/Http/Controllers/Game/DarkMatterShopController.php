@@ -77,7 +77,11 @@ class DarkMatterShopController extends BaseController
 
         $methods = $this->shop->methods();
 
+        $user = $request->user();
+
         return view('premium.shop', [
+            // money is at stake: point to two-factor sign-in
+            'two_factor_hint' => $user instanceof User && !$user->hasTwoFactor(),
             'methods' => $methods,
             'packages' => array_values(array_map(fn (DarkMatterPackage $package): array => [
                 'id' => $package->id,

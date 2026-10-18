@@ -15,6 +15,14 @@
             @endforeach
         </td>
     </tr>
+    @if ($two_factor_hint)
+    <tr>
+        <th colspan="4" id="two-factor-hint" style="text-align:left;color:orange;">
+            {{ __('game/darkmatter.dm_two_factor_hint') }}
+            <a href="{{ route('account.security') }}">{{ __('game/darkmatter.dm_two_factor_link') }}</a>
+        </th>
+    </tr>
+    @endif
     <tr>
         <td class="c"></td>
         <td class="c">{{ __('game/global.darkmatter') }}</td>

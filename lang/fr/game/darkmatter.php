@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => 'Sans ce mémo, ou après le délai, rien n\'est crédité automatiquement. L\'admin t\'aidera alors.',
     'dm_status_wax_pending' => 'En attente de ton transfert WAX ...',
     'dm_status_wax_expired' => 'L\'offre a expiré. Passe une nouvelle commande ; l\'admin vérifie un transfert déjà envoyé.',
+    'dm_two_factor_hint' => 'Protège ton compte avant d\'acheter : avec la connexion en deux étapes, personne n\'accède à ta matière noire achetée avec ton seul mot de passe.',
+    'dm_two_factor_link' => 'Configurer maintenant',
 ];

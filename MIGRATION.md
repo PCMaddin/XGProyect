@@ -1428,6 +1428,14 @@ Baseline-Einträge.
   - *Live geprüft:* Admin-Login führt zur Einrichtung, Einschalten mit dem
     Code der App, acht Codes, zweiter Login fragt den Code ab, falscher
     Code abgewiesen, richtiger führt in den Admin-Bereich.
+- ✅ **Zwei-Faktor-Anmeldung für Spieler:**
+  - Die Einstellungen im Spiel haben einen Abschnitt
+    „Zwei-Faktor-Anmeldung“ mit Status (an/aus) und Link zur Einrichtung.
+  - Der Shop für Dunkle Materie weist Spieler ohne
+    Zwei-Faktor-Anmeldung vor dem Kauf darauf hin.
+  - Für Spieler bleibt sie freiwillig.
+  - Texte in zehn Sprachen; Test im `DarkMatterShopControllerTest` (Hinweis
+    ohne, kein Hinweis mit Zwei-Faktor-Anmeldung).
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

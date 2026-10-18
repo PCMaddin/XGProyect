@@ -128,6 +128,12 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         // WAX is not offered here: no price in WAX
         $this->assertSame(['id' => 'dm_10k', 'dark_matter' => '10.000', 'price' => '1.99 €', 'wax' => ''], $packages[0]);
         $this->assertSame(['stripe'], $view->getData()['methods']);
+        // money is at stake: the page points to two-factor sign-in
+        $this->assertTrue($view->getData()['two_factor_hint']);
+
+        $protected = $this->page(Request::create('/game.php?page=darkmatter'), twoFactor: true);
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $protected);
+        $this->assertFalse($protected->getData()['two_factor_hint']);
     }
 
     public function testAClosedShopRefusesEveryRequest(): void
@@ -364,10 +370,14 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $this->inUniverse('andromeda');
     }
 
-    private function page(Request $request): Response | \Illuminate\Contracts\View\View
+    private function page(Request $request, bool $twoFactor = false): Response | \Illuminate\Contracts\View\View
     {
         $user = new User();
         $user->id = self::PLAYER;
+
+        if ($twoFactor) {
+            $user->forceFill(['two_factor_secret' => 'JBSWY3DPEHPK3PXP', 'two_factor_confirmed_at' => time()]);
+        }
         // binding the request sets the user resolver of the auth guard
         $this->app->instance('request', $request);
         $request->setUserResolver(fn () => $user);

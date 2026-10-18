@@ -50,4 +50,6 @@ return [
     'pr_error_email_in_use' => 'Este e-mail já está em uso no jogo!',
     'pr_delete_mode_active' => 'Esta conta será excluída em %s',
     'pr_fleet_escape' => 'A frota foge de atacantes muito superiores (5:1, com almirante 3:1)',
+    'pr_two_factor' => 'Login em duas etapas',
+    'pr_two_factor_manage' => 'Configurar e gerenciar',
 ];

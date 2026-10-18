@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => 'Without this memo, or after the deadline, nothing is credited automatically. The admin will help then.',
     'dm_status_wax_pending' => 'Waiting for your WAX transfer ...',
     'dm_status_wax_expired' => 'The offer has expired. Please order again; the admin checks a transfer already sent.',
+    'dm_two_factor_hint' => 'Protect your account before you buy: with two-factor sign-in, nobody gets to your bought dark matter with your password alone.',
+    'dm_two_factor_link' => 'Set it up now',
 ];

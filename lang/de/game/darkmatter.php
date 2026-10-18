@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => 'Ohne dieses Memo oder nach Ablauf der Frist wird nicht automatisch gutgeschrieben. Dann hilft der Admin.',
     'dm_status_wax_pending' => 'Warte auf deine WAX-Überweisung ...',
     'dm_status_wax_expired' => 'Das Angebot ist abgelaufen. Bitte bestelle neu; eine schon gesendete Überweisung prüft der Admin.',
+    'dm_two_factor_hint' => 'Schütze dein Konto, bevor du kaufst: Mit der Zwei-Faktor-Anmeldung kommt niemand mit deinem Passwort allein an deine gekaufte Dunkle Materie.',
+    'dm_two_factor_link' => 'Jetzt einrichten',
 ];

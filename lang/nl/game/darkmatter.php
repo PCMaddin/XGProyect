@@ -36,4 +36,6 @@ return [
     'dm_wax_memo_warning' => 'Zonder dit memo, of na de termijn, wordt niets automatisch bijgeschreven. Dan helpt de admin.',
     'dm_status_wax_pending' => 'Wachten op je WAX-overboeking ...',
     'dm_status_wax_expired' => 'Het aanbod is verlopen. Bestel opnieuw; de admin controleert een al verzonden overboeking.',
+    'dm_two_factor_hint' => 'Beveilig je account voordat je koopt: met tweestapsaanmelding komt niemand met alleen je wachtwoord bij je gekochte donkere materie.',
+    'dm_two_factor_link' => 'Nu instellen',
 ];
