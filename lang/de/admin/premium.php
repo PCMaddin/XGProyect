@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'Bestellung nicht offen',
     'pr_wax_result_unknown' => 'unbekanntes Memo',
     'pr_wax_result_no_player' => 'Spieler gelöscht',
+    'pr_wax_result_linked' => 'WAX-Konto verknüpft',
 ];

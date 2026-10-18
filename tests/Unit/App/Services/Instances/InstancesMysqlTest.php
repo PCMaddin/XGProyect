@@ -11,6 +11,7 @@ use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
 use App\Services\Instances\SeasonResults;
+use App\Services\Premium\WaxLinks;
 use App\Services\RegistrationService;
 use App\Models\User;
 use Database\Seeders\LanguagesTableSeeder;
@@ -227,6 +228,12 @@ class InstancesMysqlTest extends MysqlTestCase
                 $this->assertInstanceOf(User::class, $player);
                 $planet = DB::table('planets')->where('planet_user_id', $player->id)->value('planet_id');
                 DB::table('buildings')->where('building_planet_id', $planet)->update(['building_metal_mine' => $mine, 'building_crystal_mine' => $mine]);
+
+                // Beta links a WAX account for the prizes
+                if ($name === 'Beta') {
+                    $links = app(WaxLinks::class);
+                    $links->link(WaxLinks::MEMO_PREFIX . $links->code('u1', $player->id, time()), 'beta.wam', time());
+                }
             }
         });
 
@@ -240,6 +247,8 @@ class InstancesMysqlTest extends MysqlTestCase
 
         $total = app(SeasonResults::class)->forUniverse('u1')['total'] ?? [];
         $this->assertSame([600, 400], array_column($total, 'reward'));
+        // the prizes go to the linked WAX account; Alpha has none
+        $this->assertSame(['beta.wam', null], array_column($total, 'wax_account'));
         $this->assertSame([300, 200], array_column(app(SeasonResults::class)->forUniverse('u1')['buildings'] ?? [], 'reward'));
         // a ranking without a prize pays nothing
         $this->assertSame([], array_filter(array_column(app(SeasonResults::class)->forUniverse('u1')['ships'] ?? [], 'reward')));

@@ -64,7 +64,7 @@ class LobbyController extends BaseController
     /**
      * The rankings frozen when the season ended; none if they cannot be read.
      *
-     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float}>>
+     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float, reward: int, wax_account: string|null}>>
      */
     private function hallOfFame(Instance $instance): array
     {

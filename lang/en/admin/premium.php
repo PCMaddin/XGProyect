@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'order not open',
     'pr_wax_result_unknown' => 'unknown memo',
     'pr_wax_result_no_player' => 'player deleted',
+    'pr_wax_result_linked' => 'WAX account linked',
 ];

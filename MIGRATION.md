@@ -1492,6 +1492,35 @@ Baseline-Einträge.
     Form). `InstancesMysqlTest`: Plan aus der Konfiguration, eigener Plan
     per Befehl, ungültige Staffel abgewiesen, Preise nach dem Schließen,
     Anzeige in Lobby und Ruhmeshalle.
+- ✅ **WAX-Konto über alle Universen, Saisonpreise einlösen:**
+  - *Verknüpfen* unter `/account/wax` (auch aus den Einstellungen und, bei
+    laufender Saison ohne Verknüpfung, mit Hinweis in der Übersicht): Der
+    Spieler überweist eine Kleinstmenge WAX mit dem Memo
+    `xgp-link:<code>` an das Shop-Konto. `xgp:wax:check` verknüpft den
+    Absender (Ergebnis „linked“ in der Admin-Liste). Ein neuer Code macht
+    den alten ungültig; ein anderes Konto verknüpft man mit einer
+    weiteren Überweisung.
+  - *Speicherung:* zentral in `wax_links` (Universum, Spieler, Code,
+    WAX-Konto; zentrale Migration `000006`). Das ist die Identität über
+    die getrennten Konten der Universen.
+  - *Beim Einfrieren* der Rangliste bekommt jeder Platz das verknüpfte
+    WAX-Konto (`season_results.wax_account`); ohne Verknüpfung bleibt der
+    Preis beim Admin.
+  - *Einlösen:* In einem Pay2Win-Universum sieht ein Spieler mit
+    demselben WAX-Konto die offenen Preise anderer Universen und löst sie
+    als Dunkle Materie ein (`SeasonRewards`). Jeder Preis zählt einmal,
+    nur für sein WAX-Konto; kann nicht gutgeschrieben werden, wartet er
+    wieder. In Play2Win-Universen ist Einlösen nicht möglich.
+  - *Texte:* alle Texte in zehn Sprachen.
+  - *Tests:*
+    - `WaxPaymentsTest`: Link-Memo verknüpft, unbekannter Code nicht.
+    - `WaxControllerTest`:
+      - Memo ohne Verknüpfung, neuer Code;
+      - Einlösen einmal, fremde Preise nicht;
+      - nur in Pay2Win;
+      - Preis wartet wieder ohne Gutschrift.
+    - `InstancesMysqlTest`: WAX-Konto des verknüpften Gewinners in der
+      eingefrorenen Rangliste.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

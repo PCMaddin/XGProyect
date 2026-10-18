@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'commande non ouverte',
     'pr_wax_result_unknown' => 'mémo inconnu',
     'pr_wax_result_no_player' => 'joueur supprimé',
+    'pr_wax_result_linked' => 'compte WAX lié',
 ];

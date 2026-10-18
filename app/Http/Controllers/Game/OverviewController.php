@@ -11,6 +11,8 @@ use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Instances\InstanceContext;
+use App\Services\Premium\DarkMatterShop;
+use App\Services\Premium\WaxLinks;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
@@ -74,6 +76,8 @@ class OverviewController extends BaseController
                 'dateTime' => $this->timingService->formatExtendedDate(time()),
                 // the season of this universe ends then (empty: it runs on)
                 'seasonEnd' => $this->seasonEnd(),
+                // season prizes are paid to a linked WAX account only
+                'seasonLinkHint' => $this->seasonLinkHint(),
                 'newMessage' => $this->getMessages(),
                 'wreckField' => app(WreckFieldService::class)->field($this->planetInt('planet_id')) !== null,
                 'fleetList' => $this->getFleetMovements(),
@@ -441,6 +445,15 @@ class OverviewController extends BaseController
     private function asString(mixed $value): string
     {
         return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function seasonLinkHint(): bool
+    {
+        $universe = app(InstanceContext::class)->current();
+
+        return $universe !== null && $universe->endsAt !== null &&
+            app(DarkMatterShop::class)->waxAccount() !== '' &&
+            app(WaxLinks::class)->account($universe->slug, $this->userInt('id')) === null;
     }
 
     private function seasonEnd(): string

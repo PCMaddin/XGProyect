@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => '订单未开放',
     'pr_wax_result_unknown' => '未知备注',
     'pr_wax_result_no_player' => '玩家已删除',
+    'pr_wax_result_linked' => 'WAX 账户已绑定',
 ];

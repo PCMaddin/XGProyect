@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'pedido no abierto',
     'pr_wax_result_unknown' => 'memo desconocido',
     'pr_wax_result_no_player' => 'jugador borrado',
+    'pr_wax_result_linked' => 'cuenta WAX vinculada',
 ];

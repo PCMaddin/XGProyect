@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => '注文が未処理ではない',
     'pr_wax_result_unknown' => '不明なメモ',
     'pr_wax_result_no_player' => 'プレイヤー削除済み',
+    'pr_wax_result_linked' => 'WAXアカウント連携',
 ];

@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'ordine non aperto',
     'pr_wax_result_unknown' => 'memo sconosciuto',
     'pr_wax_result_no_player' => 'giocatore eliminato',
+    'pr_wax_result_linked' => 'conto WAX collegato',
 ];

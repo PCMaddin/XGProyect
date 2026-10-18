@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Instances;
 
 use App\Libraries\StatisticsLibrary;
+use App\Services\Premium\WaxLinks;
 use App\Services\SettingsService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -32,8 +33,11 @@ class SeasonResults
         'military' => 'military',
     ];
 
-    public function __construct(private InstanceContext $context, private InstanceRegistry $registry)
-    {
+    public function __construct(
+        private InstanceContext $context,
+        private InstanceRegistry $registry,
+        private WaxLinks $links,
+    ) {
     }
 
     /**
@@ -69,6 +73,13 @@ class SeasonResults
             return $rows;
         });
 
+        // the prizes go to the WAX accounts the players have linked
+        $accounts = $this->links->accounts($instance->slug, array_values(array_unique(array_column($rows, 'user_id'))));
+
+        foreach ($rows as $index => $row) {
+            $rows[$index]['wax_account'] = $accounts[$row['user_id']] ?? null;
+        }
+
         $this->table()->where('universe', $instance->slug)->delete();
         $this->table()->insert($rows);
     }
@@ -76,7 +87,7 @@ class SeasonResults
     /**
      * The frozen rankings of a universe, by category, best first.
      *
-     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float, reward: int}>>
+     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float, reward: int, wax_account: string|null}>>
      */
     public function forUniverse(string $universe): array
     {
@@ -91,6 +102,7 @@ class SeasonResults
                 'alliance_tag' => is_string($values['alliance_tag'] ?? null) ? $values['alliance_tag'] : null,
                 'points' => is_numeric($values['points'] ?? null) ? (float) $values['points'] : 0.0,
                 'reward' => is_numeric($values['reward'] ?? null) ? (int) $values['reward'] : 0,
+                'wax_account' => is_string($values['wax_account'] ?? null) ? $values['wax_account'] : null,
             ];
         }
 

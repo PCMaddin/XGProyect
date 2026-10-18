@@ -6,6 +6,7 @@ namespace Tests\Unit\App\Services\Premium;
 
 use App\Models\DarkMatterOrder;
 use App\Services\Premium\WaxException;
+use App\Services\Premium\WaxLinks;
 use App\Services\Premium\WaxPayments;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -132,6 +133,19 @@ class WaxPaymentsTest extends DatabaseTestCase
         }
 
         $this->assertSame(['unknown' => 150], $this->check());
+    }
+
+    public function testATransferWithALinkMemoLinksItsSender(): void
+    {
+        $code = app(WaxLinks::class)->code('', self::PLAYER, self::NOON);
+        $this->actions = [
+            self::action(['global_sequence' => 1, 'memo' => WaxLinks::MEMO_PREFIX . $code, 'from' => 'player.wam', 'quantity' => '0.00010000 WAX']),
+            self::action(['global_sequence' => 2, 'memo' => WaxLinks::MEMO_PREFIX . 'aaaaaaaaaaaa', 'from' => 'other.wam']),
+        ];
+
+        $this->assertSame(['linked' => 1, 'unknown' => 1], $this->check());
+        $this->assertSame('player.wam', app(WaxLinks::class)->account('', self::PLAYER));
+        $this->assertSame(0, $this->darkMatter());
     }
 
     public function testWithoutAnAccountNothingIsRead(): void

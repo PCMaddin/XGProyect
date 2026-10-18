@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\DB;
  *   decides: credit by hand or send it back);
  * - not_pending: the order was paid already, or closed;
  * - unknown: no such universe or order (wrong memo);
- * - no_player: the player who ordered is gone.
+ * - no_player: the player who ordered is gone;
+ * - linked: a memo xgp-link:<code> links the sender to a player (WaxLinks).
  * The transfers stay in the base database (wax_transfers) for the admin.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
@@ -36,6 +37,7 @@ class WaxPayments
     public const NOT_PENDING = 'not_pending';
     public const UNKNOWN = 'unknown';
     public const NO_PLAYER = 'no_player';
+    public const LINKED = 'linked';
 
     /** pages of transfers read per check */
     private const MAX_PAGES = 10;
@@ -49,6 +51,7 @@ class WaxPayments
         private DarkMatterOrders $orders,
         private InstanceRegistry $registry,
         private InstanceContext $context,
+        private WaxLinks $links,
     ) {
     }
 
@@ -125,7 +128,9 @@ class WaxPayments
         $orderId = null;
         $result = self::UNKNOWN;
 
-        if (preg_match('/^xgp:(?:([a-z0-9][a-z0-9-]{0,31}):)?(\d{1,18})$/', trim($transfer->memo), $match) === 1) {
+        if (WaxLinks::isLinkMemo($transfer->memo)) {
+            $result = $this->links->link($transfer->memo, $transfer->from, $now) ? self::LINKED : self::UNKNOWN;
+        } elseif (preg_match('/^xgp:(?:([a-z0-9][a-z0-9-]{0,31}):)?(\d{1,18})$/', trim($transfer->memo), $match) === 1) {
             $slug = $match[1];
             $orderId = (int) $match[2];
             $memo = self::memo($slug, $orderId);

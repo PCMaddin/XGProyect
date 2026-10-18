@@ -24,6 +24,11 @@
         <th scope="row">{{ __('game/overview.ov_season_end') }}</th>
         <th role="cell" colspan="3" id="season-end">{{ $seasonEnd }}</th>
     </tr>
+    @if ($seasonLinkHint)
+    <tr>
+        <th colspan="4" id="season-link-hint" style="color:orange;">{{ __('account/wax.wx_link_hint') }} <a href="{{ route('account.wax') }}">{{ __('account/wax.wx_link_now') }}</a></th>
+    </tr>
+    @endif
     @endif
     <tr>
         <td colspan="4" class="c">{{ __('game/overview.ov_events') }}</td>

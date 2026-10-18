@@ -79,6 +79,10 @@
                 <th id="two-factor-status" style="color:{{ $two_factor ? 'lime' : 'orange' }};">{{ $two_factor ? __('account/two_factor.tf_status_on') : __('account/two_factor.tf_status_off') }}</th>
                 <th><a href="{{ route('account.security') }}">{{ __('game/preferences.pr_two_factor_manage') }}</a></th>
             </tr>
+            <tr>
+                <th>{{ __('account/wax.wx_title') }}</th>
+                <th><a href="{{ route('account.wax') }}">{{ __('game/preferences.pr_two_factor_manage') }}</a></th>
+            </tr>
             <tr {!! $hide_vacation_invalid !!}>
                 <td role="heading" aria-level="2" class="c" colspan="2">{{ __('game/preferences.pr_general') }}</td>
             </tr>

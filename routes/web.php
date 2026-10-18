@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Account\RecoverController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\TwoFactorChallengeController;
+use App\Http\Controllers\Account\WaxController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Ajax as AdminAjax;
 use App\Http\Controllers\Admin\Users as AdminUsers;
@@ -46,6 +47,9 @@ Route::prefix('account')->group(function () {
         Route::post('/security/confirm', [SecurityController::class, 'confirm'])->name('account.security.confirm');
         Route::post('/security/disable', [SecurityController::class, 'disable'])->name('account.security.disable');
         Route::post('/security/codes', [SecurityController::class, 'codes'])->name('account.security.codes');
+        Route::get('/wax', [WaxController::class, 'show'])->name('account.wax');
+        Route::post('/wax/renew', [WaxController::class, 'renew'])->name('account.wax.renew');
+        Route::post('/wax/claim', [WaxController::class, 'claim'])->name('account.wax.claim');
     });
 });
 

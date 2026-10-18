@@ -70,4 +70,5 @@ return [
     'pr_wax_result_not_pending' => 'bestelling niet open',
     'pr_wax_result_unknown' => 'onbekend memo',
     'pr_wax_result_no_player' => 'speler verwijderd',
+    'pr_wax_result_linked' => 'WAX-account gekoppeld',
 ];
