@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => 'abgelaufen',
     'pr_status_failed' => 'fehlgeschlagen',
     'pr_status_refunded' => 'erstattet',
+    'pr_status_disputed' => 'Rückbuchung',
     'pr_shop_closed_methods' => 'geschlossen (keine Zahlungsart eingerichtet)',
     'pr_payment_methods' => 'Zahlungsarten',
     'pr_payment_methods_help' => 'Wie in diesem Universum bezahlt werden kann. Eine Zahlungsart wirkt erst, wenn sie auch in der .env eingerichtet ist.',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'Spieler gelöscht',
     'pr_wax_result_linked' => 'WAX-Konto verknüpft',
     'pr_wax_result_paid_out' => 'Preis ausgezahlt',
+    'pr_wax_result_unconfirmed' => 'vom zweiten Server nicht bestätigt',
 ];

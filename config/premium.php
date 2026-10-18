@@ -44,10 +44,16 @@ return [
         'account' => (string) env('XGP_WAX_ACCOUNT', ''),
         // a Hyperion history server of the WAX chain
         'api_url' => rtrim((string) env('XGP_WAX_API', 'https://wax.eosusa.io'), '/'),
+        // a second one of another operator: confirms each transfer before it
+        // counts (one server alone could make up payments); empty: off
+        'verify_url' => rtrim((string) env('XGP_WAX_VERIFY_API', 'https://api.waxsweden.org'), '/'),
         // the price of 1 WAX in the shop's currency: {"wax":{"eur":0.0043}}
         'rate_url' => (string) env('XGP_WAX_RATE_URL', 'https://api.coingecko.com/api/v3/simple/price?ids=wax&vs_currencies=:currency'),
         // the rate is read again after this many seconds
         'rate_cache' => 300,
+        // a rate more than this many percent off the last one is refused
+        // (no orders until it settles or a day passed); 0: no check
+        'max_rate_jump' => (float) env('XGP_WAX_MAX_RATE_JUMP', 50),
         // added to the converted price (percent), for the rate moving
         'markup' => (float) env('XGP_WAX_MARKUP', 0),
         // a quote holds this long: later transfers are left to the admin

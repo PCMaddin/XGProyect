@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'El pago no se completó. No se ha cobrado nada.',
     'dm_status_failed' => 'No se pudo iniciar el pago. No se ha cobrado nada.',
     'dm_status_refunded' => 'El pago ha sido reembolsado.',
+    'dm_status_disputed' => 'El banco devolvió el pago (contracargo); la materia oscura también se ha retirado.',
     'dm_cancelled' => 'Has cancelado el pago. No se ha cobrado nada.',
     'dm_reload' => 'Recargar',
     'dm_unknown_method' => 'Esta forma de pago no está disponible aquí.',

@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'Płatność nie została dokończona. Nic nie zostało pobrane.',
     'dm_status_failed' => 'Nie udało się rozpocząć płatności. Nic nie zostało pobrane.',
     'dm_status_refunded' => 'Płatność została zwrócona.',
+    'dm_status_disputed' => 'Bank cofnął płatność (obciążenie zwrotne); ciemna materia również została odebrana.',
     'dm_cancelled' => 'Płatność została anulowana. Nic nie zostało pobrane.',
     'dm_reload' => 'Odśwież',
     'dm_unknown_method' => 'Ta forma płatności nie jest tu dostępna.',

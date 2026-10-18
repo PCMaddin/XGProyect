@@ -21,6 +21,9 @@ class TwoFactorChallengeController extends BaseController
 {
     private const ATTEMPTS = 5;
 
+    /** five wrong codes lock for this long (six digits must not be guessable) */
+    private const LOCK_SECONDS = 900;
+
     public function __construct(
         private LoginFlow $login,
         private TwoFactor $twoFactor,
@@ -60,7 +63,7 @@ class TwoFactorChallengeController extends BaseController
         $code = $request->input('code');
 
         if (!is_string($code) || !$this->twoFactor->check($user, $code, time())) {
-            $this->limiter->hit($key, 60);
+            $this->limiter->hit($key, self::LOCK_SECONDS);
 
             return back()->with('error', __('account/two_factor.tf_wrong_code'));
         }

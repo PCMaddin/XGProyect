@@ -168,8 +168,20 @@ class WaxChain
      */
     private function get(string $path, array $query): array
     {
+        return self::getFrom(self::apiUrl(), $path, $query);
+    }
+
+    /**
+     * @param array<string, int|string> $query
+     *
+     * @return array<mixed>
+     *
+     * @throws WaxException
+     */
+    public static function getFrom(string $server, string $path, array $query): array
+    {
         try {
-            $response = Http::acceptJson()->timeout(15)->get(self::apiUrl() . $path, $query);
+            $response = Http::acceptJson()->timeout(15)->get($server . $path, $query);
         } catch (HttpClientException | TransferException $exception) {
             throw new WaxException('The WAX history server could not be reached: ' . $exception->getMessage(), 0, $exception);
         }

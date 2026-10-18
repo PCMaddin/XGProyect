@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use Illuminate\Http\Request;
+use App\Services\Operators\OperatorLog;
 use App\Support\Concerns\ReadsMixedValues;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Http\Requests\Admin\Users\UserPremiumRequest;
@@ -103,6 +105,12 @@ class UserProgressController extends BaseController
             DB::table('premium')->where('premium_user_id', $user->id)->update($updates);
         }
 
+        $before = $currentPremium['premium_dark_matter'] ?? null;
+
+        if (isset($updates['premium_dark_matter']) && (is_numeric($before) ? (int) $before : null) !== $updates['premium_dark_matter']) {
+            $this->recordDarkMatter($request, $user, is_numeric($before) ? (int) $before : 0, $updates['premium_dark_matter']);
+        }
+
         session()->flash('success', __('admin/users.us_all_ok_message'));
 
         return redirect()->route('admin.users.premium', $user->id);
@@ -176,5 +184,18 @@ class UserProgressController extends BaseController
     private function dateFormat(): string
     {
         return $this->settings->getString('date_format') ?: 'Y-m-d';
+    }
+
+    /**
+     * Dark matter is worth money: who gave whom how much goes to the
+     * operators' log in the base database, out of reach of the admin.
+     */
+    private function recordDarkMatter(Request $request, User $player, int $from, int $to): void
+    {
+        $admin = $request->user();
+        $email = $admin instanceof User ? $admin->email : '';
+        $details = ['admin_id' => $admin instanceof User ? $admin->id : 0, 'player_id' => $player->id, 'player' => $player->name, 'from' => $from, 'to' => $to];
+
+        app(OperatorLog::class)->recordAdmin($email, OperatorLog::ADMIN_DARK_MATTER, (string) $request->ip(), $details);
     }
 }

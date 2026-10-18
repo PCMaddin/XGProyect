@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Users\UserProgressController;
 use App\Http\Requests\Admin\Users\UserPremiumRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -58,6 +59,29 @@ class UserEditAllowlistTest extends DatabaseTestCase
 
         $this->assertSame(1, DB::table('premium')->where('premium_user_id', $user->id)->count());
         $this->assertSame(0, DB::table('premium')->where('premium_user_id', 99)->count());
+    }
+
+    public function testDarkMatterSetByAnAdminIsLoggedForTheOperators(): void
+    {
+        Artisan::call('migrate', ['--database' => 'central', '--path' => 'database/migrations/central', '--force' => true]);
+        $player = $this->seedUser();
+        DB::table('premium')->insert(['premium_user_id' => $player->id, 'premium_dark_matter' => 100]);
+        $admin = new User(['name' => 'Boss', 'email' => 'boss@example.com', 'password' => 'secret', 'home_planet_id' => 2, 'current_planet' => 2]);
+        $admin->save();
+
+        $data = ['premium_dark_matter' => 5_000_000];
+        $request = UserPremiumRequest::create('/', 'POST', $data, [], [], ['REMOTE_ADDR' => '198.51.100.4']);
+        $request->setValidator(Validator::make($data, []));
+        $request->setUserResolver(static fn (): User => $admin);
+        app(UserProgressController::class)->updatePremium($request, $player);
+
+        $event = DB::connection('central')->table('operator_events')->sole();
+        $this->assertSame(['admin_dark_matter', 'boss@example.com', '198.51.100.4'], [$event->action, $event->email, $event->ip]);
+        $this->assertSame(['admin_id' => $admin->id, 'player_id' => $player->id, 'player' => 'Player', 'from' => 100, 'to' => 5_000_000], json_decode((string) $event->details, true));
+
+        // the same amount again changes nothing and logs nothing
+        app(UserProgressController::class)->updatePremium($request, $player);
+        $this->assertSame(1, DB::connection('central')->table('operator_events')->count());
     }
 
     private function seedUser(): User

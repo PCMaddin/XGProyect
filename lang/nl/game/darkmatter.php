@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'De betaling is niet voltooid. Er is niets afgeschreven.',
     'dm_status_failed' => 'De betaling kon niet worden gestart. Er is niets afgeschreven.',
     'dm_status_refunded' => 'De betaling is terugbetaald.',
+    'dm_status_disputed' => 'De bank heeft de betaling teruggeboekt; de donkere materie is ook teruggenomen.',
     'dm_cancelled' => 'Je hebt de betaling geannuleerd. Er is niets afgeschreven.',
     'dm_reload' => 'Vernieuwen',
     'dm_unknown_method' => 'Deze betaalmethode wordt hier niet aangeboden.',

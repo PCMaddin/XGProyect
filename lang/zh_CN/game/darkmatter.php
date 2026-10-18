@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => '付款未完成。未产生任何扣款。',
     'dm_status_failed' => '无法发起付款。未产生任何扣款。',
     'dm_status_refunded' => '付款已退款。',
+    'dm_status_disputed' => '银行已撤回该付款（拒付）；暗物质也已收回。',
     'dm_cancelled' => '您已取消付款。未产生任何扣款。',
     'dm_reload' => '刷新',
     'dm_unknown_method' => '此处不提供这种支付方式。',

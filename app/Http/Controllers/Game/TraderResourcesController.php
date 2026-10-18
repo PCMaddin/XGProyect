@@ -121,15 +121,23 @@ class TraderResourcesController extends BaseController
         $amount = $this->trader->getProjectedResouces($resource, $percentage);
 
         // $resource is whitelisted by parseRefillKey; the amounts are bound.
-        DB::update(
+        // Paid only if the dark matter is still there: two requests at once
+        // must not both pay from the same balance.
+        $changed = DB::update(
             $this->prepareSql(
                 'UPDATE `' . PREMIUM . '` pr, `' . PLANETS . '` p SET
                     pr.`premium_dark_matter` = pr.`premium_dark_matter` - ?,
                     p.`planet_' . $resource . '` = ?
-                WHERE pr.`premium_user_id` = ? AND p.`planet_id` = ?;'
+                WHERE pr.`premium_user_id` = ? AND p.`planet_id` = ? AND pr.`premium_dark_matter` >= ?;'
             ),
-            [$darkMatter, $amount, $this->int($this->user, 'id'), $this->int($this->planet, 'planet_id')]
+            [$darkMatter, $amount, $this->int($this->user, 'id'), $this->int($this->planet, 'planet_id'), $darkMatter]
         );
+
+        if ($changed === 0) {
+            $this->error = (string) __('game/trader.tr_no_enough_dark_matter');
+
+            return null;
+        }
 
         return redirect(self::REDIRECT_TARGET);
     }

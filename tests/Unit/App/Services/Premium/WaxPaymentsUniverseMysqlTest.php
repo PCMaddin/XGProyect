@@ -44,6 +44,7 @@ class WaxPaymentsUniverseMysqlTest extends MysqlTestCase
         config([
             'premium.wax.account' => 'xgpshop',
             'premium.wax.api_url' => 'https://hyperion.example.org',
+            'premium.wax.verify_url' => 'https://second.example.org',
             'database.connections.central' => config('database.connections.mysql_test'),
         ]);
         DB::purge('central');
@@ -52,6 +53,11 @@ class WaxPaymentsUniverseMysqlTest extends MysqlTestCase
         Http::fake([
             'hyperion.example.org/v1/chain/get_info' => Http::response(['last_irreversible_block_num' => 5000]),
             'hyperion.example.org/v2/history/get_actions*' => fn () => Http::response(['actions' => $this->actions]),
+            // the second server knows the same transactions
+            'second.example.org/v2/history/get_transaction*' => fn (\Illuminate\Http\Client\Request $request) => Http::response([
+                'executed' => true, 'lib' => 5000,
+                'actions' => array_values(array_filter($this->actions, static fn (array $action): bool => ($action['trx_id'] ?? null) === $request['id'])),
+            ]),
         ]);
 
         DB::statement('DROP DATABASE IF EXISTS `' . self::UNIVERSE_DATABASE . '`');

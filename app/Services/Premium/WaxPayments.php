@@ -11,6 +11,7 @@ use App\Services\Instances\SeasonPayouts;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Credits dark matter paid in WAX. The player transfers the quoted amount
@@ -44,6 +45,13 @@ class WaxPayments
     public const NO_PLAYER = 'no_player';
     public const LINKED = 'linked';
     public const PAID_OUT = 'paid_out';
+    public const UNCONFIRMED = 'unconfirmed';
+
+    /** not a result: the transfer is looked at again next time */
+    private const WAIT = 'wait';
+
+    /** a transfer the second server still does not know after this long is not believed */
+    private const CONFIRM_WAIT = 1800;
 
     /** pages of transfers read per check */
     private const MAX_PAGES = 10;
@@ -59,6 +67,7 @@ class WaxPayments
         private InstanceContext $context,
         private WaxLinks $links,
         private SeasonPayouts $payouts,
+        private WaxVerifier $verifier,
     ) {
     }
 
@@ -99,11 +108,12 @@ class WaxPayments
                     return $results;
                 }
 
-                $result = $this->known($transfer) ? null : match (true) {
-                    $transfer->to === $account => $this->settle($transfer, $now),
-                    $transfer->from === $account && SeasonPayouts::isPrizeMemo($transfer->memo) => $this->settlePayout($transfer, $now),
-                    default => null,
-                };
+                $result = $this->known($transfer) ? null : $this->process($transfer, $account, $tokens, $now);
+
+                // the second server has not seen it yet: next time
+                if ($result === self::WAIT) {
+                    return $results;
+                }
 
                 if ($result !== null) {
                     $results[$result] = ($results[$result] ?? 0) + 1;
@@ -159,6 +169,55 @@ class WaxPayments
         $this->record($transfer, $universe, $orderId, $result, $now);
 
         return $result;
+    }
+
+    /**
+     * Settles a new transfer once the second server agrees; null for one
+     * that is none of the shop's business.
+     *
+     * @param list<TokenSpec> $tokens
+     *
+     * @throws WaxException
+     */
+    private function process(WaxTransfer $transfer, string $account, array $tokens, int $now): ?string
+    {
+        $relevant = $transfer->to === $account || ($transfer->from === $account && SeasonPayouts::isPrizeMemo($transfer->memo));
+
+        if (!$relevant) {
+            return null;
+        }
+
+        $confirmed = self::changesState($transfer->memo) ? $this->verifier->confirm($transfer, $tokens) : true;
+
+        return match (true) {
+            $confirmed === null && $transfer->blockTime > $now - self::CONFIRM_WAIT => self::WAIT,
+            $confirmed !== true => $this->unconfirmed($transfer, $now),
+            $transfer->to === $account => $this->settle($transfer, $now),
+            default => $this->settlePayout($transfer, $now),
+        };
+    }
+
+    /**
+     * A memo that pays an order, links an account or pays a prize: only
+     * those need the second server's word.
+     */
+    private static function changesState(string $memo): bool
+    {
+        $memo = trim($memo);
+
+        return WaxLinks::isLinkMemo($memo) || SeasonPayouts::isPrizeMemo($memo) || preg_match('/^xgp:(?:[a-z0-9][a-z0-9-]{0,31}:)?\d{1,18}$/', $memo) === 1;
+    }
+
+    /**
+     * The second server contradicts the transfer, or never saw it: nothing
+     * counts, the admin looks into it.
+     */
+    private function unconfirmed(WaxTransfer $transfer, int $now): string
+    {
+        Log::warning('WAX transfer not confirmed by the second history server', ['trx_id' => $transfer->trxId, 'sequence' => $transfer->sequence, 'memo' => $transfer->memo]);
+        $this->record($transfer, null, null, self::UNCONFIRMED, $now);
+
+        return self::UNCONFIRMED;
     }
 
     private function settlePayout(WaxTransfer $transfer, int $now): string

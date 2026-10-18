@@ -37,6 +37,8 @@ class OperatorArea
         Config::set('session.expire_on_close', true);
         Config::set('session.same_site', 'strict');
         Config::set('session.http_only', true);
+        // over HTTPS the cookie never travels unencrypted
+        Config::set('session.secure', $request->isSecure() || config('session.secure') === true);
         Session::setDefaultDriver('file');
 
         $response = $next($request);

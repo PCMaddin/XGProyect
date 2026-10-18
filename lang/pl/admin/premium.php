@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => 'wygasło',
     'pr_status_failed' => 'nieudane',
     'pr_status_refunded' => 'zwrócone',
+    'pr_status_disputed' => 'obciążenie zwrotne',
     'pr_shop_closed_methods' => 'zamknięty (brak skonfigurowanej formy płatności)',
     'pr_payment_methods' => 'Formy płatności',
     'pr_payment_methods_help' => 'Jak można płacić w tym uniwersum. Forma płatności działa dopiero, gdy jest też skonfigurowana w .env.',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'gracz usunięty',
     'pr_wax_result_linked' => 'konto WAX połączone',
     'pr_wax_result_paid_out' => 'nagroda wypłacona',
+    'pr_wax_result_unconfirmed' => 'niepotwierdzone przez drugi serwer',
 ];

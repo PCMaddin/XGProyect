@@ -61,6 +61,30 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // signing in to the game or the admin area: few tries per address and
+        // per account (against guessing and lists of leaked passwords)
+        RateLimiter::for('login', function (Request $request) {
+            $account = $request->input('username', $request->input('inputEmail'));
+
+            return [
+                Limit::perMinute(20)->by('ip:' . $request->ip()),
+                Limit::perMinute(5)->by('account:' . mb_strtolower(is_string($account) ? $account : '')),
+            ];
+        });
+
+        // new accounts: a few per address and hour (second accounts cost effort)
+        RateLimiter::for('register', fn (Request $request) => Limit::perHour(5)->by('ip:' . $request->ip()));
+
+        // reset mails: no flood of mails to an address
+        RateLimiter::for('recover', function (Request $request) {
+            $email = $request->input('email');
+
+            return [
+                Limit::perMinute(5)->by('ip:' . $request->ip()),
+                Limit::perHour(5)->by('email:' . mb_strtolower(is_string($email) ? $email : '')),
+            ];
+        });
+
         // the operators' sign-in: few tries per address and per account
         RateLimiter::for('operator-login', function (Request $request) {
             $email = $request->input('email');

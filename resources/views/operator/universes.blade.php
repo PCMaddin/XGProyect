@@ -59,6 +59,7 @@
                 <th>{{ __('operator/operator.op_col_operator') }}</th>
                 <th>{{ __('operator/operator.op_col_action') }}</th>
                 <th>{{ __('operator/operator.op_col_subject') }}</th>
+                <th>{{ __('operator/operator.op_col_details') }}</th>
                 <th>{{ __('operator/operator.op_col_ip') }}</th>
             </tr>
         </thead>
@@ -69,6 +70,7 @@
                     <td>{{ $event['email'] }}</td>
                     <td>{{ __('operator/operator.op_action_' . $event['action']) }}</td>
                     <td>{{ $event['subject'] }}</td>
+                    <td><code>{{ \Illuminate\Support\Str::limit($event['details'], 120) }}</code></td>
                     <td><code>{{ $event['ip'] }}</code></td>
                 </tr>
             @endforeach

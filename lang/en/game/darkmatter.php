@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'The payment was not completed. Nothing was charged.',
     'dm_status_failed' => 'The payment could not be started. Nothing was charged.',
     'dm_status_refunded' => 'The payment was refunded.',
+    'dm_status_disputed' => 'The payment was taken back by the bank (chargeback); the dark matter was taken back too.',
     'dm_cancelled' => 'You cancelled the payment. Nothing was charged.',
     'dm_reload' => 'Reload',
     'dm_unknown_method' => 'This way to pay is not offered here.',

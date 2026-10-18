@@ -151,6 +151,25 @@ class StripeWebhookControllerTest extends DatabaseTestCase
         $this->assertSame(DarkMatterOrder::REFUNDED, $order->refresh()->status);
     }
 
+    public function testAChargebackTakesTheDarkMatterBack(): void
+    {
+        $order = $this->order();
+        $this->webhook($this->completed($order))->assertOk();
+        DB::table('premium')->update(['premium_dark_matter' => 15_000]);
+
+        $dispute = [
+            'id' => 'evt_dispute', 'type' => 'charge.dispute.created',
+            'data' => ['object' => ['id' => 'dp_test_1', 'object' => 'dispute', 'amount' => 199, 'charge' => 'ch_test_1', 'payment_intent' => 'pi_test_1', 'reason' => 'fraudulent', 'metadata' => []]],
+        ];
+        $this->webhook($dispute)->assertOk()->assertJson(['result' => 'disputed']);
+        $this->webhook($dispute)->assertOk()->assertJson(['result' => 'ignored']);
+        // a refund after the chargeback takes nothing twice
+        $this->webhook($this->refunded(true))->assertOk()->assertJson(['result' => 'ignored']);
+
+        $this->assertSame(5_000, $this->darkMatter());
+        $this->assertSame(DarkMatterOrder::DISPUTED, $order->refresh()->status);
+    }
+
     public function testABadSignatureIsRefused(): void
     {
         $order = $this->order();

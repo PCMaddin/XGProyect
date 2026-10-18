@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'Il pagamento non è stato completato. Non è stato addebitato nulla.',
     'dm_status_failed' => 'Non è stato possibile avviare il pagamento. Non è stato addebitato nulla.',
     'dm_status_refunded' => 'Il pagamento è stato rimborsato.',
+    'dm_status_disputed' => 'La banca ha stornato il pagamento; anche la materia oscura è stata ritirata.',
     'dm_cancelled' => 'Hai annullato il pagamento. Non è stato addebitato nulla.',
     'dm_reload' => 'Ricarica',
     'dm_unknown_method' => 'Questo metodo di pagamento non è disponibile qui.',

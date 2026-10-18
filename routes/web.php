@@ -23,8 +23,8 @@ Route::post('/universes/{slug}', [LobbyController::class, 'choose'])->name('lobb
 
 Route::prefix('/')->group(function () {
     Route::get('/', WelcomeController::class)->name('home.index');
-    Route::post('/login', LoginController::class)->name('home.login');
-    Route::post('/register', RegisterController::class)->name('home.register');
+    Route::post('/login', LoginController::class)->middleware('throttle:login')->name('home.login');
+    Route::post('/register', RegisterController::class)->middleware('throttle:register')->name('home.register');
 });
 
 Route::prefix('home/ajax')->group(function () {
@@ -35,9 +35,9 @@ Route::prefix('home/ajax')->group(function () {
 
 Route::prefix('account')->group(function () {
     Route::get('/recover', RecoverController::class)->name('account.recover');
-    Route::post('/recover', [RecoverController::class, 'recover']);
+    Route::post('/recover', [RecoverController::class, 'recover'])->middleware('throttle:recover');
     Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
-    Route::post('/reset', [RecoverController::class, 'reset'])->name('account.reset.update');
+    Route::post('/reset', [RecoverController::class, 'reset'])->middleware('throttle:recover')->name('account.reset.update');
     Route::get('/two-factor', [TwoFactorChallengeController::class, 'show'])->name('account.two-factor');
     Route::post('/two-factor', [TwoFactorChallengeController::class, 'verify'])->name('account.two-factor.verify');
 
@@ -55,7 +55,7 @@ Route::prefix('account')->group(function () {
 
 Route::prefix('admin')->group(function () {
     Route::get('/', Admin\IndexController::class)->name('admin.index');
-    Route::post('/login', Admin\LoginController::class)->name('admin.login');
+    Route::post('/login', Admin\LoginController::class)->middleware('throttle:login')->name('admin.login');
     Route::get('/logout', Admin\LogoutController::class)->name('admin.logout');
 
     Route::middleware(['admin.auth', 'admin.two_factor', 'admin.authorize'])

@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'O pagamento não foi concluído. Nada foi cobrado.',
     'dm_status_failed' => 'Não foi possível iniciar o pagamento. Nada foi cobrado.',
     'dm_status_refunded' => 'O pagamento foi reembolsado.',
+    'dm_status_disputed' => 'O banco estornou o pagamento; a matéria escura também foi retirada.',
     'dm_cancelled' => 'Você cancelou o pagamento. Nada foi cobrado.',
     'dm_reload' => 'Recarregar',
     'dm_unknown_method' => 'Esta forma de pagamento não está disponível aqui.',

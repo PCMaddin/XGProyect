@@ -34,6 +34,8 @@ class DarkMatterOrder extends Model
     public const EXPIRED = 'expired';
     public const FAILED = 'failed';
     public const REFUNDED = 'refunded';
+    /** the bank took the money back (chargeback): the dark matter goes back too */
+    public const DISPUTED = 'disputed';
 
     /**
      * @var string

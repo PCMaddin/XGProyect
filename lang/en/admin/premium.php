@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => 'expired',
     'pr_status_failed' => 'failed',
     'pr_status_refunded' => 'refunded',
+    'pr_status_disputed' => 'chargeback',
     'pr_shop_closed_methods' => 'closed (no way to pay set up)',
     'pr_payment_methods' => 'Ways to pay',
     'pr_payment_methods_help' => 'How players can pay in this universe. A way to pay works only once it is also set up in .env.',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'player deleted',
     'pr_wax_result_linked' => 'WAX account linked',
     'pr_wax_result_paid_out' => 'prize paid out',
+    'pr_wax_result_unconfirmed' => 'not confirmed by the second server',
 ];

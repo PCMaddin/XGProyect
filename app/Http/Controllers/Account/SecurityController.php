@@ -132,7 +132,7 @@ class SecurityController extends BaseController
 
     private function failed(User $user, string $message): RedirectResponse
     {
-        $this->limiter->hit('two-factor-settings:' . $user->id, 60);
+        $this->limiter->hit('two-factor-settings:' . $user->id, 900);
 
         return redirect()->route('account.security')->with('error', __('account/two_factor.' . $message));
     }

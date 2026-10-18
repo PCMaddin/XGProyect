@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => 'caducado',
     'pr_status_failed' => 'fallido',
     'pr_status_refunded' => 'reembolsado',
+    'pr_status_disputed' => 'contracargo',
     'pr_shop_closed_methods' => 'cerrada (ninguna forma de pago configurada)',
     'pr_payment_methods' => 'Formas de pago',
     'pr_payment_methods_help' => 'Cómo se puede pagar en este universo. Una forma de pago solo funciona si también está configurada en .env.',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'jugador borrado',
     'pr_wax_result_linked' => 'cuenta WAX vinculada',
     'pr_wax_result_paid_out' => 'premio pagado',
+    'pr_wax_result_unconfirmed' => 'no confirmado por el segundo servidor',
 ];

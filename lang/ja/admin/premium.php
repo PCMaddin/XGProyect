@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => '期限切れ',
     'pr_status_failed' => '失敗',
     'pr_status_refunded' => '返金済み',
+    'pr_status_disputed' => 'チャージバック',
     'pr_shop_closed_methods' => '閉店中（支払い方法が設定されていません）',
     'pr_payment_methods' => '支払い方法',
     'pr_payment_methods_help' => 'この宇宙で使える支払い方法です。.env でも設定されている場合にのみ有効になります。',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'プレイヤー削除済み',
     'pr_wax_result_linked' => 'WAXアカウント連携',
     'pr_wax_result_paid_out' => '賞品支払い済み',
+    'pr_wax_result_unconfirmed' => '2台目のサーバーで未確認',
 ];

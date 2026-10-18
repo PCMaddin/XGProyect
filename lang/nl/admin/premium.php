@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => 'verlopen',
     'pr_status_failed' => 'mislukt',
     'pr_status_refunded' => 'terugbetaald',
+    'pr_status_disputed' => 'terugboeking',
     'pr_shop_closed_methods' => 'gesloten (geen betaalmethode ingesteld)',
     'pr_payment_methods' => 'Betaalmethoden',
     'pr_payment_methods_help' => 'Hoe er in dit universum betaald kan worden. Een betaalmethode werkt pas als ze ook in .env is ingesteld.',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => 'speler verwijderd',
     'pr_wax_result_linked' => 'WAX-account gekoppeld',
     'pr_wax_result_paid_out' => 'prijs uitbetaald',
+    'pr_wax_result_unconfirmed' => 'niet bevestigd door de tweede server',
 ];

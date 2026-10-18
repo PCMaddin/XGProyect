@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\TransferException;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * What a package costs in WAX: its price in the shop's currency at the
@@ -58,10 +59,39 @@ class WaxRates
         }
 
         $rate = $this->fetch($currency);
+        $this->guard($currency, $rate);
         $seconds = config('premium.wax.rate_cache');
         $this->cache->put('wax_rate_' . $currency, $rate, is_int($seconds) ? $seconds : 300);
+        $this->cache->put('wax_rate_last_' . $currency, ['rate' => $rate, 'at' => now()->getTimestamp()], 30 * 86400);
 
         return $rate;
+    }
+
+    /**
+     * A rate far off the last one is not believed (a broken or forged feed
+     * would sell dark matter for nearly nothing): no order until it is
+     * checked. After a day without a rate any rate counts again.
+     *
+     * @throws WaxException
+     */
+    private function guard(string $currency, float $rate): void
+    {
+        $last = $this->cache->get('wax_rate_last_' . $currency);
+        $jump = config('premium.wax.max_rate_jump');
+        $limit = (is_numeric($jump) ? (float) $jump : 50.0) / 100;
+
+        if (!is_array($last) || !is_float($last['rate'] ?? null) || !is_int($last['at'] ?? null) ||
+            $limit <= 0 || now()->getTimestamp() - $last['at'] > 86400) {
+            return;
+        }
+
+        $change = abs($rate / $last['rate'] - 1);
+
+        if ($change > $limit) {
+            Log::warning('WAX rate refused: ' . $rate . ' ' . $currency . ' after ' . $last['rate'] . ' (' . round($change * 100) . ' %)');
+
+            throw new WaxException('The WAX rate moved too far to be believed: ' . $rate . ' after ' . $last['rate']);
+        }
     }
 
     /**

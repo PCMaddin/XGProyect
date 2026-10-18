@@ -54,7 +54,7 @@
                                         $badge = match ($order['status']) {
                                             'paid' => 'badge-success',
                                             'pending' => 'badge-warning',
-                                            'refunded' => 'badge-danger',
+                                            'refunded', 'disputed' => 'badge-danger',
                                             default => 'badge-secondary',
                                         };
                                     @endphp

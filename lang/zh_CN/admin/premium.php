@@ -50,6 +50,7 @@ return [
     'pr_status_expired' => '已过期',
     'pr_status_failed' => '失败',
     'pr_status_refunded' => '已退款',
+    'pr_status_disputed' => '拒付',
     'pr_shop_closed_methods' => '已关闭（未设置支付方式）',
     'pr_payment_methods' => '支付方式',
     'pr_payment_methods_help' => '本宇宙可用的支付方式。只有在 .env 中也设置后才会生效。',
@@ -74,4 +75,5 @@ return [
     'pr_wax_result_no_player' => '玩家已删除',
     'pr_wax_result_linked' => 'WAX 账户已绑定',
     'pr_wax_result_paid_out' => '奖励已发放',
+    'pr_wax_result_unconfirmed' => '未经第二台服务器确认',
 ];

@@ -36,16 +36,34 @@ class WaxPaymentsTest extends DatabaseTestCase
 
     private int $lastIrreversible = 2000;
 
+    /** @var list<array<string, mixed>>|null what the second server holds; null: the same */
+    private ?array $verified = null;
+
+    private ?bool $verifierDown = null;
+
+    /** the second server's last irreversible block; null: the same as the first's */
+    private ?int $verifierLib = null;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         Artisan::call('migrate', ['--database' => 'central', '--path' => 'database/migrations/central', '--force' => true]);
-        config(['premium.wax.account' => 'xgpshop', 'premium.wax.api_url' => 'https://hyperion.example.org']);
+        config(['premium.wax.account' => 'xgpshop', 'premium.wax.api_url' => 'https://hyperion.example.org', 'premium.wax.verify_url' => 'https://second.example.org']);
         Http::preventStrayRequests();
         Http::fake([
             'hyperion.example.org/v1/chain/get_info' => fn () => Http::response(['last_irreversible_block_num' => $this->lastIrreversible]),
             'hyperion.example.org/v2/history/get_actions*' => fn (Request $request) => Http::response(['actions' => array_slice($this->actions, (is_numeric($request['skip']) ? (int) $request['skip'] : 0), 100)]),
+            // the second server: knows the same transactions unless told otherwise
+            'second.example.org/v2/history/get_transaction*' => function (Request $request) {
+                if ($this->verifierDown === true) {
+                    return Http::response('down', 503);
+                }
+
+                $actions = array_values(array_filter($this->verified ?? $this->actions, static fn (array $action): bool => ($action['trx_id'] ?? null) === $request['id']));
+
+                return Http::response(['executed' => $actions !== [], 'trx_id' => $request['id'], 'lib' => $this->verifierLib ?? $this->lastIrreversible] + ($actions === [] ? [] : ['actions' => $actions]));
+            },
         ]);
 
         DB::table('premium')->insert(['premium_user_id' => self::PLAYER, 'premium_dark_matter' => 0]);
@@ -222,6 +240,79 @@ class WaxPaymentsTest extends DatabaseTestCase
 
         $this->assertSame(1, Artisan::call('xgp:season:payout', ['universe' => 'andromeda']));
         $this->assertSame(1, Artisan::call('xgp:season:payout', ['universe' => 'nowhere']));
+    }
+
+    public function testATransferTheSecondServerContradictsCountsForNothing(): void
+    {
+        // the first server makes up a payment in full; the second knows the transaction with 1 WAX
+        $this->actions = [self::action(['memo' => 'xgp:1', 'quantity' => '466.76000000 WAX'])];
+        $this->verified = [self::action(['memo' => 'xgp:1', 'quantity' => '1.00000000 WAX'])];
+
+        $this->assertSame(['unconfirmed' => 1], $this->check());
+        $this->assertSame(0, $this->darkMatter());
+        $this->assertSame(DarkMatterOrder::PENDING, DarkMatterOrder::findOrFail(1)->status);
+        $this->assertSame([['sequence' => 5000, 'order_id' => null, 'result' => 'unconfirmed', 'universe' => null, 'units' => self::QUOTE]], $this->transfers());
+    }
+
+    public function testATransferTheSecondServerNeverSawIsNotBelieved(): void
+    {
+        // a recent one: wait for the second server
+        $this->actions = [self::action(['memo' => 'xgp:1', 'quantity' => '466.76000000 WAX', 'timestamp' => '2030-01-01T11:50:00.000'])];
+        $this->verified = [];
+
+        $this->assertSame([], $this->check());
+        $this->assertSame([], $this->transfers());
+
+        // half an hour later it still does not know it: made up
+        $this->assertSame(['unconfirmed' => 1], app(WaxPayments::class)->check(self::NOON + 1800));
+        $this->assertSame(0, $this->darkMatter());
+    }
+
+    public function testATransferNotFinalOnTheSecondServerWaits(): void
+    {
+        $this->actions = [self::action(['memo' => 'xgp:1', 'quantity' => '466.76000000 WAX', 'block_num' => 1500])];
+        $this->verified = [self::action(['memo' => 'xgp:1', 'quantity' => '466.76000000 WAX', 'block_num' => 1500])];
+        $this->lastIrreversible = 1500;
+        // the first server says final, the second does not yet
+        $this->verifierLib = 1400;
+
+        $this->assertSame([], $this->check());
+        $this->assertSame(0, $this->darkMatter());
+
+        $this->verifierLib = 1500;
+        $this->assertSame(['credited' => 1], $this->check());
+    }
+
+    public function testWithoutTheSecondServerNothingCountsAndNothingIsLost(): void
+    {
+        $this->actions = [self::action(['memo' => 'xgp:1', 'quantity' => '466.76000000 WAX'])];
+        $this->verifierDown = true;
+
+        try {
+            $this->check();
+            $this->fail('no exception');
+        } catch (WaxException) {
+            $this->assertSame([], $this->transfers());
+        }
+
+        $this->verifierDown = false;
+        $this->assertSame(['credited' => 1], $this->check());
+        $this->assertSame(10_000, $this->darkMatter());
+    }
+
+    public function testALinkCodeCountsOnce(): void
+    {
+        $links = app(WaxLinks::class);
+        $code = $links->code('', self::PLAYER, self::NOON);
+        // the player links; later someone sends the same memo, public on the chain, from their own account
+        $this->actions = [
+            self::action(['global_sequence' => 1, 'memo' => WaxLinks::MEMO_PREFIX . $code, 'from' => 'player.wam', 'quantity' => '0.00010000 WAX', 'trx_id' => str_repeat('1', 64)]),
+            self::action(['global_sequence' => 2, 'memo' => WaxLinks::MEMO_PREFIX . $code, 'from' => 'thief.wam', 'quantity' => '0.00010000 WAX', 'trx_id' => str_repeat('2', 64)]),
+        ];
+
+        $this->assertSame(['linked' => 1, 'unknown' => 1], $this->check());
+        $this->assertSame('player.wam', $links->account('', self::PLAYER));
+        $this->assertNotSame($code, $links->code('', self::PLAYER, self::NOON));
     }
 
     public function testWithoutAnAccountNothingIsRead(): void

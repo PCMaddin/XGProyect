@@ -48,6 +48,8 @@ class StripeWebhookHandler
             'checkout.session.completed', 'checkout.session.async_payment_succeeded' => $this->inUniverse($object, fn (): string => $this->paid($object, $now)),
             'checkout.session.expired', 'checkout.session.async_payment_failed' => $this->inUniverse($object, fn (): string => $this->expired($object)),
             'charge.refunded' => $this->refunded($object, $now),
+            // a chargeback: the money is gone, the dark matter must go too
+            'charge.dispute.created' => $this->reversed(self::str($object['payment_intent'] ?? null), self::arr($object['metadata'] ?? null), $now, DarkMatterOrder::DISPUTED),
             default => 'ignored',
         };
     }
@@ -116,21 +118,31 @@ class StripeWebhookHandler
             return 'partial refund ignored';
         }
 
-        $paymentId = self::str($charge['payment_intent'] ?? null);
-        $refund = fn (): string => $this->orders->refund($paymentId, $now) ? 'refunded' : 'ignored';
-        $metadata = self::arr($charge['metadata'] ?? null);
+        return $this->reversed(self::str($charge['payment_intent'] ?? null), self::arr($charge['metadata'] ?? null), $now, DarkMatterOrder::REFUNDED);
+    }
+
+    /**
+     * Takes a payment back (refund or chargeback) in the universe that knows it.
+     *
+     * @param array<mixed> $metadata
+     *
+     * @throws UnknownUniverseException
+     */
+    private function reversed(string $paymentId, array $metadata, int $now, string $status): string
+    {
+        $reverse = fn (): string => $this->orders->refund($paymentId, $now, $status) ? $status : 'ignored';
 
         // the charge may not carry the session's metadata: then the
         // universe is the one that knows the payment
         if (self::str($metadata['universe'] ?? null) !== '' || !$this->registry->enabled()) {
-            return $this->inUniverse($charge, $refund);
+            return $this->inUniverse(['metadata' => $metadata], $reverse);
         }
 
         foreach ($this->registry->all() as $instance) {
-            if ($this->context->runIn($instance, $refund) === 'refunded') {
-                Log::info('Stripe webhook: payment refunded', ['universe' => $instance->slug]);
+            if ($this->context->runIn($instance, $reverse) === $status) {
+                Log::warning('Stripe webhook: payment ' . $status, ['universe' => $instance->slug, 'payment' => $paymentId]);
 
-                return 'refunded';
+                return $status;
             }
         }
 

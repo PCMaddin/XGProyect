@@ -6,6 +6,7 @@ namespace Tests\Unit\App\Services\Premium;
 
 use App\Services\Premium\WaxException;
 use App\Services\Premium\WaxRates;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
@@ -48,6 +49,36 @@ class WaxRatesTest extends TestCase
         Http::fake(['rates.example.org/*' => Http::response(['wax' => ['usd' => 0.05]])]);
 
         $this->assertSame(2_000_000_000, app(WaxRates::class)->units(100, 'usd'));
+    }
+
+    public function testARateFarOffTheLastOneIsNotBelieved(): void
+    {
+        $rate = 0.004;
+        Http::fake(['rates.example.org/*' => function () use (&$rate) {
+            return Http::response(['wax' => ['eur' => $rate]]);
+        }]);
+        $rates = app(WaxRates::class);
+
+        $this->assertSame(0.004, $rates->rate('eur'));
+        Cache::forget('wax_rate_eur');
+
+        // a broken or forged feed: WAX a hundred times dearer, dark matter nearly free
+        $rate = 0.4;
+
+        try {
+            $rates->rate('eur');
+            $this->fail('the jump was believed');
+        } catch (WaxException) {
+            $this->assertNull(Cache::get('wax_rate_eur'));
+        }
+
+        // a move within the limit counts, and a day later any rate counts again
+        $rate = 0.005;
+        $this->assertSame(0.005, $rates->rate('eur'));
+        Cache::forget('wax_rate_eur');
+        $rate = 0.05;
+        $this->travel(25)->hours();
+        $this->assertSame(0.05, $rates->rate('eur'));
     }
 
     public function testWithoutARateThereIsNoPrice(): void

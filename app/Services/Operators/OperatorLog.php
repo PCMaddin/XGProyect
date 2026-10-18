@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace App\Services\Operators;
 
 use App\Models\Operator;
+use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * What happened on /operator: sign-ins (also failed ones), and every change
- * to a universe, with who, from where and when.
+ * to a universe, with who, from where and when; and what admins of the
+ * universes did with dark matter.
+ *
+ * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class OperatorLog
 {
@@ -29,6 +35,8 @@ class OperatorLog
     public const ACCOUNT_CREATED = 'operator_created';
     public const ACCOUNT_RESET = 'operator_reset';
     public const ACCOUNT_DELETED = 'operator_deleted';
+    /** an admin of a universe set a player's dark matter by hand */
+    public const ADMIN_DARK_MATTER = 'admin_dark_matter';
 
     /**
      * @param array<string, mixed> $details
@@ -44,6 +52,21 @@ class OperatorLog
             'ip' => mb_substr($ip, 0, 45),
             'created_at' => time(),
         ]);
+    }
+
+    /**
+     * What an admin of the current universe did with something worth money;
+     * without the operators' log (a single game) it goes to the log file.
+     *
+     * @param array<string, mixed> $details
+     */
+    public function recordAdmin(string $email, string $action, string $ip, array $details): void
+    {
+        try {
+            $this->record(null, $email, $action, $ip, app(InstanceContext::class)->current()->slug ?? '', $details);
+        } catch (QueryException) {
+            Log::notice('Admin: ' . $action, $details + ['admin' => $email]);
+        }
     }
 
     /**

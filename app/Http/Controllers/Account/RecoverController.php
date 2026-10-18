@@ -58,7 +58,7 @@ class RecoverController extends BaseController
                 // the answer stays the same either way (it must not tell
                 // whether an account exists); the failure is logged
                 try {
-                    Mail::to($email)->send(new Recover($this->context->link(route('account.reset', ['token' => $token, 'email' => $email]))));
+                    Mail::to($email)->send(new Recover($this->context->link($this->resetLink($token, $email))));
                 } catch (Throwable $e) {
                     report($e);
                 }
@@ -95,5 +95,17 @@ class RecoverController extends BaseController
         }
 
         return redirect()->route('account.recover')->with('message', __('account/recover.re_reset_done'));
+    }
+
+    /**
+     * The link in the mail, on the address of APP_URL, never on the host
+     * the request named: a forged Host header would send the token to
+     * someone else's server.
+     */
+    private function resetLink(string $token, string $email): string
+    {
+        $base = config('app.url');
+
+        return rtrim(is_string($base) ? $base : '', '/') . route('account.reset', ['token' => $token, 'email' => $email], false);
     }
 }

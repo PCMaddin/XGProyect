@@ -129,25 +129,26 @@ class DarkMatterOrders
     }
 
     /**
-     * The payment was refunded in full: mark the order and take back the
-     * dark matter the player still has (never below zero).
+     * The payment was refunded in full, or the bank took it back (status
+     * disputed): mark the order and take back the dark matter the player
+     * still has (never below zero).
      *
      * @return bool whether the order was refunded now
      */
-    public function refund(string $paymentId, int $now): bool
+    public function refund(string $paymentId, int $now, string $status = DarkMatterOrder::REFUNDED): bool
     {
         if ($paymentId === '') {
             return false;
         }
 
-        return DB::transaction(function () use ($paymentId, $now): bool {
+        return DB::transaction(function () use ($paymentId, $now, $status): bool {
             $order = DarkMatterOrder::where('provider_payment', $paymentId)->lockForUpdate()->first();
 
             if ($order === null || $order->status !== DarkMatterOrder::PAID) {
                 return false;
             }
 
-            DarkMatterOrder::whereKey($order->id)->update(['status' => DarkMatterOrder::REFUNDED, 'refunded_at' => $now]);
+            DarkMatterOrder::whereKey($order->id)->update(['status' => $status, 'refunded_at' => $now]);
 
             $premium = DB::table('premium')->where('premium_user_id', $order->user_id)->lockForUpdate()->first(['premium_dark_matter']);
 

@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'Le paiement n\'a pas été finalisé. Rien n\'a été débité.',
     'dm_status_failed' => 'Le paiement n\'a pas pu être lancé. Rien n\'a été débité.',
     'dm_status_refunded' => 'Le paiement a été remboursé.',
+    'dm_status_disputed' => 'La banque a annulé le paiement (rétrofacturation) ; la matière noire a aussi été reprise.',
     'dm_cancelled' => 'Tu as annulé le paiement. Rien n\'a été débité.',
     'dm_reload' => 'Actualiser',
     'dm_unknown_method' => 'Ce moyen de paiement n\'est pas proposé ici.',

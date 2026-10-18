@@ -1739,6 +1739,79 @@ Baseline-Einträge.
     Code, Wiederherstellungscodes), im Browser angemeldet, falsches
     Passwort, Universum mit eigener Datenbank angelegt, geändert,
     geschlossen, Protokoll, Abmelden, Handyansicht. Danach aufgeräumt.
+- ✅ **Sicherheits-Audit (Geldflüsse zuerst):** Stripe, WAX und Token,
+  Bestellungen, Preise und Auszahlung, Anmeldung und 2FA, Admin- und
+  Betreiberbereich, Spiel-Eingaben, Konfiguration und Abhängigkeiten geprüft
+  (`composer audit` und `npm audit` ohne Befunde). Gefunden und behoben:
+  - *Hoch: WAX-Verknüpfung kapern.* Der Code galt nach dem Verknüpfen
+    weiter, das Memo steht öffentlich auf der Chain. Jeder konnte es noch
+    einmal senden und die Verknüpfung (und damit die Saisonpreise) auf
+    sein Konto lenken. Jetzt bekommt die Verknüpfung nach dem ersten
+    Gebrauch einen neuen Code; zentrale Migration `000009` erneuert die
+    Codes bestehender Verknüpfungen.
+  - *Hoch: Reset-Link über den Host-Header.* Der Link in der „Passwort
+    vergessen“-Mail kam aus dem `Host` der Anfrage; ein Angreifer konnte
+    ihn für fremde Konten auf seinen Server zeigen lassen (Kontoübernahme
+    mit einem Klick). Jetzt immer `APP_URL`.
+  - *Hoch: ein einziger Hyperion-Server als Wahrheit.* Ein falscher oder
+    übernommener Server hätte Zahlungen erfinden können. Jetzt bestätigt
+    ein zweiter Server eines anderen Betreibers jede Überweisung, die
+    etwas bewirkt (`WaxVerifier`, `XGP_WAX_VERIFY_API`, Standard
+    `api.waxsweden.org`): gleiche Aktion, gleicher Inhalt, dort ebenfalls
+    unumkehrbar. Kennt er sie noch nicht, wird gewartet; widerspricht er
+    oder kennt er sie nach 30 Minuten nicht, zählt sie nicht (Ergebnis
+    „unconfirmed“ für den Admin).
+  - *Hoch: Passwörter ohne Versuchsgrenze.* Spiel-Login, Admin-Login,
+    Registrierung und „Passwort vergessen“ hatten kein Limit. Jetzt 5 pro
+    Minute und Konto, 20 pro Adresse; Registrierung 5 pro Stunde und
+    Adresse; Reset-Mails 5 pro Stunde und Adresse. Zwei-Faktor-Code nach
+    fünf Fehlern 15 statt 1 Minute gesperrt.
+  - *Mittel: doppelt ausgeben.* Offiziere und das Auffüllen beim Händler
+    zogen Dunkle Materie ohne Bedingung ab: Zwei gleichzeitige Anfragen
+    zahlten aus demselben Guthaben, das ins Minus ging. Jetzt nur, wenn
+    sie im selben Moment noch da ist (Offiziere zusätzlich nur für die
+    gelesene Laufzeit).
+  - *Mittel: Rückbuchungen.* Ein Chargeback (`charge.dispute.created`)
+    ließ die Dunkle Materie beim Spieler. Jetzt wird sie wie bei einer
+    Erstattung zurückgenommen; Status „disputed“.
+  - *Mittel: Kursquelle ohne Prüfung.* Ein falscher WAX-Kurs hätte Dunkle
+    Materie für 30 Minuten verschleudert. Jetzt wird ein Kurs, der mehr als
+    `XGP_WAX_MAX_RATE_JUMP` Prozent (Standard 50) vom letzten abweicht,
+    abgelehnt, bis ein Tag vergangen ist.
+  - *Mittel: Insider.* Setzt ein Admin eines Universums die Dunkle Materie
+    eines Spielers, steht das jetzt mit Admin, Spieler, altem und neuem
+    Wert im Protokoll der Basisdatenbank (`/operator`), wo der Admin es
+    nicht löschen kann; ohne Universen in der Logdatei.
+  - *Niedrig:* globale Header `X-Frame-Options: SAMEORIGIN` (keine
+    Klick-Falle auf Kauf-Buttons), `nosniff`, `Referrer-Policy`, HSTS über
+    HTTPS; `SESSION_SECURE_COOKIE=true` in `.env.example`; Cookie von
+    `/operator` über HTTPS nur verschlüsselt; Planetennamen-Regex `A-z`
+    ließ `[ \ ] ^` und Backtick zu.
+  - *Geprüft ohne Befund:* Stripe-Signatur (zeitkonstant, 5 Minuten),
+    Gutschrift einmalig unter Sperre mit Betrag, Währung und Session;
+    WAX-Gutschrift erst unumkehrbar, Vertrag und Symbol geprüft; Preise
+    einlösen atomar; alle Admin-Seiten hinter Anmeldung, 2FA und Rechten;
+    Installer nach der Installation gesperrt; Backups außerhalb von
+    `public/` mit strengem Dateinamen; keine Geheimnisse im Repository;
+    rohes SQL nur mit Zahlen oder Positivlisten; Namen ohne HTML-Zeichen;
+    Flottendaten aus der Sitzung.
+  - *Tests:*
+    - `WaxPaymentsTest`: zweiter Server widerspricht, kennt die
+      Überweisung nie, ist noch nicht unumkehrbar, ist nicht erreichbar;
+      Link-Code zählt einmal.
+    - `ConcurrentSpendingMysqlTest` (MariaDB): eine andere Anfrage gibt
+      die Dunkle Materie genau zwischen Prüfung und Abbuchung aus
+      (Offizier, doppelter Offizier, Auffüllen).
+    - `SecurityHardeningTest`: Login-, Registrierungs- und Reset-Limits,
+      Reset-Link trotz fremdem Host, Header.
+    - `StripeWebhookControllerTest`: Chargeback.
+    - `WaxRatesTest`: Kurssprung.
+    - `UserEditAllowlistTest`: Admin-Protokoll.
+    - Mutationsproben (14): Jeder Fix wurde einzeln ausgebaut, jedes Mal
+      schlugen die Tests fehl.
+  - *Live geprüft:* eine echte WAX-Überweisung vom ersten Server wurde vom
+    zweiten (`api.waxsweden.org`) bestätigt, dieselbe mit verfälschtem
+    Betrag abgelehnt, eine erfundene nicht gefunden.
 
 ## Smoke-Test gegen eine echte Datenbank
 

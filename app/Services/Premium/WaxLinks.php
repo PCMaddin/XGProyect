@@ -82,13 +82,15 @@ class WaxLinks
 
     /**
      * A transfer with a link memo: links its sender. False if no link has
-     * that code.
+     * that code. The code counts once: the memo is public on the chain
+     * afterwards, and whoever sent it again would take over the link (and
+     * the prizes paid to it).
      */
     public function link(string $memo, string $waxAccount, int $now): bool
     {
         $code = strtolower(substr(trim($memo), strlen(self::MEMO_PREFIX)));
 
-        return $this->table()->where('code', $code)->update(['wax_account' => $waxAccount, 'linked_at' => $now]) === 1;
+        return $this->table()->where('code', $code)->update(['wax_account' => $waxAccount, 'linked_at' => $now, 'code' => $this->newCode()]) === 1;
     }
 
     public static function isLinkMemo(string $memo): bool

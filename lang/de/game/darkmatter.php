@@ -26,6 +26,7 @@ return [
     'dm_status_expired' => 'Die Zahlung wurde nicht abgeschlossen. Es wurde nichts abgebucht.',
     'dm_status_failed' => 'Die Zahlung konnte nicht gestartet werden. Es wurde nichts abgebucht.',
     'dm_status_refunded' => 'Die Zahlung wurde erstattet.',
+    'dm_status_disputed' => 'Die Zahlung wurde von der Bank zurückgebucht; die Dunkle Materie wurde ebenfalls zurückgenommen.',
     'dm_cancelled' => 'Du hast die Zahlung abgebrochen. Es wurde nichts abgebucht.',
     'dm_reload' => 'Neu laden',
     'dm_unknown_method' => 'Diese Zahlungsart gibt es hier nicht.',

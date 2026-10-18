@@ -107,14 +107,18 @@ class PremiumController extends BaseController
         $userId = $this->userInt('id');
 
         if ($userId > 0) {
+            $price = $this->officerPrice($officer, $resource);
+
+            // paid only from dark matter still there, and only for the term
+            // read above: two requests at once must not both pay
             DB::update(
                 $this->prepareSql(
                     'UPDATE `' . PREMIUM . '` SET
                         `premium_dark_matter` = `premium_dark_matter` - ?,
                         `' . $column . '` = ?
-                    WHERE `premium_user_id` = ?;'
+                    WHERE `premium_user_id` = ? AND `premium_dark_matter` >= ? AND COALESCE(`' . $column . '`, 0) = ?;'
                 ),
-                [$this->officerPrice($officer, $resource), $expiry, $userId]
+                [$price, $expiry, $userId, $price, $currentExpiry]
             );
         }
 
