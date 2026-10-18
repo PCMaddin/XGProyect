@@ -43,6 +43,16 @@ class SeasonPayouts
             ->whereNull('claimed_at')
             ->update(['claimed_at' => $now, 'claimed_universe' => self::RESERVED]);
 
+        return $this->reserved($universe, $token);
+    }
+
+    /**
+     * The transfers reserved and not yet seen on the chain.
+     *
+     * @return list<array{id: int, to: string, category: string, rank: int, reward: int, quantity: string, memo: string}>
+     */
+    public function reserved(string $universe, TokenSpec $token): array
+    {
         $payouts = [];
 
         foreach ($this->table()->where('universe', $universe)->where('claimed_universe', self::RESERVED)->orderBy('category')->orderBy('rank')->get() as $row) {
@@ -51,8 +61,8 @@ class SeasonPayouts
             $reward = self::int($values['reward'] ?? 0);
             $payouts[] = [
                 'id' => $id,
-                'to' => is_string($values['wax_account'] ?? null) ? $values['wax_account'] : '',
-                'category' => is_string($values['category'] ?? null) ? $values['category'] : '',
+                'to' => self::text($values['wax_account'] ?? null),
+                'category' => self::text($values['category'] ?? null),
                 'rank' => self::int($values['rank'] ?? 0),
                 'reward' => $reward,
                 'quantity' => $token->quantity($this->rates->unitsForPrize($reward, $token)),
@@ -61,6 +71,38 @@ class SeasonPayouts
         }
 
         return $payouts;
+    }
+
+    /**
+     * Every prize of the universe with what became of it: open, redeemed
+     * as dark matter (in which universe), reserved for a payout, or paid.
+     *
+     * @return list<array{category: string, rank: int, name: string, reward: int, wax_account: string, state: string, universe: string}>
+     */
+    public function overview(string $universe): array
+    {
+        $prizes = [];
+
+        foreach ($this->table()->where('universe', $universe)->where('reward', '>', 0)->orderBy('category')->orderBy('rank')->get() as $row) {
+            $values = get_object_vars($row);
+            $claimed = self::text($values['claimed_universe'] ?? null);
+            $prizes[] = [
+                'category' => self::text($values['category'] ?? null),
+                'rank' => self::int($values['rank'] ?? 0),
+                'name' => self::text($values['name'] ?? null),
+                'reward' => self::int($values['reward'] ?? 0),
+                'wax_account' => self::text($values['wax_account'] ?? null),
+                'state' => match ($claimed) {
+                    '' => 'open',
+                    self::RESERVED => 'reserved',
+                    self::PAID => 'paid',
+                    default => 'redeemed',
+                },
+                'universe' => in_array($claimed, ['', self::RESERVED, self::PAID], true) ? '' : $claimed,
+            ];
+        }
+
+        return $prizes;
     }
 
     /**
@@ -86,6 +128,11 @@ class SeasonPayouts
     public static function isPrizeMemo(string $memo): bool
     {
         return preg_match('/^' . preg_quote(self::MEMO_PREFIX, '/') . '\d{1,18}$/', trim($memo)) === 1;
+    }
+
+    private static function text(mixed $value): string
+    {
+        return is_string($value) ? $value : '';
     }
 
     private static function int(mixed $value): int

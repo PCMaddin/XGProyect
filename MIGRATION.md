@@ -1671,6 +1671,74 @@ Baseline-Einträge.
     - Mutationsproben: ohne Symbolprüfung der Bestellung, ohne
       Empfängerprüfung oder ohne Symbolprüfung der Auszahlung schlagen
       die Tests fehl.
+- ✅ **Betreiberbereich `/operator` mit Pflicht-2FA:** die Universen im
+  Browser verwalten, getrennt von allen Universen.
+  - *Konten:* `operators` in der Basisdatenbank (zentrale Migration
+    `000008`, Modell `Operator`, Guard `operator`). Angelegt werden sie nur
+    auf der Kommandozeile: `xgp:operator:create` fragt das Passwort
+    (mindestens 12 Zeichen), zeigt den QR-Code im Terminal und speichert
+    das Konto erst, wenn die App den richtigen Code zeigt. Dazu
+    `xgp:operator:reset` (Passwort, neue App), `xgp:operator:list` und
+    `xgp:operator:delete`. Die Zwei-Faktor-Anmeldung wird nie im Browser
+    eingerichtet: Ein Passwort allein kann keine eigene App eintragen.
+  - *Anmeldung* (`OperatorLogin`): Passwort, dann immer TOTP- oder
+    Wiederherstellungscode (`TwoFactor` für Spieler und Betreiber).
+    - Ohne Zwei-Faktor-Anmeldung kein Zugang; unbekannte E-Mail und
+      falsches Passwort geben dieselbe Antwort und dauern gleich lang.
+    - Jeder Code gilt einmal; nach fünf falschen Codes zurück zum
+      Passwort.
+    - Rate-Limit: 10 pro Minute je Adresse, 5 je Konto.
+  - *Rahmen* (`OperatorArea`):
+    - eigene Sitzung (Dateien, Cookie `xgp_operator`, `SameSite=strict`,
+      30 Minuten Leerlauf); `AuthenticateOperator` meldet spätestens nach
+      8 Stunden ab;
+    - Header `X-Frame-Options: DENY`, `no-store`, `no-referrer`;
+    - optional nur von `XGP_OPERATOR_IPS` (Adressen oder Netze, sonst
+      404); `XGP_OPERATOR_WEB=false` schaltet den Bereich ab.
+  - *Seiten:*
+    - Universenliste mit Protokoll;
+    - Universum anlegen (Datenbank, Zahlungsarten, Saisonende, KI-Spieler,
+      Admin des Universums);
+    - bearbeiten (Name, Modus, Status, Zahlungsarten mit Hinweis auf
+      fehlende `.env`-Werte, Saisonende, Preise und Anteile);
+    - schließen mit Rückfrage;
+    - Saison mit allen Preisen und ihrem Stand (offen, eingelöst in,
+      reserviert, ausgezahlt) und Token-Auszahlung wie
+      `xgp:season:payout`, mit fertigem JSON für die Wallet;
+    - Konto: Passwort ändern und neue Wiederherstellungscodes, beides nur
+      mit aktuellem Passwort und Code; die Codes werden einmal angezeigt.
+  - *Protokoll:* `operator_events` (wer, was, welches Universum, Adresse,
+    Zeit) für Anmeldungen, auch fehlgeschlagene, falsche Codes, jede
+    Änderung, Auszahlungen und die Kontobefehle (Adresse `cli`).
+  - *Sprache:* aus dem Browser oder `?lang=`; alle Texte in zehn Sprachen
+    (`operator/operator.php`). Eigenes schlichtes Layout, hell und dunkel,
+    auch auf dem Handy ohne seitliches Scrollen.
+  - *Tests:*
+    - `OperatorLoginTest` (SQLite):
+      - Passwort und Code;
+      - gleiche Antwort für unbekannt und falsch;
+      - ohne 2FA kein Zugang;
+      - Code und Wiederherstellungscode je einmal;
+      - Versuchslimit und Höchstdauer;
+      - IP-Sperre, gefälschtes `X-Forwarded-For` hilft nicht,
+        Abschalten;
+      - eigene Sitzung;
+      - Passwortwechsel und neue Codes nur mit Passwort und Code;
+      - Sprache.
+    - `OperatorCommandsTest`: Konto erst nach richtigem Code, falscher
+      Code legt nichts an, kurze Passwörter, neue App behält bis zur
+      Bestätigung die alte, Liste und Löschen.
+    - `OperatorUniversesMysqlTest`: Universum im Browser anlegen (echte
+      Datenbank), ändern, schließen, Protokoll; Token-Auszahlung und
+      Freigabe, laufende Saison abgelehnt.
+    - Mutationsproben (sieben): ohne 2FA-Pflicht, ohne Höchstdauer, ohne
+      IP-Sperre, Login schon nach dem Passwort, ohne Versuchslimit,
+      Passwortwechsel ohne altes Passwort, Konto ohne Codebestätigung;
+      jedes Mal schlagen die Tests fehl.
+  - *Live geprüft:* Konto über ein echtes Terminal angelegt (QR-Code,
+    Code, Wiederherstellungscodes), im Browser angemeldet, falsches
+    Passwort, Universum mit eigener Datenbank angelegt, geändert,
+    geschlossen, Protokoll, Abmelden, Handyansicht. Danach aufgeräumt.
 
 ## Smoke-Test gegen eine echte Datenbank
 

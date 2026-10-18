@@ -69,6 +69,18 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\TrackActivity::class,
         ],
 
+        // the operators' area (routes/operator.php): apart from every universe
+        'operator' => [
+            \App\Http\Middleware\OperatorArea::class,
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\OperatorLocale::class,
+        ],
+
         // payment providers (routes/webhooks.php): no session, cookies or CSRF token
         'webhook' => [
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -93,6 +105,7 @@ class Kernel extends HttpKernel
         'admin.auth' => \App\Http\Middleware\AdminAuthenticate::class,
         'admin.two_factor' => \App\Http\Middleware\RequireTwoFactor::class,
         'admin.authorize' => \App\Http\Middleware\AdminAuthorize::class,
+        'operator.auth' => \App\Http\Middleware\AuthenticateOperator::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,

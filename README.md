@@ -72,7 +72,7 @@ If you already created your own `.env`, those values may be different. Check tha
 
 ## Several universes
 
-One server can run several universes, each in a database of its own, with a lobby, a new universe every month and dark matter sold by card (Stripe) or WAX. See [docs/universes.md](docs/universes.md) (German) for setup, commands and payments.
+One server can run several universes, each in a database of its own, with a lobby, a new universe every month and dark matter sold by card (Stripe), WAX or an own token, managed on the command line or in the operators’ area `/operator` (always with two-factor sign-in). See [docs/universes.md](docs/universes.md) (German) for setup, commands and payments.
 
 ## Mailpit
 

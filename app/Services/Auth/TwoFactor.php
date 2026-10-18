@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services\Auth;
 
+use App\Models\Operator;
 use App\Models\User;
 use App\Services\Instances\InstanceContext;
 use App\Services\SettingsService;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\PlainTextRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 
 /**
- * Two-factor sign-in of an account: a secret shared with the player's
- * authenticator app (stored encrypted), and one-time recovery codes for a
- * lost phone (stored as hashes; shown once).
+ * Two-factor sign-in of an account (a player's, or an operator's): a secret
+ * shared with the authenticator app (stored encrypted), and one-time
+ * recovery codes for a lost phone (stored as hashes; shown once).
  */
 class TwoFactor
 {
@@ -36,11 +38,19 @@ class TwoFactor
     /**
      * The QR code the authenticator app scans, as SVG.
      */
-    public function qrCode(User $user, string $secret): string
+    public function qrCode(User | Operator $user, string $secret): string
     {
         $writer = new Writer(new ImageRenderer(new RendererStyle(200, 1), new SvgImageBackEnd()));
 
-        return $writer->writeString($this->totp->uri($this->issuer(), $user->email, $secret));
+        return $writer->writeString($this->totp->uri($user instanceof Operator ? $this->operatorIssuer() : $this->issuer(), $user->email, $secret));
+    }
+
+    /**
+     * The QR code in text, for a terminal; and the secret to type in instead.
+     */
+    public function qrText(User | Operator $user, string $secret): string
+    {
+        return (new Writer(new PlainTextRenderer(2)))->writeString($this->totp->uri($user instanceof Operator ? $this->operatorIssuer() : $this->issuer(), $user->email, $secret));
     }
 
     /**
@@ -48,7 +58,7 @@ class TwoFactor
      *
      * @return list<string>|null the recovery codes, or null for a wrong code
      */
-    public function enable(User $user, string $secret, string $code, int $now): ?array
+    public function enable(User | Operator $user, string $secret, string $code, int $now): ?array
     {
         $step = $this->totp->verify($secret, $code, $now);
 
@@ -71,7 +81,7 @@ class TwoFactor
      * Whether the code from the app, or an unused recovery code, is right.
      * Each counts once: an app code not again, a recovery code never again.
      */
-    public function check(User $user, string $code, int $now): bool
+    public function check(User | Operator $user, string $code, int $now): bool
     {
         if (!$user->hasTwoFactor()) {
             return false;
@@ -88,7 +98,7 @@ class TwoFactor
         return $this->useRecoveryCode($user, $code);
     }
 
-    public function disable(User $user): void
+    public function disable(User | Operator $user): void
     {
         $user->forceFill([
             'two_factor_secret' => null,
@@ -103,7 +113,7 @@ class TwoFactor
      *
      * @return list<string>
      */
-    public function regenerateRecoveryCodes(User $user): array
+    public function regenerateRecoveryCodes(User | Operator $user): array
     {
         $codes = $this->newRecoveryCodes();
         $user->forceFill(['two_factor_recovery_codes' => self::hashes($codes)])->save();
@@ -111,12 +121,12 @@ class TwoFactor
         return $codes;
     }
 
-    public function recoveryCodesLeft(User $user): int
+    public function recoveryCodesLeft(User | Operator $user): int
     {
         return count($this->storedHashes($user));
     }
 
-    private function useRecoveryCode(User $user, string $code): bool
+    private function useRecoveryCode(User | Operator $user, string $code): bool
     {
         $hash = hash('sha256', self::normalized($code));
         $hashes = $this->storedHashes($user);
@@ -135,7 +145,7 @@ class TwoFactor
     /**
      * @return list<string>
      */
-    private function storedHashes(User $user): array
+    private function storedHashes(User | Operator $user): array
     {
         $hashes = json_decode((string) $user->two_factor_recovery_codes, true);
 
@@ -170,6 +180,16 @@ class TwoFactor
     private static function normalized(string $code): string
     {
         return strtolower((string) preg_replace('/[^a-z0-9]/i', '', $code));
+    }
+
+    /**
+     * The name the app lists an operator's account under: the server.
+     */
+    private function operatorIssuer(): string
+    {
+        $name = config('app.name');
+
+        return (is_string($name) && $name !== '' ? $name : 'XG Proyect') . ' (operator)';
     }
 
     /**
