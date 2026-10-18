@@ -142,6 +142,7 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->get('/universes')->assertOk()->assertSee('Universe One')->assertSee('Players: 1')->assertSeeInOrder(['Universe Two', 'Payment: WAX', 'Universe One'])->assertDontSee('card');
 
         $backupName = config('backup.backup.name');
+        $this->assertIsString($backupName);
         $choice = $this->post('/universes/u1');
         $choice->assertRedirect(route('home.index'))->assertPlainCookie(SelectInstance::COOKIE, 'u1');
 
@@ -150,7 +151,9 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame('xgp_test_u1', DB::connection()->getDatabaseName());
         $this->assertSame(1, DB::table('users')->count());
         // cache and backups of their own
-        $this->assertStringEndsWith('_u1', (string) config('cache.prefix'));
+        $cachePrefix = config('cache.prefix');
+        $this->assertIsString($cachePrefix);
+        $this->assertStringEndsWith('_u1', $cachePrefix);
         $this->assertSame($backupName . '_u1', config('backup.backup.name'));
 
         // an unknown or closed universe is not played
