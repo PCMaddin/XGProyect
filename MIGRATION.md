@@ -1367,6 +1367,13 @@ Baseline-Einträge.
   Lobby und konnte den Code im falschen Universum suchen. Test in
   `InstancesMysqlTest` (Link wählt, Reset-Mail trägt das Universum,
   unbekanntes Universum führt zur Lobby).
+- ✅ **Backups je Universum:** Das automatische Backup sicherte schon die
+  Datenbank des aktiven Universums, aber alle unter demselben Namen
+  (`APP_NAME`) im selben Ordner; das Aufräumen alter Sicherungen hätte
+  so Backups anderer Universen löschen können. `InstanceContext` hängt
+  jetzt wie beim Cache-Präfix den Slug an `backup.backup.name` an:
+  jedes Universum hat seinen eigenen Backup-Ordner und seine eigene
+  Liste im Admin. Test in `InstancesMysqlTest`.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

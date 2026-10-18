@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * The universe this request or job plays in: its database becomes the
- * game's connection, and the cache gets a prefix of its own, so nothing is
- * shared between universes but the registry.
+ * game's connection, and the cache and the backups get names of their own
+ * (the cache prefix, the backup folder), so nothing is shared between
+ * universes but the registry.
  */
 class InstanceContext
 {
@@ -22,7 +23,11 @@ class InstanceContext
 
     private ?string $baseDatabase = null;
 
-    private ?string $baseCachePrefix = null;
+    /** settings that get the universe's slug appended */
+    private const PER_UNIVERSE = ['cache.prefix', 'backup.backup.name'];
+
+    /** @var array<string, string> their values for the base database */
+    private array $base = [];
 
     public function __construct(private Application $app, private CacheManager $cache)
     {
@@ -50,12 +55,14 @@ class InstanceContext
     {
         $connection = $this->gameConnection();
         $this->baseDatabase ??= self::str(config('database.connections.' . $connection . '.database'));
-        $this->baseCachePrefix ??= self::str(config('cache.prefix'));
+        $settings = ['database.connections.' . $connection . '.database' => $instance->database];
 
-        config([
-            'database.connections.' . $connection . '.database' => $instance->database,
-            'cache.prefix' => $this->baseCachePrefix . '_' . $instance->slug,
-        ]);
+        foreach (self::PER_UNIVERSE as $key) {
+            $this->base[$key] ??= self::str(config($key));
+            $settings[$key] = $this->base[$key] . '_' . $instance->slug;
+        }
+
+        config($settings);
         DB::purge($connection);
         $this->cache->forgetDriver($this->cache->getDefaultDriver());
         // options and other per-request services were read from the base database
@@ -94,10 +101,7 @@ class InstanceContext
         }
 
         $connection = $this->gameConnection();
-        config([
-            'database.connections.' . $connection . '.database' => $this->baseDatabase,
-            'cache.prefix' => $this->baseCachePrefix,
-        ]);
+        config(['database.connections.' . $connection . '.database' => $this->baseDatabase] + $this->base);
         DB::purge($connection);
         $this->cache->forgetDriver($this->cache->getDefaultDriver());
         $this->app->forgetScopedInstances();

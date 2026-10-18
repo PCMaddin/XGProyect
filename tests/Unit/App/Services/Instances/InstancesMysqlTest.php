@@ -141,6 +141,7 @@ class InstancesMysqlTest extends MysqlTestCase
         // how dark matter is paid: only in Pay2Win, only the ways set up on the server
         $this->get('/universes')->assertOk()->assertSee('Universe One')->assertSee('Players: 1')->assertSeeInOrder(['Universe Two', 'Payment: WAX', 'Universe One'])->assertDontSee('card');
 
+        $backupName = config('backup.backup.name');
         $choice = $this->post('/universes/u1');
         $choice->assertRedirect(route('home.index'))->assertPlainCookie(SelectInstance::COOKIE, 'u1');
 
@@ -148,10 +149,14 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame('u1', app(InstanceContext::class)->current()?->slug);
         $this->assertSame('xgp_test_u1', DB::connection()->getDatabaseName());
         $this->assertSame(1, DB::table('users')->count());
+        // cache and backups of their own
+        $this->assertStringEndsWith('_u1', (string) config('cache.prefix'));
+        $this->assertSame($backupName . '_u1', config('backup.backup.name'));
 
         // an unknown or closed universe is not played
         $this->withUnencryptedCookie(SelectInstance::COOKIE, 'nope')->get('/')->assertRedirect(route('lobby.index'));
         app(InstanceContext::class)->reset();
+        $this->assertSame($backupName, config('backup.backup.name'));
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
         $this->post('/universes/u1')->assertRedirect(route('lobby.index'));
     }
