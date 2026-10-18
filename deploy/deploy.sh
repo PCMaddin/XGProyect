@@ -127,10 +127,15 @@ healthy() {
 # the start page, rendered by the game inside the container: php-fpm alone
 # answering the health check does not mean the release works
 renders() {
-    docker exec "$1" sh -c 'REQUEST_METHOD=GET REQUEST_URI=/ QUERY_STRING= SCRIPT_NAME=/index.php \
+    local first
+    # read whole, then judged: "head" ending the pipe early made docker exec
+    # fail, and pipefail took that for a broken page
+    first="$(docker exec "$1" sh -c 'REQUEST_METHOD=GET REQUEST_URI=/ QUERY_STRING= SCRIPT_NAME=/index.php \
         SCRIPT_FILENAME=/srv/app/public/index.php DOCUMENT_ROOT=/srv/app/public SERVER_NAME=localhost \
-        SERVER_PORT=443 HTTPS=on REMOTE_ADDR=127.0.0.1 cgi-fcgi -bind -connect 127.0.0.1:9000' 2>/dev/null |
-        head -n 1 | grep -qvE '^(Status: 5|$)'
+        SERVER_PORT=443 HTTPS=on REMOTE_ADDR=127.0.0.1 cgi-fcgi -bind -connect 127.0.0.1:9000' 2>/dev/null | sed -n 1p || true)"
+    case "$first" in
+        "" | $'\r' | "Status: 5"*) return 1 ;;
+    esac
 }
 
 mapfile -t current < <(app_containers)
