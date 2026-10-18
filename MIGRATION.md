@@ -2170,6 +2170,12 @@ Baseline-Einträge.
     - Ein MariaDB-Init-Skript lief nicht (ausführbar statt eingebunden);
       der GRANT steht jetzt im Deploy-Skript und wirkt auch bei
       bestehenden Volumes.
+    - Unter Last scheiterten gute Rollouts. `compose ps app` zählte den
+      Einmal-Container der Migrationen mit. Außerdem beendete in der
+      Renderprüfung `head` die Pipe vor `docker exec`, was `pipefail` für
+      eine kaputte Seite hielt. Die Spieler merkten nichts, die alte
+      Version lief weiter, aber das Update ging nicht durch. Danach
+      gelangen 6 von 6 Rollouts unter Last, mit 96.776 Anfragen ohne Fehler.
   - *Geprüft, live in Docker:*
     - Installation von Null; Crawl aller 53 Spielseiten über HTTPS mit
       Login (Secure-Cookies, Sitzungen in Redis);
