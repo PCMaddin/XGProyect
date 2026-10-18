@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Instances;
 
 use Illuminate\Cache\CacheManager;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Foundation\Application;
 use Illuminate\Log\LogManager;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +13,11 @@ use Illuminate\Support\Facades\DB;
 /**
  * The universe this request or job plays in: its database becomes the
  * game's connection, and the cache, the backups and the error log get names
- * of their own (the cache prefix, the backup folder, xgproyect-<slug>.log),
- * so nothing is shared between universes but the registry.
+ * of their own (the cache prefix or folder, the backup folder,
+ * xgproyect-<slug>.log),
+ * so nothing is shared between universes but the registry. Sessions live in
+ * the universe's database or, on Redis, under its cache prefix: a session
+ * of one universe is unknown in the others (player 5 there is someone else).
  */
 class InstanceContext
 {
@@ -24,8 +28,11 @@ class InstanceContext
 
     private ?string $baseDatabase = null;
 
-    /** settings that get the universe's slug appended (log files before .log) */
-    private const PER_UNIVERSE = ['cache.prefix', 'backup.backup.name', 'logging.channels.single.path', 'logging.channels.daily.path'];
+    /**
+     * settings that get the universe's slug appended (log files before
+     * .log); the cache in files knows no prefix, it gets a folder of its own
+     */
+    private const PER_UNIVERSE = ['cache.prefix', 'cache.stores.file.path', 'backup.backup.name', 'logging.channels.single.path', 'logging.channels.daily.path'];
 
     /** log channels that write the files above */
     private const LOG_CHANNELS = ['stack', 'single', 'daily'];
@@ -63,13 +70,13 @@ class InstanceContext
 
         foreach (self::PER_UNIVERSE as $key) {
             $this->base[$key] ??= self::str(config($key));
-            $settings[$key] = self::suffixed($this->base[$key], $instance->slug);
+            $settings[$key] = self::suffixed($key, $this->base[$key], $instance->slug);
         }
 
         config($settings);
         $this->forgetLogChannels();
         DB::purge($connection);
-        $this->cache->forgetDriver($this->cache->getDefaultDriver());
+        $this->forgetStores();
         // options and other per-request services were read from the base database
         $this->app->forgetScopedInstances();
         $this->current = $instance;
@@ -109,17 +116,51 @@ class InstanceContext
         config(['database.connections.' . $connection . '.database' => $this->baseDatabase] + $this->base);
         $this->forgetLogChannels();
         DB::purge($connection);
-        $this->cache->forgetDriver($this->cache->getDefaultDriver());
+        $this->forgetStores();
         $this->app->forgetScopedInstances();
         $this->current = null;
     }
 
     /**
-     * "xgp" → "xgp_andromeda", ".../xgproyect.log" → ".../xgproyect-andromeda.log".
+     * "xgp" → "xgp_andromeda", ".../xgproyect.log" → ".../xgproyect-andromeda.log";
+     * the cache prefix ends after the slug, so the key "1x" of "u1" is not
+     * the key "x" of "u11".
      */
-    private static function suffixed(string $value, string $slug): string
+    private static function suffixed(string $key, string $value, string $slug): string
     {
-        return str_ends_with($value, '.log') ? substr($value, 0, -4) . '-' . $slug . '.log' : $value . '_' . $slug;
+        if (str_ends_with($value, '.log')) {
+            return substr($value, 0, -4) . '-' . $slug . '.log';
+        }
+
+        return $value . '_' . $slug . ($key === 'cache.prefix' ? ':' : '');
+    }
+
+    /**
+     * The cache and the sessions are built again with the prefix and the
+     * connection of the universe now active. A session already started
+     * (a page that looks into other universes, like the lobby) is kept: it
+     * belongs to the request, and its token is in the page's forms.
+     */
+    private function forgetStores(): void
+    {
+        $session = config('session.store') ?: config('session.driver');
+        $this->cache->forgetDriver(array_values(array_unique([$this->cache->getDefaultDriver(), self::str($session)])));
+
+        if (!$this->app->resolved('session')) {
+            return;
+        }
+
+        $sessions = $this->app->make('session');
+
+        foreach ($sessions->getDrivers() as $store) {
+            if ($store instanceof Session && $store->isStarted()) {
+                return;
+            }
+        }
+
+        $sessions->forgetDrivers();
+        // what the guard reads the logged-in player from
+        $this->app->forgetInstance('session.store');
     }
 
     private function forgetLogChannels(): void

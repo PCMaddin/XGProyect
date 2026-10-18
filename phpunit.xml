@@ -20,6 +20,10 @@
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
   </php>
+  <extensions>
+    <!-- exit in the code under test fails the run instead of ending it as passed -->
+    <bootstrap class="Tests\Support\RunMustFinish"/>
+  </extensions>
   <source>
     <include>
       <directory suffix=".php">./app</directory>

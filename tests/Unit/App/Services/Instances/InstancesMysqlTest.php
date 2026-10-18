@@ -8,6 +8,7 @@ use App\Http\Middleware\SelectInstance;
 use App\Mail\Recover;
 use App\Libraries\BattleEngine\Utils\DebrisFactor;
 use App\Libraries\UpdatesLibrary;
+use App\Libraries\Users;
 use App\Services\SettingsService;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
@@ -19,10 +20,14 @@ use App\Services\RegistrationService;
 use App\Models\User;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Testing\PendingCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
+use ReflectionProperty;
 use Tests\MysqlTestCase;
 
 /**
@@ -165,7 +170,8 @@ class InstancesMysqlTest extends MysqlTestCase
         // cache and backups of their own
         $cachePrefix = config('cache.prefix');
         $this->assertIsString($cachePrefix);
-        $this->assertStringEndsWith('_u1', $cachePrefix);
+        $this->assertStringEndsWith('_u1:', $cachePrefix);
+        $this->assertStringEndsWith('_u1', self::str(config('cache.stores.file.path')));
         $this->assertSame($backupName . '_u1', config('backup.backup.name'));
         $this->assertSame(storage_path('logs/xgproyect-u1.log'), config('logging.channels.single.path'));
 
@@ -208,6 +214,84 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->command('xgp:instance:update', ['slug' => 'u2', '--status' => 'closed'])->assertSuccessful();
         $this->command('xgp:tick')->assertSuccessful();
         $this->assertFalse($context->runIn($u2, static fn (): bool => DB::table('options')->where('name', UpdatesLibrary::HEARTBEAT)->exists()));
+    }
+
+    /**
+     * The cache in files knows no prefix: each universe gets a folder of its
+     * own. Before, the lobby showed one universe's player count for all, and
+     * the two-factor lock of player 5 counted in every universe.
+     */
+    public function testInFilesEveryUniverseKeepsItsOwnCache(): void
+    {
+        $path = storage_path('framework/testing/cache-universes');
+        config(['cache.default' => 'file', 'cache.stores.file.path' => $path]);
+        app('cache')->forgetDriver('file');
+        $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        $this->createUniverse('u2', 'xgp_test_u2')->assertSuccessful();
+        app(InstanceRegistry::class)->update('u1', ['opened_at' => time() - 86400]);
+        $context = app(InstanceContext::class);
+        $u1 = app(InstanceRegistry::class)->find('u1');
+        $u2 = app(InstanceRegistry::class)->find('u2');
+        $this->assertInstanceOf(Instance::class, $u1);
+        $this->assertInstanceOf(Instance::class, $u2);
+
+        try {
+            $context->runIn($u2, static fn (): bool => DB::table('users')->insert(['name' => 'Second', 'email' => 'second@example.com', 'home_planet_id' => 900, 'current_planet' => 900]));
+            $lobby = $this->get('/universes')->assertOk()->assertSeeInOrder(['Universe Two', 'Players: 2', 'Universe One', 'Players: 1']);
+            // the lobby looked into both universes: its own session stays, with the token of its forms
+            $this->assertMatchesRegularExpression('/name="_token" value="' . preg_quote(self::str(session()->token()), '/') . '"/', (string) $lobby->getContent());
+            $this->assertSame(40, strlen(self::str(session()->token())));
+
+            $context->runIn($u1, static fn (): bool => Cache::put('greeting', 'one'));
+            $this->assertNull($context->runIn($u2, static fn (): mixed => Cache::get('greeting')));
+            $this->assertSame('one', $context->runIn($u1, static fn (): mixed => Cache::get('greeting')));
+        } finally {
+            foreach ([$path, $path . '_u1', $path . '_u2'] as $folder) {
+                File::deleteDirectory($folder);
+            }
+        }
+    }
+
+    /**
+     * On Redis all universes share one store: the sessions and the cache of
+     * each are kept under its own prefix. A session of one universe is
+     * unknown in the others, where player 1 is someone else.
+     */
+    public function testOnRedisEveryUniverseKeepsItsOwnSessionsAndCache(): void
+    {
+        $this->useRedis();
+        $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        $this->createUniverse('u2', 'xgp_test_u2')->assertSuccessful();
+        $cookie = self::str(config('session.cookie'));
+
+        $login = $this->withUnencryptedCookie(SelectInstance::COOKIE, 'u1')->post('/login', ['username' => 'admin@example.com', 'password' => 'secret-password']);
+        $login->assertRedirect();
+        $session = $login->getCookie($cookie, false)?->getValue();
+        $this->assertIsString($session);
+
+        $this->assertSame(200, $this->asSession('u1', $cookie, $session)->get('/game.php?page=overview')->getStatusCode());
+        $this->asSession('u1', $cookie, $session)->get('/account/security')->assertOk();
+        // the same browser in the other universe: not logged in there, also
+        // not on the pages behind Laravel's login alone (two-factor, WAX)
+        $this->asSession('u2', $cookie, $session)->get('/account/security')->assertRedirect(route('home.index'));
+        $this->asSession('u2', $cookie, $session)->get('/game.php?page=overview')->assertRedirect(route('home.index'));
+        $this->assertSame(200, $this->asSession('u1', $cookie, $session)->get('/game.php?page=overview')->getStatusCode());
+
+        $keys = Redis::connection('session')->keys('*');
+        $this->assertNotSame([], $keys);
+        $this->assertSame([], array_filter($keys, static fn (string $key): bool => !str_contains($key, '_u1:') && !str_contains($key, '_u2:')));
+        // nothing of the sessions in the cache's database
+        $this->assertSame([], array_filter(Redis::connection('cache')->keys('*'), static fn (string $key): bool => strlen((string) strrchr($key, ':')) === 41));
+
+        $context = app(InstanceContext::class);
+        $u1 = app(InstanceRegistry::class)->find('u1');
+        $u2 = app(InstanceRegistry::class)->find('u2');
+        $this->assertInstanceOf(Instance::class, $u1);
+        $this->assertInstanceOf(Instance::class, $u2);
+        // also when the game's cache is elsewhere and only the sessions are on Redis
+        $context->runIn($u1, static fn (): bool => Cache::store('redis')->put('greeting', 'one'));
+        $this->assertNull($context->runIn($u2, static fn (): mixed => Cache::store('redis')->get('greeting')));
+        $this->assertSame('one', $context->runIn($u1, static fn (): mixed => Cache::store('redis')->get('greeting')));
     }
 
     public function testAMailLinkNamesTheUniverse(): void
@@ -348,6 +432,48 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame(['Monthly'], $this->inUniverse('xgp_uni_zz_test_2030_06', 'SELECT name FROM xgp_users WHERE user_is_bot = 0'));
         // with AI opponents, each on a home planet
         $this->assertSame(['3', '3'], $this->inUniverse('xgp_uni_zz_test_2030_06', 'SELECT COUNT(*), (SELECT COUNT(*) FROM xgp_planets p JOIN xgp_users u ON u.id = p.planet_user_id WHERE u.user_is_bot = 1) FROM xgp_users WHERE user_is_bot = 1'));
+    }
+
+    private function useRedis(): void
+    {
+        $host = getenv('REDIS_TEST_HOST');
+
+        if (!is_string($host) || $host === '') {
+            $this->markTestSkipped('REDIS_TEST_HOST is not set.');
+        }
+
+        $settings = ['database.redis.client' => 'phpredis', 'database.redis.options.prefix' => 'xgp_test:', 'cache.default' => 'array', 'session.driver' => 'redis', 'session.connection' => 'session'];
+
+        foreach (['default' => 13, 'cache' => 14, 'session' => 15] as $connection => $database) {
+            $settings['database.redis.' . $connection] = ['host' => $host, 'port' => getenv('REDIS_TEST_PORT') ?: '6379', 'database' => $database];
+        }
+
+        config($settings);
+        app()->forgetInstance('redis');
+        Redis::clearResolvedInstances();
+        app('cache')->forgetDriver('redis');
+
+        foreach (['default', 'cache', 'session'] as $connection) {
+            Redis::connection($connection)->flushdb();
+        }
+    }
+
+    /**
+     * A request in a universe with the session cookie as the browser sends it.
+     */
+    private function asSession(string $universe, string $cookie, string $session): static
+    {
+        // as in a new worker: the legacy pages keep the player in a static,
+        // the guard keeps the user of the last request
+        (new ReflectionProperty(Users::class, 'instance'))->setValue(null, null);
+        app('auth')->forgetGuards();
+
+        return $this->withUnencryptedCookies([SelectInstance::COOKIE => $universe, $cookie => $session]);
+    }
+
+    private static function str(mixed $value): string
+    {
+        return is_string($value) ? $value : '';
     }
 
     private function createUniverse(string $slug, string $database, string $mode = Instance::PLAY2WIN): PendingCommand

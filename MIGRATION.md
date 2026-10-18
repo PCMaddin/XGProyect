@@ -2086,6 +2086,46 @@ Baseline-Einträge.
     (Seitenaufrufe ignorieren den Scheduler, kein Herzschlag, Trümmer aus
     der Konstante, nur das erste Universum).
 
+- **Alpha a02 — Sitzungen und Cache auf Redis**
+  - *Konfiguration:* `CACHE_DRIVER=redis`, `SESSION_DRIVER=redis`. Neue
+    Redis-Verbindung `session` (Datenbank 2, eigener Host möglich über
+    `REDIS_SESSION_HOST`), die Sitzungen automatisch nutzen: `cache:clear`
+    und Verdrängung im Cache melden niemanden ab. `.env.example` erklärt
+    es, die CI startet einen Redis und testet dagegen (`REDIS_TEST_HOST`).
+  - *Getrennte Universen:* Mit Sitzungen in der Datenbank waren die
+    Universen automatisch getrennt. In Redis teilen sie sich einen
+    Speicher, und derselbe Browser schickt in jedem Universum dasselbe
+    Sitzungs-Cookie; Spieler 1 in u1 ist in u2 jemand anderes. Die
+    Sitzungen liegen jetzt unter dem Präfix des Universums, der Test
+    meldet sich in u1 an und kommt mit demselben Cookie in u2 weder ins
+    Spiel noch auf `/account/security` (2FA) oder `/account/wax`, die nur
+    an Laravels Anmeldung hängen.
+  - *Gefunden und behoben:* (1) Der Datei-Cache kennt kein Präfix: Mit
+    `CACHE_DRIVER=file` (Standard) teilten sich alle Universen einen
+    Cache. Die Lobby zeigte für jedes Universum die Spielerzahl des
+    zuerst gezählten, die Zwei-Faktor-Sperre von Spieler 5 galt in allen
+    Universen. Jetzt ein Ordner je Universum. (2) Das Cache-Präfix endete
+    ohne Trenner (`…_u1` + Schlüssel): der Schlüssel `1x` in u1 war der
+    Schlüssel `x` in u11. Jetzt `…_u1:`. (3) Ein Wechsel des Universums
+    in einem Prozess (Tests, langlebige Worker) behielt den
+    Sitzungsspeicher und das `session.store`, aus dem der Login gelesen
+    wird. `InstanceContext` baut sie neu, außer eine Sitzung läuft schon
+    (die Lobby schaut in alle Universen und braucht danach ihr CSRF-Token).
+  - *`exit` im Spiel:* `Functions::redirect()` beendete den Prozess mit
+    `exit`, ausgerechnet in den drei Sitzungsprüfungen von `Users`
+    (Spieler-ID, Login, Passwort-Fingerabdruck). Kein Test konnte sie
+    erreichen: PHPUnit endete dort mit Status 0, die CI zeigte den Lauf
+    als bestanden. Jetzt eine `HttpResponseException` (Laravel speichert
+    die Sitzung wie sonst auch). Die Erweiterung `Tests\Support\RunMustFinish`
+    lässt einen Lauf scheitern, der vor seinem Ende abbricht, und nennt
+    den Test.
+  - *Tests:* `InstancesMysqlTest` (Redis: Sitzungen und Cache je
+    Universum, auch wenn nur die Sitzungen auf Redis liegen; Dateien:
+    Cache je Universum, Spielerzahl der Lobby, CSRF-Token der Lobby),
+    `SessionGatesMysqlTest` (passende Sitzung, Sitzung eines anderen
+    Spielers, altes Passwort). Neun Mutationsproben schlugen an; die
+    Probe „wieder `exit`“ scheitert erst durch `RunMustFinish`.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

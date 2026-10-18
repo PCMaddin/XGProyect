@@ -146,6 +146,17 @@ return [
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 
+        // sessions apart from the cache: clearing the cache (or evicting
+        // its keys when Redis is full) logs nobody out
+        'session' => [
+            'url' => env('REDIS_SESSION_URL'),
+            'host' => env('REDIS_SESSION_HOST', env('REDIS_HOST', '127.0.0.1')),
+            'username' => env('REDIS_SESSION_USERNAME', env('REDIS_USERNAME')),
+            'password' => env('REDIS_SESSION_PASSWORD', env('REDIS_PASSWORD')),
+            'port' => env('REDIS_SESSION_PORT', env('REDIS_PORT', '6379')),
+            'database' => env('REDIS_SESSION_DB', '2'),
+        ],
+
     ],
 
 ];

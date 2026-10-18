@@ -507,11 +507,31 @@ dann ein weiteres Universum. Mit 1 Mio. Spielern in einem (absichtlich
 
 - **Statistik:** Der Neuaufbau aller Punkte und Ränge braucht bei
   1 Mio. Spielern rund zwei Minuten. Stelle `stat_update_time`
-  (Admin → Server) für große Universen auf 15 Minuten oder mehr. Nur ein
-  Seitenaufruf startet ihn, und unter php-fpm erst nach seiner Antwort;
-  niemand wartet darauf.
+  (Admin → Server) für große Universen auf 15 Minuten oder mehr. Der
+  Scheduler (`xgp:tick`) baut sie im Hintergrund; ohne Cron übernimmt
+  ein Seitenaufruf, unter php-fpm erst nach seiner Antwort.
 - **Webserver:** php-fpm, nicht `php artisan serve` (dort wartet der
   Aufruf, der die Statistik übernimmt, bis sie fertig ist).
+- **Sitzungen und Cache auf Redis:** Ab einigen tausend gleichzeitigen
+  Spielern oder mit mehreren App-Servern:
+
+  ```
+  CACHE_DRIVER=redis
+  SESSION_DRIVER=redis
+  ```
+
+  Alle Universen teilen sich den Redis-Server. Jedes bekommt eigene
+  Schlüssel (`<CACHE_PREFIX>_<slug>:…`), eine Sitzung aus einem Universum
+  gilt in keinem anderen. Der Cache liegt in Redis-Datenbank 1, die
+  Sitzungen in Datenbank 2 (`REDIS_SESSION_DB`), damit `cache:clear` niemanden
+  abmeldet. Am besten bekommen die Sitzungen einen eigenen Redis ohne
+  Verdrängung (`maxmemory-policy noeviction`, mit AOF) über
+  `REDIS_SESSION_HOST`/`REDIS_SESSION_PORT`, der Cache einen mit
+  `allkeys-lru`. Platzbedarf der Sitzungen: etwa 1 KB je angemeldetem
+  Spieler. Beim Umstellen von `database` auf `redis` melden sich alle
+  einmal neu an. `cache:clear` leert den Cache aller Universen.
+- **Cache in Dateien:** Ohne Redis bekommt jedes Universum einen eigenen
+  Ordner (`storage/framework/cache/data_<slug>`).
 - **Datenbank:** `innodb_buffer_pool_size` etwa so groß wie die Daten
   (1 Mio. Spieler ≈ 2,5 GB).
 - **Betrugserkennung:** Browser und Adressen mit mehr als

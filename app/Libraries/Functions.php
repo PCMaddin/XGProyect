@@ -9,6 +9,7 @@ use App\Libraries\Messenger\MessagesFormat;
 use App\Libraries\Messenger\MessagesOptions;
 use App\Libraries\Messenger\Messenger;
 use App\Services\SettingsService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 use App\Core\Enumerators\MessagesEnumerator;
@@ -16,12 +17,12 @@ use App\Helpers\StringsHelper;
 
 /**
  * Grab-bag of static helpers shared by the native controllers and the
- * remaining legacy code. The `exit` calls and boolean flags are legacy
- * request-flow control kept for behavioural parity.
+ * remaining legacy code. The boolean flags are legacy request-flow control
+ * kept for behavioural parity; pages that end early throw the response
+ * (no exit: it skipped saving the session and ended a test run as passed).
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
- * @SuppressWarnings("PHPMD.ExitExpression")
  */
 abstract class Functions
 {
@@ -87,7 +88,6 @@ abstract class Functions
     {
         if ($accessLevel === 0) {
             self::message((string) __('game/global.module_not_accesible'), '', 0, true);
-            exit;
         }
     }
 
@@ -137,12 +137,13 @@ abstract class Functions
     }
 
     /**
+     * Ends the page with a redirect.
+     *
      * @deprecated use laravel redirect or Response
      */
-    public static function redirect(string $route): void
+    public static function redirect(string $route): never
     {
-        header('location:' . $route);
-        exit;
+        throw new HttpResponseException(redirect($route));
     }
 
     /**
