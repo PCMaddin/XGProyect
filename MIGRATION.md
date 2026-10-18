@@ -12,7 +12,8 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 1.816 PHPUnit-Tests (50 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 2.001 PHPUnit-Tests (105 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Betrieb | mehrere Universen in getrennten Datenbanken mit Lobby und Monatsstart (`xgp:instance:*`); Dunkle Materie per Stripe oder WAX, Zahlungsarten je Universum |
 | Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht); Schlüssel und Platzhalter per Test gleich, gezählte Texte über `trans_choice` mit der Pluralregel jeder Sprache |
 | Smoke-Test | Installer und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten); alle Spiel- und Admin-Seiten in allen zehn Sprachen gecrawlt, ohne echte Fehler (die drei erwarteten Meldungen stehen unter „Offen“ am Ende) |
 
