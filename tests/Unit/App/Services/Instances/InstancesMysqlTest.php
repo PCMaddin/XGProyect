@@ -230,15 +230,25 @@ class InstancesMysqlTest extends MysqlTestCase
             }
         });
 
+        // the configured prizes, then this universe's own
+        $this->assertSame(100_000, app(InstanceRegistry::class)->rewardPlan('u1')?->pools['total']);
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--rewards' => 'total=1000,buildings=500', '--shares' => '60,40'])->assertSuccessful();
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--shares' => '70,40'])->assertFailed();
+        $this->get('/universes')->assertOk()->assertSee('Season prizes: 1.500 dark matter for the top ten');
+
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
 
         $total = app(SeasonResults::class)->forUniverse('u1')['total'] ?? [];
+        $this->assertSame([600, 400], array_column($total, 'reward'));
+        $this->assertSame([300, 200], array_column(app(SeasonResults::class)->forUniverse('u1')['buildings'] ?? [], 'reward'));
+        // a ranking without a prize pays nothing
+        $this->assertSame([], array_filter(array_column(app(SeasonResults::class)->forUniverse('u1')['ships'] ?? [], 'reward')));
         $this->assertSame(['Beta', 'Alpha'], array_column($total, 'name'));
         $this->assertSame([1, 2], array_column($total, 'rank'));
         $this->assertGreaterThan($total[1]['points'], $total[0]['points']);
         $this->assertSame(['Beta', 'Alpha'], array_column(app(SeasonResults::class)->forUniverse('u1')['buildings'] ?? [], 'name'));
 
-        $this->get('/universes')->assertOk()->assertSee('Hall of fame')->assertSeeInOrder(['Total', 'Beta', 'Alpha']);
+        $this->get('/universes')->assertOk()->assertSee('Hall of fame')->assertSeeInOrder(['Total', 'Beta', '+600 DM', 'Alpha', '+400 DM']);
     }
 
     public function testTheInstalledGameIsAdopted(): void

@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => '艦隊',
     'lb_category_defenses' => '防衛',
     'lb_category_military' => '軍事',
+    'lb_rewards' => 'シーズン賞品：上位10名にダークマター :amount',
+    'lb_dm' => 'DM',
 ];

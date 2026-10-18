@@ -1472,6 +1472,26 @@ Baseline-Einträge.
     Minen, zwei Bots und ein Admin. Nach dem Schließen gilt die richtige
     Reihenfolge in Gesamt und Gebäuden, ohne Bots und Admin, und die
     Lobby zeigt die Ruhmeshalle.
+- ✅ **Saisonpreise (gestaffelt, mehrere Wertungen):** Jede Wertung hat
+  einen Topf Dunkler Materie, den die Top 10 gestaffelt teilen.
+  - *Standard* (`config/seasons.php`, `XGP_SEASON_REWARDS` und
+    `XGP_SEASON_SHARES`): Gesamt 100.000, Gebäude, Forschung, Flotte,
+    Verteidigung und Militär je 20.000; Plätze 1–10 erhalten
+    30/20/15/10/7/6/4/3/3/2 %.
+  - *Je Universum gespeichert:* Jedes Universum behält den Plan, mit dem
+    es angelegt wurde (`reward_plan` in der Registry, zentrale Migration
+    `000005`). Ändern mit
+    `xgp:instance:update --rewards=total=…,military=… --shares=60,40`.
+    Abgewiesen werden mehr als zehn Plätze, zusammen über 100 % und
+    unbekannte Wertungen.
+  - *Beim Einfrieren* bekommt jeder Platz seinen Preis (`reward` in
+    `season_results`).
+  - *Lobby:* zeigt bei offenen Universen die Saisonpreise, in der
+    Ruhmeshalle steht der Preis neben jedem Platz.
+  - *Tests:* `RewardPlanTest` (Staffel, Summe, Grenzen, gespeicherte
+    Form). `InstancesMysqlTest`: Plan aus der Konfiguration, eigener Plan
+    per Befehl, ungültige Staffel abgewiesen, Preise nach dem Schließen,
+    Anzeige in Lobby und Ruhmeshalle.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

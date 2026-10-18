@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => '舰队',
     'lb_category_defenses' => '防御',
     'lb_category_military' => '军事',
+    'lb_rewards' => '赛季奖励：前十名共 :amount 暗物质',
+    'lb_dm' => '暗物质',
 ];

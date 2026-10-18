@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => 'Vloot',
     'lb_category_defenses' => 'Verdediging',
     'lb_category_military' => 'Militair',
+    'lb_rewards' => 'Seizoensprijzen: :amount donkere materie voor de top tien',
+    'lb_dm' => 'DM',
 ];

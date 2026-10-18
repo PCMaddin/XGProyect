@@ -32,7 +32,7 @@ class SeasonResults
         'military' => 'military',
     ];
 
-    public function __construct(private InstanceContext $context)
+    public function __construct(private InstanceContext $context, private InstanceRegistry $registry)
     {
     }
 
@@ -41,7 +41,8 @@ class SeasonResults
      */
     public function freeze(Instance $instance, int $now): void
     {
-        $rows = $this->context->runIn($instance, function () use ($instance, $now): array {
+        $plan = $this->registry->rewardPlan($instance->slug) ?? RewardPlan::configured();
+        $rows = $this->context->runIn($instance, function () use ($instance, $now, $plan): array {
             (new StatisticsLibrary())->makeStats();
             $adminLevel = app(SettingsService::class)->getInt('stat_admin_level');
             $rows = [];
@@ -60,6 +61,7 @@ class SeasonResults
                         'alliance_tag' => is_string($values['alliance_tag'] ?? null) ? $values['alliance_tag'] : null,
                         'points' => is_numeric($values['points'] ?? null) ? (float) $values['points'] : 0.0,
                         'frozen_at' => $now,
+                        'reward' => $plan->reward($category, $rank),
                     ];
                 }
             }
@@ -74,7 +76,7 @@ class SeasonResults
     /**
      * The frozen rankings of a universe, by category, best first.
      *
-     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float}>>
+     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float, reward: int}>>
      */
     public function forUniverse(string $universe): array
     {
@@ -88,6 +90,7 @@ class SeasonResults
                 'name' => is_string($values['name'] ?? null) ? $values['name'] : '',
                 'alliance_tag' => is_string($values['alliance_tag'] ?? null) ? $values['alliance_tag'] : null,
                 'points' => is_numeric($values['points'] ?? null) ? (float) $values['points'] : 0.0,
+                'reward' => is_numeric($values['reward'] ?? null) ? (int) $values['reward'] : 0,
             ];
         }
 

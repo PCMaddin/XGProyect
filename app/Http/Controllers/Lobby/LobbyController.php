@@ -44,6 +44,7 @@ class LobbyController extends BaseController
                 'opened_at' => $instance->openedAt,
                 'ends_at' => $instance->endsAt,
                 'hall_of_fame' => $instance->isOpen() ? [] : $this->hallOfFame($instance),
+                'rewards' => $instance->isOpen() ? $this->registry->rewardPlan($instance->slug)?->pools : null,
             ] + $this->facts($instance), $this->registry->all()),
             'chosen' => request()->cookie(SelectInstance::COOKIE),
         ]);

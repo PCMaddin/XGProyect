@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => 'Flota',
     'lb_category_defenses' => 'Defensa',
     'lb_category_military' => 'Militar',
+    'lb_rewards' => 'Premios de temporada: :amount de materia oscura para los diez mejores',
+    'lb_dm' => 'MO',
 ];

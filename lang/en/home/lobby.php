@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => 'Fleet',
     'lb_category_defenses' => 'Defence',
     'lb_category_military' => 'Military',
+    'lb_rewards' => 'Season prizes: :amount dark matter for the top ten',
+    'lb_dm' => 'DM',
 ];

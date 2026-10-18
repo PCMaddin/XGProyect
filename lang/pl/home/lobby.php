@@ -25,4 +25,6 @@ return [
     'lb_category_ships' => 'Flota',
     'lb_category_defenses' => 'Obrona',
     'lb_category_military' => 'Wojsko',
+    'lb_rewards' => 'Nagrody sezonu: :amount ciemnej materii dla najlepszej dziesiątki',
+    'lb_dm' => 'CM',
 ];

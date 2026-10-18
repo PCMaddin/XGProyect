@@ -28,6 +28,7 @@
         .fame-grid h3 { font-size: 13px; margin: 0 0 4px; color: #fff; }
         .fame-grid ol { margin: 0; padding-left: 22px; font-size: 13px; color: #c3cad8; }
         .fame-grid .pts { color: #9aa4b8; font-variant-numeric: tabular-nums; }
+        .fame-grid .prize, .rewards { color: #c7b8ff; }
     </style>
 </head>
 <body>
@@ -50,6 +51,12 @@
                         @endif
                     </div>
                     <div class="meta">{{ __('home/lobby.lb_mode_' . $universe['mode'] . '_explained') }}</div>
+                    @if ($universe['rewards'] !== null && array_sum($universe['rewards']) > 0)
+                        <div class="meta rewards">
+                            {{ __('home/lobby.lb_rewards', ['amount' => number_format(array_sum($universe['rewards']), 0, ',', '.')]) }}
+                            ({{ implode(', ', array_map(static fn (string $category, int $amount): string => __('home/lobby.lb_category_' . $category) . ' ' . number_format($amount, 0, ',', '.'), array_keys(array_filter($universe['rewards'])), array_filter($universe['rewards']))) }})
+                        </div>
+                    @endif
                     @if ($universe['payments'] !== [])
                         <div class="meta payments">{{ __('home/lobby.lb_payments', ['methods' => implode(', ', array_map(static fn (string $method): string => __('home/lobby.lb_payment_' . $method), $universe['payments']))]) }}</div>
                     @endif
@@ -71,7 +78,7 @@
                                     <h3>{{ __('home/lobby.lb_category_' . $category) }}</h3>
                                     <ol>
                                         @foreach ($places as $place)
-                                            <li>{{ $place['name'] }}@if ($place['alliance_tag'] !== null) [{{ $place['alliance_tag'] }}]@endif <span class="pts">{{ number_format($place['points'], 0, ',', '.') }}</span></li>
+                                            <li>{{ $place['name'] }}@if ($place['alliance_tag'] !== null) [{{ $place['alliance_tag'] }}]@endif <span class="pts">{{ number_format($place['points'], 0, ',', '.') }}</span>@if ($place['reward'] > 0) <span class="prize">+{{ number_format($place['reward'], 0, ',', '.') }} {{ __('home/lobby.lb_dm') }}</span>@endif</li>
                                         @endforeach
                                     </ol>
                                 </div>

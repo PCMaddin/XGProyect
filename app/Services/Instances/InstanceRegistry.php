@@ -100,6 +100,23 @@ class InstanceRegistry
         $this->table()->where('slug', $slug)->update($changes);
     }
 
+    /**
+     * The reward plan the universe's season was started with.
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
+    public function rewardPlan(string $slug): ?RewardPlan
+    {
+        $json = $this->enabled() ? $this->table()->where('slug', $slug)->value('reward_plan') : null;
+
+        return is_string($json) ? RewardPlan::fromJson($json) : null;
+    }
+
+    public function setRewardPlan(string $slug, RewardPlan $plan): void
+    {
+        $this->table()->where('slug', $slug)->update(['reward_plan' => $plan->toJson()]);
+    }
+
     private function table(): Builder
     {
         return DB::connection(self::CONNECTION)->table('instances');

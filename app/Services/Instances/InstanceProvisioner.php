@@ -18,6 +18,8 @@ use Throwable;
  * every universe.
  *
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
+ * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class InstanceProvisioner
 {
@@ -112,6 +114,7 @@ class InstanceProvisioner
         });
 
         $this->registry->register($instance);
+        $this->registry->setRewardPlan($instance->slug, RewardPlan::configured());
     }
 
     /**
@@ -128,6 +131,25 @@ class InstanceProvisioner
 
         $this->context->runIn($instance, fn () => $this->writeOptions(['premium_mode' => $instance->mode]));
         $this->registry->register($instance);
+        $this->registry->setRewardPlan($instance->slug, RewardPlan::configured());
+    }
+
+    /**
+     * New rewards or shares for the season (null keeps them).
+     */
+    public function changeRewards(Instance $instance, ?string $rewards, ?string $shares): RewardPlan
+    {
+        $current = $this->registry->rewardPlan($instance->slug) ?? RewardPlan::configured();
+        $pools = [];
+
+        foreach ($current->pools as $category => $amount) {
+            $pools[] = $category . '=' . $amount;
+        }
+
+        $plan = RewardPlan::parse($rewards ?? implode(',', $pools), $shares ?? implode(',', $current->shares));
+        $this->registry->setRewardPlan($instance->slug, $plan);
+
+        return $plan;
     }
 
     /**
