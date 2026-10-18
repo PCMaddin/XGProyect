@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Podejrzenia',
+    'su_sub_title' => 'Oznaki multikont, pushowania i skryptów. Oznaki, nie dowody: decydujesz ty.',
+    'su_list' => 'Oznaki',
+    'su_none' => 'Brak oznak.',
+    'su_player' => 'Gracz',
+    'su_sign' => 'Oznaka',
+    'su_score' => 'Siła',
+    'su_evidence' => 'Dowody',
+    'su_seen' => 'Ostatnio',
+    'su_decision' => 'Decyzja',
+    'su_top_ten' => 'miejsce :rank',
+    'su_with' => 'z :player',
+    'su_kind_shared_device' => 'ta sama przeglądarka',
+    'su_kind_shared_ip' => 'ten sam adres IP',
+    'su_kind_pushing' => 'wysyła surowce silniejszemu',
+    'su_kind_pushed' => 'otrzymuje surowce',
+    'su_kind_around_clock' => 'aktywny prawie całą dobę',
+    'su_kind_machine_pace' => 'tempo kliknięć jak skrypt',
+    'su_status_open' => 'otwarte',
+    'su_status_cleared' => 'w porządku',
+    'su_status_excluded' => 'wykluczony',
+    'su_note' => 'Notatka',
+    'su_save' => 'Zapisz',
+    'su_saved' => 'Decyzja zapisana.',
+    'su_not_saved' => 'Nie udało się zapisać decyzji.',
+    'su_help' => '„Wykluczony” usuwa gracza z wszystkich rankingów i nagród na koniec sezonu. Wspólny adres IP może też oznaczać jedno gospodarstwo domowe. Sprawdzanie działa co godzinę (xgp:cheat:scan).',
+    'su_detail_logins' => 'logowania',
+    'su_detail_resources' => 'surowce netto',
+    'su_detail_days' => 'pełne dni',
+    'su_detail_requests' => 'żądania na godzinę',
+];

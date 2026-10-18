@@ -243,6 +243,15 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->command('xgp:instance:update', ['slug' => 'u1', '--shares' => '70,40'])->assertFailed();
         $this->get('/universes')->assertOk()->assertSee('Season prizes: 1.500 dark matter for the top ten');
 
+        // a third player the admin excluded for cheating
+        app(InstanceContext::class)->runIn($universe, function (): void {
+            $cheat = app(RegistrationService::class)->register(['name' => 'Cheat', 'email' => 'cheat@example.com', 'password' => 'secret-password']);
+            $this->assertInstanceOf(User::class, $cheat);
+            $planet = DB::table('planets')->where('planet_user_id', $cheat->id)->value('planet_id');
+            DB::table('buildings')->where('building_planet_id', $planet)->update(['building_metal_mine' => 20]);
+            DB::table('suspicions')->insert(['user_id' => $cheat->id, 'kind' => 'shared_device', 'other_user' => 0, 'score' => 80, 'detail' => '{}', 'status' => 'excluded', 'created_at' => time(), 'updated_at' => time()]);
+        });
+
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
 
         $total = app(SeasonResults::class)->forUniverse('u1')['total'] ?? [];

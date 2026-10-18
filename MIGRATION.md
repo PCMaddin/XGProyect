@@ -1521,6 +1521,51 @@ Baseline-Einträge.
       - Preis wartet wieder ohne Gutschrift.
     - `InstancesMysqlTest`: WAX-Konto des verknüpften Gewinners in der
       eingefrorenen Rangliste.
+- ✅ **Betrugserkennung (Mehrfachkonten, Pushing, Skripte):**
+  - *Protokoll* je Universum (Migration `000038`, install und 400):
+    - Logins mit IP, Browser und einem Geräte-Cookie `xgp_device`
+      (`LoginFlow`);
+    - Rohstofflieferungen an andere Spieler (`Transport`);
+    - Spielanfragen pro Stunde (Middleware `TrackActivity`).
+
+    Alles älter als 60 Tage wird gelöscht.
+  - *Prüfung* `xgp:cheat:scan` (stündlich, `config/cheats.php`) legt
+    Hinweise an:
+    - gleicher Browser (Stärke 80) oder gleiche IP (40);
+    - netto über 100.000 Rohstoffe an einen Stärkeren (60; 90, wenn die
+      beiden auch Browser oder IP teilen), für beide Seiten;
+    - an drei Tagen der Woche je 20 Stunden aktiv (50);
+    - mehr als 1.200 Anfragen in einer Stunde (50).
+
+    Die eigenen KI-Bots zählen nicht. Ein erneut gefundener Hinweis behält
+    die Entscheidung des Admins.
+  - *Admin → Information → Verdachtsfälle* (Berechtigung `suspicions`,
+    Migration `000039`): Hinweise mit Belegen und Markierung für die
+    Top 10, Entscheidung „offen“, „in Ordnung“ oder „ausgeschlossen“ mit
+    Notiz.
+  - *Ausschluss:* „Ausgeschlossen“ nimmt den Spieler beim Saisonende aus
+    allen Wertungen und Preisen.
+  - *Texte:* alle Texte in zehn Sprachen.
+  - *Tests:*
+    - `CheatScannerTest`:
+      - gemeinsamer Browser und gemeinsame IP, Bots und alte Logins
+        außen vor;
+      - Pushing einschließlich Gegenrichtung, Schwächere, eigene
+        Planeten und Verstärkung durch gemeinsamen Browser;
+      - Aktivität rund um die Uhr und Skripttempo;
+      - Entscheidung bleibt, Löschen alter Daten.
+    - `SuspicionsControllerTest` (Liste, Entscheidung, ungültiger
+      Status).
+    - `TwoFactorTest`: Login protokolliert, Geräte-Cookie gesetzt.
+    - `TransportTrailMysqlTest`: Lieferung an andere protokolliert, an
+      sich selbst nicht.
+    - `SuspicionsMysqlTest`: Prüfung und Liste mit Tabellenpräfix.
+    - `InstancesMysqlTest`: ausgeschlossener Spieler fehlt in der
+      Rangliste, obwohl er die meisten Punkte hat.
+  - *Gefunden beim Crawl:* Die Sortierung der Liste nutzte einen
+    Tabellen-Alias in rohem SQL, der mit dem Präfix `xgp_` unter MariaDB
+    nicht stimmte (500). Jetzt wird in PHP sortiert, und der MariaDB-Test
+    deckt das ab.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

@@ -26,6 +26,7 @@ return [
     'messages' => 'メッセージ',
     'users' => 'ユーザー',
     'bots' => 'ボット',
+    'suspicions' => '不正の疑い',
     'alliances' => '同盟',
     'languages' => '言語',
     'changelog' => '更新履歴',

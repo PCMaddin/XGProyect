@@ -186,8 +186,12 @@ class TwoFactorTest extends DatabaseTestCase
     {
         $this->user('player@example.com');
 
-        $this->post('/login', ['username' => 'player@example.com', 'password' => self::PASSWORD])->assertRedirect('game.php?page=overview');
+        $this->post('/login', ['username' => 'player@example.com', 'password' => self::PASSWORD])
+            ->assertRedirect('game.php?page=overview')
+            ->assertCookie('xgp_device');
         $this->assertAuthenticated();
+        // the sign-in is recorded for the cheat detection
+        $this->assertSame(1, DB::table('login_events')->count());
     }
 
     private function isOn(User $user): bool

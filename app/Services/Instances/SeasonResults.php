@@ -6,6 +6,7 @@ namespace App\Services\Instances;
 
 use App\Libraries\StatisticsLibrary;
 use App\Services\Premium\WaxLinks;
+use App\Services\Security\Suspicions;
 use App\Services\SettingsService;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -49,12 +50,14 @@ class SeasonResults
         $rows = $this->context->runIn($instance, function () use ($instance, $now, $plan): array {
             (new StatisticsLibrary())->makeStats();
             $adminLevel = app(SettingsService::class)->getInt('stat_admin_level');
+            // players the admin excluded for cheating lose their place
+            $excluded = app(Suspicions::class)->excluded();
             $rows = [];
 
             foreach (self::CATEGORIES as $category => $column) {
                 $rank = 0;
 
-                foreach ($this->best($column, $adminLevel) as $player) {
+                foreach ($this->best($column, $adminLevel, $excluded) as $player) {
                     $values = get_object_vars($player);
                     $rows[] = [
                         'universe' => $instance->slug,
@@ -110,15 +113,18 @@ class SeasonResults
     }
 
     /**
+     * @param list<int> $excluded
+     *
      * @return list<object>
      */
-    private function best(string $column, int $adminLevel): array
+    private function best(string $column, int $adminLevel, array $excluded): array
     {
         return array_values(DB::table('users_statistics as s')
             ->join('users as u', 'u.id', '=', 's.user_statistic_user_id')
             ->leftJoin('alliance as a', 'a.alliance_id', '=', 'u.ally_id')
             ->where('u.user_is_bot', false)
             ->where('u.authlevel', '<=', $adminLevel)
+            ->whereNotIn('u.id', $excluded)
             ->where('s.user_statistic_' . $column . '_points', '>', 0)
             ->orderByDesc('s.user_statistic_' . $column . '_points')
             ->orderBy('u.id')

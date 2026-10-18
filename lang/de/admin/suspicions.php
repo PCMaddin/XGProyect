@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Verdachtsfälle',
+    'su_sub_title' => 'Hinweise auf Mehrfachkonten, Pushing und Skripte. Hinweise, keine Beweise: Du entscheidest.',
+    'su_list' => 'Hinweise',
+    'su_none' => 'Keine Hinweise.',
+    'su_player' => 'Spieler',
+    'su_sign' => 'Hinweis',
+    'su_score' => 'Stärke',
+    'su_evidence' => 'Belege',
+    'su_seen' => 'Zuletzt',
+    'su_decision' => 'Entscheidung',
+    'su_top_ten' => 'Platz :rank',
+    'su_with' => 'mit :player',
+    'su_kind_shared_device' => 'gleicher Browser',
+    'su_kind_shared_ip' => 'gleiche IP-Adresse',
+    'su_kind_pushing' => 'schickt Stärkerem Rohstoffe',
+    'su_kind_pushed' => 'bekommt Rohstoffe',
+    'su_kind_around_clock' => 'fast rund um die Uhr aktiv',
+    'su_kind_machine_pace' => 'Klicktempo wie ein Skript',
+    'su_status_open' => 'offen',
+    'su_status_cleared' => 'in Ordnung',
+    'su_status_excluded' => 'ausgeschlossen',
+    'su_note' => 'Notiz',
+    'su_save' => 'Speichern',
+    'su_saved' => 'Entscheidung gespeichert.',
+    'su_not_saved' => 'Die Entscheidung konnte nicht gespeichert werden.',
+    'su_help' => '„Ausgeschlossen“ nimmt den Spieler beim Saisonende aus allen Wertungen und Preisen. Eine gemeinsame IP-Adresse kann auch ein Haushalt sein. Die Prüfung läuft stündlich (xgp:cheat:scan).',
+    'su_detail_logins' => 'Logins',
+    'su_detail_resources' => 'Rohstoffe netto',
+    'su_detail_days' => 'volle Tage',
+    'su_detail_requests' => 'Anfragen pro Stunde',
+];

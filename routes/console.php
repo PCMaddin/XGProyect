@@ -38,3 +38,8 @@ Schedule::command('xgp:wax:check')
 Schedule::command('xgp:instance:close-ended')
     ->everyFiveMinutes()
     ->withoutOverlapping();
+
+// signs of multiple accounts, pushing and scripts for the admin, see config/cheats.php
+Schedule::command('xgp:cheat:scan')
+    ->hourly()
+    ->withoutOverlapping();

@@ -137,6 +137,8 @@ Route::prefix('admin')->group(function () {
             // Ajax
             Route::get('/ajax/update/check', AdminAjax\UpdateCheckController::class)->name('admin.update.check');
             // Users — core (search, create, info, settings, delete)
+            Route::get('/suspicions', [Admin\SuspicionsController::class, 'index'])->name('admin.suspicions');
+            Route::post('/suspicions/{suspicion}', [Admin\SuspicionsController::class, 'decide'])->whereNumber('suspicion')->name('admin.suspicions.decide');
             Route::get('/users', [AdminUsers\UsersController::class, 'index'])->name('admin.users');
             Route::get('/users/create', [AdminUsers\UsersController::class, 'create'])->name('admin.users.create');
             Route::post('/users', [AdminUsers\UsersController::class, 'store'])->name('admin.users.store');

@@ -51,6 +51,7 @@ class Sidebar extends Component
                     'errors' => [],
                     'fleets' => [],
                     'messages' => [],
+                    'suspicions' => [],
                 ]
             ],
             'edition' => [

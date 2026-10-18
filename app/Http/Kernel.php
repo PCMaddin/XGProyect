@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\Authenticate::class,
             \App\Http\Middleware\ServerLanguage::class,
+            \App\Http\Middleware\TrackActivity::class,
         ],
 
         // payment providers (routes/webhooks.php): no session, cookies or CSRF token

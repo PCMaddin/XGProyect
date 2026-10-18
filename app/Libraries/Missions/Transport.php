@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries\Missions;
 
+use App\Services\Security\PlayerTrail;
 use App\Services\Game\Formulas\FleetsService;
 use App\Services\FormatService;
 use App\Helpers\StringsHelper;
@@ -38,6 +39,15 @@ class Transport extends Missions
 
             // transfer the fleet resources to the planet
             parent::storeResources($fleet);
+            // resources for another player: the cheat detection looks at them
+            app(PlayerTrail::class)->transfer(
+                self::int($fleet['fleet_owner']),
+                self::int($fleet['fleet_target_owner'] ?? 0),
+                (float) self::int($fleet['fleet_resource_metal']),
+                (float) self::int($fleet['fleet_resource_crystal']),
+                (float) self::int($fleet['fleet_resource_deuterium']),
+                time()
+            );
             $this->updateReturningFleetResources(self::int($fleet['fleet_id']));
 
             // we need to remove the resources in case we are continuing with the

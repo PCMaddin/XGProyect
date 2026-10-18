@@ -6,6 +6,7 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Services\Game\HomePlanetService;
+use App\Services\Security\PlayerTrail;
 use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ class LoginFlow
     public function __construct(
         private SessionService $sessions,
         private HomePlanetService $homePlanets,
+        private PlayerTrail $trail,
     ) {
     }
 
@@ -79,6 +81,17 @@ class LoginFlow
         $request->session()->regenerate();
         $this->sessions->setLoginData($user->id, $user->password);
 
+        // for the cheat detection: where and on which device
+        $device = $this->trail->device($request->cookie(PlayerTrail::DEVICE_COOKIE));
+        $this->trail->login($user->id, (string) $request->ip(), (string) $request->userAgent(), $device, time());
+        $response = $this->target($user, $target, $redirect);
+        $response->headers->setCookie(cookie()->forever(PlayerTrail::DEVICE_COOKIE, $device));
+
+        return $response;
+    }
+
+    private function target(User $user, string $target, string $redirect): RedirectResponse
+    {
         if ($target === self::ADMIN) {
             return redirect('admin/' . ($redirect !== '' ? $redirect : 'home'));
         }

@@ -26,6 +26,7 @@ return [
     'messages' => '消息',
     'users' => '用户',
     'bots' => '机器人',
+    'suspicions' => '可疑情况',
     'alliances' => '联盟',
     'languages' => '语言',
     'changelog' => '更新日志',
