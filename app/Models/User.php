@@ -47,6 +47,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Research                         $research
  * @property Collection<int,ResearchQueue>    $researchQueue
  * @property UsersStatistics                  $stats
+ * @property string|null                      $two_factor_secret         decrypted on read
+ * @property string|null                      $two_factor_recovery_codes JSON list of SHA-256 hashes
+ * @property int|null                         $two_factor_confirmed_at
+ * @property int|null                         $two_factor_last_step
  */
 class User extends Authenticatable
 {
@@ -92,6 +96,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -105,6 +111,9 @@ class User extends Authenticatable
         'password' => 'string',
         'email' => 'string',
         'email_verified_at' => 'datetime',
+        'two_factor_secret' => 'encrypted',
+        'two_factor_confirmed_at' => 'int',
+        'two_factor_last_step' => 'int',
         'authlevel' => 'int',
         'home_planet_id' => 'int',
         'galaxy' => 'int',
@@ -147,6 +156,14 @@ class User extends Authenticatable
     // Scopes...
 
     // Functions ...
+    /**
+     * Whether signing in asks for a code from the authenticator app.
+     */
+    public function hasTwoFactor(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && $this->two_factor_secret !== null && $this->two_factor_secret !== '';
+    }
+
     public function setPasswordAttribute(string $input): void
     {
         $this->attributes['password'] = Hash::make($input);

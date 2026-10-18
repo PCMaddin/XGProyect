@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Account\RecoverController;
+use App\Http\Controllers\Account\SecurityController;
+use App\Http\Controllers\Account\TwoFactorChallengeController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Ajax as AdminAjax;
 use App\Http\Controllers\Admin\Users as AdminUsers;
@@ -35,6 +37,16 @@ Route::prefix('account')->group(function () {
     Route::post('/recover', [RecoverController::class, 'recover']);
     Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
     Route::post('/reset', [RecoverController::class, 'reset'])->name('account.reset.update');
+    Route::get('/two-factor', [TwoFactorChallengeController::class, 'show'])->name('account.two-factor');
+    Route::post('/two-factor', [TwoFactorChallengeController::class, 'verify'])->name('account.two-factor.verify');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/security', [SecurityController::class, 'show'])->name('account.security');
+        Route::post('/security/start', [SecurityController::class, 'start'])->name('account.security.start');
+        Route::post('/security/confirm', [SecurityController::class, 'confirm'])->name('account.security.confirm');
+        Route::post('/security/disable', [SecurityController::class, 'disable'])->name('account.security.disable');
+        Route::post('/security/codes', [SecurityController::class, 'codes'])->name('account.security.codes');
+    });
 });
 
 Route::prefix('admin')->group(function () {
@@ -42,7 +54,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', Admin\LoginController::class)->name('admin.login');
     Route::get('/logout', Admin\LogoutController::class)->name('admin.logout');
 
-    Route::middleware(['admin.auth', 'admin.authorize'])
+    Route::middleware(['admin.auth', 'admin.two_factor', 'admin.authorize'])
         ->group(function () {
             Route::get('/announcement', [Admin\AnnouncementController::class, 'index'])->name('admin.announcement');
             Route::post('/announcement', [Admin\AnnouncementController::class, 'send'])->name('admin.announcement.send');

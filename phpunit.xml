@@ -14,6 +14,8 @@
     <env name="DB_DATABASE" value=":memory:"/>
     <env name="MAIL_MAILER" value="array"/>
     <env name="LOG_CHANNEL" value="null"/>
+    <!-- the admin area tests sign in without an authenticator app; TwoFactorTest switches the rule on -->
+    <env name="XGP_ADMIN_TWO_FACTOR" value="false"/>
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>

@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\LoginRequest;
 use App\Models\User;
-use App\Services\SessionService;
+use App\Services\Auth\LoginFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Routing\Redirector;
@@ -15,7 +15,7 @@ use App\Core\Enumerators\UserRanksEnumerator;
 
 class LoginController extends BaseController
 {
-    public function __construct(private readonly SessionService $sessionService)
+    public function __construct(private readonly LoginFlow $login)
     {
     }
 
@@ -36,16 +36,7 @@ class LoginController extends BaseController
             /** @var User $authUser */
             $authUser = Auth::getUser();
 
-            $request->session()->regenerate();
-
-            // only to log the user into the game
-            // mostly legacy support
-            $this->sessionService->setLoginData(
-                $authUser->id,
-                $authUser->password
-            );
-
-            return redirect('admin/' . ($redirect !== '' ? $redirect : 'home'));
+            return $this->login->passwordAccepted($request, $authUser, LoginFlow::ADMIN, $redirect);
         }
 
         return back()->with('danger', __('admin/login.lg_error_wrong_data'));

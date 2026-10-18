@@ -1391,6 +1391,43 @@ Baseline-Einträge.
   Monatsstart mit allen `XGP_MONTHLY_*`-Variablen, Stripe und WAX
   einrichten, Ergebnisse der WAX-Gutschrift, Updates, Backups, Logs,
   Mail-Links und häufige Fehler. Die README verweist darauf.
+- ✅ **Zwei-Faktor-Anmeldung (TOTP), Pflicht im Admin-Bereich:**
+  - *Einrichten* unter `/account/security`: QR-Code (Bibliothek
+    `bacon/bacon-qr-code`, SVG) und Schlüssel zum Abtippen; eingeschaltet
+    wird erst, wenn die App einen richtigen Code zeigt. Danach acht
+    Wiederherstellungscodes, die nur einmal angezeigt werden. Neue Codes
+    gibt es mit dem Passwort, ausschalten geht mit Passwort und Code.
+  - *Anmelden:* Spiel- und Admin-Login prüfen erst das Passwort; ist die
+    Zwei-Faktor-Anmeldung an, bleibt das Konto abgemeldet, bis unter
+    `/account/two-factor` innerhalb von fünf Minuten ein Code der App oder
+    ein Wiederherstellungscode kommt (`LoginFlow`; der Abschluss des Logins
+    ist für beide Wege an einer Stelle). Jeder App-Code zählt nur einmal,
+    ein Wiederherstellungscode nur einmal überhaupt, fünf Versuche pro
+    Minute und Konto.
+  - *Speicherung:* das Geheimnis verschlüsselt mit dem `APP_KEY`, die
+    Wiederherstellungscodes als SHA-256; Migration `000037` (install und
+    400). Ein neuer `APP_KEY` macht eingerichtete Apps ungültig.
+  - *Admin-Bereich:* Middleware `admin.two_factor` schickt Admins ohne
+    Zwei-Faktor-Anmeldung zur Einrichtung, und solange die Pflicht gilt,
+    können sie sie nicht ausschalten. Abschaltbar mit
+    `XGP_ADMIN_TWO_FACTOR=false`, nur für lokale Arbeit.
+  - *TOTP:* eigene Umsetzung nach RFC 6238 (`App\Services\Auth\Totp`),
+    geprüft gegen die Testvektoren des RFC.
+  - *Texte:* alle Texte in den zehn Sprachen.
+  - *Tests:* `TotpTest` und `TwoFactorTest`:
+    - Einrichten mit falschem und richtigem Code, Geheimnis verschlüsselt;
+    - Spiel-Login wartet auf den Code, derselbe Code nicht zweimal;
+    - Wiederherstellungscode einmal;
+    - Versuchslimit und Ablauf nach fünf Minuten;
+    - Ausschalten, neue Codes;
+    - Pflicht im Admin-Bereich mit Admin-Login über den Code;
+    - Login ohne Zwei-Faktor unverändert.
+
+    Gegenproben: ohne den Schutz vor doppelt benutzten Codes bzw. ohne das
+    Abmelden bis zur Code-Eingabe schlagen die Tests fehl.
+  - *Live geprüft:* Admin-Login führt zur Einrichtung, Einschalten mit dem
+    Code der App, acht Codes, zweiter Login fragt den Code ab, falscher
+    Code abgewiesen, richtiger führt in den Admin-Bereich.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer
