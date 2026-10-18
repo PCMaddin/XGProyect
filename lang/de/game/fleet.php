@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Geschwindigkeit: ',
     'fl_continue' => 'weiter',
     'fl_no_ships' => 'Es sind keine Schiffe verfügbar',
+    'fl_gone_meanwhile' => 'Die Schiffe oder Rohstoffe sind nicht mehr auf dem Planeten (ein anderer Auftrag hat sie eben genommen). Es wurde nichts gesendet.',
     'fl_remove_all_ships' => 'keine Schiffe',
     'fl_select_all_ships' => 'alle Schiffe',
     'fl_fleets' => 'Flotten:',

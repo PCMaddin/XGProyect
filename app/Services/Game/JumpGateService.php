@@ -8,6 +8,7 @@ use App\Core\GameObjects\GameObjectRegistry;
 use App\Libraries\Functions;
 use App\Services\FormatService;
 use App\Support\Concerns\ReadsMixedValues;
+use App\Exceptions\NoLongerOnPlanet;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\BuildingsEnumerator as Buildings;
@@ -204,7 +205,13 @@ class JumpGateService
             return ['success' => false, 'message' => self::asString(__('game/technologydetails.in_jump_gate_error_data'))];
         }
 
-        $this->planet['planet_last_jump_time'] = $this->transfer($moves, self::asInt($targetGate['planet_id'] ?? 0));
+        try {
+            $this->planet['planet_last_jump_time'] = $this->transfer($moves, self::asInt($targetGate['planet_id'] ?? 0), self::asInt($targetGate['planet_last_jump_time'] ?? 0));
+        } catch (NoLongerOnPlanet) {
+            // another jump at the same moment used the gates or the ships
+            return ['success' => false, 'message' => self::asString(__('game/technologydetails.in_jump_gate_already_used'))];
+        }
+
         $restString = $this->getNextJumpWaitTime($this->planet);
 
         return [
@@ -274,46 +281,38 @@ class JumpGateService
 
     /**
      * Move the ships and the player to the target moon and start both gates'
-     * recharge; returns the jump time.
+     * recharge; returns the jump time. Each gate jumps once per charge and
+     * the ships leave only if they are still there: two jumps at the same
+     * moment moved the same ships twice.
      *
      * @param array<string, int> $moves
+     *
+     * @throws NoLongerOnPlanet
      */
-    private function transfer(array $moves, int $targetId): int
+    private function transfer(array $moves, int $targetId, int $targetLastJump): int
     {
-        $subQueryOrigin = '';
-        $subQueryDestination = '';
-
-        foreach ($moves as $resourceKey => $shipsToMove) {
-            $subQueryOrigin .= '`' . $resourceKey . '` = `' . $resourceKey . "` - '" . $shipsToMove . "', ";
-            $subQueryDestination .= '`' . $resourceKey . '` = `' . $resourceKey . "` + '" . $shipsToMove . "', ";
-        }
-
         $jumpTime = time();
         $originId = self::asInt($this->planet['planet_id'] ?? 0);
+        $originLastJump = self::asInt($this->planet['planet_last_jump_time'] ?? 0);
         $userId = self::asInt($this->user['id'] ?? 0);
 
-        DB::transaction(function () use ($subQueryOrigin, $subQueryDestination, $jumpTime, $targetId, $originId, $userId): void {
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . '`, `' . USERS . '`, `' . SHIPS . "` SET
-                        $subQueryOrigin
-                        `planet_last_jump_time` = '" . $jumpTime . "',
-                        `current_planet` = '" . $targetId . "'
-                    WHERE `planet_id` = '" . $originId . "'
-                        AND `ship_planet_id` = '" . $originId . "'
-                        AND `id` = '" . $userId . "';"
-                )
-            );
+        DB::transaction(function () use ($moves, $jumpTime, $targetId, $targetLastJump, $originId, $originLastJump, $userId): void {
+            foreach ([$originId => $originLastJump, $targetId => $targetLastJump] as $gate => $lastJump) {
+                if (DB::table('planets')->where('planet_id', $gate)->where('planet_last_jump_time', $lastJump)->update(['planet_last_jump_time' => $jumpTime]) !== 1) {
+                    throw new NoLongerOnPlanet('The jump gate of planet ' . $gate . ' was used meanwhile');
+                }
+            }
 
-            DB::statement(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . '`, `' . SHIPS . "` SET
-                        $subQueryDestination
-                        `planet_last_jump_time` = '" . $jumpTime . "'
-                    WHERE `planet_id` = '" . $targetId . "'
-                        AND `ship_planet_id` = '" . $targetId . "';"
-                )
-            );
+            app(PlanetStock::class)->take($originId, $moves);
+
+            $arrivals = [];
+
+            foreach ($moves as $column => $amount) {
+                $arrivals[$column] = DB::raw('`' . $column . '` + ' . (int) $amount);
+            }
+
+            DB::table('ships')->where('ship_planet_id', $targetId)->update($arrivals);
+            DB::table('users')->where('id', $userId)->update(['current_planet' => $targetId]);
         });
 
         return $jumpTime;

@@ -161,20 +161,22 @@ class ShipyardController extends BaseController
         }
 
         if ($total > 0) {
+            $cost = [
+                'metal' => (float) $this->planetInt('planet_metal') - $this->resourcesConsumed['metal'],
+                'crystal' => (float) $this->planetInt('planet_crystal') - $this->resourcesConsumed['crystal'],
+                'deuterium' => (float) $this->planetInt('planet_deuterium') - $this->resourcesConsumed['deuterium'],
+            ];
+
+            // paid from what is there now, never written back from what was
+            // read: that undid a fleet's cargo sent meanwhile
             DB::update(
                 $this->prepareSql(
                     'UPDATE `' . PLANETS . '` AS p SET
                         p.`planet_b_hangar_id` = CONCAT(p.`planet_b_hangar_id`, ?),
-                        p.`planet_metal` = ?, p.`planet_crystal` = ?, p.`planet_deuterium` = ?
-                    WHERE p.`planet_id` = ?;'
+                        p.`planet_metal` = p.`planet_metal` - ?, p.`planet_crystal` = p.`planet_crystal` - ?, p.`planet_deuterium` = p.`planet_deuterium` - ?
+                    WHERE p.`planet_id` = ? AND p.`planet_metal` >= ? AND p.`planet_crystal` >= ? AND p.`planet_deuterium` >= ?;'
                 ),
-                [
-                    $queue,
-                    $this->resourcesConsumed['metal'],
-                    $this->resourcesConsumed['crystal'],
-                    $this->resourcesConsumed['deuterium'],
-                    $this->planetInt('planet_id'),
-                ]
+                [$queue, $cost['metal'], $cost['crystal'], $cost['deuterium'], $this->planetInt('planet_id'), $cost['metal'], $cost['crystal'], $cost['deuterium']]
             );
         }
 

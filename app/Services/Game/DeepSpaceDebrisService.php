@@ -50,7 +50,8 @@ class DeepSpaceDebrisService
      */
     public function get(int $galaxy, int $system): array
     {
-        $row = DB::table('deep_space_debris')->where('galaxy', $galaxy)->where('system', $system)->first(['metal', 'crystal']);
+        // locked within a recycling mission: two fleets at once load in turn
+        $row = DB::table('deep_space_debris')->where('galaxy', $galaxy)->where('system', $system)->lockForUpdate()->first(['metal', 'crystal']);
 
         $metal = $row === null ? 0 : $row->metal;
         $crystal = $row === null ? 0 : $row->crystal;

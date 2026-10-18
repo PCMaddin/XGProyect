@@ -9,6 +9,7 @@ use App\Core\Enumerators\DefensesEnumerator as Defenses;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
 use App\Services\SettingsService;
 use App\Support\FleetShips;
+use App\Exceptions\NoLongerOnPlanet;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -39,6 +40,8 @@ class MissileService
      * @param array{galaxy: int, system: int, planet: int} $from      the launching planet
      * @param array{galaxy: int, system: int, planet: int} $to        the target planet
      * @param int                                          $targetObj the defence hit first (0: all in order)
+     *
+     * @throws NoLongerOnPlanet
      */
     public function launch(int $ownerId, int $planetId, array $from, array $to, int $amount, int $targetObj, int $targetOwner, int $now): void
     {
@@ -75,14 +78,19 @@ class MissileService
                 ]
             );
 
-            DB::update(
+            // only missiles still in the silo: two launches at once fired the same ones twice
+            $fired = DB::update(
                 $this->prepareSql(
                     'UPDATE `' . DEFENSES . '` SET
                         `defense_interplanetary_missile` = `defense_interplanetary_missile` - ?
-                    WHERE `defense_planet_id` = ?;'
+                    WHERE `defense_planet_id` = ? AND `defense_interplanetary_missile` >= ?;'
                 ),
-                [$amount, $planetId]
+                [$amount, $planetId, $amount]
             );
+
+            if ($fired !== 1) {
+                throw new NoLongerOnPlanet('The missiles are no longer on planet ' . $planetId);
+            }
         });
     }
 }

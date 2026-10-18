@@ -18,6 +18,8 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use App\Exceptions\NoLongerOnPlanet;
+use App\Services\Game\PlanetStock;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\MissionsEnumerator as Missions;
@@ -151,7 +153,11 @@ class Fleet4Controller extends BaseController
         $this->getTarget();
 
         if ($this->runValidations()) {
-            $this->sendFleet();
+            try {
+                $this->sendFleet();
+            } catch (NoLongerOnPlanet) {
+                $this->showMessage((string) __('game/fleet.fl_gone_meanwhile'));
+            }
         }
 
         return redirect(self::REDIRECT_TARGET);
@@ -669,31 +675,13 @@ class Fleet4Controller extends BaseController
                 array_values($this->fleetData)
             );
 
-            $shipAssignments = [];
-            $bindings = [];
-
-            foreach ($this->fleetShips as $column => $amount) {
-                $shipAssignments[] = '`' . $column . '` = `' . $column . '` - ?';
-                $bindings[] = $amount;
-            }
-
-            $deuteriumSpent = $this->asInt($this->fleetData['fleet_resource_deuterium']) + $this->asInt($this->fleetData['fleet_fuel']);
-            $bindings[] = $this->asInt($this->fleetData['fleet_resource_metal']);
-            $bindings[] = $this->asInt($this->fleetData['fleet_resource_crystal']);
-            $bindings[] = $deuteriumSpent;
-            $bindings[] = $this->planetInt('planet_id');
-
-            DB::update(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . '` AS p
-                    INNER JOIN `' . SHIPS . '` AS s ON s.`ship_planet_id` = p.`planet_id` SET
-                    ' . implode(', ', $shipAssignments) . ',
-                    `planet_metal` = `planet_metal` - ?, `planet_crystal` = `planet_crystal` - ?,
-                    `planet_deuterium` = `planet_deuterium` - ?
-                    WHERE `planet_id` = ?;'
-                ),
-                $bindings
-            );
+            // taken only if all of it is still there: two requests at once
+            // must not send the same ships and cargo twice
+            app(PlanetStock::class)->take($this->planetInt('planet_id'), $this->fleetShips, [
+                'metal' => $this->asInt($this->fleetData['fleet_resource_metal']),
+                'crystal' => $this->asInt($this->fleetData['fleet_resource_crystal']),
+                'deuterium' => $this->asInt($this->fleetData['fleet_resource_deuterium']) + $this->asInt($this->fleetData['fleet_fuel']),
+            ]);
 
             // the system espionage skips targets spied on recently
             if ($this->asInt($this->fleetData['fleet_mission']) === Missions::SPY) {

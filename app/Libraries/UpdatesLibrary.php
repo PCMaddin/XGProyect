@@ -457,7 +457,17 @@ class UpdatesLibrary
             $current_planet['planet_energy_max'] = $Caps['planet_energy_max'];
         }
 
-        $ProductionTime = $UpdateTime - self::numInt($current_planet['planet_last_update']);
+        // what was read: the write adds to it, and only if no other view
+        // updated the planet meanwhile (see the end)
+        $before = [
+            'planet_metal' => self::num($current_planet['planet_metal']),
+            'planet_crystal' => self::num($current_planet['planet_crystal']),
+            'planet_deuterium' => self::num($current_planet['planet_deuterium']),
+            'planet_last_update' => self::numInt($current_planet['planet_last_update']),
+            // a shipyard order added meanwhile must not be dropped by this write
+            'planet_b_hangar_id' => self::str($current_planet['planet_b_hangar_id'] ?? ''),
+        ];
+        $ProductionTime = $UpdateTime - $before['planet_last_update'];
 
         // boosters: the per-hour value shows the ones working now, the
         // resources get each one for the time it worked
@@ -582,50 +592,96 @@ class UpdatesLibrary
                                 break;
                         }
 
+                        // added, never set: ships that left meanwhile stay gone
                         if ($resource[$element] != '') {
-                            $sub_query .= '`' . self::str($resource[$element]) . "` = '" . self::str($current_planet[$resource[$element]]) . "', ";
+                            $sub_query .= '`' . self::str($resource[$element]) . '` = `' . self::str($resource[$element]) . '` + ' . (int) $count . ', ';
                         }
                     }
                 }
             }
 
-            $tech_query = '';
-
-            $data = [
-                'planet' => $current_planet,
-                'ship_points' => $ship_points,
-                'defense_points' => $defense_points,
-                'sub_query' => $sub_query,
-                'tech_query' => $tech_query,
-            ];
-
-            DB::statement(
+            $changed = DB::update(
                 self::sql(
                     'UPDATE ' . PLANETS . ' AS p
                     INNER JOIN ' . USERS_STATISTICS . ' AS us ON us.user_statistic_user_id = p.planet_user_id
                     INNER JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
                     INNER JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id`
                     INNER JOIN ' . RESEARCH . " AS r ON r.research_user_id = p.planet_user_id SET
-                        `planet_metal` = '" . self::str($data['planet']['planet_metal']) . "',
-                        `planet_crystal` = '" . self::str($data['planet']['planet_crystal']) . "',
-                        `planet_deuterium` = '" . self::str($data['planet']['planet_deuterium']) . "',
-                        `planet_last_update` = '" . self::str($data['planet']['planet_last_update']) . "',
-                        `planet_b_hangar_id` = '" . self::str($data['planet']['planet_b_hangar_id']) . "',
-                        `planet_metal_perhour` = '" . self::str($data['planet']['planet_metal_perhour']) . "',
-                        `planet_crystal_perhour` = '" . self::str($data['planet']['planet_crystal_perhour']) . "',
-                        `planet_deuterium_perhour` = '" . self::str($data['planet']['planet_deuterium_perhour']) . "',
-                        `planet_energy_used` = '" . self::str($data['planet']['planet_energy_used']) . "',
-                        `planet_energy_max` = '" . self::str($data['planet']['planet_energy_max']) . "',
-                        `user_statistic_ships_points` = `user_statistic_ships_points` + '" . $data['ship_points'] . "',
-                        `user_statistic_defenses_points` = `user_statistic_defenses_points`  + '" . $data['defense_points'] . "',
-                        `user_statistic_military_points` = `user_statistic_military_points` + '" . ($data['ship_points'] + $data['defense_points']) . "',
-                        `user_statistic_military_built_points` = `user_statistic_military_built_points` + '" . ($data['ship_points'] + $data['defense_points']) . "',
-                        {$data['sub_query']}
-                        {$data['tech_query']}
-                        `planet_b_hangar` = '" . self::str($data['planet']['planet_b_hangar']) . "'
-                    WHERE `planet_id` = '" . self::str($data['planet']['planet_id']) . "';"
-                )
+                        `planet_metal` = `planet_metal` + ?,
+                        `planet_crystal` = `planet_crystal` + ?,
+                        `planet_deuterium` = `planet_deuterium` + ?,
+                        `planet_last_update` = ?,
+                        `planet_b_hangar_id` = ?,
+                        `planet_metal_perhour` = ?,
+                        `planet_crystal_perhour` = ?,
+                        `planet_deuterium_perhour` = ?,
+                        `planet_energy_used` = ?,
+                        `planet_energy_max` = ?,
+                        `user_statistic_ships_points` = `user_statistic_ships_points` + ?,
+                        `user_statistic_defenses_points` = `user_statistic_defenses_points` + ?,
+                        `user_statistic_military_points` = `user_statistic_military_points` + ?,
+                        `user_statistic_military_built_points` = `user_statistic_military_built_points` + ?,
+                        {$sub_query}
+                        `planet_b_hangar` = ?
+                    WHERE `planet_id` = ? AND `planet_last_update` = ? AND `planet_b_hangar_id` = ?;"
+                ),
+                [
+                    self::num($current_planet['planet_metal']) - $before['planet_metal'],
+                    self::num($current_planet['planet_crystal']) - $before['planet_crystal'],
+                    self::num($current_planet['planet_deuterium']) - $before['planet_deuterium'],
+                    self::numInt($current_planet['planet_last_update']),
+                    self::str($current_planet['planet_b_hangar_id']),
+                    self::str($current_planet['planet_metal_perhour']),
+                    self::str($current_planet['planet_crystal_perhour']),
+                    self::str($current_planet['planet_deuterium_perhour']),
+                    self::str($current_planet['planet_energy_used']),
+                    self::str($current_planet['planet_energy_max']),
+                    $ship_points,
+                    $defense_points,
+                    $ship_points + $defense_points,
+                    $ship_points + $defense_points,
+                    self::str($current_planet['planet_b_hangar']),
+                    self::numInt($current_planet['planet_id']),
+                    $before['planet_last_update'],
+                    $before['planet_b_hangar_id'],
+                ]
             );
+
+            // another view got there first: show what is stored, not this view's guess
+            if ($changed === 0) {
+                self::reload($current_planet, array_keys($builded), $resource);
+            }
+        }
+    }
+
+    /**
+     * The planet's stored resources, queue and the built units, after
+     * another view updated it first.
+     *
+     * @param array<string, mixed>     $planet
+     * @param array<int, int|string>   $built
+     * @param array<int|string, mixed> $names
+     *
+     * @param-out array<string, mixed> $planet
+     */
+    private static function reload(array &$planet, array $built, array $names): void
+    {
+        $columns = ['planet_metal', 'planet_crystal', 'planet_deuterium', 'planet_last_update', 'planet_b_hangar', 'planet_b_hangar_id'];
+
+        foreach ($built as $element) {
+            if (is_string($names[$element] ?? null) && $names[$element] !== '') {
+                $columns[] = $names[$element];
+            }
+        }
+
+        $row = DB::table('planets AS p')
+            ->join('ships AS s', 's.ship_planet_id', '=', 'p.planet_id')
+            ->join('defenses AS d', 'd.defense_planet_id', '=', 'p.planet_id')
+            ->where('p.planet_id', self::numInt($planet['planet_id']))
+            ->first($columns);
+
+        foreach ((array) $row as $column => $value) {
+            $planet[(string) $column] = $value;
         }
     }
 

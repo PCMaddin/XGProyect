@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Game;
 
 use App\Core\GameObjects\GameObjectRegistry;
+use App\Exceptions\NoLongerOnPlanet;
 use App\Models\BuildingQueue;
+use App\Models\Buildings;
 use App\Models\Planets;
 use App\Models\UsersStatistics;
 use App\Services\FormatService;
@@ -15,9 +17,12 @@ use App\Core\Enumerators\BuildingsEnumerator;
 use App\Core\Enumerators\ResearchEnumerator;
 use App\Libraries\Functions;
 use App\Libraries\StatisticsLibrary;
+use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class BuildingQueueService
 {
@@ -31,6 +36,7 @@ class BuildingQueueService
         private DevelopmentDataService $developmentDataService,
         private FormatService $formatService,
         private GameObjectRegistry $registry,
+        private PlanetStock $stock,
     ) {
     }
 
@@ -169,10 +175,12 @@ class BuildingQueueService
             return false;
         }
 
-        $price = $this->developmentsService->developmentPrice($buildingId, $level, true, $forDestroy, $ionTech);
-        $planet->planet_metal -= $price['metal'] ?? 0;
-        $planet->planet_crystal -= $price['crystal'] ?? 0;
-        $planet->planet_deuterium -= $price['deuterium'] ?? 0;
+        // paid only from what is still there (see PlanetStock)
+        try {
+            $this->stock->spend($planet, $this->developmentsService->developmentPrice($buildingId, $level, true, $forDestroy, $ionTech));
+        } catch (NoLongerOnPlanet) {
+            return false;
+        }
 
         return true;
     }
@@ -202,11 +210,12 @@ class BuildingQueueService
             $ionTech
         );
 
-        $planet->planet_metal += $refund['metal'] ?? 0;
-        $planet->planet_crystal += $refund['crystal'] ?? 0;
-        $planet->planet_deuterium += $refund['deuterium'] ?? 0;
+        // refunded once: only the request that removed the order gets it back
+        if (BuildingQueue::whereKey($firstItem->getKey())->delete() !== 1) {
+            return false;
+        }
 
-        $firstItem->delete();
+        $this->stock->refund($planet, $refund);
 
         $remaining = $planet->buildingQueue()->orderBy('position')->get();
 
@@ -306,52 +315,65 @@ class BuildingQueueService
                 break;
             }
 
-            $this->applyCompletion($planet, $first);
+            // another request finished it first: look again
+            if (!$this->applyCompletion($planet, $first)) {
+                continue;
+            }
+
             $this->advanceQueue($planet, $user);
         }
     }
 
     /**
-     * @SuppressWarnings("PHPMD.ElseExpression")
+     * Raises (or lowers) the level of a finished order. Only the request
+     * that removes the order does it, and relatively: two at once raised a
+     * level twice.
+     *
      * @SuppressWarnings("PHPMD.StaticAccess")
      */
-    private function applyCompletion(Planets $planet, BuildingQueue $item): void
+    private function applyCompletion(Planets $planet, BuildingQueue $item): bool
     {
+        if (BuildingQueue::whereKey($item->getKey())->delete() !== 1) {
+            return false;
+        }
+
         $buildingCol = $this->registry->get($item->building_id)->getName();
-        $buildings = $planet->buildings;
-        $isDestroy = $item->mode === 'destroy';
+        $step = $item->mode === 'destroy' ? -1 : 1;
 
-        if ($buildings) {
-            $buildings->$buildingCol = $buildings->$buildingCol + ($isDestroy ? -1 : 1);
-            $buildings->save();
-        }
+        Buildings::where('building_planet_id', $planet->planet_id)->update([$buildingCol => DB::raw('`' . $buildingCol . '` + (' . $step . ')')]);
+        Planets::whereKey($planet->planet_id)->toBase()->update(self::fieldChanges($item->building_id, $step) + ['planet_b_building' => 0]);
 
-        if ($item->building_id === BuildingsEnumerator::BUILDING_SPACE_DOCK) {
-            // in orbit: no field
-        } elseif ($item->building_id === BuildingsEnumerator::BUILDING_MONDBASIS) {
-            $planet->planet_field_current += 1;
-            $planet->planet_field_max += FIELDS_BY_MOONBASIS_LEVEL;
-        } elseif ($isDestroy) {
-            $planet->planet_field_current -= 1;
-        } else {
-            $planet->planet_field_current += 1;
-        }
-
-        $newLevel = (int) ($buildings->$buildingCol ?? 0);
-        $points = StatisticsLibrary::calculatePoints($item->building_id, $newLevel);
+        $planet->refresh();
+        $planet->load('buildings');
+        $newLevel = (int) ($planet->buildings->$buildingCol ?? 0);
 
         UsersStatistics::where('user_statistic_user_id', $planet->planet_user_id)
-            ->increment('user_statistic_buildings_points', $points);
-
-        $planet->planet_b_building = 0;
-        $planet->save();
-
-        $item->delete();
+            ->increment('user_statistic_buildings_points', StatisticsLibrary::calculatePoints($item->building_id, $newLevel));
 
         foreach ($planet->buildingQueue()->orderBy('position')->get() as $r) {
             $r->position -= 1;
             $r->save();
         }
+
+        return true;
+    }
+
+    /**
+     * The fields a finished order uses or frees (relative changes).
+     *
+     * @return array<string, Expression>
+     */
+    private static function fieldChanges(int $buildingId, int $step): array
+    {
+        return match ($buildingId) {
+            // in orbit: no field
+            BuildingsEnumerator::BUILDING_SPACE_DOCK => [],
+            BuildingsEnumerator::BUILDING_MONDBASIS => [
+                'planet_field_current' => DB::raw('`planet_field_current` + 1'),
+                'planet_field_max' => DB::raw('`planet_field_max` + ' . FIELDS_BY_MOONBASIS_LEVEL),
+            ],
+            default => ['planet_field_current' => DB::raw('`planet_field_current` + (' . $step . ')')],
+        };
     }
 
     /**
@@ -397,12 +419,14 @@ class BuildingQueueService
                     $ionTech
                 );
 
-                $planet->planet_metal -= $price['metal'] ?? 0;
-                $planet->planet_crystal -= $price['crystal'] ?? 0;
-                $planet->planet_deuterium -= $price['deuterium'] ?? 0;
-                $planet->planet_b_building = $first->end_time;
-                $planet->save();
-                break;
+                try {
+                    $this->stock->spend($planet, $price);
+                    $planet->planet_b_building = $first->end_time;
+                    $planet->save();
+                    break;
+                } catch (NoLongerOnPlanet) {
+                    // spent meanwhile: like not enough resources
+                }
             }
 
             $this->sendInsufficientResourcesMessage($planet, $user, $first, $currentLevel);

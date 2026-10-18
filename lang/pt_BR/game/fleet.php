@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Velocidade: ',
     'fl_continue' => 'continuar',
     'fl_no_ships' => 'Não há naves disponíveis',
+    'fl_gone_meanwhile' => 'As naves ou os recursos não estão mais no planeta (outra ordem os pegou há pouco). Nada foi enviado.',
     'fl_remove_all_ships' => 'nenhuma nave',
     'fl_select_all_ships' => 'todas as naves',
     'fl_fleets' => 'Frotas:',

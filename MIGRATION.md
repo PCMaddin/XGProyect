@@ -1812,6 +1812,64 @@ Baseline-Einträge.
   - *Live geprüft:* eine echte WAX-Überweisung vom ersten Server wurde vom
     zweiten (`api.waxsweden.org`) bestätigt, dieselbe mit verfälschtem
     Betrag abgelehnt, eine erfundene nicht gefunden.
+- ✅ **Spielverlauf: Rohstoffe und Schiffe vermehren durch gleichzeitige
+  Aufrufe.** Jeder Seitenaufruf jedes Spielers verarbeitet fällige Flotten,
+  Bauaufträge und die Produktion. Zwei Aufrufe im selben Moment sahen
+  dasselbe und handelten beide; Werte, die zu Beginn eines Aufrufs gelesen
+  wurden, wurden später absolut zurückgeschrieben. Gefunden und behoben:
+  - *Flotten zweimal verarbeitet* (Landen, Liefern, Stationieren, Plündern,
+    Recyceln, Expeditionen): `MissionControlLib` sperrt jede fällige Flotte
+    in einer eigenen Transaktion und liest sie neu. Hat ein anderer Aufruf
+    sie schon verarbeitet (Zustand geändert oder gelöscht), wird sie
+    übersprungen; Deadlocks werden bis zu dreimal wiederholt, ein Fehler
+    bricht nur diese Mission ab, nicht die Seite.
+  - *Zwei Flotten auf dasselbe Ziel* (doppeltes Recycling, doppelte
+    Plünderung): Zielplanet, Trümmerfeld und Trümmerfeld im tiefen Raum
+    werden innerhalb der Mission mit `FOR UPDATE` gelesen; die zweite Flotte
+    wartet und sieht, was die erste übrig ließ.
+  - *Produktion schrieb absolut zurück:* Rohstoffe und gebaute Schiffe
+    wurden mit den beim Lesen bekannten Werten gesetzt und hoben einen
+    gleichzeitigen Flottenstart, Kauf oder Bau auf (Rohstoffe und Schiffe
+    verdoppelt). Jetzt nur, wenn `planet_last_update` und die
+    Werft-Warteschlange noch die gelesenen sind, und nur als Zuwachs;
+    sonst liest der Aufruf die gespeicherten Werte neu.
+  - *Abzug ohne Bedingung:* Flottenstart, Sonden aus der Galaxie,
+    Interplanetarraketen und Sprungtor prüften vorher und zogen dann ohne
+    Bedingung ab; zwei Aufrufe schickten dieselben Schiffe zweimal.
+    `PlanetStock::take()` zieht Schiffe und Rohstoffe in einer Anweisung
+    nur ab, wenn alles noch da ist, sonst wird die Aktion zurückgerollt
+    (`NoLongerOnPlanet`, Meldung `fl_gone_meanwhile` in zehn Sprachen).
+    Das Sprungtor springt zusätzlich nur einmal pro Aufladung.
+  - *Bau, Forschung, Werft, Händler-Auffüllen bezahlten absolut:* Kosten
+    und Erstattungen gehen jetzt relativ und bedingt über
+    `PlanetStock::spend()/refund()`; das Modell wird danach ohne
+    Änderungsmarke abgeglichen, sodass ein `save()` keine alten Rohstoffe
+    zurückschreibt. Erstattet wird nur, wer den Auftrag tatsächlich löscht.
+  - *Stufen zweimal erhöht:* Fertige Gebäude und Forschungen werden durch
+    atomares Löschen des Auftrags beansprucht und relativ um eins erhöht.
+  - *Forschung aus der Warteschlange ohne Deckung:* wurde beim Start
+    bezahlt, auch wenn das Geld fehlte (Planet ins Minus, von der
+    Produktion auf 0 gesetzt: gratis). Jetzt wird sie wie ein Gebäude
+    verworfen.
+  - *Rückruf* nur, wenn die Flotte noch im gelesenen Zustand ist.
+  - *Tests:*
+    - `ResourceDuplicationMysqlTest`: Rückkehr landet einmal, Trümmerfeld
+      einmal geladen, Ziel bleibt gesperrt (zweite Datenbankverbindung
+      wartet), Produktion hebt Abzug nicht auf, gebaute Schiffe werden
+      addiert, kein doppeltes Produzieren, bedingter Abzug, Gebäude- und
+      Forschungsstufe einmal, unbezahlbare Forschung verworfen,
+      Erstattung einmal.
+    - `ConcurrentSpendingMysqlTest` (über echte Spielanfragen): Auffüllen
+      relativ, Werft bedingt, Rückruf, Sprungtor, Raketen.
+    - Mutationsproben (16): Jeder Fix wurde einzeln auf das alte Verhalten
+      zurückgebaut, jedes Mal schlug ein Test an.
+  - *Live geprüft* gegen den Webserver mit 8 Workern und 40 parallelen
+    Aufrufen in der Sekunde der Ankunft:
+    - Rückkehr von 10 Recyclern: alter Code 20 bis 40 gelandet (fünf
+      Läufe), neuer Code zehnmal genau 10.
+    - zwei Recycler-Flotten auf 100.000 Metall Trümmer: alter Code unter
+      anderem 400.000 Metall im Feld danach (300.000 aus dem Nichts), neuer
+      Code fünfmal genau 100.000 geladen, Feld leer.
 
 ## Smoke-Test gegen eine echte Datenbank
 

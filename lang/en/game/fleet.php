@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Speed: ',
     'fl_continue' => 'continue',
     'fl_no_ships' => 'There are no available ships',
+    'fl_gone_meanwhile' => 'The ships or resources are no longer on the planet (another order took them a moment ago). Nothing was sent.',
     'fl_remove_all_ships' => 'no ships',
     'fl_select_all_ships' => 'all ships',
     'fl_fleets' => 'Fleets:',

@@ -24,6 +24,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
+use App\Exceptions\NoLongerOnPlanet;
+use App\Services\Game\PlanetStock;
 use Illuminate\Support\Facades\DB;
 use App\Core\Concerns\PreparesSql;
 use App\Core\GameObjects\GameObjectRegistry;
@@ -243,7 +245,12 @@ class GalaxyController extends BaseController
                 continue;
             }
 
-            $this->persistFleet($ships, Missions::SPY, $target['type'], $galaxy, $system, $target['planet'], $target['owner'], $consumption);
+            try {
+                $this->persistFleet($ships, Missions::SPY, $target['type'], $galaxy, $system, $target['planet'], $target['owner'], $consumption);
+            } catch (NoLongerOnPlanet) {
+                break;
+            }
+
             $espionage->record($this->userInt('id'), $target['planet_id'], $now);
             $probes -= $count;
             $deuterium -= $consumption['fuel'];
@@ -583,8 +590,12 @@ class GalaxyController extends BaseController
             Functions::message($error, 'game.php?page=galaxy&mode=0&galaxy=' . $galaxy . '&system=' . $system, 3);
         }
 
-        /** @var array<string, mixed> $targetUser */
-        $this->insertMissileFleet($missilesAmount, $galaxy, $system, $planet, $target, $this->asInt($targetUser['id'] ?? 0));
+        try {
+            /** @var array<string, mixed> $targetUser */
+            $this->insertMissileFleet($missilesAmount, $galaxy, $system, $planet, $target, $this->asInt($targetUser['id'] ?? 0));
+        } catch (NoLongerOnPlanet) {
+            Functions::message((string) __('game/fleet.fl_gone_meanwhile'), 'game.php?page=galaxy&mode=0&galaxy=' . $galaxy . '&system=' . $system, 3);
+        }
 
         Functions::message(
             '<b>' . $missilesAmount . '</b>' . __('game/galaxy.gl_missiles_sended') . $this->defenseLabel($target),
@@ -761,7 +772,12 @@ class GalaxyController extends BaseController
             return new Response('601 ');
         }
 
-        $this->persistFleet($ships, $order, $planetType, $galaxy, $system, $planet, $targetId, $consumption);
+        try {
+            $this->persistFleet($ships, $order, $planetType, $galaxy, $system, $planet, $targetId, $consumption);
+        } catch (NoLongerOnPlanet) {
+            // another click took the ships or the fuel first
+            return new Response('611 ');
+        }
 
         if ($order === Missions::SPY) {
             app(SystemEspionageService::class)->recordAt($this->userInt('id'), $galaxy, $system, $planet, $planetType, time());
@@ -945,33 +961,18 @@ class GalaxyController extends BaseController
                 ]
             );
 
-            $assignments = [];
-            $bindings = [];
+            $taken = [];
 
             foreach ($ships as $ship => $count) {
                 $column = $this->resourceName($ship);
 
-                if ($column === '') {
-                    continue;
+                if ($column !== '') {
+                    $taken[$column] = $count;
                 }
-
-                $assignments[] = '`' . $column . '` = `' . $column . '` - ?';
-                $bindings[] = $count;
             }
 
-            $bindings[] = $consumption['fuel'];
-            $bindings[] = $this->planetInt('planet_id');
-
-            DB::update(
-                $this->prepareSql(
-                    'UPDATE `' . PLANETS . '` AS p
-                    INNER JOIN `' . SHIPS . '` AS s ON s.`ship_planet_id` = p.`planet_id` SET
-                    ' . implode(', ', $assignments) . ',
-                    `planet_deuterium` = `planet_deuterium` - ?
-                    WHERE `planet_id` = ?;'
-                ),
-                $bindings
-            );
+            // only if the probes and the fuel are still there (two clicks at once)
+            app(PlanetStock::class)->take($this->planetInt('planet_id'), $taken, ['deuterium' => $consumption['fuel']]);
         });
     }
 

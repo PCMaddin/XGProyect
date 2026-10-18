@@ -286,8 +286,6 @@ class MovementController extends BaseController
     private function returnFleet(FleetsModel $fleet, int $userId): void
     {
         DB::transaction(function () use ($fleet, $userId): void {
-            $this->releaseAcsGroup($fleet);
-
             $baseTime = time();
             $creation = $this->asInt($fleet->fleet_creation);
             $elapsed = $baseTime - $creation;
@@ -298,15 +296,28 @@ class MovementController extends BaseController
                 $returnTime = $baseTime + $flightLength;
             }
 
-            DB::update(
+            // only the fleet as read: one that arrived meanwhile (its mission
+            // done) must not also turn back with its cargo
+            $turned = DB::update(
                 $this->prepareSql(
                     'UPDATE `' . FLEETS . '` f SET
                         f.`fleet_start_time` = ?, f.`fleet_end_stay` = 0, f.`fleet_end_time` = ?,
                         f.`fleet_target_owner` = ?, f.`fleet_mess` = 1
-                    WHERE f.`fleet_id` = ?;'
+                    WHERE f.`fleet_id` = ? AND f.`fleet_mess` = ? AND f.`fleet_start_time` = ? AND f.`fleet_end_time` = ?
+                        AND (f.`fleet_start_time` > ? OR f.`fleet_end_stay` > ?);'
                 ),
-                [$baseTime, $returnTime, $userId, $this->asInt($fleet->fleet_id)]
+                [
+                    $baseTime, $returnTime, $userId, $this->asInt($fleet->fleet_id),
+                    $this->asInt($fleet->fleet_mess), $this->asInt($fleet->fleet_start_time), $this->asInt($fleet->fleet_end_time),
+                    // still on its way, or still holding (a holding fleet any time)
+                    $this->asInt($fleet->fleet_mess) === 2 ? 0 : $baseTime,
+                    $baseTime,
+                ]
             );
+
+            if ($turned === 1) {
+                $this->releaseAcsGroup($fleet);
+            }
         });
     }
 

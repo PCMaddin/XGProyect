@@ -242,6 +242,17 @@ class Missions
     }
 
     /**
+     * Missions run in a transaction each (MissionControlLib): the planet they
+     * read stays locked until it ends, so two fleets at the same target (two
+     * recyclers on one debris field, two raids on one planet) take turns
+     * instead of both taking everything.
+     */
+    private static function lockClause(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite' ? '' : ' FOR UPDATE';
+    }
+
+    /**
      * @param array{coords: Coords4} $data
      *
      * @return Row
@@ -258,7 +269,7 @@ class Missions
                         `planet_system` = ? AND
                         `planet_planet` = ? AND
                         `planet_type` = ?
-                    LIMIT 1;',
+                    LIMIT 1' . self::lockClause() . ';',
             array_map(self::int(...), self::coords4($data['coords']))
         );
     }
@@ -900,7 +911,7 @@ class Missions
                         `planet_system` = ? AND
                         `planet_planet` = ? AND
                         `planet_type` = 1
-                    LIMIT 1;',
+                    LIMIT 1' . self::lockClause() . ';',
             self::coords3($data['coords'])
         );
     }

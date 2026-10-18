@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => '速度: ',
     'fl_continue' => '次へ',
     'fl_no_ships' => '利用できる艦船がありません',
+    'fl_gone_meanwhile' => '艦船または資源がもう惑星にありません（直前に別の命令が使用しました）。何も送信されていません。',
     'fl_remove_all_ships' => 'すべて解除',
     'fl_select_all_ships' => 'すべて選択',
     'fl_fleets' => '艦隊:',

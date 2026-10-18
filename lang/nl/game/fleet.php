@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Snelheid: ',
     'fl_continue' => 'verder',
     'fl_no_ships' => 'Er zijn geen schepen beschikbaar',
+    'fl_gone_meanwhile' => 'De schepen of grondstoffen zijn niet meer op de planeet (een andere opdracht nam ze net). Er is niets verzonden.',
     'fl_remove_all_ships' => 'geen schepen',
     'fl_select_all_ships' => 'alle schepen',
     'fl_fleets' => 'Vloten:',

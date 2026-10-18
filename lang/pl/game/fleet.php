@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Prędkość: ',
     'fl_continue' => 'dalej',
     'fl_no_ships' => 'Brak dostępnych statków',
+    'fl_gone_meanwhile' => 'Statków lub surowców nie ma już na planecie (przed chwilą zabrał je inny rozkaz). Nic nie wysłano.',
     'fl_remove_all_ships' => 'żadne statki',
     'fl_select_all_ships' => 'wszystkie statki',
     'fl_fleets' => 'Floty:',

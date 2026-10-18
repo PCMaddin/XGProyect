@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Throwable;
 use App\Core\Concerns\PreparesSql;
 use App\Libraries\Missions\Acs;
 use App\Libraries\Missions\Attack;
@@ -29,6 +30,9 @@ use App\Libraries\Missions\Transport;
 class MissionControlLib
 {
     use PreparesSql;
+
+    /** what a mission changes about a fleet: if any of it moved, it was processed */
+    private const STATE = ['fleet_mess', 'fleet_start_time', 'fleet_end_time', 'fleet_end_stay', 'fleet_array', 'fleet_amount', 'fleet_resource_metal', 'fleet_resource_crystal', 'fleet_resource_deuterium'];
 
     public function arrivingFleets(): void
     {
@@ -108,18 +112,70 @@ class MissionControlLib
     }
 
     /**
+     * Every page view of every player processes the fleets that are due, so
+     * two views at the same moment see the same fleets. Each fleet is locked
+     * and read again before its mission runs, all in one transaction: the
+     * second view finds it changed (landed, turned back, gone) and leaves it.
+     * Without that a returning fleet landed twice: ships and cargo doubled,
+     * likewise debris, deliveries and loot.
+     *
      * @param array<int, array<string, mixed>> $allFleets
      */
     private function processMissions(array $allFleets): void
     {
         foreach ($allFleets as $fleet) {
             $mission = is_numeric($fleet['fleet_mission'] ?? null) ? (int) $fleet['fleet_mission'] : 0;
-            $dispatch = $this->dispatcherFor($mission, $fleet);
 
-            if ($dispatch instanceof \Closure) {
-                $dispatch();
+            if ($this->dispatcherFor($mission, $fleet) === null) {
+                continue;
+            }
+
+            try {
+                DB::transaction(function () use ($fleet, $mission): void {
+                    $current = $this->claim($fleet);
+                    $dispatch = $current === null ? null : $this->dispatcherFor($mission, $current);
+
+                    if ($dispatch instanceof \Closure) {
+                        $dispatch();
+                    }
+                }, 3);
+            } catch (Throwable $e) {
+                // the mission runs again on the next view; the page still shows
+                report($e);
             }
         }
+    }
+
+    /**
+     * The fleet as it is now, locked until the transaction ends; null if
+     * another view processed it since it was read.
+     *
+     * @param array<string, mixed> $fleet
+     *
+     * @return array<string, mixed>|null
+     */
+    private function claim(array $fleet): ?array
+    {
+        $row = DB::table('fleets')->where('fleet_id', $fleet['fleet_id'] ?? 0)->lockForUpdate()->first();
+
+        if ($row === null) {
+            return null;
+        }
+
+        $current = (array) $row;
+
+        foreach (self::STATE as $column) {
+            if (self::text($current[$column] ?? '') !== self::text($fleet[$column] ?? '')) {
+                return null;
+            }
+        }
+
+        return $current + $fleet;
+    }
+
+    private static function text(mixed $value): string
+    {
+        return is_scalar($value) ? (string) $value : '';
     }
 
     /**

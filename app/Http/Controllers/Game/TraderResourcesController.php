@@ -127,10 +127,11 @@ class TraderResourcesController extends BaseController
             $this->prepareSql(
                 'UPDATE `' . PREMIUM . '` pr, `' . PLANETS . '` p SET
                     pr.`premium_dark_matter` = pr.`premium_dark_matter` - ?,
-                    p.`planet_' . $resource . '` = ?
+                    p.`planet_' . $resource . '` = p.`planet_' . $resource . '` + ?
                 WHERE pr.`premium_user_id` = ? AND p.`planet_id` = ? AND pr.`premium_dark_matter` >= ?;'
             ),
-            [$darkMatter, $amount, $this->int($this->user, 'id'), $this->int($this->planet, 'planet_id'), $darkMatter]
+            // added, never set: cargo that left meanwhile must stay gone
+            [$darkMatter, max(0, $amount - $this->int($this->planet, 'planet_' . $resource)), $this->int($this->user, 'id'), $this->int($this->planet, 'planet_id'), $darkMatter]
         );
 
         if ($changed === 0) {

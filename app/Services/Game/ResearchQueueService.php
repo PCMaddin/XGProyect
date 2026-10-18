@@ -7,13 +7,16 @@ namespace App\Services\Game;
 use App\Core\GameObjects\GameObjectRegistry;
 use App\Enums\PlayerClass;
 use App\Models\Buildings;
+use App\Exceptions\NoLongerOnPlanet;
 use App\Models\Planets;
+use App\Models\Research;
 use App\Models\ResearchQueue;
 use App\Models\User;
 use App\Models\UsersStatistics;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Support\Concerns\ReadsMixedValues;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use App\Core\Enumerators\BuildingsEnumerator;
 use App\Core\Enumerators\ResearchEnumerator;
 use App\Libraries\StatisticsLibrary;
@@ -33,6 +36,7 @@ class ResearchQueueService
         private QueueSequenceService $queueSequenceService,
         private DevelopmentDataService $developmentDataService,
         private DevelopmentsService $developmentsService,
+        private PlanetStock $stock,
     ) {
     }
 
@@ -87,10 +91,13 @@ class ResearchQueueService
 
             $endTime = time() + $duration;
 
-            $cost = $this->developmentsService->developmentPrice($techId, $levelForCalc);
-            $planet->planet_metal -= $cost['metal'] ?? 0;
-            $planet->planet_crystal -= $cost['crystal'] ?? 0;
-            $planet->planet_deuterium -= $cost['deuterium'] ?? 0;
+            // paid only from what is still there (see PlanetStock)
+            try {
+                $this->stock->spend($planet, $this->developmentsService->developmentPrice($techId, $levelForCalc));
+            } catch (NoLongerOnPlanet) {
+                return false;
+            }
+
             $planet->planet_b_tech_id = $techId;
             $planet->planet_b_tech = $endTime;
             $planet->save();
@@ -120,19 +127,19 @@ class ResearchQueueService
             return false;
         }
 
+        // refunded once: only the request that removed the research gets it back
+        if (ResearchQueue::whereKey($item->getKey())->delete() !== 1) {
+            return false;
+        }
+
         $workingPlanet = Planets::find($item->planet_id);
 
         if ($workingPlanet !== null) {
-            $cost = $this->developmentsService->developmentPrice($item->tech_id, $item->target_level - 1);
-            $workingPlanet->planet_metal += $cost['metal'] ?? 0;
-            $workingPlanet->planet_crystal += $cost['crystal'] ?? 0;
-            $workingPlanet->planet_deuterium += $cost['deuterium'] ?? 0;
+            $this->stock->refund($workingPlanet, $this->developmentsService->developmentPrice($item->tech_id, $item->target_level - 1));
             $workingPlanet->planet_b_tech_id = 0;
             $workingPlanet->planet_b_tech = 0;
             $workingPlanet->save();
         }
-
-        $item->delete();
         $remaining = $user->researchQueue()->orderBy('position')->get();
 
         if ($remaining->isNotEmpty()) {
@@ -158,17 +165,9 @@ class ResearchQueueService
             }
         }
 
-        /** @var ResearchQueue|null $nextItem */
-        $nextItem = $remaining->firstWhere('position', 1);
-
-        if ($nextItem !== null) {
-            $this->startItem($user, $nextItem);
-
-            return true;
-        }
-
         $user->research->research_current_research = 0;
         $user->research->save();
+        $this->startNext($user);
 
         return true;
     }
@@ -195,12 +194,16 @@ class ResearchQueueService
                 break;
             }
 
-            $techCol = $this->registry->get($item->tech_id)->getName();
-            $newLevel = (int) $user->research->$techCol + 1;
+            // only the request that removes the finished research raises the
+            // level, and by one: two at once raised it twice
+            if (ResearchQueue::whereKey($item->getKey())->delete() !== 1) {
+                continue;
+            }
 
-            $user->research->$techCol = $newLevel;
-            $user->research->research_current_research = 0;
-            $user->research->save();
+            $techCol = $this->registry->get($item->tech_id)->getName();
+            Research::where('research_user_id', $user->id)->update([$techCol => DB::raw('`' . $techCol . '` + 1'), 'research_current_research' => 0]);
+            $user->research->refresh();
+            $newLevel = (int) $user->research->$techCol;
 
             $points = StatisticsLibrary::calculatePoints((string) $item->tech_id, $newLevel, 'tech');
 
@@ -215,13 +218,24 @@ class ResearchQueueService
                 $activePlanet->save();
             }
 
-            $item->delete();
             $this->shiftPositionsDown($user);
+            $this->startNext($user);
+        }
+    }
 
-            $nextItem = $user->researchQueue()->where('position', 1)->first();
+    /**
+     * Starts the research now first in line, paying it; one that cannot be
+     * paid any more is dropped (as a building is) and the next one tried.
+     */
+    private function startNext(User $user): void
+    {
+        while (($next = $user->researchQueue()->where('position', 1)->first()) !== null) {
+            if ($this->startItem($user, $next)) {
+                return;
+            }
 
-            if ($nextItem !== null) {
-                $this->startItem($user, $nextItem);
+            if (ResearchQueue::whereKey($next->getKey())->delete() === 1) {
+                $this->shiftPositionsDown($user);
             }
         }
     }
@@ -272,22 +286,32 @@ class ResearchQueueService
             ->sum('building_laboratory'));
     }
 
-    private function startItem(User $user, ResearchQueue $item): void
+    /**
+     * Pays and starts a queued research; false if its planet cannot pay it
+     * (it was never paid when queued: it went below zero before).
+     */
+    private function startItem(User $user, ResearchQueue $item): bool
     {
         $planet = Planets::find($item->planet_id);
 
-        if ($planet !== null) {
-            $cost = $this->developmentsService->developmentPrice($item->tech_id, $item->target_level - 1);
-            $planet->planet_metal -= $cost['metal'] ?? 0;
-            $planet->planet_crystal -= $cost['crystal'] ?? 0;
-            $planet->planet_deuterium -= $cost['deuterium'] ?? 0;
-            $planet->planet_b_tech_id = $item->tech_id;
-            $planet->planet_b_tech = $item->end_time;
-            $planet->save();
+        if ($planet === null) {
+            return false;
         }
+
+        try {
+            $this->stock->spend($planet, $this->developmentsService->developmentPrice($item->tech_id, $item->target_level - 1));
+        } catch (NoLongerOnPlanet) {
+            return false;
+        }
+
+        $planet->planet_b_tech_id = $item->tech_id;
+        $planet->planet_b_tech = $item->end_time;
+        $planet->save();
 
         $user->research->research_current_research = $item->planet_id;
         $user->research->save();
+
+        return true;
     }
 
     /**

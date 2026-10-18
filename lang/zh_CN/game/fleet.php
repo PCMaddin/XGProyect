@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => '速度: ',
     'fl_continue' => '继续',
     'fl_no_ships' => '没有可用的舰船',
+    'fl_gone_meanwhile' => '舰船或资源已不在该星球上（刚被另一条指令使用）。未发送任何内容。',
     'fl_remove_all_ships' => '全部取消',
     'fl_select_all_ships' => '全部选择',
     'fl_fleets' => '舰队:',

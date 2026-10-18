@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Vitesse : ',
     'fl_continue' => 'continuer',
     'fl_no_ships' => 'Aucun vaisseau disponible',
+    'fl_gone_meanwhile' => 'Les vaisseaux ou les ressources ne sont plus sur la planète (un autre ordre vient de les prendre). Rien n’a été envoyé.',
     'fl_remove_all_ships' => 'aucun vaisseau',
     'fl_select_all_ships' => 'tous les vaisseaux',
     'fl_fleets' => 'Flottes :',
