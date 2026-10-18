@@ -18,4 +18,7 @@ return [
     'ge_no' => 'NON',
     'gn_enabled' => 'Activé',
     'gn_disabled' => 'Désactivé',
+    'player_find' => 'Chercher un joueur (début du nom)',
+    'alliance_find' => 'Chercher une alliance (début du nom)',
+    'player_find_more' => 'Les :count premiers joueurs par nom sont affichés ; cherche par nom pour en trouver d’autres.',
 ];

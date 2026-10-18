@@ -39,6 +39,7 @@
                             </div>
                         </div>
 
+                        <x-admin.player-find :find="$player_find['find']" :more="$player_find['more']" />
                         <select name="ban_name" id="users-select" class="form-control mb-3" size="12">
                             @foreach ($users as $user)
                                 <option value="{{ $user->name }}" data-id="{{ $user->id }}">{{ $user->name }} (ID: {{ $user->id }})</option>

@@ -13,6 +13,7 @@ use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -79,15 +80,19 @@ class LobbyController extends BaseController
 
     /**
      * The players of a universe (bots not counted) and how dark matter is
-     * paid there; no players (null) if its database cannot be read.
+     * paid there; no players (null) if its database cannot be read. The
+     * number is kept a minute (in the universe's cache): the lobby is the
+     * front page, and counting a million players takes a fifth of a second.
      *
      * @return array{players: int|null, payments: list<string>}
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function facts(Instance $instance): array
     {
         try {
             return $this->context->runIn($instance, static fn (): array => [
-                'players' => DB::table('users')->where('user_is_bot', false)->count(),
+                'players' => Cache::remember('lobby_players', 60, static fn (): int => DB::table('users')->where('user_is_bot', false)->count()),
                 'payments' => $instance->mode === Instance::PAY2WIN ? app(DarkMatterShop::class)->methods() : [],
             ]);
         } catch (Throwable $e) {

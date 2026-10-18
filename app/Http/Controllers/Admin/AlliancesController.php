@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\AllianceMembersRequest;
 use App\Http\Requests\Admin\AllianceRankRequest;
 use App\Models\Alliance;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use App\Services\Admin\AlliancesService;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
@@ -58,14 +59,11 @@ class AlliancesController extends BaseController
 
     public function create(): View
     {
-        $usersWithoutAlliance = User::where('ally_id', 0)
-            ->where('ally_request', 0)
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $founders = app(PlayerChoices::class)->choose(static fn ($query) => $query->where('ally_id', 0)->where('ally_request', 0));
 
         return view('admin.alliances_create', [
-            'users' => $usersWithoutAlliance,
+            'users' => $founders['players'],
+            'player_find' => $founders,
         ]);
     }
 
@@ -93,12 +91,14 @@ class AlliancesController extends BaseController
     public function showInfo(Alliance $alliance): View
     {
         $allianceData = $this->alliancesService->loadAllianceWithStats($alliance->alliance_id);
-        $users = User::query()->select('id', 'name')->orderBy('name')->get();
+        $owners = app(PlayerChoices::class)->choose(null, (int) $alliance->alliance_owner);
+        $users = $owners['players'];
         $dateFormat = $this->settings->getString('date_format_extended') ?: 'Y-m-d H:i:s';
 
         return view('admin.alliances_information', [
             'alliance' => $allianceData,
             'users' => $users,
+            'player_find' => $owners,
             'register_time' => $allianceData->alliance_register_time === 0
                 ? '-'
                 : date($dateFormat, $allianceData->alliance_register_time),

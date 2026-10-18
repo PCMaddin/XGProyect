@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\SessionService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use App\Core\Concerns\PreparesSql;
 use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
 use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
@@ -270,9 +270,7 @@ class Users
             Functions::redirect(url('/'));
         }
 
-        $expected = self::asString($userRow['password'] ?? '') . '-' . self::asString(config('SECRETWORD'));
-
-        if (!Hash::check($expected, self::asString(session('user_password')))) {
+        if (!app(SessionService::class)->matches(self::asString($userRow['password'] ?? ''), self::asString(session('user_password')))) {
             Functions::redirect(url('/'));
         }
     }
@@ -286,11 +284,7 @@ class Users
             $this->prepareSql(
                 'SELECT p.*, b.*, d.*, s.*,
                 m.planet_id AS moon_id, m.planet_name AS moon_name, m.planet_image AS moon_image,
-                m.planet_destroyed AS moon_destroyed,
-                (SELECT COUNT(user_statistic_user_id) AS stats_users
-                    FROM `' . USERS_STATISTICS . '` AS s
-                    INNER JOIN ' . USERS . ' AS u ON u.id = s.user_statistic_user_id
-                    WHERE u.`authlevel` <= ?) AS stats_users
+                m.planet_destroyed AS moon_destroyed
                 FROM ' . PLANETS . ' AS p
                 INNER JOIN ' . BUILDINGS . ' AS b ON b.building_planet_id = p.`planet_id`
                 INNER JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
@@ -301,10 +295,33 @@ class Users
                         AND mp.planet_planet=p.planet_planet AND mp.planet_type=3))
                 WHERE p.`planet_id` = ?;'
             ),
-            [$adminLevel, $planetId]
+            [$planetId]
         );
 
         $this->planetData = $row !== null ? (array) $row : [];
+        $this->planetData['stats_users'] = $this->rankedPlayers($adminLevel);
+    }
+
+    /**
+     * How many players the highscore ranks. The statistics rebuild writes
+     * it; counting them on every page view read the whole statistics.
+     */
+    private function rankedPlayers(int $adminLevel): int
+    {
+        $settings = app(SettingsService::class);
+
+        if (array_key_exists('stat_users', $settings->all())) {
+            return $settings->getInt('stat_users');
+        }
+
+        // before the first rebuild that writes it
+        $count = DB::table('users_statistics AS s')
+            ->join('users AS u', 'u.id', '=', 's.user_statistic_user_id')
+            ->where('u.authlevel', '<=', $adminLevel)
+            ->count();
+        $settings->write('stat_users', $count);
+
+        return $count;
     }
 
     private function setPlanet(): void

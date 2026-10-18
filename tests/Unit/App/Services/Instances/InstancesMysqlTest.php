@@ -143,7 +143,12 @@ class InstancesMysqlTest extends MysqlTestCase
         // without a choice every page leads to the lobby
         $this->get('/')->assertRedirect(route('lobby.index'));
         // how dark matter is paid: only in Pay2Win, only the ways set up on the server
-        $this->get('/universes')->assertOk()->assertSee('Universe One')->assertSee('Players: 1')->assertSeeInOrder(['Universe Two', 'Payment: WAX', 'Universe One'])->assertDontSee('card');
+        $u2 = app(InstanceRegistry::class)->find('u2');
+        $this->assertInstanceOf(Instance::class, $u2);
+        app(InstanceContext::class)->runIn($u2, static fn (): bool => DB::table('users')->insert(['name' => 'Second', 'email' => 'second@example.com', 'home_planet_id' => 900, 'current_planet' => 900]));
+        // each universe counts its own players
+        $this->get('/universes')->assertOk()->assertSeeInOrder(['Universe Two', 'Players: 2', 'Payment: WAX', 'Universe One', 'Players: 1'])->assertDontSee('card');
+        app(InstanceContext::class)->runIn($u2, static fn (): int => DB::table('users')->where('name', 'Second')->delete());
 
         $backupName = config('backup.backup.name');
         $this->assertIsString($backupName);

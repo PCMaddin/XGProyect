@@ -60,68 +60,77 @@ class UpdatesLibrary
         app(BotPlayerService::class)->playDue(time());
     }
 
+    /**
+     * Every six hours: players who asked to be deleted or stayed away for a
+     * month, old messages and reports, destroyed planets, empty fleet
+     * unions. One page view claims it and does it after its answer.
+     */
     private function cleanUp(): void
     {
         $settings = app(SettingsService::class);
         $lastCleanup = $settings->getInt('last_cleanup');
         $cleanupInterval = 6; // 6 HOURS
 
-        if ((time() >= ($lastCleanup + (3600 * $cleanupInterval)))) {
-            // TIMERS
-            $delPlanets = time() - ONE_DAY;
-            $delBefore = time() - ONE_WEEK;
-            $delInactive = time() - ONE_MONTH;
-            $delDeleted = time() - ONE_WEEK;
-
-            // USERS TO DELETE
-            $chooseToDelete = array_map(
-                fn ($row) => (array) $row,
-                DB::select(
-                    $this->prepareSql(
-                        'SELECT u.`id`
-                        FROM `' . USERS . '` AS u
-                        INNER JOIN `' . PREFERENCES . "` AS p ON p.preference_user_id = u.id
-                        WHERE (p.`preference_delete_mode` < '" . $delDeleted . "'
-                            AND p.`preference_delete_mode` <> 0)
-                            OR (u.`onlinetime` < '" . $delInactive . "' AND u.`onlinetime` <> 0 AND u.`authlevel` <> 3 AND u.`user_is_bot` = 0)"
-                    )
-                )
-            );
-
-            $users = new Users();
-
-            if ($chooseToDelete) {
-                foreach ($chooseToDelete as $delete) {
-                    $users->deleteUser((int) $delete['id']);
-                }
-            }
-
-            // Misc deletions
-            DB::statement($this->prepareSql('DELETE FROM ' . MESSAGES . " WHERE `message_time` < '" . $delBefore . "';"));
-            DB::statement($this->prepareSql('DELETE FROM ' . REPORTS . " WHERE `report_time` < '" . $delBefore . "';"));
-            DB::table('sessions')->where('last_activity', '<', $delPlanets)->delete();
-            DB::statement(
-                $this->prepareSql(
-                    'DELETE p,b,d,s FROM `' . PLANETS . '` AS p
-                    INNER JOIN `' . BUILDINGS . '` AS b ON b.building_planet_id = p.`planet_id`
-                    INNER JOIN `' . DEFENSES . '` AS d ON d.defense_planet_id = p.`planet_id`
-                    INNER JOIN `' . SHIPS . "` AS s ON s.ship_planet_id = p.`planet_id`
-                    WHERE `planet_destroyed` < '" . $delPlanets . "'
-                        AND `planet_destroyed` <> 0;"
-                )
-            );
-            DB::statement(
-                $this->prepareSql(
-                    'DELETE a,m1,m2 FROM `' . ACS . '` AS a
-                    INNER JOIN `' . ACS_MEMBERS . '` m1 ON m1.`acs_group_id` = a.`acs_id`
-                    RIGHT JOIN `' . ACS_MEMBERS . '` m2 ON m2.`acs_group_id` = a.`acs_id`
-                    LEFT JOIN `' . FLEETS . '` f ON f.`fleet_group` = a.`acs_id`
-                    WHERE f.`fleet_id` IS NULL'
-                )
-            );
-
-            $settings->write('last_cleanup', time());
+        if (time() < $lastCleanup + 3600 * $cleanupInterval || !$settings->claim('last_cleanup', $lastCleanup, time())) {
+            return;
         }
+
+        $this->afterResponse(fn () => $this->runCleanUp());
+    }
+
+    private function runCleanUp(): void
+    {
+        // TIMERS
+        $delPlanets = time() - ONE_DAY;
+        $delBefore = time() - ONE_WEEK;
+        $delInactive = time() - ONE_MONTH;
+        $delDeleted = time() - ONE_WEEK;
+
+        // USERS TO DELETE
+        $chooseToDelete = array_map(
+            fn ($row) => (array) $row,
+            DB::select(
+                $this->prepareSql(
+                    'SELECT u.`id`
+                    FROM `' . USERS . '` AS u
+                    INNER JOIN `' . PREFERENCES . "` AS p ON p.preference_user_id = u.id
+                    WHERE (p.`preference_delete_mode` < '" . $delDeleted . "'
+                        AND p.`preference_delete_mode` <> 0)
+                        OR (u.`onlinetime` < '" . $delInactive . "' AND u.`onlinetime` <> 0 AND u.`authlevel` <> 3 AND u.`user_is_bot` = 0)"
+                )
+            )
+        );
+
+        $users = new Users();
+
+        foreach ($chooseToDelete as $delete) {
+            $users->deleteUser((int) $delete['id']);
+        }
+
+        // Misc deletions
+        DB::statement($this->prepareSql('DELETE FROM ' . MESSAGES . " WHERE `message_time` < '" . $delBefore . "';"));
+        DB::statement($this->prepareSql('DELETE FROM ' . REPORTS . " WHERE `report_time` < '" . $delBefore . "';"));
+        DB::table('sessions')->where('last_activity', '<', $delPlanets)->delete();
+        DB::statement(
+            $this->prepareSql(
+                'DELETE p,b,d,s FROM `' . PLANETS . '` AS p
+                INNER JOIN `' . BUILDINGS . '` AS b ON b.building_planet_id = p.`planet_id`
+                INNER JOIN `' . DEFENSES . '` AS d ON d.defense_planet_id = p.`planet_id`
+                INNER JOIN `' . SHIPS . "` AS s ON s.ship_planet_id = p.`planet_id`
+                WHERE `planet_destroyed` < '" . $delPlanets . "'
+                    AND `planet_destroyed` <> 0;"
+            )
+        );
+        // fleet_group is text: compared as text it can use its index
+        DB::statement(
+            $this->prepareSql(
+                'DELETE a,m1,m2 FROM `' . ACS . '` AS a
+                INNER JOIN `' . ACS_MEMBERS . '` m1 ON m1.`acs_group_id` = a.`acs_id`
+                RIGHT JOIN `' . ACS_MEMBERS . '` m2 ON m2.`acs_group_id` = a.`acs_id`
+                LEFT JOIN `' . FLEETS . '` f ON f.`fleet_group` = CAST(a.`acs_id` AS CHAR)
+                WHERE f.`fleet_id` IS NULL'
+            )
+        );
     }
 
     private function createBackup(): void
@@ -131,11 +140,11 @@ class UpdatesLibrary
         $lastBackup = $settings->getInt('last_backup');
         $updateInterval = 6;
 
-        if ((time() >= ($lastBackup + (3600 * $updateInterval))) && $autoBackup) {
-            app(BackupService::class)->createBackup();
-
-            $settings->write('last_backup', time());
+        if (!$autoBackup || time() < $lastBackup + 3600 * $updateInterval || !$settings->claim('last_backup', $lastBackup, time())) {
+            return;
         }
+
+        $this->afterResponse(fn () => app(BackupService::class)->createBackup());
     }
 
     /**
@@ -248,22 +257,51 @@ class UpdatesLibrary
     }
 
     /**
-     * updateStatistics
-     *
-     * @return void
+     * The points and ranks, every stat_update_time minutes. One page view
+     * claims the rebuild and runs it after its answer; meanwhile the time
+     * stamp lies an hour ahead, so no other view starts it again, not even
+     * if this one dies. Before, every page view started it while it was due:
+     * with many players it ran longer than the time limit, never finished,
+     * and every page failed.
      */
-    private function updateStatistics()
+    private function updateStatistics(): void
     {
-        // LAST UPDATE AND UPDATE INTERVAL, EX: 15 MINUTES
         $settings = app(SettingsService::class);
-        $stat_last_update = $settings->getInt('stat_last_update');
-        $update_interval = $settings->getInt('stat_update_time');
+        $lastUpdate = $settings->getInt('stat_last_update');
+        $now = time();
 
-        if ((time() >= ($stat_last_update + (60 * $update_interval)))) {
-            $result = new StatisticsLibrary();
-
-            $settings->write('stat_last_update', $result->makeStats()['stats_time']);
+        if ($now < $lastUpdate + 60 * $settings->getInt('stat_update_time') || !$settings->claim('stat_last_update', $lastUpdate, $now + 3600)) {
+            return;
         }
+
+        $this->afterResponse(function () use ($settings): void {
+            $settings->write('stat_last_update', (new StatisticsLibrary())->makeStats()['stats_time']);
+        });
+    }
+
+    /**
+     * Work of the tick the player does not wait for: after the page has
+     * been sent (php-fpm), without the time limit; on the command line (the
+     * scheduler, tests) at once.
+     */
+    private function afterResponse(\Closure $work): void
+    {
+        if (app()->runningInConsole()) {
+            $work();
+
+            return;
+        }
+
+        app()->terminating(static function () use ($work): void {
+            ignore_user_abort(true);
+            set_time_limit(0);
+
+            try {
+                $work();
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
     }
 
     private static function sql(string $sql): string

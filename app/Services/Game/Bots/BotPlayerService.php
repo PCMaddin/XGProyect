@@ -64,11 +64,12 @@ class BotPlayerService
      */
     public function playDue(int $now): void
     {
-        if (!$this->settings->getBool('bots_play') || $now < $this->settings->getInt('bots_last_run') + self::TICK_GAP) {
+        $lastRun = $this->settings->getInt('bots_last_run');
+
+        // one page view of those at the same moment plays the bots
+        if (!$this->settings->getBool('bots_play') || $now < $lastRun + self::TICK_GAP || !$this->settings->claim('bots_last_run', $lastRun, $now)) {
             return;
         }
-
-        $this->settings->write('bots_last_run', $now);
 
         $bots = User::where('user_is_bot', true)
             ->where('user_bot_next_action', '<=', $now)

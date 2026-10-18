@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     're_disabled' => 'En estos momentos el registro a nuevos usuarios se encuentra cerrado.',
     're_create_fail' => 'No pudimos completar tu registro en este momento. Por favor, inténtalo de nuevo en unos instantes.',
+    're_universe_full' => 'Este universo está lleno: no queda sitio libre para un nuevo planeta principal. Elige otro universo.',
     're_welcome_message_from' => 'Admin',
     're_welcome_message_subject' => '¡Te damos la bienvenida a XGProyect!',
     're_welcome_message_content' => '¡Saludos, emperador %s!<br><br>Te felicito de todo corazón por el inicio de tu reinado y espero poder ayudarte en tus primeros pasos.<br><br>A la izquierda verás el menú, con el que dirigirás el destino de tu imperio galáctico.<br><br>Seguro que ya conoces el «Resumen». En «Recursos» e «Instalaciones» construyes los edificios que necesita tu imperio. El mejor comienzo es mejorar primero tu planta de energía solar, para obtener energía y abastecer con ella tus minas.<br><br>Después mejora tus minas de metal y de cristal para producir los recursos necesarios. También puedes echar un vistazo a los menús; seguro que enseguida te orientarás.',

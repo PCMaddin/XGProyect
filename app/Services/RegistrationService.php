@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Exceptions\UniverseFull;
 use App\Libraries\PlanetLib;
 use App\Models\Planets;
 use App\Models\User;
@@ -36,10 +37,11 @@ class RegistrationService
      */
     public function register(array $attributes): ?User
     {
-        $coords = $this->planetService->calculateNewPlanetPosition();
-
         try {
-            return DB::transaction(fn (): User => $this->createPlayer($attributes, $coords));
+            // the place is chosen in the transaction: it stays locked until the planet stands
+            return DB::transaction(fn (): User => $this->createPlayer($attributes, $this->planetService->calculateNewPlanetPosition()));
+        } catch (UniverseFull $e) {
+            throw $e;
         } catch (Throwable $e) {
             report($e);
 

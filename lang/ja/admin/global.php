@@ -18,4 +18,7 @@ return [
     'ge_no' => 'いいえ',
     'gn_enabled' => '有効',
     'gn_disabled' => '無効',
+    'player_find' => 'プレイヤーを検索（名前の先頭）',
+    'alliance_find' => '同盟を検索（名前の先頭）',
+    'player_find_more' => '名前順に最初の :count 人を表示しています。他のプレイヤーは名前で検索してください。',
 ];

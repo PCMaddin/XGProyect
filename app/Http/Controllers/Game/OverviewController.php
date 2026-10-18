@@ -203,7 +203,7 @@ class OverviewController extends BaseController
                             WHERE f.`fleet_owner` = ? OR f.`fleet_target_owner` = ?
                         UNION ALL
                         SELECT f.* FROM `' . ACS_MEMBERS . '` am
-                            LEFT JOIN `' . FLEETS . '` f ON f.`fleet_group` = am.`acs_group_id`
+                            LEFT JOIN `' . FLEETS . '` f ON f.`fleet_group` = CAST(am.`acs_group_id` AS CHAR)
                             WHERE f.`fleet_id` IS NOT NULL AND am.`acs_user_id` = ?
                     ) fleets
                     INNER JOIN `' . USERS . '` uo ON uo.`id` = fleets.`fleet_owner`

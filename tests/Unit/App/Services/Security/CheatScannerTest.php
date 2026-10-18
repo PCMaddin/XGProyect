@@ -61,6 +61,24 @@ class CheatScannerTest extends DatabaseTestCase
         ], $this->signs());
     }
 
+    public function testTheAddressOfAPublicNetworkIsNoSign(): void
+    {
+        config(['cheats.shared_max_accounts' => 3]);
+        $trail = app(PlayerTrail::class);
+
+        foreach ([self::ALPHA, self::BETA, self::GAMMA, self::DELTA] as $player) {
+            $trail->login($player, '100.64.0.1', '', str_repeat((string) $player, 32), self::NOW - 600);
+        }
+
+        $trail->login(self::ALPHA, '10.0.0.7', '', str_repeat('1', 32), self::NOW - 300);
+        $trail->login(self::BETA, '10.0.0.7', '', str_repeat('2', 32), self::NOW - 300);
+
+        app(CheatScanner::class)->scan(self::NOW);
+
+        // four accounts behind 100.64.0.1: a network, not a sign; the two on 10.0.0.7 are
+        $this->assertSame([[self::ALPHA, 'shared_ip', self::BETA, 40], [self::BETA, 'shared_ip', self::ALPHA, 40]], $this->signs());
+    }
+
     public function testResourcesPushedToAStrongerPlayerAreASign(): void
     {
         $trail = app(PlayerTrail::class);
@@ -90,10 +108,14 @@ class CheatScannerTest extends DatabaseTestCase
         $trail = app(PlayerTrail::class);
         $firstDay = intdiv(self::NOW, 86400) - 4;
 
-        // Gamma: 22 hours on each of three days; Alpha: one hour of 1500 requests
+        // Gamma: 22 hours on each of three days, Delta on two only; Alpha: one hour of 1500 requests
         for ($day = 0; $day < 3; $day++) {
             for ($hour = 0; $hour < 22; $hour++) {
                 $trail->activity(self::GAMMA, ($firstDay + $day) * 86400 + $hour * 3600);
+
+                if ($day < 2) {
+                    $trail->activity(self::DELTA, ($firstDay + $day) * 86400 + $hour * 3600);
+                }
             }
         }
 

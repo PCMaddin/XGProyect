@@ -18,4 +18,7 @@ return [
     'ge_no' => '否',
     'gn_enabled' => '已启用',
     'gn_disabled' => '已禁用',
+    'player_find' => '查找玩家（名称开头）',
+    'alliance_find' => '查找联盟（名称开头）',
+    'player_find_more' => '按名称显示前 :count 名玩家；按名称搜索以查找其他玩家。',
 ];

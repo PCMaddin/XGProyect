@@ -18,4 +18,7 @@ return [
     'ge_no' => 'NO',
     'gn_enabled' => 'Enabled',
     'gn_disabled' => 'Disabled',
+    'player_find' => 'Find a player (start of the name)',
+    'alliance_find' => 'Find an alliance (start of the name)',
+    'player_find_more' => 'The first :count players by name are shown; search by name to find others.',
 ];

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin\Users;
 use App\Http\Requests\Admin\Users\UserPlanetRequest;
 use App\Http\Traits\Admin\Users\UserPlanetTrait;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -146,7 +147,7 @@ class UserMoonController extends BaseController
         return view('admin.users_moon_edit', [
             'user' => $user,
             'moon' => $this->preparePlanetViewData($moonData, $this->dateFormatExtended()),
-            'all_users' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'owners' => app(PlayerChoices::class)->choose(null, (int) ($moonData->planet_user_id ?? 0)),
             'images' => $this->getPlanetImages(),
             'percent_options' => $this->percentOptions(),
             'queue_options' => $this->buildProcessQueue((string) ($moonData->planet_b_building_id ?? '')),

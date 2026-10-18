@@ -64,6 +64,9 @@ class CheatScanner
 
     /**
      * Pairs of accounts that signed in with the same device or address.
+     * Only values used by a few accounts count: behind the address of a
+     * mobile network or a university thousands of players sign in, which
+     * is no sign, and their pairs (millions) filled the memory.
      *
      * @param list<int> $bots
      *
@@ -72,11 +75,17 @@ class CheatScanner
     private function sharedBy(string $column, int $since, array $bots): array
     {
         $groups = [];
-
-        $rows = DB::table('login_events')
+        $events = fn () => DB::table('login_events')
             ->where('created_at', '>=', $since)
             ->where($column, '!=', '')
-            ->whereNotIn('user_id', $bots)
+            ->whereNotIn('user_id', $bots);
+        $shared = $events()
+            ->select($column)
+            ->groupBy($column)
+            ->havingRaw('COUNT(DISTINCT user_id) BETWEEN 2 AND ?', [self::setting('shared_max_accounts', 20)]);
+
+        $rows = $events()
+            ->whereIn($column, $shared)
             ->groupBy($column, 'user_id')
             ->selectRaw($column . ' as shared, user_id, COUNT(*) as logins')
             ->get();
@@ -120,7 +129,7 @@ class CheatScanner
             $sent[self::asInt($values['from_user'] ?? 0)][self::asInt($values['to_user'] ?? 0)] = self::asFloat($values['amount'] ?? 0);
         }
 
-        $points = $this->points();
+        $points = $this->points(array_merge(array_keys($sent), ...array_map('array_keys', array_values($sent))));
         $threshold = self::setting('pushing_resources', 100000);
         $found = 0;
 
@@ -143,53 +152,68 @@ class CheatScanner
     }
 
     /**
+     * Around the clock: active in $hoursNeeded hours of a day on $daysNeeded
+     * days of the last week; at a script's pace: $pace requests in an hour.
+     * Counted by the database: the hours of a week of all players (with
+     * many players a hundred million rows) were read into PHP.
+     *
      * @param list<int> $bots
      */
     private function activity(int $now, array $bots): int
     {
         $sinceHour = intdiv($now, 3600) - 7 * 24;
-        $hoursNeeded = self::setting('active_hours', 20);
-        $daysNeeded = self::setting('active_days', 3);
-        $pace = self::setting('requests_per_hour', 1200);
-        $days = [];
-        $busiest = [];
-
-        $rows = DB::table('activity_hours')->where('hour', '>=', $sinceHour)->whereNotIn('user_id', $bots)->get(['user_id', 'hour', 'requests']);
-
-        foreach ($rows as $row) {
-            $values = get_object_vars($row);
-            $user = self::asInt($values['user_id'] ?? 0);
-            $day = intdiv(self::asInt($values['hour'] ?? 0), 24);
-            $days[$user][$day] = ($days[$user][$day] ?? 0) + 1;
-            $busiest[$user] = max($busiest[$user] ?? 0, self::asInt($values['requests'] ?? 0));
-        }
-
+        $hours = fn () => DB::table('activity_hours')->where('hour', '>=', $sinceHour)->whereNotIn('user_id', $bots);
         $found = 0;
 
-        foreach ($days as $user => $hoursPerDay) {
-            $fullDays = count(array_filter($hoursPerDay, static fn (int $hours): bool => $hours >= $hoursNeeded));
+        $fullDays = DB::query()
+            ->fromSub(
+                $hours()
+                    ->selectRaw('user_id, hour - hour % 24 AS day')
+                    ->groupByRaw('user_id, hour - hour % 24')
+                    ->havingRaw('COUNT(*) >= ?', [self::setting('active_hours', 20)]),
+                'days'
+            )
+            ->selectRaw('user_id, COUNT(*) AS full_days')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) >= ?', [self::setting('active_days', 3)])
+            ->orderBy('user_id')
+            ->get();
 
-            if ($fullDays >= $daysNeeded) {
-                $found += $this->suspicions->note($user, 'around_clock', 0, 50, ['days' => $fullDays], $now);
-            }
+        foreach ($fullDays as $row) {
+            $values = get_object_vars($row);
+            $found += $this->suspicions->note(self::asInt($values['user_id'] ?? 0), 'around_clock', 0, 50, ['days' => self::asInt($values['full_days'] ?? 0)], $now);
+        }
 
-            if ($busiest[$user] >= $pace) {
-                $found += $this->suspicions->note($user, 'machine_pace', 0, 50, ['requests' => $busiest[$user]], $now);
-            }
+        $fast = $hours()
+            ->where('requests', '>=', self::setting('requests_per_hour', 1200))
+            ->groupBy('user_id')
+            ->selectRaw('user_id, MAX(requests) AS busiest')
+            ->orderBy('user_id')
+            ->get();
+
+        foreach ($fast as $row) {
+            $values = get_object_vars($row);
+            $found += $this->suspicions->note(self::asInt($values['user_id'] ?? 0), 'machine_pace', 0, 50, ['requests' => self::asInt($values['busiest'] ?? 0)], $now);
         }
 
         return $found;
     }
 
     /**
-     * @return array<int, float> total points by player
+     * @param list<int> $users
+     *
+     * @return array<int, float> total points of these players
      */
-    private function points(): array
+    private function points(array $users): array
     {
         $points = [];
 
-        foreach (DB::table('users_statistics')->pluck('user_statistic_total_points', 'user_statistic_user_id')->all() as $user => $total) {
-            $points[self::asInt($user)] = self::asFloat($total);
+        foreach (array_chunk(array_values(array_unique($users)), 1000) as $chunk) {
+            $rows = DB::table('users_statistics')->whereIn('user_statistic_user_id', $chunk)->pluck('user_statistic_total_points', 'user_statistic_user_id');
+
+            foreach ($rows->all() as $user => $total) {
+                $points[self::asInt($user)] = self::asFloat($total);
+            }
         }
 
         return $points;

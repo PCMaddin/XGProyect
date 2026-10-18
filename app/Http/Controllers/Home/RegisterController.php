@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Home;
 use App\Http\Requests\RegisterRequest;
 use App\Mail\Welcome;
 use App\Services\RegistrationService;
+use App\Exceptions\UniverseFull;
 use App\Services\SessionService;
 use App\Services\SettingsService;
 use Illuminate\Auth\AuthManager;
@@ -56,13 +57,19 @@ class RegisterController extends BaseController
             ], 'register')->onlyInput('username');
         }
 
-        $newUser = $this->registrationService->register(array_merge($request->validated(), [
-            'name' => $request->validated()['username'],
-            'lastip' => $request->ip(),
-            'ip_at_reg' => $request->ip(),
-            'agent' => $request->header('User-Agent'),
-            'current_page' => $request->getRequestUri(),
-        ]));
+        try {
+            $newUser = $this->registrationService->register(array_merge($request->validated(), [
+                'name' => $request->validated()['username'],
+                'lastip' => $request->ip(),
+                'ip_at_reg' => $request->ip(),
+                'agent' => $request->header('User-Agent'),
+                'current_page' => $request->getRequestUri(),
+            ]));
+        } catch (UniverseFull) {
+            return back()->withErrors([
+                'username' => __('home/register.re_universe_full'),
+            ], 'register')->onlyInput('username');
+        }
 
         if ($newUser === null) {
             return back()->withErrors([

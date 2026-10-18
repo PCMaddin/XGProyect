@@ -18,4 +18,7 @@ return [
     'ge_no' => 'NIE',
     'gn_enabled' => 'Włączone',
     'gn_disabled' => 'Wyłączone',
+    'player_find' => 'Szukaj gracza (początek nazwy)',
+    'alliance_find' => 'Szukaj sojuszu (początek nazwy)',
+    'player_find_more' => 'Pokazano pierwszych :count graczy według nazwy; wyszukaj po nazwie, aby znaleźć innych.',
 ];

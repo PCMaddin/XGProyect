@@ -1870,6 +1870,127 @@ Baseline-Einträge.
     - zwei Recycler-Flotten auf 100.000 Metall Trümmer: alter Code unter
       anderem 400.000 Metall im Feld danach (300.000 aus dem Nichts), neuer
       Code fünfmal genau 100.000 geladen, Feld leer.
+- ✅ **Performance-Audit mit 1.000.000 Spielern.** Eine eigene Datenbank
+  mit 1 Mio. Spielern, 1,3 Mio. Planeten und Monden, 100.000 Flotten im
+  Flug, 3 Mio. Nachrichten, 20.000 Allianzen und 200.000 Freundschaften
+  (alle Tabellen eines Spielers gefüllt), dazu 1 Mio. Anmeldungen und
+  4,8 Mio. Aktivitätsstunden für die Betrugserkennung. Jede Abfrage eines
+  vollständigen Crawls (174 Formen) per `EXPLAIN` gegen diese Datenbank
+  geprüft, die Seiten über den Webserver gemessen.
+  - *Ein Universum fasst nicht 1 Mio. Spieler:* Neue Heimatplaneten
+    kommen auf die Positionen 4, 6, 8, 10, 12, also 9 × 499 × 5 =
+    22.455 Plätze. 1 Mio. Spieler heißt rund 45 Universen. Der Test
+    überfüllt ein Universum (401 Galaxien) absichtlich, damit jede Tabelle
+    die Größe hat, an der Abfragen ohne Index auffallen.
+  - *Universum voll:* `PlanetService::isPlanetFree` rief sich für jeden
+    belegten Platz selbst auf, in einem vollen Universum ohne Ende, bis PHP
+    abstürzte. Jetzt eine Schleife mit einer Abfrage pro System über jedes
+    System einmal; ist nichts frei, sagt die Registrierung es
+    (`re_universe_full`, zehn Sprachen).
+  - *Zwei Registrierungen, ein Platz:* Der Platz wurde vor der Transaktion
+    gesucht; zwei gleichzeitige Anmeldungen bekamen denselben. Jetzt in der
+    Transaktion, die Zeile des letzten Platzes ist gesperrt
+    (`lockForUpdate`).
+  - *Fehlende Indizes* (Migration `2026_10_18_000040`, idempotent, in
+    `install` und `400`): `fleets` und `messages` hatten außer dem
+    Primärschlüssel keinen Index, `planets` keinen auf Besitzer oder
+    Koordinaten. Jeder Seitenaufruf las alle Planeten (Planeten des
+    Spielers, Mond des aktuellen Planeten), alle Nachrichten (ungelesene
+    zählen) und alle Flotten (fällige, eigene). Neu u. a.
+    `planets(planet_user_id, planet_destroyed, planet_type)` – auch die
+    Reihenfolge, in der die Statistik summiert; ein einzelner Index auf
+    `planet_destroyed` lenkte den Optimierer dort auf einen fünfmal
+    langsameren Plan –, `planets(Koordinaten, Typ)`, Nachrichten nach
+    Empfänger/gelesen/Zeit, Flotten nach Besitzer, Ziel, Ankunft
+    `(fleet_mess, fleet_start_time)`, Rückkehr, Start- und Zielkoordinaten
+    und ACS-Gruppe, `users(name, ally_id, onlinetime, authlevel)`,
+    Freundschaften, Spionage-Log, ACS-Mitglieder, Aktivitätsstunden und je
+    Highscore-Rangliste der Rang. Auf 1 Mio. Spielern in 24 Sekunden
+    angelegt.
+  - *Die Statistik legte das Universum lahm:* Standard ist
+    `stat_update_time = 1` (Minute). Der Neuaufbau lief im Seitenaufruf,
+    mit mehreren Abfragen pro Spieler und am Ende einem einzigen INSERT mit
+    allen Spielern (weit über `max_allowed_packet`) aus PHP-Arrays von
+    Gigabytes. Jeder Aufruf, der ihn fällig fand, startete ihn; das
+    Zeitlimit beendete ihn nach 30 Sekunden, `stat_last_update` wurde nie
+    geschrieben, also begann der nächste Aufruf von vorn. Gemessen: jede
+    Seite 500 nach 60 Sekunden, dauerhaft.
+    - `Statistics\BulkStatistics`: Punkte rechnet die Datenbank (ein
+      `INSERT … SELECT` über Planeten und Forschung, geometrische Reihe mit
+      `POWER`); ein Rang ist die Position, an der ein Spieler nach Punkten
+      sortiert in eine temporäre Tabelle mit Auto-Increment eingefügt wird
+      (keine Fensterfunktionen, läuft also auf MySQL 5.7, MariaDB und
+      SQLite). Alle zehn Ranglisten in zwei Durchgängen (alter Rang,
+      neuer Rang), in Scheiben von 10.000 Spielern, damit ein
+      Seitenaufruf, der die Punkte eines Spielers ändert, nur auf eine
+      Scheibe wartet. Gleichstand: das ältere Konto zuerst. Allianzen
+      genauso.
+    - Gemessen auf 1 Mio. Spielern: 116 Sekunden, 45 MB Speicher.
+    - Nur ein Seitenaufruf übernimmt ihn: `SettingsService::claim`
+      verschiebt den Zeitstempel nur, wenn er noch der gelesene ist. Für
+      die Dauer liegt er eine Stunde voraus (stirbt der Lauf, beginnt der
+      nächste danach), am Ende auf dem Start des Laufs. Der Lauf kommt nach
+      der Antwort an den Spieler (`app()->terminating`, ohne Zeitlimit;
+      unter php-fpm wartet niemand darauf). Live mit 20 gleichzeitigen
+      Aufrufen: genau ein Lauf.
+    - Ebenso für Aufräumen, Backup und Bots (die Bots spielten bei
+      gleichzeitigen Aufrufen doppelt).
+  - *Spielerzahl auf jeder Seite:* Jeder Aufruf zählte alle Spieler der
+    Statistik (1,3 Sekunden bei 1 Mio.). Jetzt schreibt der Neuaufbau die
+    Zahl in die Option `stat_users`.
+  - *bcrypt bei jedem Seitenaufruf:* Die Sitzung hielt einen bcrypt-Hash
+    des Passwort-Hashes, geprüft bei jedem Aufruf: 73 ms Rechenzeit, bei
+    vielen Spielern der größte Posten (5.000 Aufrufe pro Sekunde wären
+    rund 365 Prozessorkerne nur dafür). Jetzt ein HMAC mit `SECRETWORD`,
+    verglichen in Mikrosekunden; ein neues Passwort beendet die Sitzung
+    weiterhin. Bestehende Sitzungen werden einmal auf die alte Art geprüft
+    und dann umgestellt, niemand wird abgemeldet.
+  - *Highscore:* sortierte jede Seite alle Spieler nach Punkten (Seite
+    5.001: 5,6 Sekunden) und bot jede der 10.000 Seiten als eigene Option
+    an. Jetzt nach Rang über den Index (1 ms) und rund 150 Optionen (um die
+    aktuelle Seite herum, dann jede 10. und 100.). Fehler behoben: ab Rang
+    10.001 sprang die Seite wieder an den Anfang. Ehrentitel zählen über
+    einen Index statt über die ganze Statistik.
+  - *Betrugserkennung* (stündlich): bildete für jede gemeinsame Adresse
+    alle Paare. Hinter einer Mobilfunk- oder Uni-Adresse mit 5.000
+    Spielern sind das 25 Mio. Paare. Alter Scan: Speicherüberlauf bei 2 GB.
+    Jetzt zählen nur Browser und Adressen von 2 bis
+    `XGP_CHEATS_SHARED_MAX_ACCOUNTS` (20) Konten; die Aktivität wertet die
+    Datenbank aus statt einer Woche Stundenzeilen in PHP; Punkte werden nur
+    für die beteiligten Spieler gelesen. Neuer Scan: 47 Sekunden, 45 MB.
+  - *Admin-Listen:* Besitzer von Planet, Mond und Allianz, Gründer und
+    „Spieler sperren“ listeten jeden Spieler (bei 1 Mio. rund 50 MB HTML),
+    die Spielerseite jede Allianz (5,2 MB). Jetzt die ersten 500 nach Namen
+    mit Suche nach dem Namensanfang, der aktuelle Besitzer immer dabei
+    (`Admin\PlayerChoices`); Spielerseite 210 KB. Die Flottenliste zeigt die
+    nächsten 500.
+  - *Lobby:* zählte bei jedem Aufruf die Spieler jedes Universums (200 ms
+    pro Universum bei 1 Mio.); die Zahl bleibt jetzt eine Minute im Cache
+    des Universums.
+  - *ACS:* `fleet_group` ist Text, die Gruppen-Id eine Zahl; der Vergleich
+    konnte keinen Index nutzen. Jetzt als Text verglichen.
+  - *Ergebnis auf 1 Mio. Spielern* (Webserver, angemeldeter Spieler):
+    Übersicht vorher 40 Sekunden (vor den Indizes), mit fälliger Statistik
+    jede Seite 500; nachher alle Spielerseiten 46 bis 125 ms (Übersicht,
+    Galaxie, Highscore auch auf Seite 5.001, Nachrichten, Bewegungen,
+    Flotte, Freunde, Suche, Imperium, Allianz, Forschung). Admin-Seiten
+    unter 200 ms außer der Startseite (0,7 s, zählt Planeten und Spieler).
+  - *Tests:* `BulkStatisticsTest` (Punkte wie einzeln gezählt, Ränge,
+    alter Rang, Admins ausgenommen, Allianzen, zerstörte Planeten, Ids in
+    verschiedenen Scheiben), `LargeUniverseTest` (Indizes, `claim`,
+    HMAC-Sitzung und Umstellung, nächster freier Platz, volles Universum
+    mit allen 22.455 Plätzen, Registrierung meldet es, Admin-Listen,
+    Highscore-Seiten), `LargeUniverseMysqlTest` (Neuaufbau einmal, kein
+    Neuaufbau nach fremdem Claim, Highscore über Rang 10.000 im Browser,
+    alte Sitzung angenommen und umgestellt), Betrugserkennung (öffentliche
+    Adresse, Tagesgrenze), Lobby zählt je Universum. 14 Mutationsproben
+    schlugen an (zwei erst, nachdem die Tests geschärft waren), eine
+    Kontrollprobe (eine einzige Scheibe) bestand wie erwartet.
+  - **Empfehlung** für große Universen: `stat_update_time` auf 15 Minuten
+    oder mehr; php-fpm (der Neuaufbau läuft dann nach der Antwort); MySQL
+    oder MariaDB mit `innodb_buffer_pool_size` in der Größe der Daten
+    (1 Mio. Spieler ≈ 2,5 GB); mehrere Universen statt eines übervollen.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

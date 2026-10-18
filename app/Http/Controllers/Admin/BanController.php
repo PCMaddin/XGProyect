@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Requests\Admin\BanRequest;
 use App\Models\Ban;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,15 +23,13 @@ class BanController extends BaseController
         /** @var User $adminUser */
         $adminUser = Auth::user();
 
-        $usersQuery = User::query()
-            ->select('users.id', 'users.name')
-            ->leftJoin('bans', 'bans.user_id', '=', 'users.id')
-            ->whereNull('bans.user_id')
-            ->orderBy('users.name');
+        $choices = app(PlayerChoices::class)->choose(static function ($query) use ($adminUser): void {
+            $query->leftJoin('bans', 'bans.user_id', '=', 'users.id')->whereNull('bans.user_id');
 
-        if ((int) $adminUser->authlevel !== 3) {
-            $usersQuery->where('users.authlevel', '<', $adminUser->authlevel);
-        }
+            if ((int) $adminUser->authlevel !== 3) {
+                $query->where('users.authlevel', '<', $adminUser->authlevel);
+            }
+        });
 
         $bannedUsers = Ban::query()
             ->select('users.id', 'users.name', 'bans.until')
@@ -39,7 +38,8 @@ class BanController extends BaseController
             ->get();
 
         return view('admin.ban', [
-            'users' => $usersQuery->get(),
+            'users' => $choices['players'],
+            'player_find' => $choices,
             'banned_users' => $bannedUsers,
         ]);
     }

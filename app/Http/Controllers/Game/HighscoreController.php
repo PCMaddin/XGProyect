@@ -109,8 +109,8 @@ class HighscoreController extends BaseController
             INNER JOIN `' . USERS . '` AS u ON u.`id` = s.`user_statistic_user_id`
             LEFT JOIN `' . ALLIANCE . '` AS a ON a.`alliance_id` = u.`ally_id`
             WHERE `authlevel` <= ' . $adminLevel . '
-            ORDER BY `user_statistic_' . $mapping['order'] . '` DESC, `user_statistic_total_rank` ASC
-            LIMIT ' . $start . ', 100;'
+                AND s.`user_statistic_' . $mapping['rank'] . '` BETWEEN ' . ($start + 1) . ' AND ' . ($start + 100) . '
+            ORDER BY s.`user_statistic_' . $mapping['rank'] . '` ASC;'
         );
 
         $position = $start + 1;
@@ -176,8 +176,8 @@ class HighscoreController extends BaseController
                 ) AS `ally_members`
             FROM `' . ALLIANCE_STATISTICS . '` AS s
             INNER JOIN `' . ALLIANCE . '` AS a ON a.`alliance_id` = s.`alliance_statistic_alliance_id`
-            ORDER BY `alliance_statistic_' . $mapping['order'] . '` DESC, `alliance_statistic_total_rank` ASC
-            LIMIT ' . $start . ', 100;'
+            WHERE s.`alliance_statistic_' . $mapping['rank'] . '` BETWEEN ' . ($start + 1) . ' AND ' . ($start + 100) . '
+            ORDER BY s.`alliance_statistic_' . $mapping['rank'] . '` ASC;'
         );
 
         $position = $start + 1;
@@ -249,17 +249,27 @@ class HighscoreController extends BaseController
         return $html;
     }
 
+    /**
+     * The pages of 100 to choose from: all near the current one, then every
+     * 10th and every 100th. Each of the 10 000 pages of a million players
+     * was an option of its own.
+     */
     private function buildRangeList(int $count, int $range): string
     {
         $list = '';
-        $lastPage = $count > 100 ? (int) floor($count / 100) : 0;
+        $lastPage = intdiv(max($count, 1) - 1, 100);
+        $current = intdiv(max($range, 1) - 1, 100);
 
         for ($page = 0; $page <= $lastPage; $page++) {
+            $distance = abs($page - $current);
+
+            if ($distance > 10 && !($distance <= 100 && $page % 10 === 0) && $page % 100 !== 0 && $page !== $lastPage) {
+                continue;
+            }
+
             $pageValue = $page * 100 + 1;
-            $pageRange = $pageValue + 99;
-            $list .= '<option value="' . $pageValue . '"'
-                . (($range >= $pageValue && $range <= $pageRange) ? ' SELECTED' : '')
-                . '>' . $pageValue . '-' . $pageRange . '</option>';
+            $list .= '<option value="' . $pageValue . '"' . ($page === $current ? ' SELECTED' : '') . '>'
+                . $pageValue . '-' . ($pageValue + 99) . '</option>';
         }
 
         return $list;
@@ -328,9 +338,13 @@ class HighscoreController extends BaseController
         return $title === '' ? '' : ' (' . e((string) __('game/highscore.st_title_' . $title)) . ')';
     }
 
+    /**
+     * How many ranks lie before the chosen page (after rank 10 000 it went
+     * back to the top).
+     */
     private function pageOffset(int $range): int
     {
-        return (intdiv($range, 100) % 100) * 100;
+        return intdiv(max($range, 1) - 1, 100) * 100;
     }
 
     /**

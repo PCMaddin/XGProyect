@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Admin\Users;
 
 use App\Http\Requests\Admin\Users\UserInfoRequest;
 use App\Http\Requests\Admin\Users\UserSettingsRequest;
-use App\Models\Alliance;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use App\Services\Admin\UsersManagementService;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
@@ -154,8 +154,7 @@ class UsersController extends BaseController
             'user' => $user,
             'data' => $data,
             'planets' => $this->usersManagement->getPlanets($user->id),
-            'alliances' => Alliance::query()->select('alliance_id', 'alliance_name', 'alliance_tag')->orderBy('alliance_name')->get(),
-            'all_users' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'alliances' => app(PlayerChoices::class)->alliances((int) ($data->ally_id ?? 0)),
             'register_time' => ($registerTime === 0) ? '-' : date($dateFormat, $registerTime),
             'online_status' => $this->onlineStatus($onlineTime),
             'user_roles' => $this->buildUserRolesList($user),

@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 
 class FleetsController extends BaseController
 {
+    private const SHOWN = 500;
+
     public function __construct(
         private FleetsService $fleetsService,
         private FormatService $formatService,
@@ -84,7 +86,9 @@ class FleetsController extends BaseController
      */
     private function buildFleetMovements(): array
     {
+        // the next ones to come back; all fleets of a big universe make a page PHP cannot build
         return Fleets::orderBy('fleet_end_time')
+            ->limit(self::SHOWN)
             ->get()
             ->map(function (Fleets $fleet): array {
                 $shipLines = collect(FleetShips::decode($fleet->fleet_array))

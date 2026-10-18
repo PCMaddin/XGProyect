@@ -17,6 +17,9 @@ declare(strict_types=1);
 return [
     // how far back the signs are looked for (days)
     'window_days' => (int) env('XGP_CHEATS_WINDOW_DAYS', 30),
+    // a browser or address shared by more accounts is a public network
+    // (mobile, university), no sign of multiple accounts
+    'shared_max_accounts' => (int) env('XGP_CHEATS_SHARED_MAX_ACCOUNTS', 20),
     // resources sent to a stronger player, minus what came back, from here on
     'pushing_resources' => (int) env('XGP_CHEATS_PUSHING_RESOURCES', 100000),
     // active in this many hours of a day …

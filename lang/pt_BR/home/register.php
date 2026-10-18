@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     're_disabled' => 'O cadastro de novos jogadores não está disponível no momento.',
     're_create_fail' => 'Não conseguimos concluir seu cadastro agora. Tente novamente em instantes.',
+    're_universe_full' => 'Este universo está cheio: não há mais lugar livre para um novo planeta natal. Escolha outro universo.',
     're_welcome_message_from' => 'Admin',
     're_welcome_message_subject' => 'Bem-vindo ao XG Proyect!',
     're_welcome_message_content' => 'Saudações, imperador %s!<br><br>Meus mais sinceros parabéns pelo início do seu reinado. Espero poder ajudar você nos primeiros passos.<br><br>À esquerda você vê o menu, com o qual comanda o destino do seu império galáctico.<br><br>Você certamente já conhece a “Visão Geral”. Em “Recursos” e “Instalações” você constrói os edifícios de que seu império precisa. Comece bem melhorando sua planta de energia solar, para obter energia e abastecer suas minas.<br><br>Depois, melhore suas minas de metal e de cristal para começar a produzir os recursos necessários. Você também pode simplesmente explorar os menus; logo vai se sentir em casa.',
