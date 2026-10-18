@@ -8,6 +8,7 @@ use App\Http\Requests\RecoverRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Mail\Recover;
 use App\Models\User;
+use App\Services\Instances\InstanceContext;
 use App\Services\SettingsService;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\View\Factory;
@@ -27,10 +28,12 @@ use Symfony\Component\HttpFoundation\Response;
  * one mailed in plain text, so anybody who knew a player's email address
  * could lock them out; and its answer told whether an account existed for
  * an address.
+ *
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class RecoverController extends BaseController
 {
-    public function __construct(private SettingsService $settingsService)
+    public function __construct(private SettingsService $settingsService, private InstanceContext $context)
     {
     }
 
@@ -55,7 +58,7 @@ class RecoverController extends BaseController
                 // the answer stays the same either way (it must not tell
                 // whether an account exists); the failure is logged
                 try {
-                    Mail::to($email)->send(new Recover(route('account.reset', ['token' => $token, 'email' => $email])));
+                    Mail::to($email)->send(new Recover($this->context->link(route('account.reset', ['token' => $token, 'email' => $email]))));
                 } catch (Throwable $e) {
                     report($e);
                 }

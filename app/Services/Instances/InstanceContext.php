@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\DB;
  */
 class InstanceContext
 {
+    /** the query parameter that names the universe in links sent by mail */
+    public const QUERY = 'universe';
+
     private ?Instance $current = null;
 
     private ?string $baseDatabase = null;
@@ -28,6 +31,19 @@ class InstanceContext
     public function current(): ?Instance
     {
         return $this->current;
+    }
+
+    /**
+     * A link into this universe that also works in a browser that never
+     * chose it in the lobby (links sent by mail).
+     */
+    public function link(string $url): string
+    {
+        if ($this->current === null) {
+            return $url;
+        }
+
+        return $url . (str_contains($url, '?') ? '&' : '?') . self::QUERY . '=' . rawurlencode($this->current->slug);
     }
 
     public function activate(Instance $instance): void

@@ -13,8 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * With several universes, the one chosen in the lobby (cookie) becomes the
  * request's database before the session starts (sessions live in the
- * universe's database). Without a valid choice the player goes to the lobby.
- * A single universe (no registry) passes untouched.
+ * universe's database). A link sent by mail names its universe in the
+ * query (?universe=slug), which wins over the cookie and is remembered like
+ * a choice in the lobby. Without a valid choice the player goes to the
+ * lobby. A single universe (no registry) passes untouched.
  */
 class SelectInstance
 {
@@ -38,7 +40,8 @@ class SelectInstance
             return $next($request);
         }
 
-        $slug = $request->cookie(self::COOKIE);
+        $linked = $request->query(InstanceContext::QUERY);
+        $slug = is_string($linked) && $linked !== '' ? $linked : $request->cookie(self::COOKIE);
         $instance = is_string($slug) ? $this->registry->find($slug) : null;
 
         if ($instance === null || !$instance->isOpen()) {
@@ -46,7 +49,12 @@ class SelectInstance
         }
 
         $this->context->activate($instance);
+        $response = $next($request);
 
-        return $next($request);
+        if ($slug === $linked) {
+            $response->headers->setCookie(cookie()->forever(self::COOKIE, $instance->slug));
+        }
+
+        return $response;
     }
 }

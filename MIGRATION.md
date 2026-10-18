@@ -1359,6 +1359,14 @@ Baseline-Einträge.
     `spieler3`): ohne `STRIPE_SECRET` kein Button und die Shop-Seite lehnt
     ab; mit Test-Schlüsseln Button und Paketliste (1,99 € … 34,99 €);
     Webhook mit falscher Signatur → 400 ohne Session-Cookie.
+- ✅ **Universum in Mail-Links:** Links aus Mails nennen ihr Universum
+  (`?universe=<slug>`): „Passwort vergessen“, Willkommensmail und
+  Rundmails. Die Middleware nimmt das Universum aus dem Link vor dem
+  Cookie und merkt es sich wie eine Wahl in der Lobby. Vorher landete ein
+  Spieler, der den Reset-Link auf einem anderen Gerät öffnete, in der
+  Lobby und konnte den Code im falschen Universum suchen. Test in
+  `InstancesMysqlTest` (Link wählt, Reset-Mail trägt das Universum,
+  unbekanntes Universum führt zur Lobby).
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

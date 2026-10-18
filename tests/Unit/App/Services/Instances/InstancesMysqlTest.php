@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Services\Instances;
 
 use App\Http\Middleware\SelectInstance;
+use App\Mail\Recover;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceProvisioner;
@@ -12,6 +13,7 @@ use App\Services\Instances\InstanceRegistry;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Testing\PendingCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\MysqlTestCase;
@@ -152,6 +154,22 @@ class InstancesMysqlTest extends MysqlTestCase
         app(InstanceContext::class)->reset();
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
         $this->post('/universes/u1')->assertRedirect(route('lobby.index'));
+    }
+
+    public function testAMailLinkNamesTheUniverse(): void
+    {
+        $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        Mail::fake();
+
+        // a browser that never chose in the lobby: the link chooses, and is remembered
+        $this->get('/?universe=u1')->assertOk()->assertPlainCookie(SelectInstance::COOKIE, 'u1');
+        $this->assertSame('u1', app(InstanceContext::class)->current()?->slug);
+
+        $this->withUnencryptedCookie(SelectInstance::COOKIE, 'u1')->post('/account/recover', ['email' => 'admin@example.com'])->assertRedirect();
+        Mail::assertSent(Recover::class, static fn (Recover $mail): bool => str_contains($mail->resetUrl, '/reset/') && str_ends_with($mail->resetUrl, '&universe=u1'));
+
+        app(InstanceContext::class)->reset();
+        $this->get('/?universe=nope')->assertRedirect(route('lobby.index'));
     }
 
     public function testTheInstalledGameIsAdopted(): void
