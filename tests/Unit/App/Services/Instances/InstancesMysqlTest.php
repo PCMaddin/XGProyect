@@ -155,11 +155,13 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertIsString($cachePrefix);
         $this->assertStringEndsWith('_u1', $cachePrefix);
         $this->assertSame($backupName . '_u1', config('backup.backup.name'));
+        $this->assertSame(storage_path('logs/xgproyect-u1.log'), config('logging.channels.single.path'));
 
         // an unknown or closed universe is not played
         $this->withUnencryptedCookie(SelectInstance::COOKIE, 'nope')->get('/')->assertRedirect(route('lobby.index'));
         app(InstanceContext::class)->reset();
         $this->assertSame($backupName, config('backup.backup.name'));
+        $this->assertSame(storage_path('logs/xgproyect.log'), config('logging.channels.single.path'));
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
         $this->post('/universes/u1')->assertRedirect(route('lobby.index'));
     }

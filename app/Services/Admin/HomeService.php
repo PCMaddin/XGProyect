@@ -26,7 +26,10 @@ class HomeService
 
     public function hasServerErrors(): bool
     {
-        return file_exists(storage_path('logs/xgproyect.log'));
+        // the error log of this universe (each universe writes its own)
+        $path = config('logging.channels.single.path');
+
+        return file_exists(is_string($path) && $path !== '' ? $path : storage_path('logs/xgproyect.log'));
     }
 
     /**

@@ -6,13 +6,14 @@ namespace App\Services\Instances;
 
 use Illuminate\Cache\CacheManager;
 use Illuminate\Foundation\Application;
+use Illuminate\Log\LogManager;
 use Illuminate\Support\Facades\DB;
 
 /**
  * The universe this request or job plays in: its database becomes the
- * game's connection, and the cache and the backups get names of their own
- * (the cache prefix, the backup folder), so nothing is shared between
- * universes but the registry.
+ * game's connection, and the cache, the backups and the error log get names
+ * of their own (the cache prefix, the backup folder, xgproyect-<slug>.log),
+ * so nothing is shared between universes but the registry.
  */
 class InstanceContext
 {
@@ -23,13 +24,16 @@ class InstanceContext
 
     private ?string $baseDatabase = null;
 
-    /** settings that get the universe's slug appended */
-    private const PER_UNIVERSE = ['cache.prefix', 'backup.backup.name'];
+    /** settings that get the universe's slug appended (log files before .log) */
+    private const PER_UNIVERSE = ['cache.prefix', 'backup.backup.name', 'logging.channels.single.path', 'logging.channels.daily.path'];
+
+    /** log channels that write the files above */
+    private const LOG_CHANNELS = ['stack', 'single', 'daily'];
 
     /** @var array<string, string> their values for the base database */
     private array $base = [];
 
-    public function __construct(private Application $app, private CacheManager $cache)
+    public function __construct(private Application $app, private CacheManager $cache, private LogManager $log)
     {
     }
 
@@ -59,10 +63,11 @@ class InstanceContext
 
         foreach (self::PER_UNIVERSE as $key) {
             $this->base[$key] ??= self::str(config($key));
-            $settings[$key] = $this->base[$key] . '_' . $instance->slug;
+            $settings[$key] = self::suffixed($this->base[$key], $instance->slug);
         }
 
         config($settings);
+        $this->forgetLogChannels();
         DB::purge($connection);
         $this->cache->forgetDriver($this->cache->getDefaultDriver());
         // options and other per-request services were read from the base database
@@ -102,10 +107,26 @@ class InstanceContext
 
         $connection = $this->gameConnection();
         config(['database.connections.' . $connection . '.database' => $this->baseDatabase] + $this->base);
+        $this->forgetLogChannels();
         DB::purge($connection);
         $this->cache->forgetDriver($this->cache->getDefaultDriver());
         $this->app->forgetScopedInstances();
         $this->current = null;
+    }
+
+    /**
+     * "xgp" → "xgp_andromeda", ".../xgproyect.log" → ".../xgproyect-andromeda.log".
+     */
+    private static function suffixed(string $value, string $slug): string
+    {
+        return str_ends_with($value, '.log') ? substr($value, 0, -4) . '-' . $slug . '.log' : $value . '_' . $slug;
+    }
+
+    private function forgetLogChannels(): void
+    {
+        foreach (self::LOG_CHANNELS as $channel) {
+            $this->log->forgetChannel($channel);
+        }
     }
 
     private function gameConnection(): string

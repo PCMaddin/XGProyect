@@ -1036,8 +1036,6 @@ Baseline-Einträge.
     Cron-Eintrag `* * * * * php artisan schedule:run`.
   - *Nebenbei:* Das Anlegen des Administrators ist aus dem Installer in
     `AdminAccount` gezogen; Installer und Befehle teilen es.
-  - *Gemeinsam bleiben:* die Logdateien (`storage/logs`) und die
-    Admin-Fehlerliste, die sie liest.
   - *Tests:* `InstancesMysqlTest` auf MariaDB:
     - Anlegen mit eigener Datenbank, Admin und Optionen.
     - Abweisen doppelter Slugs, fremder Datenbanken, ungültiger Slugs
@@ -1379,6 +1377,14 @@ Baseline-Einträge.
   Galaxien verteilt, wie „Bots erzeugen“ im Admin. Vorher startete ein
   neues Universum ohne Gegner, bis der Admin sie von Hand anlegte. Test:
   Monatsstart mit drei Bots, jeder mit Heimatplanet.
+- ✅ **Fehlerlog je Universum:** Jedes Universum schreibt in seine eigene
+  Logdatei `storage/logs/xgproyect-<slug>.log` (Kanäle `single` und
+  `daily`, beim Umschalten neu geöffnet). Die Fehlerliste im Admin, ihr
+  Export und „Alle löschen“ sowie der Hinweis auf der Admin-Startseite
+  betreffen nur das eigene Universum. Was ohne Universum läuft (Lobby,
+  Befehle, Stripe-Webhook vor dem Umschalten), bleibt in
+  `xgproyect.log`. Test in `InstancesMysqlTest`; live geprüft, dass ein
+  Fehler im Universum in dessen Datei landet.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

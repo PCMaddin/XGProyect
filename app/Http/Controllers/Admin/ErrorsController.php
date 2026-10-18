@@ -79,9 +79,13 @@ class ErrorsController extends BaseController
         ];
     }
 
+    /**
+     * The error log of this universe (each universe writes its own).
+     */
     private function logFilePath(): ?string
     {
-        $path = storage_path('logs/xgproyect.log');
+        $configured = config('logging.channels.single.path');
+        $path = is_string($configured) && $configured !== '' ? $configured : storage_path('logs/xgproyect.log');
 
         return File::exists($path) ? $path : null;
     }
