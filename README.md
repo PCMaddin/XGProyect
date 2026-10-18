@@ -70,6 +70,10 @@ If you already created your own `.env`, those values may be different. Check tha
 
 `.env.example` is set up for a public server (`APP_ENV=production`, `APP_DEBUG=false`). For local development set `APP_ENV=local` and `APP_DEBUG=true` in your `.env` to get detailed error pages and the debug bar; never on a public server, since error pages then show source code, queries and request data to every visitor.
 
+## Several universes
+
+One server can run several universes, each in a database of its own, with a lobby, a new universe every month and dark matter sold by card (Stripe) or WAX. See [docs/universes.md](docs/universes.md) (German) for setup, commands and payments.
+
 ## Mailpit
 
 Mailpit captures outgoing emails locally so you can inspect them from a simple web UI.

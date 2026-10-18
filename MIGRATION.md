@@ -1385,6 +1385,12 @@ Baseline-Einträge.
   Befehle, Stripe-Webhook vor dem Umschalten), bleibt in
   `xgproyect.log`. Test in `InstancesMysqlTest`; live geprüft, dass ein
   Fehler im Universum in dessen Datei landet.
+- ✅ **Betreiberhandbuch:** `docs/universes.md` beschreibt den Betrieb mit
+  mehreren Universen an einer Stelle: Voraussetzungen (Datenbankrechte,
+  Cron), erste Einrichtung, alle `xgp:instance:*`-Befehle mit Optionen,
+  Monatsstart mit allen `XGP_MONTHLY_*`-Variablen, Stripe und WAX
+  einrichten, Ergebnisse der WAX-Gutschrift, Updates, Backups, Logs,
+  Mail-Links und häufige Fehler. Die README verweist darauf.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer
