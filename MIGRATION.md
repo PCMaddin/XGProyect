@@ -1374,6 +1374,11 @@ Baseline-Einträge.
   jetzt wie beim Cache-Präfix den Slug an `backup.backup.name` an:
   jedes Universum hat seinen eigenen Backup-Ordner und seine eigene
   Liste im Admin. Test in `InstancesMysqlTest`.
+- ✅ **Bots beim Anlegen eines Universums:** `xgp:instance:create --bots=N`
+  und `XGP_MONTHLY_BOTS` für den Monatsstart legen KI-Gegner an, über alle
+  Galaxien verteilt, wie „Bots erzeugen“ im Admin. Vorher startete ein
+  neues Universum ohne Gegner, bis der Admin sie von Hand anlegte. Test:
+  Monatsstart mit drei Bots, jeder mit Heimatplanet.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

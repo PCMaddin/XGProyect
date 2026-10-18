@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Instances;
 
+use App\Services\Admin\BotService;
 use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\Console\Kernel as Artisan;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +67,9 @@ class InstanceProvisioner
      * must hold no game yet; registered once it is installed.
      *
      * @param array<string, string> $options more options of the universe, by name
+     * @param int                   $bots    AI opponents spread over the galaxies
      */
-    public function create(Instance $instance, string $adminName, string $adminEmail, string $adminPassword, array $options = []): void
+    public function create(Instance $instance, string $adminName, string $adminEmail, string $adminPassword, array $options = [], int $bots = 0): void
     {
         $this->validate($instance);
         $this->prepareRegistry();
@@ -85,7 +87,7 @@ class InstanceProvisioner
         $this->createDatabase($instance->database);
         $options += $this->inheritedOptions();
 
-        $this->context->runIn($instance, function () use ($instance, $adminName, $adminEmail, $adminPassword, $options): void {
+        $this->context->runIn($instance, function () use ($instance, $adminName, $adminEmail, $adminPassword, $options, $bots): void {
             if (DB::connection()->getSchemaBuilder()->hasTable('migrations')) {
                 throw new RuntimeException('The database ' . $instance->database . ' holds a game already.');
             }
@@ -99,6 +101,11 @@ class InstanceProvisioner
 
             $this->admins->create($adminName, $adminEmail, $adminPassword);
             $this->writeOptions(['game_name' => $instance->name, 'premium_mode' => $instance->mode] + $options);
+
+            if ($bots > 0) {
+                // resolved here: it reads the options of the new universe
+                app(BotService::class)->createBots($bots, 1, MAX_GALAXY_IN_WORLD);
+            }
         });
 
         $this->registry->register($instance);

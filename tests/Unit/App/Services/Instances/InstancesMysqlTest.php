@@ -199,6 +199,7 @@ class InstancesMysqlTest extends MysqlTestCase
             'mode' => 'pay2win',
             'options' => 'game_speed=5000, fleet_speed=7000',
             'keep_open' => 1,
+            'bots' => 3,
             'admin' => ['name' => 'Monthly', 'email' => 'monthly@example.com', 'password' => 'secret-password'],
         ]]);
 
@@ -212,7 +213,9 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame('Universe 2', $registry->find('zz-test-2030-06')?->name);
         $this->assertSame(Instance::OPEN, $registry->find('zz-test-2030-06')->status);
         $this->assertSame(['7000'], $this->inUniverse('xgp_uni_zz_test_2030_06', "SELECT value FROM xgp_options WHERE name = 'fleet_speed'"));
-        $this->assertSame(['Monthly'], $this->inUniverse('xgp_uni_zz_test_2030_06', 'SELECT name FROM xgp_users'));
+        $this->assertSame(['Monthly'], $this->inUniverse('xgp_uni_zz_test_2030_06', 'SELECT name FROM xgp_users WHERE user_is_bot = 0'));
+        // with AI opponents, each on a home planet
+        $this->assertSame(['3', '3'], $this->inUniverse('xgp_uni_zz_test_2030_06', 'SELECT COUNT(*), (SELECT COUNT(*) FROM xgp_planets p JOIN xgp_users u ON u.id = p.planet_user_id WHERE u.user_is_bot = 1) FROM xgp_users WHERE user_is_bot = 1'));
     }
 
     private function createUniverse(string $slug, string $database, string $mode = Instance::PLAY2WIN): PendingCommand

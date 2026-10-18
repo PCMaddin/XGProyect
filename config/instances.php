@@ -25,6 +25,8 @@ return [
         'payments' => env('XGP_MONTHLY_PAYMENTS', 'stripe'),
         'options' => env('XGP_MONTHLY_OPTIONS', ''),
         'keep_open' => (int) env('XGP_MONTHLY_KEEP_OPEN', 0),
+        // AI opponents the new universe starts with
+        'bots' => (int) env('XGP_MONTHLY_BOTS', 0),
         'admin' => [
             'name' => env('XGP_MONTHLY_ADMIN_NAME', ''),
             'email' => env('XGP_MONTHLY_ADMIN_EMAIL', ''),

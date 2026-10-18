@@ -21,6 +21,7 @@ class CreateInstance extends Command
         {--name= : name shown in the lobby, default: the slug}
         {--mode=play2win : pay2win (dark matter for money) or play2win (no purchase)}
         {--payments=stripe : ways to pay in pay2win: stripe, wax or stripe,wax}
+        {--bots=0 : AI opponents to start with}
         {--database= : database of the universe, default: xgp_uni_<slug>}
         {--admin-name= : administrator of the universe}
         {--admin-email=}
@@ -51,6 +52,7 @@ class CreateInstance extends Command
                 $this->text('admin-email') ?: self::str($this->ask('Administrator e-mail')),
                 $this->text('admin-password') ?: self::str($this->secret('Administrator password')),
                 $options,
+                max(0, (int) $this->text('bots')),
             );
         } catch (Throwable $e) {
             $this->error($e->getMessage());
