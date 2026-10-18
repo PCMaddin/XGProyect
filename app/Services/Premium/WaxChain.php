@@ -40,18 +40,23 @@ class WaxChain
     }
 
     /**
-     * A page of the account's WAX transfers (to it and from it) after the
-     * given time, oldest first, and how many actions the page held.
+     * A page of the account's transfers (to it and from it) of the given
+     * tokens (default: WAX) after the given time, oldest first, and how many
+     * actions the page held.
+     *
+     * @param list<TokenSpec> $tokens
      *
      * @return array{transfers: list<WaxTransfer>, actions: int}
      *
      * @throws WaxException
      */
-    public function transfers(string $account, int $after, int $skip): array
+    public function transfers(string $account, int $after, int $skip, array $tokens = []): array
     {
+        $tokens = $tokens === [] ? [TokenSpec::wax()] : $tokens;
+        $contracts = array_unique(array_map(static fn (TokenSpec $token): string => $token->contract . ':transfer', $tokens));
         $history = $this->get('/v2/history/get_actions', [
             'account' => $account,
-            'filter' => self::CONTRACT . ':transfer',
+            'filter' => implode(',', $contracts),
             'sort' => 'asc',
             'after' => gmdate('Y-m-d\TH:i:s', $after),
             'limit' => self::PAGE_SIZE,
@@ -66,7 +71,7 @@ class WaxChain
         $transfers = [];
 
         foreach ($actions as $action) {
-            $transfer = is_array($action) ? self::transfer($action) : null;
+            $transfer = is_array($action) ? self::transfer($action, $tokens) : null;
 
             if ($transfer !== null) {
                 $transfers[] = $transfer;
@@ -77,16 +82,19 @@ class WaxChain
     }
 
     /**
-     * A transfer of the system token, or null for anything else.
+     * A transfer of one of the given tokens (default: WAX), or null for
+     * anything else.
      *
-     * @param array<mixed> $action
+     * @param array<mixed>    $action
+     * @param list<TokenSpec> $tokens
      */
-    public static function transfer(array $action): ?WaxTransfer
+    public static function transfer(array $action, array $tokens = []): ?WaxTransfer
     {
         $act = is_array($action['act'] ?? null) ? $action['act'] : [];
         $data = is_array($act['data'] ?? null) ? $act['data'] : [];
+        $token = self::token($act['account'] ?? null, self::text($data, 'quantity'), $tokens === [] ? [TokenSpec::wax()] : $tokens);
 
-        if (($act['account'] ?? null) !== self::CONTRACT || ($act['name'] ?? null) !== 'transfer') {
+        if ($token === null || ($act['name'] ?? null) !== 'transfer') {
             return null;
         }
 
@@ -97,11 +105,28 @@ class WaxChain
             (int) strtotime(self::text($action, 'timestamp') . 'Z'),
             self::text($data, 'from'),
             self::text($data, 'to'),
-            self::units(self::text($data, 'quantity')) ?? 0,
+            $token->units(self::text($data, 'quantity')) ?? 0,
             self::text($data, 'memo'),
+            $token->symbol,
         );
 
         return self::complete($transfer) ? $transfer : null;
+    }
+
+    /**
+     * The token a transfer moves: its contract and the symbol of its quantity.
+     *
+     * @param list<TokenSpec> $tokens
+     */
+    private static function token(mixed $contract, string $quantity, array $tokens): ?TokenSpec
+    {
+        foreach ($tokens as $token) {
+            if ($token->contract === $contract && str_ends_with($quantity, ' ' . $token->symbol)) {
+                return $token;
+            }
+        }
+
+        return null;
     }
 
     private static function complete(WaxTransfer $transfer): bool
@@ -131,11 +156,7 @@ class WaxChain
      */
     public static function units(string $quantity): ?int
     {
-        if (preg_match('/^(\d{1,11})\.(\d{8}) ' . self::SYMBOL . '$/', $quantity, $match) !== 1) {
-            return null;
-        }
-
-        return (int) $match[1] * self::UNITS + (int) $match[2];
+        return TokenSpec::wax()->units($quantity);
     }
 
     /**

@@ -55,9 +55,11 @@ return [
     'pr_payment_methods_help' => 'この宇宙で使える支払い方法です。.env でも設定されている場合にのみ有効になります。',
     'pr_payment_method_stripe' => 'カード（Stripe）',
     'pr_payment_method_wax' => 'WAX',
+    'pr_payment_method_token' => '独自トークン',
     'pr_payment_method_ready' => '設定済み',
     'pr_payment_method_missing_stripe' => '.env に STRIPE_SECRET / STRIPE_WEBHOOK_SECRET がありません',
     'pr_payment_method_missing_wax' => '.env に XGP_WAX_ACCOUNT がありません',
+    'pr_payment_method_missing_token' => '.env に XGP_WAX_ACCOUNT / XGP_TOKEN_CONTRACT / XGP_TOKEN_SYMBOL がありません',
     'pr_orders_provider' => '支払い',
     'pr_wax_transfers' => 'WAX 入金',
     'pr_wax_transfers_none' => 'WAX の入金はまだありません。',
@@ -71,4 +73,5 @@ return [
     'pr_wax_result_unknown' => '不明なメモ',
     'pr_wax_result_no_player' => 'プレイヤー削除済み',
     'pr_wax_result_linked' => 'WAXアカウント連携',
+    'pr_wax_result_paid_out' => '賞品支払い済み',
 ];

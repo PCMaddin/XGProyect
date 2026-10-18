@@ -13,13 +13,15 @@ use App\Services\SettingsService;
  * The rule:
  * - The shop is open only in a Pay2Win universe (option premium_mode) with
  *   a way to pay that the universe allows (option payment_methods) and the
- *   server has set up: Stripe (STRIPE_SECRET and STRIPE_WEBHOOK_SECRET) or
- *   WAX (XGP_WAX_ACCOUNT). The "get dark matter" button then leads to it.
+ *   server has set up: Stripe (STRIPE_SECRET and STRIPE_WEBHOOK_SECRET),
+ *   WAX (XGP_WAX_ACCOUNT) or the game's own token (XGP_TOKEN_*, paid to the
+ *   same account). The "get dark matter" button then leads to it.
  * - Pay2Win without one: the button links to the option premium_url, if
  *   set (a shop of the operator's own).
  * - Play2Win: nothing can be bought and there is no button.
  *
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")
+ * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class DarkMatterShop
 {
@@ -27,7 +29,8 @@ class DarkMatterShop
 
     public const STRIPE = 'stripe';
     public const WAX = 'wax';
-    public const METHODS = [self::STRIPE, self::WAX];
+    public const TOKEN = 'token';
+    public const METHODS = [self::STRIPE, self::WAX, self::TOKEN];
 
     public function __construct(private SettingsService $settings)
     {
@@ -75,6 +78,8 @@ class DarkMatterShop
         return match ($method) {
             self::STRIPE => $this->stripeConfigured(),
             self::WAX => $this->waxAccount() !== '',
+            // tokens are paid to the shop's WAX account too
+            self::TOKEN => $this->waxAccount() !== '' && TokenSpec::game() !== null,
             default => false,
         };
     }

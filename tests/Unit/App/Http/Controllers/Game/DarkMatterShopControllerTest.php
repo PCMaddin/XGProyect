@@ -125,8 +125,8 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $packages = $view->getData()['packages'];
         $this->assertIsArray($packages);
         $this->assertCount(4, $packages);
-        // WAX is not offered here: no price in WAX
-        $this->assertSame(['id' => 'dm_10k', 'dark_matter' => '10.000', 'price' => '1.99 €', 'wax' => ''], $packages[0]);
+        // neither WAX nor the token is offered here: no price in them
+        $this->assertSame(['id' => 'dm_10k', 'dark_matter' => '10.000', 'price' => '1.99 €', 'wax' => '', 'token' => '', 'token_market' => ''], $packages[0]);
         $this->assertSame(['stripe'], $view->getData()['methods']);
         // money is at stake: the page points to two-factor sign-in
         $this->assertTrue($view->getData()['two_factor_hint']);
@@ -361,6 +361,46 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
 
         $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_wax_rate_failed');
         $this->assertSame(DarkMatterOrder::FAILED, DarkMatterOrder::sole()->status);
+    }
+
+    public function testBuyingWithTheGamesTokenHasAFixedPrice(): void
+    {
+        $this->waxShop();
+        app(SettingsService::class)->write('payment_methods', 'token');
+        config(['premium.token' => [
+            'contract' => 'xgptokens', 'symbol' => 'XGP', 'decimals' => 4, 'dark_matter_per_token' => 100,
+            'market_url' => 'https://alcor.example.org/api/v2/tokens/:id', 'quote_hours' => 24,
+        ]]);
+        Http::fake(['alcor.example.org/*' => Http::response(['system_price' => 0.25])]);
+
+        $view = $this->page(Request::create('/game.php?page=darkmatter'));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $view);
+        $this->assertSame(['token'], $view->getData()['methods']);
+        $this->assertSame('XGP', $view->getData()['token_symbol']);
+        // 50,000 dark matter at 100 per token; on the market 500 × 0.25 WAX
+        $this->assertSame(['500.00 XGP', '125.00 WAX'], [$view->getData()['packages'][1]['token'], $view->getData()['packages'][1]['token_market']]);
+
+        $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'method' => 'token']));
+
+        $order = DarkMatterOrder::sole();
+        $this->assertSame(
+            ['token', 5_000_000, 'XGP', 'xgp:andromeda:' . $order->id],
+            [$order->provider, $order->provider_amount, $order->provider_currency, $order->provider_session]
+        );
+        $this->assertEqualsWithDelta(time() + 24 * 3600, $order->expires_at, 5);
+
+        $page = $this->page(Request::create('/game.php?page=darkmatter&order=' . $order->id));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $page);
+        $wax = $page->getData()['wax'];
+        $this->assertIsArray($wax);
+        $this->assertSame(['xgpshop', '500.00 XGP', '500.0000 XGP'], [$wax['account'], $wax['amount'], $wax['quantity']]);
+        // it costs tokens, not the package's euro price
+        $this->assertSame('500.00 XGP', $page->getData()['price']);
+        $this->assertSame(__('game/darkmatter.dm_status_token_pending'), $page->getData()['status_text']);
+
+        // without the token's contract the way to pay is gone
+        config(['premium.token.contract' => '']);
+        $this->assertSame([], app(DarkMatterShop::class)->methods());
     }
 
     private function waxShop(): void

@@ -35,13 +35,14 @@ class DarkMatterOrders
     }
 
     /**
-     * A WAX order: the amount to transfer, the memo that names the order
-     * (kept as its session, unique) and until when the quote holds.
+     * An order paid by transfer on the WAX chain (WAX or the game's token):
+     * the amount to transfer, the memo that names the order (kept as its
+     * session, unique) and until when the quote holds.
      */
-    public function quoteWax(DarkMatterOrder $order, int $units, string $memo, int $expiresAt): void
+    public function quoteTransfer(DarkMatterOrder $order, int $units, string $symbol, string $memo, int $expiresAt): void
     {
         $order->provider_amount = $units;
-        $order->provider_currency = WaxChain::SYMBOL;
+        $order->provider_currency = $symbol;
         $order->provider_session = $memo;
         $order->expires_at = $expiresAt;
         $order->save();
@@ -182,7 +183,9 @@ class DarkMatterOrders
     {
         $revenue = [];
 
+        // paid in the game's token: no money came in (see tokenRevenue)
         $rows = DarkMatterOrder::where('status', DarkMatterOrder::PAID)
+            ->where('provider', '!=', DarkMatterShop::TOKEN)
             ->groupBy('currency')
             ->selectRaw('currency, SUM(amount) as total')
             ->get();
@@ -190,6 +193,29 @@ class DarkMatterOrders
         foreach ($rows as $row) {
             $total = $row->getAttribute('total');
             $revenue[$row->currency] = is_numeric($total) ? (int) $total : 0;
+        }
+
+        return $revenue;
+    }
+
+    /**
+     * The tokens the paid token orders brought in, in units by symbol.
+     *
+     * @return array<string, int>
+     */
+    public function tokenRevenue(): array
+    {
+        $revenue = [];
+
+        $rows = DarkMatterOrder::where('status', DarkMatterOrder::PAID)
+            ->where('provider', DarkMatterShop::TOKEN)
+            ->groupBy('provider_currency')
+            ->selectRaw('provider_currency, SUM(provider_amount) as total')
+            ->get();
+
+        foreach ($rows as $row) {
+            $total = $row->getAttribute('total');
+            $revenue[(string) $row->provider_currency] = is_numeric($total) ? (int) $total : 0;
         }
 
         return $revenue;

@@ -17,6 +17,7 @@ return [
     'lb_payments' => 'Pagamento: :methods',
     'lb_payment_stripe' => 'carta',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => 'token del gioco',
     'lb_ends' => 'Termina il :date',
     'lb_hall_of_fame' => 'Albo d\'oro',
     'lb_category_total' => 'Totale',

@@ -83,6 +83,23 @@ class DarkMatterOrder extends Model
         'expires_at' => 'int',
     ];
 
+    /**
+     * Paid by transfer on the chain (WAX or the game's token), not by Stripe.
+     */
+    public function isTransfer(): bool
+    {
+        return in_array($this->provider, ['wax', 'token'], true);
+    }
+
+    /**
+     * The status to show: a transfer quote that ran out shows as expired,
+     * though the order stays open (a late transfer is left to the admin).
+     */
+    public function shownStatus(int $now): string
+    {
+        return $this->isTransfer() && $this->status === self::PENDING && $now > ($this->expires_at ?? 0) ? self::EXPIRED : $this->status;
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {

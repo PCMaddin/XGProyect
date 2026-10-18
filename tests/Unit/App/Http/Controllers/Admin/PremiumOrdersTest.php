@@ -55,6 +55,29 @@ class PremiumOrdersTest extends DatabaseTestCase
             ->assertSee('Admin');
     }
 
+    public function testTokenOrdersCountInTokensNotInMoney(): void
+    {
+        config(['premium.token' => ['contract' => 'xgptokens', 'symbol' => 'XGP', 'decimals' => 4]]);
+        Artisan::call('migrate', ['--database' => 'central', '--path' => 'database/migrations/central', '--force' => true]);
+        $this->order($this->admin->id, 'dm_10k', 199, 'paid');
+        DB::table('dark_matter_orders')->insert([
+            'user_id' => $this->admin->id, 'package' => 'dm_50k', 'dark_matter' => 50_000, 'amount' => 799, 'currency' => 'eur', 'provider' => 'token',
+            'provider_amount' => 5_000_000, 'provider_currency' => 'XGP', 'provider_session' => 'xgp:2', 'status' => 'paid', 'created_at' => time(), 'paid_at' => time(),
+        ]);
+        DB::connection('central')->table('wax_transfers')->insert([
+            'sequence' => 1, 'trx_id' => str_repeat('a', 64), 'block_num' => 10, 'block_time' => time(), 'from_account' => 'player.wam', 'units' => 5_000_000,
+            'symbol' => 'XGP', 'memo' => 'xgp:2', 'universe' => null, 'order_id' => 2, 'result' => 'credited', 'checked_at' => time(),
+        ]);
+
+        $this->actingAs($this->admin)->get('/admin/premium/orders')
+            ->assertOk()
+            ->assertSee('1.99 €')
+            ->assertDontSee('9.98 €')
+            ->assertSee('500.00 XGP')
+            ->assertSee('Own token')
+            ->assertDontSee('0.05 WAX');
+    }
+
     public function testWithoutOrdersTheListSaysSo(): void
     {
         $this->actingAs($this->admin)->get('/admin/premium/orders')

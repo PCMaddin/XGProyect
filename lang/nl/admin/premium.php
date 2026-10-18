@@ -55,9 +55,11 @@ return [
     'pr_payment_methods_help' => 'Hoe er in dit universum betaald kan worden. Een betaalmethode werkt pas als ze ook in .env is ingesteld.',
     'pr_payment_method_stripe' => 'Kaart (Stripe)',
     'pr_payment_method_wax' => 'WAX',
+    'pr_payment_method_token' => 'Eigen token',
     'pr_payment_method_ready' => 'ingesteld',
     'pr_payment_method_missing_stripe' => 'STRIPE_SECRET / STRIPE_WEBHOOK_SECRET ontbreken in .env',
     'pr_payment_method_missing_wax' => 'XGP_WAX_ACCOUNT ontbreekt in .env',
+    'pr_payment_method_missing_token' => 'XGP_WAX_ACCOUNT / XGP_TOKEN_CONTRACT / XGP_TOKEN_SYMBOL ontbreekt in .env',
     'pr_orders_provider' => 'Betaling',
     'pr_wax_transfers' => 'WAX-overboekingen',
     'pr_wax_transfers_none' => 'Nog geen WAX-overboekingen.',
@@ -71,4 +73,5 @@ return [
     'pr_wax_result_unknown' => 'onbekend memo',
     'pr_wax_result_no_player' => 'speler verwijderd',
     'pr_wax_result_linked' => 'WAX-account gekoppeld',
+    'pr_wax_result_paid_out' => 'prijs uitbetaald',
 ];

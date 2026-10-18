@@ -55,4 +55,17 @@ return [
         // transfers looked at on the first check (hours back)
         'lookback_hours' => 24,
     ],
+
+    // the game's own token on the WAX chain (payment method "token"); empty: none
+    'token' => [
+        'contract' => (string) env('XGP_TOKEN_CONTRACT', ''),
+        'symbol' => strtoupper((string) env('XGP_TOKEN_SYMBOL', '')),
+        'decimals' => (int) env('XGP_TOKEN_DECIMALS', 4),
+        // the fixed rate: dark matter for one token
+        'dark_matter_per_token' => (int) env('XGP_TOKEN_DARK_MATTER', 100),
+        // market price in WAX: {"system_price": 0.25}; :id is "symbol-contract" in lower case
+        'market_url' => (string) env('XGP_TOKEN_MARKET_URL', 'https://wax.alcor.exchange/api/v2/tokens/:id'),
+        // a token order holds this long (the price is fixed)
+        'quote_hours' => 24,
+    ],
 ];

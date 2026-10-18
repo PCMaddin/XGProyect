@@ -55,9 +55,11 @@ return [
     'pr_payment_methods_help' => 'Come si può pagare in questo universo. Un metodo funziona solo se è configurato anche in .env.',
     'pr_payment_method_stripe' => 'Carta (Stripe)',
     'pr_payment_method_wax' => 'WAX',
+    'pr_payment_method_token' => 'Token del gioco',
     'pr_payment_method_ready' => 'configurato',
     'pr_payment_method_missing_stripe' => 'STRIPE_SECRET / STRIPE_WEBHOOK_SECRET mancanti in .env',
     'pr_payment_method_missing_wax' => 'XGP_WAX_ACCOUNT mancante in .env',
+    'pr_payment_method_missing_token' => 'XGP_WAX_ACCOUNT / XGP_TOKEN_CONTRACT / XGP_TOKEN_SYMBOL mancante in .env',
     'pr_orders_provider' => 'Pagamento',
     'pr_wax_transfers' => 'Trasferimenti WAX',
     'pr_wax_transfers_none' => 'Ancora nessun trasferimento WAX.',
@@ -71,4 +73,5 @@ return [
     'pr_wax_result_unknown' => 'memo sconosciuto',
     'pr_wax_result_no_player' => 'giocatore eliminato',
     'pr_wax_result_linked' => 'conto WAX collegato',
+    'pr_wax_result_paid_out' => 'premio pagato',
 ];

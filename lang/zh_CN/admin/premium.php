@@ -55,9 +55,11 @@ return [
     'pr_payment_methods_help' => '本宇宙可用的支付方式。只有在 .env 中也设置后才会生效。',
     'pr_payment_method_stripe' => '银行卡（Stripe）',
     'pr_payment_method_wax' => 'WAX',
+    'pr_payment_method_token' => '自有代币',
     'pr_payment_method_ready' => '已设置',
     'pr_payment_method_missing_stripe' => '.env 中缺少 STRIPE_SECRET / STRIPE_WEBHOOK_SECRET',
     'pr_payment_method_missing_wax' => '.env 中缺少 XGP_WAX_ACCOUNT',
+    'pr_payment_method_missing_token' => '.env 中缺少 XGP_WAX_ACCOUNT / XGP_TOKEN_CONTRACT / XGP_TOKEN_SYMBOL',
     'pr_orders_provider' => '支付',
     'pr_wax_transfers' => 'WAX 入账',
     'pr_wax_transfers_none' => '暂无 WAX 转账。',
@@ -71,4 +73,5 @@ return [
     'pr_wax_result_unknown' => '未知备注',
     'pr_wax_result_no_player' => '玩家已删除',
     'pr_wax_result_linked' => 'WAX 账户已绑定',
+    'pr_wax_result_paid_out' => '奖励已发放',
 ];

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Services\Premium;
 
 use App\Models\DarkMatterOrder;
+use App\Services\Instances\SeasonPayouts;
 use App\Services\Premium\WaxException;
 use App\Services\Premium\WaxLinks;
 use App\Services\Premium\WaxPayments;
@@ -148,12 +149,102 @@ class WaxPaymentsTest extends DatabaseTestCase
         $this->assertSame(0, $this->darkMatter());
     }
 
+    public function testAnOrderInTheGamesTokenIsPaidOnlyInThatToken(): void
+    {
+        $this->useToken();
+        $this->order(2, self::PLAYER, provider: 'token', symbol: 'XGP', quote: 1_000_000);
+        $this->order(3, self::PLAYER, provider: 'token', symbol: 'XGP', quote: 1_000_000);
+
+        $this->actions = [
+            // WAX for a token order, and the token for a WAX order
+            self::action(['global_sequence' => 1, 'memo' => 'xgp:2', 'quantity' => '466.76000000 WAX']),
+            self::action(['global_sequence' => 2, 'memo' => 'xgp:1', 'contract' => 'xgptokens', 'quantity' => '9999.0000 XGP']),
+            // the symbol from another contract: not even read
+            self::action(['global_sequence' => 3, 'memo' => 'xgp:2', 'contract' => 'fake.token', 'quantity' => '100.0000 XGP']),
+            self::action(['global_sequence' => 4, 'memo' => 'xgp:3', 'contract' => 'xgptokens', 'quantity' => '99.9999 XGP']),
+            self::action(['global_sequence' => 5, 'memo' => 'xgp:2', 'contract' => 'xgptokens', 'quantity' => '100.0000 XGP']),
+        ];
+
+        $this->assertSame(['unknown' => 2, 'underpaid' => 1, 'credited' => 1], $this->check());
+        $this->assertSame(10_000, $this->darkMatter());
+        $this->assertSame(DarkMatterOrder::PAID, DarkMatterOrder::findOrFail(2)->status);
+        $this->assertSame(['WAX', 'XGP', 'XGP', 'XGP'], DB::connection('central')->table('wax_transfers')->orderBy('sequence')->pluck('symbol')->all());
+        Http::assertSent(static fn (Request $request): bool => ($request->data()['filter'] ?? null) === 'eosio.token:transfer,xgptokens:transfer');
+    }
+
+    public function testPrizesArePaidInTheTokenByTheOperator(): void
+    {
+        $this->useToken();
+        $central = DB::connection('central');
+        $central->table('instances')->insert(['slug' => 'andromeda', 'name' => 'Andromeda', 'database' => 'xgp_andromeda', 'mode' => 'pay2win', 'status' => 'closed', 'opened_at' => 1]);
+        $prize = static fn (string $category, int $rank, ?string $account, int $reward, ?int $claimed = null): array => [
+            'universe' => 'andromeda', 'category' => $category, 'rank' => $rank, 'user_id' => $rank, 'name' => 'p' . $rank, 'points' => 1.0,
+            'frozen_at' => self::NOON, 'reward' => $reward, 'wax_account' => $account, 'claimed_at' => $claimed, 'claimed_universe' => $claimed === null ? null : 'orion',
+        ];
+        $central->table('season_results')->insert([
+            $prize('total', 1, 'winner.wam', 30_000),
+            $prize('total', 2, null, 20_000),
+            $prize('military', 1, 'second.wam', 5_000),
+            $prize('military', 2, 'redeemed.wam', 4_000, self::NOON),
+        ]);
+
+        $this->assertSame(0, Artisan::call('xgp:season:payout', ['universe' => 'andromeda']));
+        $output = Artisan::output();
+        $this->assertStringContainsString('"quantity": "300.0000 XGP"', $output);
+        $this->assertStringContainsString('"account": "xgptokens"', $output);
+        $this->assertStringContainsString('"from": "xgpshop"', $output);
+        $this->assertStringNotContainsString('redeemed.wam', $output);
+        $reserved = $central->table('season_results')->where('claimed_universe', SeasonPayouts::RESERVED)->orderBy('id')->pluck('id')->all();
+        $this->assertSame([1, 3], self::ids($reserved));
+        // reserved: the prize cannot be redeemed as dark matter meanwhile
+        $this->assertSame([], $central->table('season_results')->whereNull('claimed_at')->whereNotNull('wax_account')->pluck('id')->all());
+
+        $this->actions = [
+            self::action(['global_sequence' => 1, 'from' => 'xgpshop', 'to' => 'winner.wam', 'memo' => 'xgp-prize:1', 'contract' => 'xgptokens', 'quantity' => '300.0000 XGP']),
+            // to someone else, in WAX, and a prize already redeemed
+            self::action(['global_sequence' => 2, 'from' => 'xgpshop', 'to' => 'thief.wam', 'memo' => 'xgp-prize:3', 'contract' => 'xgptokens', 'quantity' => '50.0000 XGP']),
+            self::action(['global_sequence' => 3, 'from' => 'xgpshop', 'to' => 'second.wam', 'memo' => 'xgp-prize:3', 'quantity' => '1.00000000 WAX']),
+            self::action(['global_sequence' => 4, 'from' => 'xgpshop', 'to' => 'redeemed.wam', 'memo' => 'xgp-prize:4', 'contract' => 'xgptokens', 'quantity' => '40.0000 XGP']),
+        ];
+        $this->assertSame(['paid_out' => 1, 'unknown' => 3], $this->check());
+        $this->assertSame(SeasonPayouts::PAID, $central->table('season_results')->where('id', 1)->value('claimed_universe'));
+
+        // the operator gives the rest back: redeemable as dark matter again
+        $this->assertSame(0, Artisan::call('xgp:season:payout', ['universe' => 'andromeda', '--release' => true]));
+        $this->assertSame([3], self::ids($central->table('season_results')->whereNull('claimed_at')->whereNotNull('wax_account')->pluck('id')->all()));
+        $this->assertSame(SeasonPayouts::PAID, $central->table('season_results')->where('id', 1)->value('claimed_universe'));
+    }
+
+    public function testPrizesOfARunningSeasonAreNotPaid(): void
+    {
+        $this->useToken();
+        DB::connection('central')->table('instances')->insert(['slug' => 'andromeda', 'name' => 'Andromeda', 'database' => 'xgp_andromeda', 'mode' => 'pay2win', 'status' => 'open', 'opened_at' => 1]);
+
+        $this->assertSame(1, Artisan::call('xgp:season:payout', ['universe' => 'andromeda']));
+        $this->assertSame(1, Artisan::call('xgp:season:payout', ['universe' => 'nowhere']));
+    }
+
     public function testWithoutAnAccountNothingIsRead(): void
     {
         config(['premium.wax.account' => 'Not Valid!']);
 
         $this->expectException(WaxException::class);
         $this->check();
+    }
+
+    /**
+     * @param array<mixed> $ids
+     *
+     * @return list<int>
+     */
+    private static function ids(array $ids): array
+    {
+        return array_values(array_map(static fn (mixed $id): int => is_numeric($id) ? (int) $id : 0, $ids));
+    }
+
+    private function useToken(): void
+    {
+        config(['premium.token' => ['contract' => 'xgptokens', 'symbol' => 'XGP', 'decimals' => 4, 'dark_matter_per_token' => 100]]);
     }
 
     /**
@@ -164,11 +255,11 @@ class WaxPaymentsTest extends DatabaseTestCase
         return app(WaxPayments::class)->check(self::NOON);
     }
 
-    private function order(int $id, int $userId, ?int $expiresAt = null, string $provider = 'wax'): void
+    private function order(int $id, int $userId, ?int $expiresAt = null, string $provider = 'wax', string $symbol = 'WAX', int $quote = self::QUOTE): void
     {
         DB::table('dark_matter_orders')->insert([
             'id' => $id, 'user_id' => $userId, 'package' => 'dm_10k', 'dark_matter' => 10_000, 'amount' => 199, 'currency' => 'eur',
-            'provider' => $provider, 'provider_session' => 'xgp:' . $id, 'provider_amount' => self::QUOTE, 'provider_currency' => 'WAX',
+            'provider' => $provider, 'provider_session' => 'xgp:' . $id, 'provider_amount' => $quote, 'provider_currency' => $symbol,
             'expires_at' => $expiresAt ?? self::NOON + 1800, 'status' => DarkMatterOrder::PENDING, 'created_at' => self::NOON - 300,
         ]);
     }

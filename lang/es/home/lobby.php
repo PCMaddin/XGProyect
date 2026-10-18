@@ -17,6 +17,7 @@ return [
     'lb_payments' => 'Pago: :methods',
     'lb_payment_stripe' => 'tarjeta',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => 'token propio',
     'lb_ends' => 'Termina el :date',
     'lb_hall_of_fame' => 'Salón de la fama',
     'lb_category_total' => 'Total',

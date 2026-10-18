@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Premium;
 
 /**
- * A WAX transfer as the chain recorded it: the system token only
- * (eosio.token, symbol WAX), amounts in its smallest unit (1 WAX =
+ * A transfer as the chain recorded it, of WAX (eosio.token) or of the
+ * game's own token; the amount in the token's smallest unit (1 WAX =
  * 100 000 000).
  */
 final class WaxTransfer
@@ -20,6 +20,7 @@ final class WaxTransfer
         public readonly string $to,
         public readonly int $units,
         public readonly string $memo,
+        public readonly string $symbol = WaxChain::SYMBOL,
     ) {
     }
 }

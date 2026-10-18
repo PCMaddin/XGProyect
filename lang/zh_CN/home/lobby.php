@@ -17,6 +17,7 @@ return [
     'lb_payments' => '支付：:methods',
     'lb_payment_stripe' => '银行卡',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => '自有代币',
     'lb_ends' => ':date 结束',
     'lb_hall_of_fame' => '名人堂',
     'lb_category_total' => '总分',

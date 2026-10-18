@@ -17,6 +17,7 @@ return [
     'lb_payments' => 'Płatność: :methods',
     'lb_payment_stripe' => 'karta',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => 'własny token',
     'lb_ends' => 'Kończy się :date',
     'lb_hall_of_fame' => 'Galeria sław',
     'lb_category_total' => 'Ogółem',

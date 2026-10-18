@@ -7,6 +7,7 @@ namespace App\Services\Premium;
 use App\Models\DarkMatterOrder;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\SeasonPayouts;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,11 @@ use Illuminate\Support\Facades\DB;
  * - not_pending: the order was paid already, or closed;
  * - unknown: no such universe or order (wrong memo);
  * - no_player: the player who ordered is gone;
- * - linked: a memo xgp-link:<code> links the sender to a player (WaxLinks).
+ * - linked: a memo xgp-link:<code> links the sender to a player (WaxLinks);
+ * - paid_out: a transfer from the shop's account with the memo
+ *   xgp-prize:<id> pays a season prize in the game's token (SeasonPayouts).
+ * Orders are paid in WAX or, with the payment method "token", in the
+ * game's own token; each only in its own.
  * The transfers stay in the base database (wax_transfers) for the admin.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
@@ -38,6 +43,7 @@ class WaxPayments
     public const UNKNOWN = 'unknown';
     public const NO_PLAYER = 'no_player';
     public const LINKED = 'linked';
+    public const PAID_OUT = 'paid_out';
 
     /** pages of transfers read per check */
     private const MAX_PAGES = 10;
@@ -52,6 +58,7 @@ class WaxPayments
         private InstanceRegistry $registry,
         private InstanceContext $context,
         private WaxLinks $links,
+        private SeasonPayouts $payouts,
     ) {
     }
 
@@ -80,10 +87,11 @@ class WaxPayments
 
         $lastIrreversible = $this->chain->lastIrreversibleBlock();
         $after = $this->resumeAt($now);
+        $tokens = array_filter([TokenSpec::wax(), TokenSpec::game()]);
         $results = [];
 
         for ($page = 0; $page < self::MAX_PAGES; $page++) {
-            $read = $this->chain->transfers($account, $after, $page * WaxChain::PAGE_SIZE);
+            $read = $this->chain->transfers($account, $after, $page * WaxChain::PAGE_SIZE, $tokens);
 
             foreach ($read['transfers'] as $transfer) {
                 // later blocks can still be undone: next time
@@ -91,12 +99,15 @@ class WaxPayments
                     return $results;
                 }
 
-                if ($transfer->to !== $account || $this->known($transfer)) {
-                    continue;
-                }
+                $result = $this->known($transfer) ? null : match (true) {
+                    $transfer->to === $account => $this->settle($transfer, $now),
+                    $transfer->from === $account && SeasonPayouts::isPrizeMemo($transfer->memo) => $this->settlePayout($transfer, $now),
+                    default => null,
+                };
 
-                $result = $this->settle($transfer, $now);
-                $results[$result] = ($results[$result] ?? 0) + 1;
+                if ($result !== null) {
+                    $results[$result] = ($results[$result] ?? 0) + 1;
+                }
             }
 
             if ($read['actions'] < WaxChain::PAGE_SIZE) {
@@ -145,6 +156,22 @@ class WaxPayments
             }
         }
 
+        $this->record($transfer, $universe, $orderId, $result, $now);
+
+        return $result;
+    }
+
+    private function settlePayout(WaxTransfer $transfer, int $now): string
+    {
+        $game = TokenSpec::game();
+        $result = $game !== null && $transfer->symbol === $game->symbol && $this->payouts->paid($transfer->memo, $transfer->to, $now) ? self::PAID_OUT : self::UNKNOWN;
+        $this->record($transfer, null, null, $result, $now);
+
+        return $result;
+    }
+
+    private function record(WaxTransfer $transfer, ?string $universe, ?int $orderId, string $result, int $now): void
+    {
         $this->table()->insertOrIgnore([
             'sequence' => $transfer->sequence,
             'trx_id' => $transfer->trxId,
@@ -157,16 +184,17 @@ class WaxPayments
             'order_id' => $orderId,
             'result' => $result,
             'checked_at' => $now,
+            'symbol' => $transfer->symbol,
         ]);
-
-        return $result;
     }
 
     private function settleOrder(WaxTransfer $transfer, int $orderId, string $memo, int $now): string
     {
         $order = DarkMatterOrder::find($orderId);
 
-        if ($order === null || $order->provider !== DarkMatterShop::WAX || $order->provider_session !== $memo) {
+        // an order is paid in its own token: WAX, or the game's
+        if ($order === null || !in_array($order->provider, [DarkMatterShop::WAX, DarkMatterShop::TOKEN], true) ||
+            $order->provider_session !== $memo || $order->provider_currency !== $transfer->symbol) {
             return self::UNKNOWN;
         }
 

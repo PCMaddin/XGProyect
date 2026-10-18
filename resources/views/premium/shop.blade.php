@@ -11,7 +11,7 @@
         </td>
         <td class="l" colspan="3">
             @foreach ($methods as $method)
-                <p>{{ __('game/darkmatter.dm_intro_' . $method) }}</p>
+                <p>{{ __('game/darkmatter.dm_intro_' . $method, ['symbol' => $token_symbol]) }}</p>
             @endforeach
         </td>
     </tr>
@@ -42,6 +42,9 @@
             @if ($package['wax'] !== '')
                 <br/><small>{{ __('game/darkmatter.dm_wax_about', ['amount' => $package['wax']]) }}</small>
             @endif
+            @if ($package['token'] !== '')
+                <br/><small>{{ $package['token'] }}@if ($package['token_market'] !== '') ({{ __('game/darkmatter.dm_token_market', ['amount' => $package['token_market']]) }})@endif</small>
+            @endif
         </th>
         <th>
             @foreach ($methods as $method)
@@ -49,7 +52,7 @@
                 @csrf
                 <input type="hidden" name="package" value="{{ $package['id'] }}"/>
                 <input type="hidden" name="method" value="{{ $method }}"/>
-                <input type="submit" value="{{ __('game/darkmatter.dm_buy_' . $method) }}"/>
+                <input type="submit" value="{{ __('game/darkmatter.dm_buy_' . $method, ['symbol' => $token_symbol]) }}"/>
             </form>
             @endforeach
         </th>

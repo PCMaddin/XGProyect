@@ -10,6 +10,8 @@ use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\DarkMatterShop;
+use App\Services\Premium\TokenSpec;
+use App\Services\Premium\WaxChain;
 use App\Services\Premium\WaxPayments;
 use App\Services\Premium\WaxRates;
 use App\Services\SettingsService;
@@ -83,6 +85,10 @@ class PremiumController extends AdminSettingsController
             $revenue[] = $this->shop->formatPrice($cents, $currency);
         }
 
+        foreach ($orders->tokenRevenue() as $symbol => $units) {
+            $revenue[] = self::chainAmount($units, $symbol);
+        }
+
         return $this->view('admin.premium_orders', [
             'orders' => $orders->latest(self::ORDERS_SHOWN)->map(fn (DarkMatterOrder $order): array => [
                 'id' => $order->id,
@@ -90,10 +96,11 @@ class PremiumController extends AdminSettingsController
                 'user_name' => $order->getAttribute('user_name'),
                 'package' => $order->package,
                 'dark_matter' => $order->dark_matter,
-                'amount' => $this->shop->formatPrice($order->amount, $order->currency),
+                // a token order costs tokens, never money
+                'amount' => $order->provider === DarkMatterShop::TOKEN ? '' : $this->shop->formatPrice($order->amount, $order->currency),
                 'provider' => $order->provider,
-                'provider_amount' => $order->provider_amount === null ? '' : WaxRates::format($order->provider_amount),
-                'memo' => $order->provider === DarkMatterShop::WAX ? (string) $order->provider_session : '',
+                'provider_amount' => $order->provider_amount === null ? '' : self::chainAmount($order->provider_amount, (string) $order->provider_currency),
+                'memo' => in_array($order->provider, [DarkMatterShop::WAX, DarkMatterShop::TOKEN], true) ? (string) $order->provider_session : '',
                 'status' => $order->status,
                 'created_at' => $timing->formatExtendedDate($order->created_at),
                 'paid_at' => $order->paid_at === null ? '' : $timing->formatExtendedDate($order->paid_at),
@@ -121,12 +128,22 @@ class PremiumController extends AdminSettingsController
         return array_values($transfers->map(static fn (object $row): array => [
             'time' => $timing->formatExtendedDate(self::int($row, 'block_time')),
             'from' => self::text($row, 'from_account'),
-            'amount' => WaxRates::format(self::int($row, 'units')),
+            'amount' => self::chainAmount(self::int($row, 'units'), self::text($row, 'symbol') ?: WaxChain::SYMBOL),
             'memo' => self::text($row, 'memo'),
             'order_id' => self::int($row, 'order_id') ?: null,
             'result' => self::text($row, 'result'),
             'trx_id' => self::text($row, 'trx_id'),
         ])->all());
+    }
+
+    /**
+     * An amount on the chain in its token: WAX, or the game's own.
+     */
+    private static function chainAmount(int $units, string $symbol): string
+    {
+        $token = TokenSpec::game();
+
+        return $token !== null && $symbol === $token->symbol ? $token->format($units) : WaxRates::format($units);
     }
 
     private static function int(object $row, string $field): int

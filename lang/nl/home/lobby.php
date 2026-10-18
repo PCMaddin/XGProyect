@@ -17,6 +17,7 @@ return [
     'lb_payments' => 'Betaling: :methods',
     'lb_payment_stripe' => 'kaart',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => 'eigen token',
     'lb_ends' => 'Eindigt op :date',
     'lb_hall_of_fame' => 'Eregalerij',
     'lb_category_total' => 'Totaal',

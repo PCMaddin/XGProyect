@@ -1629,6 +1629,48 @@ Baseline-Einträge.
       340 bzw. 418 Überweisungen gelesen, alle korrekt als unbekannt
       verbucht; der zweite Lauf setzte nahtlos fort.
     - Crawl aller Seiten ohne neue Treffer.
+- ✅ **Eigener Token: Shop zum festen Kurs, Marktpreis, Preisauszahlung:**
+  - *Token:* `config/premium.php` → `token` (`XGP_TOKEN_CONTRACT`,
+    `XGP_TOKEN_SYMBOL`, `XGP_TOKEN_DECIMALS`, `XGP_TOKEN_DARK_MATTER`,
+    `XGP_TOKEN_MARKET_URL`). `TokenSpec` beschreibt einen Token (Vertrag,
+    Symbol, Nachkommastellen; `wax()` und `game()`) mit exakten Mengen.
+  - *Shop:* neue Zahlungsart `token` (je Universum wie `stripe`/`wax`;
+    eingerichtet, wenn Shop-Konto und Token gesetzt sind). Preis fest:
+    Dunkle Materie ÷ Kurs, aufgerundet (`TokenRates`). Daneben der
+    Marktwert in WAX aus Alcor (`system_price`, 5 Minuten gecacht). Die
+    Bestellung gilt 24 Stunden; Bestellseite mit Konto, Menge und Memo.
+  - *Gutschrift:* `xgp:wax:check` fragt Hyperion nach beiden Verträgen
+    (`eosio.token:transfer,<vertrag>:transfer`). `WaxChain::transfer`
+    nimmt nur bekannte Paare aus Vertrag und Symbol mit genau ihren
+    Nachkommastellen. Eine Bestellung wird nur in ihrem eigenen Symbol
+    bezahlt (`provider_currency`). Zentrale Migration `000007` speichert
+    das Symbol jeder Überweisung; die Admin-Liste zeigt Beträge im
+    richtigen Token.
+  - *Preisauszahlung:* `xgp:season:payout <universum>` reserviert die nicht
+    eingelösten Preise verknüpfter WAX-Konten (`claimed_universe =
+    payout`, damit nicht doppelt als Dunkle Materie eingelöst) und gibt
+    die `transfer`-Aktionen als JSON zum Unterschreiben in der Wallet aus.
+    Der Server hält keinen Schlüssel. Eine ausgehende Token-Überweisung
+    mit Memo `xgp-prize:<id>` an das hinterlegte Konto markiert den Preis
+    als ausgezahlt (`token`, Ergebnis „paid_out“). `--release` gibt
+    reservierte Preise frei. Nur für beendete Universen.
+  - *Texte:* alle Texte in zehn Sprachen; Handbuch `docs/universes.md`
+    (Eigener Token, Preise im eigenen Token auszahlen), `.env.example`.
+  - *Tests:*
+    - `TokenTest`: Konfiguration, exakte Mengen, fester Kurs
+      (Shop aufgerundet, Preis abgerundet), Marktpreis mit Cache und
+      Fehler, nur der eigene Vertrag, Hyperion-Filter.
+    - `WaxPaymentsTest`:
+      - Token-Bestellung nur mit dem Token, WAX-Bestellung nicht mit
+        dem Token, Fremdvertrag, zu wenig;
+      - Auszahlung: reservieren, Ausgabe, nur das hinterlegte Konto
+        und nur im Token, `--release`;
+      - laufende Saison und unbekanntes Universum abgelehnt.
+    - `DarkMatterShopControllerTest`: Token-Preis, Marktwert,
+      Bestellung, Bestellseite, Zahlungsart verschwindet ohne Vertrag.
+    - Mutationsproben: ohne Symbolprüfung der Bestellung, ohne
+      Empfängerprüfung oder ohne Symbolprüfung der Auszahlung schlagen
+      die Tests fehl.
 
 ## Smoke-Test gegen eine echte Datenbank
 

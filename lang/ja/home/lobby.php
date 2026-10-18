@@ -17,6 +17,7 @@ return [
     'lb_payments' => '支払い：:methods',
     'lb_payment_stripe' => 'カード',
     'lb_payment_wax' => 'WAX',
+    'lb_payment_token' => '独自トークン',
     'lb_ends' => ':date に終了',
     'lb_hall_of_fame' => '殿堂',
     'lb_category_total' => '総合',
