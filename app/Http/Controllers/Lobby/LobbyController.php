@@ -8,6 +8,7 @@ use App\Http\Middleware\SelectInstance;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\SeasonResults;
 use App\Services\Premium\DarkMatterShop;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -24,6 +25,7 @@ class LobbyController extends BaseController
     public function __construct(
         private InstanceRegistry $registry,
         private InstanceContext $context,
+        private SeasonResults $results,
     ) {
     }
 
@@ -41,6 +43,7 @@ class LobbyController extends BaseController
                 'open' => $instance->isOpen(),
                 'opened_at' => $instance->openedAt,
                 'ends_at' => $instance->endsAt,
+                'hall_of_fame' => $instance->isOpen() ? [] : $this->hallOfFame($instance),
             ] + $this->facts($instance), $this->registry->all()),
             'chosen' => request()->cookie(SelectInstance::COOKIE),
         ]);
@@ -55,6 +58,22 @@ class LobbyController extends BaseController
         }
 
         return redirect()->route('home.index')->withCookie(cookie()->forever(SelectInstance::COOKIE, $instance->slug));
+    }
+
+    /**
+     * The rankings frozen when the season ended; none if they cannot be read.
+     *
+     * @return array<string, list<array{rank: int, name: string, alliance_tag: string|null, points: float}>>
+     */
+    private function hallOfFame(Instance $instance): array
+    {
+        try {
+            return $this->results->forUniverse($instance->slug);
+        } catch (Throwable $e) {
+            report($e);
+
+            return [];
+        }
     }
 
     /**

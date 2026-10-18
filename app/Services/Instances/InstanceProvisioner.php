@@ -16,6 +16,8 @@ use Throwable;
  * Sets up universes: the registry table, a database of their own with the
  * game's tables, options and an administrator, and the update migrations of
  * every universe.
+ *
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class InstanceProvisioner
 {
@@ -42,6 +44,7 @@ class InstanceProvisioner
         private InstanceContext $context,
         private InstanceRegistry $registry,
         private AdminAccount $admins,
+        private SeasonResults $results,
     ) {
     }
 
@@ -146,6 +149,11 @@ class InstanceProvisioner
             array_key_exists('ends_at', $changes) ? $changes['ends_at'] : $instance->endsAt,
         );
         $this->validate($changed);
+
+        // the season is over: keep its rankings before nobody gets in any more
+        if ($instance->status === Instance::OPEN && $changed->status === Instance::CLOSED) {
+            $this->results->freeze($instance, time());
+        }
 
         $options = array_filter(['premium_mode' => $changed->mode !== $instance->mode ? $changed->mode : null, 'payment_methods' => $payments], static fn (?string $value): bool => $value !== null);
 

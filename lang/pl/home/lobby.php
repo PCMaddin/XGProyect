@@ -18,4 +18,11 @@ return [
     'lb_payment_stripe' => 'karta',
     'lb_payment_wax' => 'WAX',
     'lb_ends' => 'Kończy się :date',
+    'lb_hall_of_fame' => 'Galeria sław',
+    'lb_category_total' => 'Ogółem',
+    'lb_category_buildings' => 'Budynki',
+    'lb_category_technology' => 'Badania',
+    'lb_category_ships' => 'Flota',
+    'lb_category_defenses' => 'Obrona',
+    'lb_category_military' => 'Wojsko',
 ];

@@ -10,6 +10,9 @@ use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\SeasonResults;
+use App\Services\RegistrationService;
+use App\Models\User;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Support\Facades\DB;
@@ -206,6 +209,36 @@ class InstancesMysqlTest extends MysqlTestCase
 
         $this->command('xgp:instance:update', ['slug' => 'u1', '--ends' => 'none', '--status' => 'open'])->assertSuccessful();
         $this->assertNull(app(InstanceRegistry::class)->find('u1')->endsAt);
+    }
+
+    public function testTheRankingsAreKeptWhenTheSeasonEnds(): void
+    {
+        $this->command('xgp:instance:create', [
+            'slug' => 'u1', '--name' => 'Universe One', '--database' => 'xgp_test_u1', '--bots' => 2,
+            '--admin-name' => 'Admin1', '--admin-email' => 'admin@example.com', '--admin-password' => 'secret-password',
+        ])->assertSuccessful();
+        $universe = app(InstanceRegistry::class)->find('u1');
+        $this->assertNotNull($universe);
+
+        // two players: Beta has built more than Alpha; bots and the admin do not count
+        app(InstanceContext::class)->runIn($universe, function (): void {
+            foreach (['Alpha' => 3, 'Beta' => 12] as $name => $mine) {
+                $player = app(RegistrationService::class)->register(['name' => $name, 'email' => strtolower($name) . '@example.com', 'password' => 'secret-password']);
+                $this->assertInstanceOf(User::class, $player);
+                $planet = DB::table('planets')->where('planet_user_id', $player->id)->value('planet_id');
+                DB::table('buildings')->where('building_planet_id', $planet)->update(['building_metal_mine' => $mine, 'building_crystal_mine' => $mine]);
+            }
+        });
+
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
+
+        $total = app(SeasonResults::class)->forUniverse('u1')['total'] ?? [];
+        $this->assertSame(['Beta', 'Alpha'], array_column($total, 'name'));
+        $this->assertSame([1, 2], array_column($total, 'rank'));
+        $this->assertGreaterThan($total[1]['points'], $total[0]['points']);
+        $this->assertSame(['Beta', 'Alpha'], array_column(app(SeasonResults::class)->forUniverse('u1')['buildings'] ?? [], 'name'));
+
+        $this->get('/universes')->assertOk()->assertSee('Hall of fame')->assertSeeInOrder(['Total', 'Beta', 'Alpha']);
     }
 
     public function testTheInstalledGameIsAdopted(): void

@@ -18,4 +18,11 @@ return [
     'lb_payment_stripe' => '银行卡',
     'lb_payment_wax' => 'WAX',
     'lb_ends' => ':date 结束',
+    'lb_hall_of_fame' => '名人堂',
+    'lb_category_total' => '总分',
+    'lb_category_buildings' => '建筑',
+    'lb_category_technology' => '研究',
+    'lb_category_ships' => '舰队',
+    'lb_category_defenses' => '防御',
+    'lb_category_military' => '军事',
 ];

@@ -1455,6 +1455,23 @@ Baseline-Einträge.
     - Schließen durch den Befehl, nur einmal;
     - Ende entfernen;
     - Laufzeit beim Monatsstart.
+- ✅ **Rangliste zum Saisonende und Ruhmeshalle:** Schließt ein
+  Universum (Saisonende, `--status=closed` oder `keep_open` beim
+  Monatsstart), berechnet `SeasonResults` die Statistik ein letztes Mal
+  und speichert die Top 10 jeder Wertung in der Basisdatenbank
+  (`season_results`, zentrale Migration `000004`).
+  - *Wertungen:* Gesamt, Gebäude, Forschung, Flotte, Verteidigung,
+    Militär.
+  - Bots und Admins zählen nicht, wie in der Highscore
+    (`stat_admin_level`).
+  - Die Ergebnisse bleiben, auch wenn die Universums-Datenbank später
+    gelöscht wird; sie sind die Grundlage für die Belohnungen der Top 10.
+  - *Lobby:* zeigt bei beendeten Universen eine aufklappbare Ruhmeshalle
+    mit Namen, Allianz-Tag und Punkten; Texte in zehn Sprachen.
+  - *Test in `InstancesMysqlTest`:* zwei Spieler mit unterschiedlichen
+    Minen, zwei Bots und ein Admin. Nach dem Schließen gilt die richtige
+    Reihenfolge in Gesamt und Gebäuden, ohne Bots und Admin, und die
+    Lobby zeigt die Ruhmeshalle.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

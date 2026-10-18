@@ -18,4 +18,11 @@ return [
     'lb_payment_stripe' => 'kaart',
     'lb_payment_wax' => 'WAX',
     'lb_ends' => 'Eindigt op :date',
+    'lb_hall_of_fame' => 'Eregalerij',
+    'lb_category_total' => 'Totaal',
+    'lb_category_buildings' => 'Gebouwen',
+    'lb_category_technology' => 'Onderzoek',
+    'lb_category_ships' => 'Vloot',
+    'lb_category_defenses' => 'Verdediging',
+    'lb_category_military' => 'Militair',
 ];

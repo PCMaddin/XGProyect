@@ -18,4 +18,11 @@ return [
     'lb_payment_stripe' => 'carta',
     'lb_payment_wax' => 'WAX',
     'lb_ends' => 'Termina il :date',
+    'lb_hall_of_fame' => 'Albo d\'oro',
+    'lb_category_total' => 'Totale',
+    'lb_category_buildings' => 'Edifici',
+    'lb_category_technology' => 'Ricerca',
+    'lb_category_ships' => 'Flotta',
+    'lb_category_defenses' => 'Difesa',
+    'lb_category_military' => 'Militare',
 ];

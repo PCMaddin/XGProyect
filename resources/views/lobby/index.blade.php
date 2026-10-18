@@ -22,6 +22,12 @@
         button { background: #4f7cff; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-size: 15px; cursor: pointer; }
         button:hover { background: #3d68e6; }
         .ended { color: #9aa4b8; }
+        details.fame { flex-basis: 100%; margin-top: 4px; }
+        details.fame summary { cursor: pointer; color: #ffd27a; font-size: 14px; }
+        .fame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 24px; margin-top: 10px; }
+        .fame-grid h3 { font-size: 13px; margin: 0 0 4px; color: #fff; }
+        .fame-grid ol { margin: 0; padding-left: 22px; font-size: 13px; color: #c3cad8; }
+        .fame-grid .pts { color: #9aa4b8; font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body>
@@ -55,6 +61,23 @@
                     </form>
                 @else
                     <span class="ended">{{ __('home/lobby.lb_closed') }}</span>
+                @endif
+                @if ($universe['hall_of_fame'] !== [])
+                    <details class="fame">
+                        <summary>{{ __('home/lobby.lb_hall_of_fame') }}</summary>
+                        <div class="fame-grid">
+                            @foreach ($universe['hall_of_fame'] as $category => $places)
+                                <div>
+                                    <h3>{{ __('home/lobby.lb_category_' . $category) }}</h3>
+                                    <ol>
+                                        @foreach ($places as $place)
+                                            <li>{{ $place['name'] }}@if ($place['alliance_tag'] !== null) [{{ $place['alliance_tag'] }}]@endif <span class="pts">{{ number_format($place['points'], 0, ',', '.') }}</span></li>
+                                        @endforeach
+                                    </ol>
+                                </div>
+                            @endforeach
+                        </div>
+                    </details>
                 @endif
             </li>
         @endforeach

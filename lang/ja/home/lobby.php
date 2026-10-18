@@ -18,4 +18,11 @@ return [
     'lb_payment_stripe' => 'カード',
     'lb_payment_wax' => 'WAX',
     'lb_ends' => ':date に終了',
+    'lb_hall_of_fame' => '殿堂',
+    'lb_category_total' => '総合',
+    'lb_category_buildings' => '建物',
+    'lb_category_technology' => '研究',
+    'lb_category_ships' => '艦隊',
+    'lb_category_defenses' => '防衛',
+    'lb_category_military' => '軍事',
 ];
