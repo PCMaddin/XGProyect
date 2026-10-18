@@ -1,0 +1,128 @@
+# The game on one server: deploy.sh builds, installs, migrates and rolls
+# out. Settings in deploy/.env (see .env.example), docs: docs/deployment.md.
+name: xgproyect
+
+# Docker keeps logs forever unless told otherwise
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: "5"
+
+x-game: &game
+  <<: *logging
+  image: xgproyect-app:${XGP_RELEASE:-current}
+  env_file: .env
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+    redis-cache:
+      condition: service_started
+    redis-sessions:
+      condition: service_started
+  networks: [game]
+
+services:
+  # php-fpm, several side by side: an update replaces them one set at a time
+  app:
+    <<: *game
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    environment:
+      PUBLIC_DIR: /srv/public
+    volumes:
+      - storage:/srv/app/storage
+      - public:/srv/public
+    deploy:
+      replicas: ${APP_REPLICAS:-2}
+    # php-fpm ends the requests it is serving, then stops
+    stop_signal: SIGQUIT
+    stop_grace_period: 60s
+
+  # the game's clock: xgp:tick, the monthly universe, WAX, cheat scan
+  scheduler:
+    <<: *game
+    command: ["php", "artisan", "schedule:work"]
+    volumes:
+      - storage:/srv/app/storage
+    healthcheck:
+      disable: true
+    stop_grace_period: 120s
+
+  web:
+    <<: *logging
+    image: caddy:2.10
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    environment:
+      XGP_DOMAIN: ${XGP_DOMAIN:?set XGP_DOMAIN in deploy/.env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - public:/srv/app/public:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    depends_on: [app]
+    networks: [game]
+
+  db:
+    <<: *logging
+    image: mariadb:11.4
+    restart: unless-stopped
+    command: ["--innodb-buffer-pool-size=${DB_BUFFER_POOL:-2G}"]
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-xgp}
+      MARIADB_USER: ${DB_USERNAME:-xgp}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in deploy/.env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in deploy/.env}
+    volumes:
+      - db:/var/lib/mysql
+      - ./mariadb/xgproyect.cnf:/etc/mysql/conf.d/xgproyect.cnf:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    stop_grace_period: 60s
+    networks: [game]
+
+  # the cache: may forget anything when full
+  redis-cache:
+    <<: *logging
+    image: redis:7.4
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "${REDIS_CACHE_MEMORY:-512mb}", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    networks: [game]
+
+  # the logins: never evicted, written to disk every second
+  redis-sessions:
+    <<: *logging
+    image: redis:7.4
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory-policy", "noeviction", "--appendonly", "yes", "--appendfsync", "everysec"]
+    volumes:
+      - sessions:/data
+    networks: [game]
+
+networks:
+  game:
+
+volumes:
+  storage:
+  public:
+  db:
+  sessions:
+  caddy-data:
+  caddy-config:

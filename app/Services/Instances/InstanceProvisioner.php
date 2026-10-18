@@ -29,7 +29,7 @@ class InstanceProvisioner
     private const DATABASE = '/^[A-Za-z0-9_]{1,64}$/';
 
     /** what the installer runs, without wiping anything */
-    private const INSTALL = [
+    public const INSTALL = [
         ['migrate:install', []],
         ['migrate', ['--path' => 'database/migrations/install', '--force' => true]],
         ['xgp:mark-installed-updates', ['--all' => true]],

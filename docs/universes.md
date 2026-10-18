@@ -36,6 +36,10 @@ Spiel. Alles hier ist also optional.
   GRANT ALL PRIVILEGES ON `xgp\_uni\_%`.* TO 'xgp'@'localhost';
   ```
 
+- Mit dem Docker-Stack aus `deploy/` ist alles Folgende schon eingerichtet
+  (Datenbank-Rechte, Scheduler, Redis), siehe
+  [deployment.md](deployment.md); Befehle dort mit
+  `docker compose exec app php artisan …`.
 - Der Scheduler läuft per Cron. Er hält die Spielzeit aller Universen am
   Laufen (`xgp:tick`) und startet den Monatsstart und die WAX-Gutschrift:
 
@@ -374,7 +378,8 @@ und WAX-Betrag.
 
 ## Updates
 
-Nach jedem Code-Update:
+Mit dem Docker-Stack: `deploy/deploy.sh` (siehe [deployment.md](deployment.md)).
+Sonst nach jedem Code-Update:
 
 ```bash
 composer install --no-dev

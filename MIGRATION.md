@@ -2126,6 +2126,66 @@ Baseline-Einträge.
     Spielers, altes Passwort). Neun Mutationsproben schlugen an; die
     Probe „wieder `exit`“ scheitert erst durch `RunMustFinish`.
 
+- **Alpha a01 — Produktionsbetrieb mit einem Befehl (`deploy/`)**
+  - *Stack:* Caddy (HTTPS mit Let's Encrypt, HTTP/3, statische Dateien),
+    mehrere php-fpm-8.4-Container mit OPcache (ohne Dateiprüfung) und JIT,
+    Scheduler-Container (`schedule:work`), MariaDB 11.4, Redis für den
+    Cache (`allkeys-lru`) und ein zweiter für die Sitzungen (`noeviction`,
+    AOF). PHP läuft als `www-data`; von außen sind nur 80/443 offen.
+    Logs rotieren. Statt nginx Caddy: TLS-Erneuerung ohne certbot, und
+    Caddy findet die App-Container über das interne DNS und wiederholt
+    Anfragen an einen gerade stoppenden Container bei einem anderen.
+  - *`deploy/deploy.sh`:*
+    - erzeugt einmalig Schlüssel und Passwörter in `deploy/.env` und baut
+      das Image;
+    - installiert das Spiel beim ersten Mal (`xgp:install`);
+    - setzt die Datenbank-Rechte für die Universen und spielt die
+      Migrationen ein, während die alte Version weiterläuft;
+    - startet neue App-Container neben den alten und entfernt die alten
+      erst, wenn alle neuen bereit sind;
+    - behält die Images der letzten drei Releases.
+    
+    Mit `XGP_IMAGE` rollt es ein anderswo gebautes Image aus.
+  - *Kein kaputtes Release live:* Jeder App-Container rendert beim Start
+    intern die Startseite (php-fpm auf 127.0.0.1:9001) und öffnet Port
+    9000 erst danach. Erst schickte Caddy neuen Containern sofort
+    Anfragen: Ein Release, dessen Seiten mit 500 enden, traf 598 von 2.250
+    Anfragen, bevor der Rollout abbrach. Mit der Selbstprüfung bekommt es
+    keine einzige; das Skript bricht nach 9 s ab, die alte Version läuft
+    weiter.
+  - *`xgp:install`:* die Installation ohne Browser (Container), über
+    `GameInstaller`. Sie tut nichts, wenn ein Spiel da ist, fragt dann
+    auch nichts, und installiert nur in eine leere Datenbank. Bricht sie
+    ab, ist die Datenbank wieder leer; zuerst blieb eine halbe
+    Installation zurück, die der nächste Lauf für fertig hielt.
+  - *Nebenbei gefunden:*
+    - `APP_VERSION` fehlte in der neuen `.env`, und die Installation brach
+      im Seeder ab: Die Version gehört zum Code und hat jetzt einen
+      Standardwert.
+    - `public/compiles` enthielt kompilierte Templates des alten
+      BladeOne, öffentlich abrufbar und von nichts mehr benutzt: entfernt.
+    - Das Skript löschte beim Aufräumen fremde Image-Tags (auch das
+      übergebene `XGP_IMAGE`); jetzt nur die eigenen aus
+      `deploy/.releases`.
+    - Ein MariaDB-Init-Skript lief nicht (ausführbar statt eingebunden);
+      der GRANT steht jetzt im Deploy-Skript und wirkt auch bei
+      bestehenden Volumes.
+  - *Geprüft, live in Docker:*
+    - Installation von Null; Crawl aller 53 Spielseiten über HTTPS mit
+      Login (Secure-Cookies, Sitzungen in Redis);
+    - `.env`, `.htaccess` und `/compiles` liefern 404; Admin-Login führt zur
+      Pflicht-2FA;
+    - `xgp:tick` jede Minute; ein Universum mit Bots im Container angelegt;
+    - 19.244 Anfragen während eines Rollouts ohne einen Fehler;
+    - zwei kaputte Releases (php-fpm startet nicht / Seiten mit 500)
+      abgewiesen, ohne dass eine Anfrage scheiterte.
+    
+    Die CI baut den Stack bei jedem Push, installiert, prüft HTTPS und
+    rollt ein zweites Mal unter Last aus. Doku: `docs/deployment.md`.
+  - *Tests:* `InstallGameMysqlTest` (leere Datenbank mit Admin, zweiter
+    Lauf ohne Rückfrage, abgebrochene Installation hinterlässt eine leere
+    Datenbank, fremde Tabellen bleiben unberührt, ohne Konfiguration nichts).
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

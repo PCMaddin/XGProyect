@@ -1,0 +1,25 @@
+# what the game's image (deploy/Dockerfile) does not need or must not hold
+.git
+.github
+.claude
+.idea
+.vscode
+.env
+.env.*
+!.env.example
+deploy/.env
+config/xgp-db-config.php
+bootstrap/cache/*.php
+node_modules
+vendor
+storage
+public/compiles
+public/hot
+public/storage
+tests
+tools
+docs
+*.cache
+.phpunit.cache
+.phpunit.result.cache
+docker-compose.yml

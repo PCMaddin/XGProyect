@@ -1,0 +1,35 @@
+# The game's web server: TLS (certificates from Let's Encrypt, renewed by
+# itself), static files, PHP from the app containers.
+{
+	email {$ACME_EMAIL}
+}
+
+{$XGP_DOMAIN} {
+	root * /srv/app/public
+	encode zstd gzip
+
+	# hidden files and leftovers of the old template compiler
+	@hidden path /.* /compiles/*
+	respond @hidden 404
+
+	# every running app container, found by name: while a new version rolls
+	# out both serve; a request to a stopping one is tried on another
+	php_fastcgi {
+		dynamic a {
+			name app
+			port 9000
+			refresh 2s
+		}
+		lb_policy least_conn
+		lb_try_duration 15s
+		lb_try_interval 250ms
+		fail_duration 10s
+	}
+
+	@assets path /assets/* /favicon.ico /robots.txt
+	header @assets Cache-Control "public, max-age=604800"
+	header -Server
+
+	file_server
+	log
+}
