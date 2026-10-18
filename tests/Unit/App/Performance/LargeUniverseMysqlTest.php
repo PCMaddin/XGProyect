@@ -12,6 +12,7 @@ use App\Services\RegistrationService;
 use App\Services\SettingsService;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -24,6 +25,7 @@ use Tests\MysqlTestCase;
  */
 #[CoversClass(UpdatesLibrary::class)]
 #[CoversClass(BulkStatistics::class)]
+#[CoversClass(\App\Console\Commands\Game\RunTick::class)]
 class LargeUniverseMysqlTest extends MysqlTestCase
 {
     /** @var list<User> */
@@ -74,6 +76,32 @@ class LargeUniverseMysqlTest extends MysqlTestCase
 
         $this->assertTrue($done);
         $this->assertSame([0, 0, 0], array_map(fn (User $player): int => $this->stat($player, 'total_rank'), $this->players));
+    }
+
+    public function testWhileTheSchedulerTicksPageViewsLeaveTheRebuildToIt(): void
+    {
+        $this->statisticsDue();
+        app(SettingsService::class)->write(UpdatesLibrary::HEARTBEAT, time() - 60);
+
+        new UpdatesLibrary();
+
+        $this->assertSame([0, 0, 0], array_map(fn (User $player): int => $this->stat($player, 'total_rank'), $this->players));
+
+        // the scheduler stopped: page views take over
+        app(SettingsService::class)->write(UpdatesLibrary::HEARTBEAT, time() - UpdatesLibrary::SCHEDULER_ALIVE - 1);
+        new UpdatesLibrary();
+
+        $this->assertSame([3, 2, 1], array_map(fn (User $player): int => $this->stat($player, 'total_rank'), $this->players));
+    }
+
+    public function testTheSchedulersTickRunsTheRebuildAndNotesItsTime(): void
+    {
+        $this->statisticsDue();
+
+        $this->assertSame(0, Artisan::call('xgp:tick'));
+
+        $this->assertSame([3, 2, 1], array_map(fn (User $player): int => $this->stat($player, 'total_rank'), $this->players));
+        $this->assertEqualsWithDelta(time(), $this->option(UpdatesLibrary::HEARTBEAT), 5);
     }
 
     public function testTheHighscoreReadsThePageByRank(): void

@@ -27,6 +27,7 @@ storage/cache/*.html
 storage/logs/*.txt
 .phpdoc/*
 /docs/*
+!/docs/universes.md
 config/xgp-db-config.php
 .php-cs-fixer.cache
 

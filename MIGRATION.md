@@ -2053,6 +2053,39 @@ Baseline-Einträge.
     inaktiven Spieler und den richtigen Zweig traf); eine Kontrollprobe
     ohne Kolonie im Test bestand wie erwartet.
 
+- **Alpha a03 — Spielzeit per Scheduler (`xgp:tick`)**
+  - *Vorher:* Statistik, Aufräumen, Backup, Bots, Umzüge, Auktionen und
+    fällige Flotten liefen nur in Seitenaufrufen. Ohne Besucher stand ein
+    Universum still; bei vielen Besuchern konnte ein Seitenaufruf die
+    Statistik eines ganzen Universums neu berechnen (in `afterResponse`,
+    aber im selben PHP-Worker).
+  - *Jetzt:* `php artisan xgp:tick` läuft jede Minute per Scheduler
+    (`withoutOverlapping(10)`) und arbeitet jedes offene Universum in
+    dessen eigenem Kontext ab (Datenbank, Cache, Optionen, Sprache,
+    Zeitzone); ohne Universen das eine Spiel. Fehler eines Universums
+    werden gemeldet, die übrigen laufen weiter, der Befehl endet dann mit
+    Fehlercode.
+  - *Herzschlag:* Der Tick schreibt `tick_last_run` in die Optionen des
+    Universums. Ist er jünger als 300 Sekunden, verarbeiten Seitenaufrufe
+    nur noch, was der Spieler sofort sehen muss (fällige Flotten, Umzüge,
+    Auktionen) und lassen Statistik, Aufräumen, Backup und Bots dem
+    Scheduler. Fällt der Cron aus, übernehmen die Seitenaufrufe nach fünf
+    Minuten wieder alles. Die Sperren (`SettingsService::claim`)
+    verhindern doppelte Läufe zwischen Tick und Seitenaufruf.
+  - *Nebenbei gefunden:* Der Anteil der Trümmer (`fleet_cdr`,
+    `defs_cdr`) war eine PHP-Konstante, die beim ersten Seitenaufruf
+    eines Prozesses gesetzt wurde. Mit mehreren Universen in einem Worker
+    (oder im Tick) galt der Wert des ersten Universums für alle. Jetzt
+    liest `DebrisFactor::share()` ihn aus den Optionen des aktuellen
+    Universums.
+  - *Tests:* `InstancesMysqlTest` (zwei Universen mit 30 % und 70 %
+    Trümmern, Herzschlag je Universum, geschlossenes Universum wird nicht
+    berechnet), `LargeUniverseMysqlTest` (Seitenaufrufe überlassen die
+    Statistik dem laufenden Scheduler; der Tick berechnet sie und
+    schreibt den Herzschlag). Vier Mutationsproben schlugen an
+    (Seitenaufrufe ignorieren den Scheduler, kein Herzschlag, Trümmer aus
+    der Konstante, nur das erste Universum).
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -39,6 +39,12 @@ Schedule::command('xgp:instance:close-ended')
     ->everyFiveMinutes()
     ->withoutOverlapping();
 
+// the game tick of every universe: fleets, statistics, cleanup, bots; page
+// views leave the heavy part to it while it runs
+Schedule::command('xgp:tick')
+    ->everyMinute()
+    ->withoutOverlapping(10);
+
 // signs of multiple accounts, pushing and scripts for the admin, see config/cheats.php
 Schedule::command('xgp:cheat:scan')
     ->hourly()

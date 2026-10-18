@@ -46,18 +46,56 @@ class UpdatesLibrary
 {
     use PreparesSql;
 
-    public function __construct()
-    {
-        // Other stuff
-        $this->cleanUp();
-        $this->createBackup();
+    /** the option the scheduler's tick (xgp:tick) writes its time to */
+    public const HEARTBEAT = 'tick_last_run';
 
-        // Updates
+    /** seconds a tick of the scheduler counts as recent */
+    public const SCHEDULER_ALIVE = 300;
+
+    /**
+     * The tick: for a page view, or for the scheduler's xgp:tick started at
+     * $scheduledAt. Fleets, relocations and auctions run on every page view, so
+     * a player sees what arrived. Cleanup, backup, statistics and bots are
+     * left to the scheduler while it runs; when it stops, page views take
+     * them over again.
+     */
+    public function __construct(?int $scheduledAt = null)
+    {
+        $settings = app(SettingsService::class);
+
+        if ($scheduledAt !== null) {
+            $settings->write(self::HEARTBEAT, $scheduledAt);
+        }
+
+        $background = $scheduledAt !== null || !self::schedulerRuns($settings);
+
+        if ($background) {
+            $this->cleanUp();
+            $this->createBackup();
+        }
+
         $this->updateFleets();
         app(RelocationService::class)->settleDue(time());
-        $this->updateStatistics();
+
+        if ($background) {
+            $this->updateStatistics();
+        }
+
         app(AuctionService::class)->settleEnded(time());
-        app(BotPlayerService::class)->playDue(time());
+
+        if ($background) {
+            app(BotPlayerService::class)->playDue(time());
+        }
+    }
+
+    /**
+     * Whether the scheduler ticked this universe in the last minutes.
+     */
+    public static function schedulerRuns(SettingsService $settings): bool
+    {
+        $options = $settings->all();
+
+        return isset($options[self::HEARTBEAT]) && time() - (int) $options[self::HEARTBEAT]->value < self::SCHEDULER_ALIVE;
     }
 
     /**

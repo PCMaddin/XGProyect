@@ -52,18 +52,11 @@ final class GameBootstrap
     }
 
     /**
-     * The game tick: fleet arrivals, statistics, cleanup.
+     * The game tick: fleet arrivals, statistics, cleanup. (The debris
+     * shares are read from the options by the battle: BattleEngine\Utils\DebrisFactor.)
      */
     private function runUpdates(): void
     {
-        if (!defined('SHIP_DEBRIS_FACTOR')) {
-            define('SHIP_DEBRIS_FACTOR', $this->settings->getInt('fleet_cdr') / 100);
-        }
-
-        if (!defined('DEFENSE_DEBRIS_FACTOR')) {
-            define('DEFENSE_DEBRIS_FACTOR', $this->settings->getInt('defs_cdr') / 100);
-        }
-
         app(UpdatesLibrary::class);
     }
 

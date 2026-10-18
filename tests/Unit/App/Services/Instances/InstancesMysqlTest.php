@@ -6,6 +6,9 @@ namespace Tests\Unit\App\Services\Instances;
 
 use App\Http\Middleware\SelectInstance;
 use App\Mail\Recover;
+use App\Libraries\BattleEngine\Utils\DebrisFactor;
+use App\Libraries\UpdatesLibrary;
+use App\Services\SettingsService;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceProvisioner;
@@ -173,6 +176,38 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->assertSame(storage_path('logs/xgproyect.log'), config('logging.channels.single.path'));
         $this->command('xgp:instance:update', ['slug' => 'u1', '--status' => 'closed'])->assertSuccessful();
         $this->post('/universes/u1')->assertRedirect(route('lobby.index'));
+    }
+
+    public function testTheSchedulerTicksEveryOpenUniverseWithItsOwnOptions(): void
+    {
+        $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        $this->createUniverse('u2', 'xgp_test_u2')->assertSuccessful();
+        $context = app(InstanceContext::class);
+        $registry = app(InstanceRegistry::class);
+        $u1 = $registry->find('u1');
+        $u2 = $registry->find('u2');
+        $this->assertInstanceOf(Instance::class, $u1);
+        $this->assertInstanceOf(Instance::class, $u2);
+        $context->runIn($u1, static fn (): bool => app(SettingsService::class)->write('fleet_cdr', 30));
+        $context->runIn($u2, static fn (): bool => app(SettingsService::class)->write('fleet_cdr', 70));
+
+        $this->command('xgp:tick')->assertSuccessful();
+
+        foreach ([$u1, $u2] as $universe) {
+            $heartbeat = $context->runIn($universe, static fn (): mixed => DB::table('options')->where('name', UpdatesLibrary::HEARTBEAT)->value('value'));
+            $this->assertIsNumeric($heartbeat);
+            $this->assertEqualsWithDelta(time(), (int) $heartbeat, 5);
+        }
+
+        // the debris of a battle: the shares of the universe it is fought in, not the first one's
+        $this->assertSame(0.3, $context->runIn($u1, static fn (): float => DebrisFactor::share('ship')));
+        $this->assertSame(0.7, $context->runIn($u2, static fn (): float => DebrisFactor::share('ship')));
+
+        // a closed universe is not ticked
+        $context->runIn($u2, static fn (): int => DB::table('options')->where('name', UpdatesLibrary::HEARTBEAT)->delete());
+        $this->command('xgp:instance:update', ['slug' => 'u2', '--status' => 'closed'])->assertSuccessful();
+        $this->command('xgp:tick')->assertSuccessful();
+        $this->assertFalse($context->runIn($u2, static fn (): bool => DB::table('options')->where('name', UpdatesLibrary::HEARTBEAT)->exists()));
     }
 
     public function testAMailLinkNamesTheUniverse(): void

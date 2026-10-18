@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries\BattleEngine\Core;
 
 use App\Libraries\BattleEngine\Models\Defense;
+use App\Libraries\BattleEngine\Utils\DebrisFactor;
 use Exception;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
@@ -96,6 +97,8 @@ final class BattleLosses
      * @param array<int, array<int, array<string, array<int, array{0: int|float, 1: int|float}>>>> $lostUnits
      *
      * @return array{0: int|float, 1: int|float}
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     public function debris(array $lostUnits): array
     {
@@ -110,8 +113,7 @@ final class BattleLosses
                         $metal += $lost[0];
                         $crystal += $lost[1];
                     }
-                    $factorRaw = constant(strtoupper($role) . '_DEBRIS_FACTOR');
-                    $factor = is_numeric($factorRaw) ? (float) $factorRaw : 0.0;
+                    $factor = DebrisFactor::share($role);
                     $sendMetal += $metal * $factor;
                     $sendCrystal += $crystal * $factor;
                 }
