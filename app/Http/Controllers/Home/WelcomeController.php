@@ -36,6 +36,7 @@ class WelcomeController extends BaseController
                     // with several universes: which one this is, and the way back to the lobby
                     'universe' => app(InstanceContext::class)->current()?->name,
                     'universe_name' => app(InstanceContext::class)->current()->name ?? __('home/welcome.hm_universe_name'),
+                    'universe_ends' => app(InstanceContext::class)->current()?->endsAt,
                 ],
                 $this->getErrors($request)
             )

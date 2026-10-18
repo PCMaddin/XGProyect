@@ -17,4 +17,5 @@ return [
     'lb_payments' => 'Betaling: :methods',
     'lb_payment_stripe' => 'kaart',
     'lb_payment_wax' => 'WAX',
+    'lb_ends' => 'Eindigt op :date',
 ];

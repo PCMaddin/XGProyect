@@ -87,12 +87,13 @@ class InstanceRegistry
             'mode' => $instance->mode,
             'status' => $instance->status,
             'opened_at' => $instance->openedAt,
+            'ends_at' => $instance->endsAt,
         ]);
         $this->enabled = true;
     }
 
     /**
-     * @param array<string, string|int> $changes name, mode, status
+     * @param array<string, string|int|null> $changes name, mode, status, ends_at
      */
     public function update(string $slug, array $changes): void
     {
@@ -115,6 +116,7 @@ class InstanceRegistry
             self::asString($values['mode'] ?? Instance::PLAY2WIN),
             self::asString($values['status'] ?? Instance::OPEN),
             self::asInt($values['opened_at'] ?? 0),
+            is_numeric($values['ends_at'] ?? null) ? (int) $values['ends_at'] : null,
         );
     }
 }

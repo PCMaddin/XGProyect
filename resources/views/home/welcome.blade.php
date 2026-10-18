@@ -280,7 +280,7 @@
 	<div id="footer">
 	    <div id="footerContent">
             @if ($universe !== null)
-            <p id="universe">{{ $universe }} · <a href="{{ route('lobby.index') }}">{{ __('home/lobby.lb_switch') }}</a></p>
+            <p id="universe">{{ $universe }}@if ($universe_ends !== null) · {{ __('home/lobby.lb_ends', ['date' => date('d.m.Y H:i', $universe_ends)]) }}@endif · <a href="{{ route('lobby.index') }}">{{ __('home/lobby.lb_switch') }}</a></p>
             @endif
             <p id="copyright">Powered by <a href="https://xgproyect.org/" target="_blank" title="XG Proyect {{ config('version.files') }}">XG Proyect</a> © 2008 - {{ now()->year }}.</p>
         </div>

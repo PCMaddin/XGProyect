@@ -33,3 +33,8 @@ Schedule::command('xgp:wax:check')
     ->everyMinute()
     ->when(static fn (): bool => (string) config('premium.wax.account') !== '')
     ->withoutOverlapping();
+
+// universes whose season has ended close (see xgp:instance:create --ends)
+Schedule::command('xgp:instance:close-ended')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();

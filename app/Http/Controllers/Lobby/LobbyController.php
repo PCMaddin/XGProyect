@@ -40,6 +40,7 @@ class LobbyController extends BaseController
                 'mode' => $instance->mode,
                 'open' => $instance->isOpen(),
                 'opened_at' => $instance->openedAt,
+                'ends_at' => $instance->endsAt,
             ] + $this->facts($instance), $this->registry->all()),
             'chosen' => request()->cookie(SelectInstance::COOKIE),
         ]);

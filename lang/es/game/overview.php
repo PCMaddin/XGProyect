@@ -20,4 +20,5 @@ return [
     'ov_position' => 'Posición',
     'ov_points' => 'Puntos',
     'ov_fields' => 'Campos',
+    'ov_season_end' => 'Fin de temporada',
 ];

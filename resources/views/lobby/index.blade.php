@@ -36,6 +36,9 @@
                     <span class="mode {{ $universe['mode'] }}">{{ __('home/lobby.lb_mode_' . $universe['mode']) }}</span>
                     <div class="meta">
                         {{ __('home/lobby.lb_opened', ['date' => date('d.m.Y', $universe['opened_at'])]) }}
+                        @if ($universe['open'] && $universe['ends_at'] !== null)
+                            · <span class="ends">{{ __('home/lobby.lb_ends', ['date' => date('d.m.Y H:i', $universe['ends_at'])]) }}</span>
+                        @endif
                         @if ($universe['players'] !== null)
                             · {{ __('home/lobby.lb_players', ['count' => $universe['players']]) }}
                         @endif

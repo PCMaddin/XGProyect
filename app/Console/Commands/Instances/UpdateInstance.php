@@ -21,7 +21,8 @@ class UpdateInstance extends Command
         {--name=}
         {--mode= : pay2win or play2win}
         {--status= : open or closed}
-        {--payments= : ways to pay in pay2win: stripe, wax, stripe,wax or none}';
+        {--payments= : ways to pay in pay2win: stripe, wax, stripe,wax or none}
+        {--ends= : when the season ends (a date, e.g. 2026-12-01 or "+2 weeks"), or none}';
 
     /** @var string */
     protected $description = 'Change the name, mode or status of a universe';
@@ -47,8 +48,22 @@ class UpdateInstance extends Command
             $changes['payments'] = $payments === 'none' ? '' : $payments;
         }
 
+        $ends = $this->option('ends');
+
+        if (is_string($ends) && $ends !== '') {
+            $time = $ends === 'none' ? null : strtotime($ends);
+
+            if ($time === false) {
+                $this->error('Not a date: ' . $ends);
+
+                return self::FAILURE;
+            }
+
+            $changes['ends_at'] = $time;
+        }
+
         try {
-            /** @var array{name?: string, mode?: string, status?: string, payments?: string} $changes */
+            /** @var array{name?: string, mode?: string, status?: string, payments?: string, ends_at?: int|null} $changes */
             $changed = $provisioner->change($instance, $changes);
         } catch (Throwable $e) {
             $this->error($e->getMessage());
@@ -56,7 +71,8 @@ class UpdateInstance extends Command
             return self::FAILURE;
         }
 
-        $this->info('Universe ' . $changed->slug . ': ' . $changed->name . ', ' . $changed->mode . ', ' . $changed->status . '.');
+        $this->info('Universe ' . $changed->slug . ': ' . $changed->name . ', ' . $changed->mode . ', ' . $changed->status
+            . ($changed->endsAt === null ? '' : ', ends ' . date('Y-m-d H:i', $changed->endsAt)) . '.');
 
         return self::SUCCESS;
     }

@@ -1436,6 +1436,25 @@ Baseline-Einträge.
   - Für Spieler bleibt sie freiwillig.
   - Texte in zehn Sprachen; Test im `DarkMatterShopControllerTest` (Hinweis
     ohne, kein Hinweis mit Zwei-Faktor-Anmeldung).
+- ✅ **Saisonlaufzeit:** Ein Universum kann ein Saisonende haben
+  (`ends_at` in der Registry, zentrale Migration `000003`).
+  - *Festlegen:* `xgp:instance:create --ends="2026-12-01"` oder
+    `--ends="+1 month"`, ändern mit `xgp:instance:update --ends=…|none`.
+    Der Monatsstart setzt `XGP_MONTHLY_DURATION` (Standard „1 month“): eine
+    Saison läuft, bis die nächste beginnt.
+  - *Nach dem Ende* kommt niemand mehr hinein (`Instance::isOpen`), und
+    `xgp:instance:close-ended` schließt das Universum (Scheduler alle fünf
+    Minuten); dort setzt später das Einfrieren der Rangliste an.
+  - *Anzeige:* „Endet am …“ in der Lobby und auf der Startseite des
+    Universums, „Saisonende“ in der Übersicht im Spiel; Texte in zehn
+    Sprachen.
+  - *Tests in `InstancesMysqlTest`:*
+    - Ende setzen und anzeigen;
+    - ein Ende vor dem Start wird abgewiesen;
+    - Sperre nach Ablauf;
+    - Schließen durch den Befehl, nur einmal;
+    - Ende entfernen;
+    - Laufzeit beim Monatsstart.
 - ✅ **Zahlungsarten je Universum und Zahlung mit WAX:** Jedes Universum
   legt fest, wie Dunkle Materie bezahlt wird: Option `payment_methods`
   (`stripe`, `wax`, beides oder nichts). Der Shop öffnet nur mit einer

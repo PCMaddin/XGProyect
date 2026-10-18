@@ -25,6 +25,8 @@ return [
         'payments' => env('XGP_MONTHLY_PAYMENTS', 'stripe'),
         'options' => env('XGP_MONTHLY_OPTIONS', ''),
         'keep_open' => (int) env('XGP_MONTHLY_KEEP_OPEN', 0),
+        // how long a season runs (strtotime: "1 month", "4 weeks"); empty: no end
+        'duration' => env('XGP_MONTHLY_DURATION', '1 month'),
         // AI opponents the new universe starts with
         'bots' => (int) env('XGP_MONTHLY_BOTS', 0),
         'admin' => [

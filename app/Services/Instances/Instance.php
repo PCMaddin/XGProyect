@@ -23,11 +23,20 @@ final class Instance
         public readonly string $mode,
         public readonly string $status,
         public readonly int $openedAt,
+        public readonly ?int $endsAt = null,
     ) {
     }
 
-    public function isOpen(): bool
+    /**
+     * Open for play: not closed, and its season has not ended.
+     */
+    public function isOpen(?int $now = null): bool
     {
-        return $this->status === self::OPEN;
+        return $this->status === self::OPEN && !$this->hasEnded($now ?? time());
+    }
+
+    public function hasEnded(int $now): bool
+    {
+        return $this->endsAt !== null && $now >= $this->endsAt;
     }
 }

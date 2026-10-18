@@ -44,7 +44,10 @@ class CreateMonthlyInstance extends Command
             return self::SUCCESS;
         }
 
-        $instance = new Instance($slug, strtr(self::config('name'), $placeholders), $provisioner->databaseFor($slug), self::config('mode'), Instance::OPEN, $time);
+        // the season runs until the next one opens, unless configured otherwise
+        $duration = self::config('duration');
+        $ends = $duration === '' ? null : strtotime('+' . ltrim($duration, '+'), $time);
+        $instance = new Instance($slug, strtr(self::config('name'), $placeholders), $provisioner->databaseFor($slug), self::config('mode'), Instance::OPEN, $time, $ends === false ? null : $ends);
 
         try {
             $options = ['payment_methods' => $provisioner->paymentMethods(self::config('payments'))] + $this->universeOptions();
@@ -75,7 +78,7 @@ class CreateMonthlyInstance extends Command
 
         // newest first
         foreach (array_slice($registry->open(), $keep) as $instance) {
-            $provisioner->change($instance, ['status' => Instance::CLOSED]);
+            $provisioner->close($instance);
             $this->info('Closed ' . $instance->slug . '.');
         }
     }

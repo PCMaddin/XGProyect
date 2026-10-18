@@ -19,6 +19,12 @@
         <th scope="row">{{ __('game/overview.ov_server_time') }}</th>
         <th role="cell" colspan="3">{{ $dateTime }}</th>
     </tr>
+    @if ($seasonEnd !== '')
+    <tr>
+        <th scope="row">{{ __('game/overview.ov_season_end') }}</th>
+        <th role="cell" colspan="3" id="season-end">{{ $seasonEnd }}</th>
+    </tr>
+    @endif
     <tr>
         <td colspan="4" class="c">{{ __('game/overview.ov_events') }}</td>
     </tr>

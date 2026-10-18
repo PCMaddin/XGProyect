@@ -22,6 +22,7 @@ class CreateInstance extends Command
         {--mode=play2win : pay2win (dark matter for money) or play2win (no purchase)}
         {--payments=stripe : ways to pay in pay2win: stripe, wax or stripe,wax}
         {--bots=0 : AI opponents to start with}
+        {--ends= : when the season ends (a date, e.g. 2026-12-01 or "+1 month"), default: never}
         {--database= : database of the universe, default: xgp_uni_<slug>}
         {--admin-name= : administrator of the universe}
         {--admin-email=}
@@ -34,13 +35,23 @@ class CreateInstance extends Command
     public function handle(InstanceProvisioner $provisioner): int
     {
         $slug = self::str($this->argument('slug'));
+        $now = time();
+        $ends = $this->text('ends') === '' ? null : strtotime($this->text('ends'), $now);
+
+        if ($ends === false) {
+            $this->error('Not a date: ' . $this->text('ends'));
+
+            return self::FAILURE;
+        }
+
         $instance = new Instance(
             $slug,
             $this->text('name') ?: $slug,
             $this->text('database') ?: $provisioner->databaseFor($slug),
             $this->text('mode'),
             Instance::OPEN,
-            time(),
+            $now,
+            $ends,
         );
 
         try {

@@ -17,4 +17,5 @@ return [
     'lb_payments' => '支払い：:methods',
     'lb_payment_stripe' => 'カード',
     'lb_payment_wax' => 'WAX',
+    'lb_ends' => ':date に終了',
 ];

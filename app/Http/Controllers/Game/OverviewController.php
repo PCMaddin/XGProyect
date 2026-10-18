@@ -10,6 +10,7 @@ use App\Libraries\Template;
 use App\Enums\Module;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
+use App\Services\Instances\InstanceContext;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Routing\Controller as BaseController;
@@ -71,6 +72,8 @@ class OverviewController extends BaseController
                 'planetName' => $this->planetStr('planet_name'),
                 'username' => $this->userStr('name'),
                 'dateTime' => $this->timingService->formatExtendedDate(time()),
+                // the season of this universe ends then (empty: it runs on)
+                'seasonEnd' => $this->seasonEnd(),
                 'newMessage' => $this->getMessages(),
                 'wreckField' => app(WreckFieldService::class)->field($this->planetInt('planet_id')) !== null,
                 'fleetList' => $this->getFleetMovements(),
@@ -438,5 +441,12 @@ class OverviewController extends BaseController
     private function asString(mixed $value): string
     {
         return is_scalar($value) ? (string) $value : '';
+    }
+
+    private function seasonEnd(): string
+    {
+        $ends = app(InstanceContext::class)->current()?->endsAt;
+
+        return $ends === null ? '' : $this->timingService->formatExtendedDate($ends);
     }
 }

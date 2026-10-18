@@ -130,7 +130,7 @@ class InstanceProvisioner
     /**
      * Changes name, mode or status; the mode is an option of the universe too.
      *
-     * @param array{name?: string, mode?: string, status?: string, payments?: string} $changes
+     * @param array{name?: string, mode?: string, status?: string, payments?: string, ends_at?: int|null} $changes
      */
     public function change(Instance $instance, array $changes): Instance
     {
@@ -143,6 +143,7 @@ class InstanceProvisioner
             $changes['mode'] ?? $instance->mode,
             $changes['status'] ?? $instance->status,
             $instance->openedAt,
+            array_key_exists('ends_at', $changes) ? $changes['ends_at'] : $instance->endsAt,
         );
         $this->validate($changed);
 
@@ -152,9 +153,17 @@ class InstanceProvisioner
             $this->context->runIn($changed, fn () => $this->writeOptions($options));
         }
 
-        $this->registry->update($instance->slug, ['name' => $changed->name, 'mode' => $changed->mode, 'status' => $changed->status]);
+        $this->registry->update($instance->slug, ['name' => $changed->name, 'mode' => $changed->mode, 'status' => $changed->status, 'ends_at' => $changed->endsAt]);
 
         return $changed;
+    }
+
+    /**
+     * The season is over: nobody plays in the universe any more.
+     */
+    public function close(Instance $instance): Instance
+    {
+        return $this->change($instance, ['status' => Instance::CLOSED]);
     }
 
     /**
@@ -191,6 +200,7 @@ class InstanceProvisioner
             in_array($instance->mode, [Instance::PAY2WIN, Instance::PLAY2WIN], true) ? null : 'The mode is pay2win or play2win.',
             in_array($instance->status, [Instance::OPEN, Instance::CLOSED], true) ? null : 'The status is open or closed.',
             trim($instance->name) !== '' && mb_strlen($instance->name) <= 64 ? null : 'The name holds 1 to 64 characters.',
+            $instance->endsAt === null || $instance->endsAt > $instance->openedAt ? null : 'The season must end after it starts.',
         ]);
 
         if ($errors !== []) {

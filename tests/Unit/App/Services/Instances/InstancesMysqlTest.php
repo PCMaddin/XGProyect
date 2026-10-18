@@ -182,6 +182,32 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->get('/?universe=nope')->assertRedirect(route('lobby.index'));
     }
 
+    public function testASeasonEndsAndTheUniverseCloses(): void
+    {
+        $this->createUniverse('u1', 'xgp_test_u1')->assertSuccessful();
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--ends' => '+1 day'])->assertSuccessful();
+
+        $universe = app(InstanceRegistry::class)->find('u1');
+        $this->assertNotNull($universe);
+        $this->assertEqualsWithDelta(time() + 86400, $universe->endsAt, 5);
+        $this->get('/universes')->assertOk()->assertSee('Ends on ' . date('d.m.Y', time() + 86400));
+        $this->withUnencryptedCookie(SelectInstance::COOKIE, 'u1')->get('/')->assertOk()->assertSee('Ends on');
+        app(InstanceContext::class)->reset();
+
+        // the end must follow the start
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--ends' => '-1 year'])->expectsOutputToContain('must end after')->assertFailed();
+
+        // once the season is over nobody gets in, and the scheduler closes it
+        app(InstanceRegistry::class)->update('u1', ['opened_at' => time() - 7200, 'ends_at' => time() - 60]);
+        $this->withUnencryptedCookie(SelectInstance::COOKIE, 'u1')->get('/')->assertRedirect(route('lobby.index'));
+        $this->command('xgp:instance:close-ended')->expectsOutput('Closed u1.')->assertSuccessful();
+        $this->assertSame(Instance::CLOSED, app(InstanceRegistry::class)->find('u1')?->status);
+        $this->command('xgp:instance:close-ended')->doesntExpectOutput('Closed u1.')->assertSuccessful();
+
+        $this->command('xgp:instance:update', ['slug' => 'u1', '--ends' => 'none', '--status' => 'open'])->assertSuccessful();
+        $this->assertNull(app(InstanceRegistry::class)->find('u1')->endsAt);
+    }
+
     public function testTheInstalledGameIsAdopted(): void
     {
         $this->command('xgp:instance:adopt', ['slug' => 'classic', '--mode' => 'pay2win'])->assertSuccessful();
@@ -202,6 +228,7 @@ class InstancesMysqlTest extends MysqlTestCase
             'options' => 'game_speed=5000, fleet_speed=7000',
             'keep_open' => 1,
             'bots' => 3,
+            'duration' => '1 month',
             'admin' => ['name' => 'Monthly', 'email' => 'monthly@example.com', 'password' => 'secret-password'],
         ]]);
 
@@ -211,6 +238,8 @@ class InstancesMysqlTest extends MysqlTestCase
 
         $registry = app(InstanceRegistry::class);
         $this->assertSame('Universe 1', $registry->find('zz-test-2030-05')?->name);
+        // the season runs until the next one opens
+        $this->assertSame(strtotime('+1 month', (int) strtotime('2030-05-01')), $registry->find('zz-test-2030-05')->endsAt);
         $this->assertSame(Instance::CLOSED, $registry->find('zz-test-2030-05')->status);
         $this->assertSame('Universe 2', $registry->find('zz-test-2030-06')?->name);
         $this->assertSame(Instance::OPEN, $registry->find('zz-test-2030-06')->status);
