@@ -20,4 +20,5 @@ return [
     'le_no_results' => '条件に一致するファイルはありません。',
     'le_module_label' => 'モジュール',
     'le_file_label' => 'ファイル',
+    'le_shared_files' => '言語ファイルはすべての宇宙に適用されます。運営者がサーバー上（lang/）で編集します。',
 ];

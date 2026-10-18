@@ -20,4 +20,5 @@ return [
     'le_no_results' => 'Geen bestanden gevonden met dit filter.',
     'le_module_label' => 'Module',
     'le_file_label' => 'Bestand',
+    'le_shared_files' => 'De taalbestanden gelden voor alle universums. De beheerder bewerkt ze op de server (lang/).',
 ];

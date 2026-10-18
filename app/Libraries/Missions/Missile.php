@@ -197,12 +197,12 @@ class Missile extends Missions
         $search = ['%1%', '%2%', '%3%'];
         $replace = [
             self::str($fleetRow['fleet_amount']),
-            self::str($attackerData['planet_name']) . ' ' . $this->formatService->prettyCoords(
+            e(self::str($attackerData['planet_name'])) . ' ' . $this->formatService->prettyCoords(
                 self::int($fleetRow['fleet_start_galaxy']),
                 self::int($fleetRow['fleet_start_system']),
                 self::int($fleetRow['fleet_start_planet'])
             ),
-            self::str($targetData['planet_name']) . ' ' . $this->formatService->prettyCoords(
+            e(self::str($targetData['planet_name'])) . ' ' . $this->formatService->prettyCoords(
                 self::int($fleetRow['fleet_end_galaxy']),
                 self::int($fleetRow['fleet_end_system']),
                 self::int($fleetRow['fleet_end_planet'])

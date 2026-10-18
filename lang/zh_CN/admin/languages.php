@@ -20,4 +20,5 @@ return [
     'le_no_results' => '没有符合筛选条件的文件。',
     'le_module_label' => '模块',
     'le_file_label' => '文件',
+    'le_shared_files' => '语言文件适用于所有宇宙。由运营者在服务器上（lang/）编辑。',
 ];

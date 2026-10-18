@@ -112,9 +112,9 @@ class Transport extends Missions
             __('game/missions.mi_fleet_command'),
             __('game/transport.tra_reaching'),
             StringsHelper::parseReplacements(__('game/transport.tra_delivered_resources'), [
-                self::str($tradingPlanets['start_name']),
+                e(self::str($tradingPlanets['start_name'])),
                 app(FleetEventsService::class)->startLink($fleet, ''),
-                self::str($tradingPlanets['target_name']),
+                e(self::str($tradingPlanets['target_name'])),
                 app(FleetEventsService::class)->targetLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
@@ -141,10 +141,10 @@ class Transport extends Missions
                 __('game/transport.tra_incoming_from'),
                 __('game/transport.tra_incoming_title'),
                 StringsHelper::parseReplacements(__('game/transport.tra_incoming_delivery'), [
-                    self::str($tradingPlanets['start_user_name']),
-                    self::str($tradingPlanets['start_name']),
+                    e(self::str($tradingPlanets['start_user_name'])),
+                    e(self::str($tradingPlanets['start_name'])),
                     app(FleetEventsService::class)->startLink($fleet, ''),
-                    self::str($tradingPlanets['target_name']),
+                    e(self::str($tradingPlanets['target_name'])),
                     app(FleetEventsService::class)->targetLink($fleet, ''),
                     $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                     $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
@@ -179,9 +179,9 @@ class Transport extends Missions
         if (app(FleetsService::class)->carriesResources($fleet)) {
             $text = __('game/missions.mi_fleet_back_with_resources');
             $replacements = [
-                self::str($fleet['planet_end_name']),
+                e(self::str($fleet['planet_end_name'])),
                 app(FleetEventsService::class)->targetLink($fleet, ''),
-                self::str($fleet['planet_start_name']),
+                e(self::str($fleet['planet_start_name'])),
                 app(FleetEventsService::class)->startLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),

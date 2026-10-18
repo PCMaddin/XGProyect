@@ -120,7 +120,7 @@ class HighscoreController extends BaseController
 
         foreach ($rows as $row) {
             $rowId = $this->toInt($row, 'id');
-            $name = $this->toStr($row, 'name');
+            $name = e($this->toStr($row, 'name'));
             $ranking = $this->toInt($row, 'user_statistic_' . $mapping['oldrank'])
                 - $this->toInt($row, 'user_statistic_' . $mapping['rank']);
 
@@ -216,8 +216,8 @@ class HighscoreController extends BaseController
         }
 
         $label = $allianceName === $currentAlliance
-            ? '<font color="#33CCFF">[' . $allianceName . ']</font>'
-            : '[' . $allianceName . ']';
+            ? '<font color="#33CCFF">[' . e($allianceName) . ']</font>'
+            : '[' . e($allianceName) . ']';
 
         return '<a href="game.php?page=alliance&mode=ainfo&allyid=' . $allyId . '">' . $label . '</a>';
     }

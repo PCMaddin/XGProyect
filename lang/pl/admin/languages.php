@@ -20,4 +20,5 @@ return [
     'le_no_results' => 'Żaden plik nie pasuje do filtra.',
     'le_module_label' => 'Moduł',
     'le_file_label' => 'Plik',
+    'le_shared_files' => 'Pliki językowe obowiązują we wszystkich wszechświatach. Operator edytuje je na serwerze (lang/).',
 ];

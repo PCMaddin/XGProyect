@@ -124,13 +124,13 @@ class Destroy extends CombatMission
         $lines = [
             sprintf(
                 __('game/destroy.des_report_start'),
-                self::str($fleetRow['planet_start_name']),
+                e(self::str($fleetRow['planet_start_name'])),
                 $this->formatService->prettyCoords(
                     self::int($fleetRow['fleet_start_galaxy']),
                     self::int($fleetRow['fleet_start_system']),
                     self::int($fleetRow['fleet_start_planet'])
                 ),
-                self::str($fleetRow['planet_end_name']),
+                e(self::str($fleetRow['planet_end_name'])),
                 $this->formatService->prettyCoords(
                     self::int($fleetRow['fleet_end_galaxy']),
                     self::int($fleetRow['fleet_end_system']),

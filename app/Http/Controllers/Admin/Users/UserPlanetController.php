@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserPlanetRequest;
 use App\Http\Traits\Admin\Users\UserPlanetTrait;
 use App\Models\User;
@@ -52,7 +53,7 @@ class UserPlanetController extends BaseController
         $galaxy = $request->integer('galaxy');
         $system = $request->integer('system');
         $planet = $request->integer('planet');
-        $name = trim($request->string('name')->toString());
+        $name = Html::cleanName($request->string('name')->toString());
         $fieldMax = $request->integer('planet_field_max');
         $error = '';
         $errors = 0;

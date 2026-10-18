@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserPlanetRequest;
 use App\Http\Traits\Admin\Users\UserPlanetTrait;
 use App\Models\User;
@@ -61,7 +62,7 @@ class UserMoonController extends BaseController
     public function storeMoon(Request $request, User $user): RedirectResponse
     {
         $planetId = $request->integer('planet');
-        $moonName = trim($request->string('name')->toString());
+        $moonName = Html::cleanName($request->string('name')->toString());
         $diameter = $request->integer('planet_diameter');
         $tempMin = $request->integer('planet_temp_min');
         $tempMax = $request->integer('planet_temp_max');

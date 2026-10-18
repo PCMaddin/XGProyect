@@ -42,9 +42,9 @@ class Stay extends Missions
         ]);
 
         // SOME REQUIRED VALUES
-        $startName = self::str($friendlyPlanet['start_name']);
+        $startName = e(self::str($friendlyPlanet['start_name']));
         $startOwnerId = self::int($friendlyPlanet['start_id']);
-        $targetName = self::str($friendlyPlanet['target_name']);
+        $targetName = e(self::str($friendlyPlanet['target_name']));
         $targetOwnerId = self::int($friendlyPlanet['target_id']);
         $metal = self::str($fleetRow['fleet_resource_metal']);
         $crystal = self::str($fleetRow['fleet_resource_crystal']);

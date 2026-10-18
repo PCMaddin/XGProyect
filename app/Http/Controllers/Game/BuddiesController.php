@@ -268,7 +268,8 @@ class BuddiesController extends BaseController
             return;
         }
 
-        $name = $this->asString($this->user['name'] ?? '');
+        // the message is shown as HTML
+        $name = e($this->asString($this->user['name'] ?? ''));
 
         Functions::sendMessage(
             $to,

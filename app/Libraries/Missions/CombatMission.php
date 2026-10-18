@@ -184,7 +184,7 @@ abstract class CombatMission extends Missions
         $this->settleBattle($fleetRow, $report, $targetPlanet);
         $this->awardHonour(self::int($targetUser['id']), $report);
         $this->afterBattle($fleetRow, $report, $targetPlanet, $targetUser);
-        $this->createNewReportAndSendIt($fleetRow, $report, self::str($targetPlanet['planet_name']));
+        $this->createNewReportAndSendIt($fleetRow, $report, e(self::str($targetPlanet['planet_name'])));
     }
 
     /**
@@ -399,9 +399,9 @@ abstract class CombatMission extends Missions
     {
         $message = sprintf(
             __('game/missions.mi_fleet_back_with_resources'),
-            self::str($fleetRow['planet_end_name']),
+            e(self::str($fleetRow['planet_end_name'])),
             app(FleetEventsService::class)->targetLink($fleetRow, ''),
-            self::str($fleetRow['planet_start_name']),
+            e(self::str($fleetRow['planet_start_name'])),
             app(FleetEventsService::class)->startLink($fleetRow, ''),
             $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_metal'])),
             $this->formatService->prettyNumber(self::int($fleetRow['fleet_resource_crystal'])),

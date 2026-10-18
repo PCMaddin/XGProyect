@@ -141,8 +141,8 @@ class GalaxyLib
             return (string) __('game/galaxy.gl_planet_destroyed');
         }
 
-        $name = self::asString($this->rowData['planet_name'] ?? '');
-        $planetName = stripslashes($name);
+        $name = e(self::asString($this->rowData['planet_name'] ?? ''));
+        $planetName = $name;
 
         if ($this->isPhalanxActive()) {
             $attributes = "onclick=fenster('game.php?page=phalanx&galaxy=" . $this->galaxy .
@@ -244,7 +244,7 @@ class GalaxyLib
         if ($this->isCurrentPlayer()) {
             $this->noPopup = true;
 
-            return ['status' => $name];
+            return ['status' => e($name)];
         }
 
         $statuses = $this->userStatuses();
@@ -253,7 +253,7 @@ class GalaxyLib
 
         foreach ($statuses as $details) {
             if ($username === '') {
-                $username = $this->formatService->spanClassElement($name, $details['class']);
+                $username = $this->formatService->spanClassElement(e($name), $details['class']);
             }
 
             $userStatus[] = $this->formatService->spanClassElement($details['shortcut'], $details['class']);
@@ -266,7 +266,7 @@ class GalaxyLib
         $rank = self::asInt($this->rowData['user_statistic_total_rank'] ?? 0);
 
         return [
-            'status' => $formattedUsername ?? $name,
+            'status' => $formattedUsername ?? e($name),
             'username' => $name,
             'current_rank' => $rank,
             'start' => ((int) floor($rank / 100) * 100) + 1,
@@ -382,7 +382,8 @@ class GalaxyLib
             return $parse;
         }
 
-        $parse['alliance_name'] = str_replace("'", "\'", htmlspecialchars(self::asString($this->rowData['alliance_name'] ?? ''), ENT_COMPAT));
+        // escaped by the template, for the tooltip's script
+        $parse['alliance_name'] = self::asString($this->rowData['alliance_name'] ?? '');
         $members = self::asInt($this->rowData['ally_members'] ?? 0);
         $parse['ally_members'] = trans_choice('game/galaxy.gl_alliance_members', $members, ['count' => $members]);
         $parse['ally_id'] = self::asInt($this->rowData['ally_id'] ?? 0);
@@ -397,7 +398,7 @@ class GalaxyLib
             $parse['web'] = '</tr><tr><td>' . str_replace('"', '\\\'', $webUrl) . '</td>';
         }
 
-        $tag = self::asString($this->rowData['alliance_tag'] ?? '');
+        $tag = e(self::asString($this->rowData['alliance_tag'] ?? ''));
         $parse['tag'] = self::asInt($this->user['ally_id'] ?? 0) === self::asInt($this->rowData['ally_id'] ?? 0)
             ? '<span class="allymember">' . $tag . '</span>'
             : $tag;

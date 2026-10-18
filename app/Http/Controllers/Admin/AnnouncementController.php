@@ -71,11 +71,12 @@ class AnnouncementController extends BaseController
         $time = time();
 
         $from = $this->formatService->customColor($level, $color);
+        // messages are shown as HTML: the admin's text is text, in the chosen colour
         $subject = $this->formatService->customColor(
-            (string) $request->string('subject') ?: (string) __('admin/announcement.an_none'),
+            e((string) $request->string('subject') ?: (string) __('admin/announcement.an_none')),
             $color
         );
-        $message = $this->formatService->customColor((string) $request->string('text'), $color);
+        $message = $this->formatService->customColor(nl2br(e((string) $request->string('text'))), $color);
 
         foreach ($players as $player) {
             Functions::sendMessage(
@@ -85,7 +86,7 @@ class AnnouncementController extends BaseController
                 MessagesEnumerator::GENERAL,
                 $from,
                 $subject,
-                strtr($message, ['%player%' => $this->formatService->strongText($player->name)]),
+                strtr($message, ['%player%' => $this->formatService->strongText(e($player->name))]),
                 true
             );
         }

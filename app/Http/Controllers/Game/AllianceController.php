@@ -22,6 +22,7 @@ use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
 use App\Libraries\Alliance\Alliances;
 use App\Libraries\Alliance\Ranks;
 use App\Libraries\BBCodeLib;
+use App\Support\Html;
 use App\Helpers\UrlHelper;
 use App\Libraries\Functions;
 use App\Libraries\Users;
@@ -527,9 +528,9 @@ class AllianceController extends BaseController
             $this->userInt('id'),
             0,
             3,
-            $current->alliance_tag,
-            __('game/alliance.' . $titleKey) . $current->alliance_name,
-            __('game/alliance.al_hi_the_alliance') . $current->alliance_name . __('game/alliance.' . $verb) . $text
+            e($current->alliance_tag),
+            __('game/alliance.' . $titleKey) . e($current->alliance_name),
+            __('game/alliance.al_hi_the_alliance') . e($current->alliance_name) . __('game/alliance.' . $verb) . $text
         );
 
         return redirect('game.php?page=alliance&mode=admin&edit=requests');
@@ -745,7 +746,7 @@ class AllianceController extends BaseController
                 'game.php?page=alliance&mode=admin&edit=members&kick=' . $memberId,
                 Functions::setImage(asset(self::ALLIANCE_ASSET . 'abort.gif')),
                 '',
-                'onclick="javascript:return confirm(\'' . strtr((string) __('game/alliance.al_confirm_remove_member'), ['%s' => $memberName]) . '\');"'
+                'onclick="javascript:return confirm(\'' . Html::attributeScript(strtr((string) __('game/alliance.al_confirm_remove_member'), ['%s' => $memberName])) . '\');"'
             );
         }
 
@@ -959,9 +960,9 @@ class AllianceController extends BaseController
                 $results[] = [
                     'ally_tag' => $this->formatService->link(
                         'game.php?page=alliance&mode=apply&allyid=' . $result->alliance_id,
-                        $result->alliance_tag
+                        e($result->alliance_tag)
                     ),
-                    'alliance_name' => $result->alliance_name,
+                    'alliance_name' => e($result->alliance_name),
                     'ally_members' => $this->asString($result->alliance_members),
                 ];
             }
@@ -1155,12 +1156,12 @@ class AllianceController extends BaseController
                 $this->userInt('id'),
                 0,
                 3,
-                $this->currentAllianceTag(),
-                $this->asString($this->user['name'] ?? ''),
+                e($this->currentAllianceTag()),
+                e($this->asString($this->user['name'] ?? '')),
                 $text
             );
 
-            $names[] = $this->asString($member['name'] ?? '');
+            $names[] = e($this->asString($member['name'] ?? ''));
         }
 
         Functions::messageBox(
@@ -1185,7 +1186,7 @@ class AllianceController extends BaseController
             );
 
             Functions::messageBox(
-                strtr((string) __('game/alliance.al_leave_sucess'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_name]),
+                strtr((string) __('game/alliance.al_leave_sucess'), ['%s' => e($this->alliance->getCurrentAlliance()->alliance_name)]),
                 '<br>',
                 'game.php?page=alliance',
                 (string) __('game/alliance.al_continue')
@@ -1193,7 +1194,7 @@ class AllianceController extends BaseController
         }
 
         Functions::messageBox(
-            strtr((string) __('game/alliance.al_do_you_really_want_to_go_out'), ['%s' => $this->alliance->getCurrentAlliance()->alliance_name]),
+            strtr((string) __('game/alliance.al_do_you_really_want_to_go_out'), ['%s' => e($this->alliance->getCurrentAlliance()->alliance_name)]),
             '<br>',
             'game.php?page=alliance&mode=exit&yes=1',
             (string) __('game/alliance.al_go_out_yes')
@@ -1253,7 +1254,7 @@ class AllianceController extends BaseController
     {
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_tag'),
-            'detail_content' => $this->alliance->getCurrentAlliance()->alliance_tag,
+            'detail_content' => e($this->alliance->getCurrentAlliance()->alliance_tag),
         ];
     }
 
@@ -1264,7 +1265,7 @@ class AllianceController extends BaseController
     {
         return [
             'detail_title' => (string) __('game/alliance.al_ally_info_name'),
-            'detail_content' => $this->alliance->getCurrentAlliance()->alliance_name,
+            'detail_content' => e($this->alliance->getCurrentAlliance()->alliance_name),
         ];
     }
 
@@ -1398,7 +1399,7 @@ class AllianceController extends BaseController
         $rank = $this->alliance->getCurrentAllianceRankObject()->getRankById($memberRankId);
 
         if ($rank !== null) {
-            return $rank['rank'];
+            return e($rank['rank']);
         }
 
         return $this->alliance->getCurrentAlliance()->alliance_owner === $memberId

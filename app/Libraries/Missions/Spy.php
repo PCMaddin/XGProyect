@@ -159,7 +159,7 @@ class Spy extends Missions
             $arrivalTime,
             0,
             __('game/missions.mi_fleet_command'),
-            sprintf(__('game/spy.spy_report_title'), self::str($targetData['planet_name']), $this->formatService->prettyCoords(self::int($targetData['planet_galaxy']), self::int($targetData['planet_system']), self::int($targetData['planet_planet']))),
+            sprintf(__('game/spy.spy_report_title'), e(self::str($targetData['planet_name'])), $this->formatService->prettyCoords(self::int($targetData['planet_galaxy']), self::int($targetData['planet_system']), self::int($targetData['planet_planet']))),
             $spyMessage,
             true
         );
@@ -301,17 +301,17 @@ class Spy extends Missions
             StringsHelper::parseReplacements(
                 __('game/spy.spy_activity_title'),
                 [
-                    $target['planet_name'],
+                    e(self::str($target['planet_name'])),
                     $this->formatService->prettyCoords(self::int($target['planet_galaxy']), self::int($target['planet_system']), self::int($target['planet_planet'])),
                 ]
             ),
             StringsHelper::parseReplacements(
                 __('game/spy.spy_activity_enemy_seen'),
                 [
-                    $user['planet_name'],
+                    e(self::str($user['planet_name'])),
                     $this->formatService->prettyCoords(self::int($user['planet_galaxy']), self::int($user['planet_system']), self::int($user['planet_planet'])),
-                    $user['name'],
-                    $target['planet_name'],
+                    e(self::str($user['name'])),
+                    e(self::str($target['planet_name'])),
                     $this->formatService->prettyCoords(self::int($target['planet_galaxy']), self::int($target['planet_system']), self::int($target['planet_planet'])),
                     $chances,
                 ]

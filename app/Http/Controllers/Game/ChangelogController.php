@@ -43,7 +43,7 @@ class ChangelogController extends BaseController
                 'description' => nl2br(
                     $this->timingService->formatShortDate($entry->changelog_date->timestamp)
                     . '<br>'
-                    . $entry->changelog_description
+                    . e($entry->changelog_description)
                 ),
             ]),
         ]);

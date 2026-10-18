@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Users;
 
+use App\Support\Html;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +23,7 @@ class UserPlanetRequest extends FormRequest
     {
         return [
             // ── Core fields (both planet and moon forms) ──────────────────────
-            'planet_name' => ['required', 'string', 'max:30'],
+            'planet_name' => ['required', 'string', 'max:30', 'not_regex:' . Html::UNSAFE_IN_NAMES],
             'planet_user_id' => ['required', 'integer', 'exists:users,id'],
             'planet_image' => ['required', 'string'],
             'planet_diameter' => ['required', 'integer', 'min:0'],

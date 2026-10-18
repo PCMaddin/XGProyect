@@ -20,4 +20,5 @@ return [
     'le_no_results' => 'Nessun file corrisponde al filtro.',
     'le_module_label' => 'Modulo',
     'le_file_label' => 'File',
+    'le_shared_files' => 'I file di lingua valgono per tutti gli universi. L’operatore li modifica sul server (lang/).',
 ];

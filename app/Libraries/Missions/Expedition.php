@@ -131,9 +131,9 @@ class Expedition extends Missions
     {
         $fleetUsedStorage = self::num($fleet['fleet_resource_metal']) + self::num($fleet['fleet_resource_crystal']) + self::num($fleet['fleet_resource_deuterium']);
         $replacements = [
-            self::str($fleet['planet_end_name']),
+            e(self::str($fleet['planet_end_name'])),
             $this->formatService->prettyCoords(self::int($fleet['fleet_end_galaxy']), self::int($fleet['fleet_end_system']), self::int($fleet['fleet_end_planet'])),
-            self::str($fleet['planet_start_name']),
+            e(self::str($fleet['planet_start_name'])),
             $this->formatService->prettyCoords(self::int($fleet['fleet_start_galaxy']), self::int($fleet['fleet_start_system']), self::int($fleet['fleet_start_planet'])),
         ];
 

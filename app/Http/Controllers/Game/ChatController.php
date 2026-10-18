@@ -56,7 +56,7 @@ class ChatController extends BaseController
 
         return view('chat.view', [
             'id' => $this->int($receiver, 'id'),
-            'to' => $this->str($receiver, 'name') . ' ' . $this->formatService->prettyCoords(
+            'to' => e($this->str($receiver, 'name')) . ' ' . $this->formatService->prettyCoords(
                 $this->int($receiver, 'planet_galaxy'),
                 $this->int($receiver, 'planet_system'),
                 $this->int($receiver, 'planet_planet')
@@ -122,7 +122,7 @@ class ChatController extends BaseController
             $this->int($this->user, 'id'),
             0,
             self::MESSAGE_TYPE_PLAYER,
-            $this->str($this->user, 'name') . ' ' . $this->formatService->prettyCoords(
+            e($this->str($this->user, 'name')) . ' ' . $this->formatService->prettyCoords(
                 $this->int($this->user, 'galaxy'),
                 $this->int($this->user, 'system'),
                 $this->int($this->user, 'planet')

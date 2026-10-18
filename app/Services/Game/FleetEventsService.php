@@ -144,7 +144,7 @@ class FleetEventsService
         $image = Functions::setImage(DPATH . '/img/m.gif');
         $link = $this->format->link('game.php?page=chat&playerId=' . self::asInt($fleetRow['fleet_owner'] ?? 0), $image);
 
-        return self::asString($fleetRow['start_planet_user'] ?? '') . ' ' . $link;
+        return e(self::asString($fleetRow['start_planet_user'] ?? '')) . ' ' . $link;
     }
 
     /**
@@ -241,14 +241,14 @@ class FleetEventsService
         $returning = $status === 2;
 
         $startId = $this->originLabel($startType, $returning)
-            . self::asString($fleetRow['start_planet_name'] ?? '') . ' '
+            . e(self::asString($fleetRow['start_planet_name'] ?? '')) . ' '
             . $this->startLink($fleetRow, $style);
 
         $targetLabel = $missionType === Missions::EXPEDITION
             ? (string) __($returning ? 'game/events.ev_from_position' : 'game/events.ev_the_position')
             : $this->destinationLabel($targetType, $returning);
 
-        $targetId = $targetLabel . self::asString($fleetRow['target_planet_name'] ?? '') . ' '
+        $targetId = $targetLabel . e(self::asString($fleetRow['target_planet_name'] ?? '')) . ' '
             . $this->targetLink($fleetRow, $style);
 
         return [$startId, $targetId];

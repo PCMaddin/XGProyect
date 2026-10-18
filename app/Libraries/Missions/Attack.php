@@ -32,7 +32,7 @@ class Attack extends CombatMission
     protected function afterBattle(array $fleetRow, BattleReport $report, array $targetPlanet, array $targetUser): void
     {
         $report->setMoonTarget(
-            self::str($targetPlanet['planet_name']),
+            e(self::str($targetPlanet['planet_name'])),
             self::int($fleetRow['fleet_end_galaxy']),
             self::int($fleetRow['fleet_end_system']),
             self::int($fleetRow['fleet_end_planet'])

@@ -20,4 +20,5 @@ return [
     'le_no_results' => 'Keine Datei passt zu deinem Filter.',
     'le_module_label' => 'Modul',
     'le_file_label' => 'Datei',
+    'le_shared_files' => 'Die Sprachdateien gelten für alle Universen. Der Betreiber bearbeitet sie auf dem Server (lang/).',
 ];

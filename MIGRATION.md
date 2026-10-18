@@ -1990,6 +1990,68 @@ Baseline-Einträge.
     oder mehr; php-fpm (der Neuaufbau läuft dann nach der Antwort); MySQL
     oder MariaDB mit `innodb_buffer_pool_size` in der Größe der Daten
     (1 Mio. Spieler ≈ 2,5 GB); mehrere Universen statt eines übervollen.
+- ✅ **Audit auf Code-Injection** (alle Eingabefelder und Schnittstellen).
+  - *SQL-Injection: keine gefunden.* Alle rohen Abfragen per Parser
+    (`nikic/php-parser`) gesucht, auch über die Hilfsmethoden `rows()`,
+    `fetchRows()`, `selectRow()` u. a. (110 Stellen mit Variablen). Jede
+    ist gebunden, eine Zahl, eine feste Liste (Spalten, Sortierung,
+    Ressourcen) oder intern (Präfix, Konstanten); Datenbanknamen von
+    Universen werden gegen ein Muster geprüft.
+  - *PHP-Code und Objekte:* `unserialize` nur ohne Klassen; die
+    Flottenliste von Fleet3/4 kommt aus der Sitzung. Der Sprach-Editor
+    schreibt Werte korrekt maskiert, Pfade nur unter `lang/`. Kein `eval`,
+    keine Shell, Downloads nur geprüfte Dateinamen, Weiterleitung nur zu
+    Stripe.
+  - *XSS, dynamisch geprüft:* In jedes Textfeld, das Spieler, Admins,
+    HTTP-Kopfzeilen oder die Blockchain füllen können (328 Stellen: Namen,
+    Planeten, Allianz mit Rängen und Texten, Nachrichten, Notizen,
+    Freunde, ACS, Kurzwahl, User-Agent, aufgerufene Seite, IP,
+    Anmeldungen, Verdachtsfälle, WAX-Memo und -Konto, Sperrgrund,
+    Changelog, Spielname) ein Marker geschrieben, der ein Element und ein
+    Attribut erzeugt, wenn er ungefiltert ankommt. Dann 268 Seiten als
+    Spieler und Admin gecrawlt, jeder GET-Parameter zusätzlich mit dem
+    Marker (reflektiert). Gewertet wurde, was der Browser daraus baut,
+    und der Text in `onclick`/`onmouseover`, den der Browser vor dem
+    Skript entschlüsselt.
+  - *Gefunden und behoben:* Spieler-, Planeten- und Allianznamen,
+    Allianz-Tag und Rangnamen kamen ungefiltert in Galaxie, Phalanx,
+    Übersicht, Highscore, Allianzseiten, Chat, Flottenereignisse und
+    Kampfberichte; in den Galaxie-Tooltips in einem Skript-String in einem
+    Attribut, wo Blades einfaches Escaping nicht reicht (der Browser
+    dekodiert vor dem Skript: ein `'` beendete den String, `<` wurde HTML).
+    Jetzt `e()` an jeder Stelle, `Html::scriptText()` für Tooltip-Text,
+    `Html::attributeScript()` für die Bestätigung beim Ausschließen.
+    Nachrichten sind HTML (Berichte mit Links): Absender und Betreff mit
+    Namen werden beim Schreiben escaped (Chat, Freunde, Allianz,
+    Rundschreiben, ACS-Einladung, Spionage, alle Missionsberichte).
+    Admin-Rundschreiben sind Text in der gewählten Farbe, kein HTML mehr.
+    Changelog-Text escaped.
+  - *Wer es ausnutzen konnte:* Spieler-Eingaben waren größtenteils schon
+    gefiltert (Namen nur Buchstaben und Ziffern, Allianz ohne `<>"'&\`,
+    Chat escaped). Admins nicht: Spielername (bis 64 beliebige Zeichen),
+    Planeten- und Mondname, Spieler anlegen. Mit mehreren Universen ist
+    der Admin eines Universums kein Betreiber: über einen Namen konnte er
+    Skript bei Spielern ausführen. Jetzt gelten im Admin dieselben Regeln
+    (`Html::UNSAFE_IN_NAMES`), und die Migration
+    `2026_10_18_000041_clean_unsafe_names` bereinigt vorhandene Namen.
+  - *Sprach-Editor:* Die Dateien in `lang/` gelten für alle Universen und
+    `/operator`, einige werden als HTML ausgegeben. Sind Universen
+    registriert, ist der Editor geschlossen (403 mit Hinweis, zehn
+    Sprachen); der Betreiber bearbeitet `lang/` auf dem Server.
+  - *Nebenbei gefunden:* Die Admin-Seite eines gesperrten Spielers endete
+    mit Fehler 500 (`$ban->ban_reason`, die Spalte heißt `details`).
+  - *Nicht betroffen:* die übrigen Admin-Seiten (Blade escaped; die
+    Nachrichtenliste zeigt Nachrichten wie im Spiel, also wie sie
+    geschrieben wurden),
+    `/operator`, reflektierte Parameter, die Debugbar (JSON-kodiert, nur
+    mit `APP_DEBUG=true`).
+  - *Tests:* `StoredXssMysqlTest` (Galaxie mit Tooltips, Highscore,
+    Allianz mit Ausschluss-Bestätigung, Chat, Übersicht, gesendete
+    Nachricht), `HtmlTest` (Escaping für Skript-String und Attribut,
+    Namen bereinigen, Migration, Sprach-Editor geschlossen). 14
+    Mutationsproben schlugen an (zwei erst, nachdem der Test einen
+    inaktiven Spieler und den richtigen Zweig traf); eine Kontrollprobe
+    ohne Kolonie im Test bestand wie erwartet.
 
 
 ## Smoke-Test gegen eine echte Datenbank

@@ -144,7 +144,7 @@ class FederationController extends BaseController
             $this->userInt('id'),
             0,
             5,
-            $this->userStr('name'),
+            e($this->userStr('name')),
             (string) __('game/fleet.fl_acs_invitation_title'),
             (string) __('game/fleet.fl_player') . $this->userStr('name') . __('game/fleet.fl_acs_invitation_message')
         );

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserInfoRequest;
 use App\Http\Requests\Admin\Users\UserSettingsRequest;
 use App\Models\User;
@@ -74,7 +75,7 @@ class UsersController extends BaseController
      */
     public function store(Request $request): RedirectResponse
     {
-        $name = trim($request->string('name')->toString());
+        $name = Html::cleanName($request->string('name')->toString());
         $pass = trim($request->string('password')->toString());
         $email = trim($request->string('email')->toString());
         $galaxy = $request->integer('galaxy');

@@ -327,10 +327,10 @@ class OverviewController extends BaseController
 
             $image = asset(self::PLANET_ASSET . 'small/s_' . $this->arrStr($planet, 'planet_image') . '.jpg');
 
-            $block .= '<th>' . $this->arrStr($planet, 'planet_name') . '<br>'
+            $block .= '<th>' . e($this->arrStr($planet, 'planet_name')) . '<br>'
                 . $this->formatService->link(
                     'game.php?page=overview&cp=' . $this->arrInt($planet, 'planet_id') . '&re=0',
-                    Functions::setImage($image, $this->arrStr($planet, 'planet_name'), 'height="50" width="50"')
+                    Functions::setImage($image, e($this->arrStr($planet, 'planet_name')), 'height="50" width="50"')
                 )
                 . '<center>' . $this->getCurrentWork($planet, false) . '</center></th>';
 

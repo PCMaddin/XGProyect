@@ -138,7 +138,7 @@
                                 <div class="col-md-8">
                                     <div class="alert alert-warning mb-0 py-2">
                                         <i class="fas fa-ban mr-1"></i>
-                                        {{ __('admin/users.us_user_banned_reason') }}: <strong>{{ $ban->ban_reason }}</strong>
+                                        {{ __('admin/users.us_user_banned_reason') }}: <strong>{{ $ban->details }}</strong>
                                     </div>
                                 </div>
                             </div>
