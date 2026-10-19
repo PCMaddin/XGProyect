@@ -31,11 +31,7 @@ class ErrorsController extends BaseController
 
     public function deleteAll(): RedirectResponse
     {
-        $path = $this->logFilePath();
-
-        if ($path !== null) {
-            File::delete($path);
-        }
+        File::delete($this->logFiles());
 
         return redirect()->route('admin.errors');
     }
@@ -84,9 +80,32 @@ class ErrorsController extends BaseController
      */
     private function logFilePath(): ?string
     {
-        $configured = config('logging.channels.single.path');
-        $path = is_string($configured) && $configured !== '' ? $configured : storage_path('logs/xgproyect.log');
+        $files = $this->logFiles();
 
-        return File::exists($path) ? $path : null;
+        return $files === [] ? null : $files[0];
+    }
+
+    /**
+     * The log files of this universe, the newest first: one file
+     * (LOG_CHANNEL=single) or one a day (daily: xgproyect-2026-10-19.log).
+     *
+     * @return list<string>
+     */
+    private function logFiles(): array
+    {
+        $files = [];
+
+        foreach (['single', 'daily'] as $channel) {
+            $configured = config('logging.channels.' . $channel . '.path');
+            $path = is_string($configured) && $configured !== '' ? $configured : storage_path('logs/xgproyect.log');
+            $extension = pathinfo($path, PATHINFO_EXTENSION);
+            $base = substr($path, 0, -strlen('.' . $extension));
+            $files = array_merge($files, File::exists($path) ? [$path] : [], File::glob($base . '-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].' . $extension));
+        }
+
+        $files = array_values(array_unique($files));
+        usort($files, static fn (string $one, string $other): int => File::lastModified($other) <=> File::lastModified($one));
+
+        return $files;
     }
 }
