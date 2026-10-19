@@ -32,7 +32,11 @@
                     <br>
                     <x-game.verify-email />
                     @yield('content')
-                    <p class="legal-links" style="text-align:center;font-size:11px;margin:24px 0 8px;">@include('legal.links')</p>
+                    <p class="legal-links" style="text-align:center;font-size:11px;margin:24px 0 8px;">
+                        <a href="{{ route('account.report', ['from' => request()->getRequestUri()]) }}" id="report-problem">{{ __('account/report.rp_link') }}</a>
+                        @if (app(\App\Services\Legal\LegalPages::class)->written() !== []) · @endif
+                        @include('legal.links')
+                    </p>
                 </div>
             </div>
         </div>

@@ -63,7 +63,9 @@ class EmailVerificationMysqlTest extends MysqlTestCase
             return $mail->hasTo('newbie@example.com');
         });
 
-        $this->asPlayer($user)->get('/game.php?page=overview')->assertOk()->assertSee('id="verify-email"', false)->assertSee('newbie@example.com');
+        $this->asPlayer($user)->get('/game.php?page=overview')->assertOk()->assertSee('id="verify-email"', false)->assertSee('newbie@example.com')
+            // every game page leads to "report a problem", from this page
+            ->assertSee('/account/report?from=%2Fgame.php%3Fpage%3Doverview', false);
 
         // the link works without signing in, on any device
         $this->app['auth']->forgetGuards();

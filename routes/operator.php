@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Operator\AccountController;
 use App\Http\Controllers\Operator\LegalController;
 use App\Http\Controllers\Operator\LoginController;
+use App\Http\Controllers\Operator\ReportsController;
 use App\Http\Controllers\Operator\UniversesController;
 use App\Services\Legal\LegalPages;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,8 @@ Route::middleware('operator.auth')->group(function () {
     Route::get('/universes/{slug}/season', [UniversesController::class, 'season'])->name('operator.universes.season');
     Route::post('/universes/{slug}/payout', [UniversesController::class, 'payout'])->name('operator.universes.payout');
     Route::post('/universes/{slug}/release', [UniversesController::class, 'release'])->name('operator.universes.release');
+    Route::get('/reports', [ReportsController::class, 'index'])->name('operator.reports');
+    Route::post('/reports/{report}', [ReportsController::class, 'update'])->whereNumber('report')->name('operator.reports.update');
     Route::get('/legal', [LegalController::class, 'index'])->name('operator.legal');
     Route::get('/legal/{page}/{locale}', [LegalController::class, 'edit'])
         ->whereIn('page', LegalPages::PAGES)->name('operator.legal.edit');

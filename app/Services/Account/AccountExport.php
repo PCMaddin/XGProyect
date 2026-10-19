@@ -108,7 +108,7 @@ class AccountExport
         $universe = $this->context->current()->slug ?? '';
         $data = [];
 
-        foreach (['wax_links' => ['code'], 'season_results' => []] as $table => $hidden) {
+        foreach (['wax_links' => ['code'], 'season_results' => [], 'bug_reports' => []] as $table => $hidden) {
             if (Schema::connection(InstanceRegistry::CONNECTION)->hasTable($table)) {
                 $rows = DB::connection(InstanceRegistry::CONNECTION)->table($table)->where('universe', $universe)->where('user_id', $userId)->get();
                 $data[$table] = array_map(static fn (array $row): array => array_diff_key($row, array_flip($hidden)), self::rows($rows));

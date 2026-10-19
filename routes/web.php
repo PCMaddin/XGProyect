@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Account\PrivacyController;
 use App\Http\Controllers\Account\RecoverController;
+use App\Http\Controllers\Account\ReportController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\TwoFactorChallengeController;
 use App\Http\Controllers\Account\VerifyEmailController;
@@ -55,6 +56,8 @@ Route::prefix('account')->group(function () {
         Route::post('/security/disable', [SecurityController::class, 'disable'])->name('account.security.disable');
         Route::post('/security/codes', [SecurityController::class, 'codes'])->name('account.security.codes');
         Route::post('/verify/resend', [VerifyEmailController::class, 'resend'])->middleware('throttle:3,60')->name('account.verify.resend');
+        Route::get('/report', [ReportController::class, 'show'])->name('account.report');
+        Route::post('/report', [ReportController::class, 'store'])->middleware('throttle:5,60')->name('account.report.store');
         Route::get('/privacy', [PrivacyController::class, 'show'])->name('account.privacy');
         Route::post('/privacy/export', [PrivacyController::class, 'download'])->name('account.privacy.export');
         Route::post('/privacy/delete', [PrivacyController::class, 'destroy'])->name('account.privacy.delete');

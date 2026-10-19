@@ -22,6 +22,7 @@
         .note.success { background: #12301f; color: #6fe3a0; }
         .note.warning { background: #3d2a12; color: #ffbf66; }
         label { display: block; font-size: 13px; color: #9aa4b8; margin: 8px 0 4px; }
+        textarea { width: 100%; box-sizing: border-box; background: #0b0f1a; color: #fff; border: 1px solid #263049; border-radius: 6px; padding: 8px 10px; font: 15px/1.5 Verdana, Arial, sans-serif; }
         input[type=text], input[type=password] { width: 100%; max-width: 280px; box-sizing: border-box; background: #0b0f1a; color: #fff; border: 1px solid #263049; border-radius: 6px; padding: 8px 10px; font: 16px Verdana, Arial, sans-serif; }
         input.code { letter-spacing: .2em; font-family: "Courier New", monospace; }
         button { background: #4f7cff; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-size: 15px; cursor: pointer; margin-top: 10px; }

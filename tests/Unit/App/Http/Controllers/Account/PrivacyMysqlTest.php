@@ -77,6 +77,7 @@ class PrivacyMysqlTest extends MysqlTestCase
         $this->assertSame('203.0.113.7', data_get($data, 'data.login_events.0.ip'));
         $this->assertSame('leaverwax123', data_get($data, 'data.wax_links.0.wax_account'));
         $this->assertSame(1999, data_get($data, 'data.dark_matter_orders.0.amount'));
+        $this->assertSame('Broken', data_get($data, 'data.bug_reports.0.description'));
         // never the password, the WAX link code, nor the findings of the cheat detection
         $this->assertStringNotContainsString(User::findOrFail($this->player->id)->password, $json);
         $this->assertFalse(Arr::hasAny($data, ['data.account.password', 'data.wax_links.0.code', 'data.suspicions']));
@@ -107,6 +108,8 @@ class PrivacyMysqlTest extends MysqlTestCase
         $this->assertSame(0, DB::table('password_reset_tokens')->count());
         $this->assertSame(0, DB::connection('central')->table('wax_links')->where('user_id', $id)->count());
         $this->assertSame('-', DB::connection('central')->table('season_results')->where('user_id', $id)->value('name'));
+        $report = DB::connection('central')->table('bug_reports')->sole();
+        $this->assertSame(['Broken', 0, '-', ''], [$report->description, (int) $report->user_id, $report->user_name, $report->user_agent]);
         // kept for the books, without anything else about the player
         $this->assertSame(1, DB::table('dark_matter_orders')->where('user_id', $id)->count());
 
@@ -174,6 +177,7 @@ class PrivacyMysqlTest extends MysqlTestCase
         DB::table('password_reset_tokens')->insert(['email' => 'leaver@example.com', 'token' => 'x']);
         DB::table('dark_matter_orders')->insert(['user_id' => $me, 'package' => 'dm_120k', 'dark_matter' => 120_000, 'amount' => 1999, 'currency' => 'eur', 'provider' => 'stripe', 'status' => 'paid', 'created_at' => $now, 'paid_at' => $now]);
         DB::connection('central')->table('season_results')->insert(['universe' => '', 'category' => 'total', 'rank' => 1, 'user_id' => $me, 'name' => 'Leaver', 'points' => 100, 'frozen_at' => $now]);
+        DB::connection('central')->table('bug_reports')->insert(['universe' => '', 'user_id' => $me, 'user_name' => 'Leaver', 'page' => '/game.php', 'description' => 'Broken', 'user_agent' => 'Firefox', 'created_at' => $now, 'updated_at' => $now]);
     }
 
     private function asPlayer(): static

@@ -188,6 +188,14 @@ Spielseite, bei der Registrierung (AGB, Datenschutz) und im Shop (AGB,
 Widerruf). Ein leer gespeicherter Text entfernt die Seite in dieser
 Sprache. Jede Änderung steht im Protokoll.
 
+**Meldungen.** Unter jeder Spielseite steht *Fehler melden*. Der Spieler
+beschreibt das Problem. Seite (nur ein Pfad dieser Seite), Universum,
+Spieler und Browser kommen mit. Höchstens 5 Meldungen pro Stunde. Die
+Meldungen aller Universen liegen in der Basisdatenbank (`xgp_bug_reports`).
+Unter *Meldungen* setzt du jede auf *gesehen* oder *behoben*; gefiltert
+wird nach Status. Löscht ein Spieler sein Konto, bleibt die Meldung ohne
+Namen und Browser.
+
 **Protokoll.** Jede Anmeldung, auch fehlgeschlagene, jede Änderung an
 einem Universum und an einem Rechtstext steht mit Betreiber, Adresse und
 Zeit in

@@ -2336,6 +2336,24 @@ Baseline-Einträge.
 
     Im Browser geprüft: Feld, Link, Fehlermeldung am Feld.
 
+- **Alpha a08 — Fehler melden im Spiel**
+  - *Melden:* Der Link *Fehler melden* unter jeder Spielseite führt zu
+    `/account/report?from=<Seite>`. Gespeichert werden Beschreibung (10
+    bis 5000 Zeichen), Seite, Universum, Spieler und Browser in der
+    Basisdatenbank (`bug_reports`); höchstens 5 pro Stunde.
+  - *Seitenangabe:* Nur ein Pfad dieser Seite zählt. Mit fremdem Host,
+    Schema oder `//` bleibt sie leer. Der erste Entwurf kürzte
+    `https://evil.example/phish` auf `/phish`, der Test fand das.
+  - *Betreiber:* /operator → *Meldungen* listet die neuesten zuerst, nach
+    Status gefiltert (neu, gesehen, behoben, alle), 50 je Seite. Der Status
+    wird direkt geändert.
+  - *Datenschutz:* Meldungen gehören zur Datenauskunft. Beim Löschen eines
+    Kontos bleiben sie ohne Namen, ID und Browser.
+  - *Tests:* `BugReportsTest` (melden, Seitenangabe, zu kurz/Gast,
+    Betreiber listet und ändert, nur Betreiber), Link auf Spielseiten in
+    `EmailVerificationMysqlTest`, Export und Anonymisierung in
+    `PrivacyMysqlTest`. Im Browser durchgespielt.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

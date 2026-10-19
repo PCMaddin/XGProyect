@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Schema;
  *
  * Kept, without anything that leads back to a person: paid orders (the
  * law asks to keep them for years), the transfers between players (pruned
- * with the other traces) and the season results with the name removed.
+ * with the other traces), the season results and the problems reported,
+ * both with the name removed.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  */
@@ -80,6 +81,11 @@ class AccountEraser
 
         if (Schema::connection(InstanceRegistry::CONNECTION)->hasTable('season_results')) {
             $base->table('season_results')->where('universe', $universe)->where('user_id', $userId)->update(['name' => '-']);
+        }
+
+        // the problems reported stay, without who reported them
+        if (Schema::connection(InstanceRegistry::CONNECTION)->hasTable('bug_reports')) {
+            $base->table('bug_reports')->where('universe', $universe)->where('user_id', $userId)->update(['user_id' => 0, 'user_name' => '-', 'user_agent' => '']);
         }
     }
 }
