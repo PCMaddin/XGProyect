@@ -49,7 +49,14 @@ return new class () extends Migration {
         foreach ($rows as $row) {
             $values = (array) $row;
             $clean = Html::cleanName(is_string($values[$column]) ? $values[$column] : '');
-            DB::table($table)->where($key, $values[$key])->update([$column => $clean !== '' ? $clean : '-']);
+            $clean = $clean !== '' ? $clean : '-';
+
+            // players tell each other apart by name: "Bob<" must not become a second "Bob"
+            if ($table === 'users' && DB::table($table)->where($column, $clean)->where($key, '!=', $values[$key])->exists()) {
+                $clean = mb_substr($clean, 0, 64 - strlen('-' . (string) $values[$key])) . '-' . (string) $values[$key];
+            }
+
+            DB::table($table)->where($key, $values[$key])->update([$column => $clean]);
         }
     }
 };

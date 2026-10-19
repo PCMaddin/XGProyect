@@ -169,7 +169,14 @@ class EmailVerificationMysqlTest extends MysqlTestCase
         $link = app(EmailVerification::class)->link($user);
 
         $this->assertStringContainsString('/account/verify/' . $user->id . '/' . EmailVerification::hash('newbie@example.com'), $link);
-        $this->assertTrue(URL::hasValidSignature(\Illuminate\Http\Request::create($link)));
+        $this->assertTrue(URL::hasValidSignature(\Illuminate\Http\Request::create($link), false));
+
+        // on APP_URL, whatever host the request named (a forged Host header
+        // would send the player to someone else's server)
+        config(['app.url' => 'https://game.example.org']);
+        $this->assertStringStartsWith('https://game.example.org/account/verify/', app(EmailVerification::class)->link($user));
+        $this->get(app(EmailVerification::class)->link($user))->assertOk();
+        $this->assertNotNull($user->refresh()->email_verified_at);
 
         $html = (new VerifyEmail('Newbie', $link, time() + 7 * 86400))->locale('de')->render();
         $this->assertStringContainsString(htmlspecialchars($link, ENT_QUOTES), $html);

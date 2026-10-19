@@ -50,13 +50,16 @@ class HtmlTest extends DatabaseTestCase
     {
         DB::table('users')->insert(['id' => 5, 'name' => 'Evil<script>', 'email' => 'e@example.com', 'home_planet_id' => 5, 'current_planet' => 5]);
         DB::table('users')->insert(['id' => 6, 'name' => 'Fine_Name', 'email' => 'f@example.com', 'home_planet_id' => 6, 'current_planet' => 6]);
+        // cleaned, "Bob<" would be a second Bob: it gets its id
+        DB::table('users')->insert(['id' => 7, 'name' => 'Bob', 'email' => 'b@example.com', 'home_planet_id' => 7, 'current_planet' => 7]);
+        DB::table('users')->insert(['id' => 8, 'name' => 'Bob<', 'email' => 'b2@example.com', 'home_planet_id' => 8, 'current_planet' => 8]);
         DB::table('planets')->insert(['planet_id' => 5, 'planet_user_id' => 5, 'planet_name' => '"><img src=x>']);
         DB::table('alliance')->insert(['alliance_id' => 3, 'alliance_name' => "Bad'Guys", 'alliance_tag' => '<T>', 'alliance_owner' => 5]);
 
         $migration = require database_path('migrations/400/2026_10_18_000041_clean_unsafe_names.php');
         $migration->up();
 
-        $this->assertSame(['Evilscript', 'Fine_Name'], DB::table('users')->orderBy('id')->pluck('name')->all());
+        $this->assertSame(['Evilscript', 'Fine_Name', 'Bob', 'Bob-8'], DB::table('users')->orderBy('id')->pluck('name')->all());
         $planetName = DB::table('planets')->where('planet_id', 5)->value('planet_name');
         $this->assertIsString($planetName);
         $this->assertSame('imgsrc=x', str_replace(' ', '', $planetName));

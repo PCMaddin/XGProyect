@@ -110,7 +110,10 @@ class EmailVerification
 
     /**
      * Signed, for this address only (a changed address needs a new link),
-     * with the universe in the signature.
+     * with the universe in the signature. On the address of APP_URL, never
+     * on the host the request named: a forged Host header would send the
+     * player a link to someone else's server. The signature covers the
+     * path (the route takes "signed:relative").
      */
     public function link(User $user): string
     {
@@ -121,7 +124,10 @@ class EmailVerification
             $parameters[InstanceContext::QUERY] = $universe;
         }
 
-        return URL::temporarySignedRoute('account.verify', Carbon::createFromTimestamp($this->deadline($user)), $parameters);
+        $base = config('app.url');
+
+        return rtrim(is_string($base) ? $base : '', '/')
+            . URL::temporarySignedRoute('account.verify', Carbon::createFromTimestamp($this->deadline($user)), $parameters, false);
     }
 
     public static function hash(string $email): string

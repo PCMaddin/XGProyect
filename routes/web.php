@@ -45,7 +45,7 @@ Route::prefix('account')->group(function () {
     Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
     Route::post('/reset', [RecoverController::class, 'reset'])->middleware('throttle:recover')->name('account.reset.update');
     Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
-        ->whereNumber('id')->middleware(['signed', 'throttle:20,1'])->name('account.verify');
+        ->whereNumber('id')->middleware(['signed:relative', 'throttle:20,1'])->name('account.verify');
     Route::get('/two-factor', [TwoFactorChallengeController::class, 'show'])->name('account.two-factor');
     Route::post('/two-factor', [TwoFactorChallengeController::class, 'verify'])->name('account.two-factor.verify');
 

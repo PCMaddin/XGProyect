@@ -225,9 +225,11 @@ Zeit in
 | `XGP_OPERATOR_IPS` | nur von diesen Adressen oder Netzen, z. B. `203.0.113.7,10.0.0.0/8`; sonst gibt es `/operator` nicht (404) |
 | `XGP_OPERATOR_WEB=false` | `/operator` ganz abschalten; die Befehle gehen weiter |
 
-Hinter einem Reverse-Proxy zählt die Adresse des Proxys, solange er nicht
-in `TrustProxies` eingetragen ist. Ein gefälschter `X-Forwarded-For`-Header
-hilft also nicht. Ein Universum anzulegen dauert bis zu einer Minute,
+Hinter einem Reverse-Proxy, der per HTTP mit dem Spiel spricht (nicht im
+Docker-Stack: Caddy übergibt die Adresse des Spielers direkt), zählt die
+Adresse des Proxys, bis er in `XGP_TRUSTED_PROXIES` steht
+(`203.0.113.7,10.0.0.0/8` oder `*`). Erst dann gilt `X-Forwarded-For`; ein
+gefälschter Header hilft also nicht. Ein Universum anzulegen dauert bis zu einer Minute,
 weil seine Datenbank mit allen Tabellen eingerichtet wird.
 
 ## Monatlicher Start

@@ -2609,6 +2609,31 @@ Baseline-Einträge.
       Lücke in der Bestätigung); alle neuen Templates escapen; das
       Deploy-Skript erzeugt die Geheimnisse einmal und hält `.env` auf 600;
       Redis und Datenbank ohne offenen Port.
+  - ✅ **Dritter Durchgang** (was die ersten beiden ausließen: Sitzung,
+    Proxy, Datenbank-Einstellungen, Namensbereinigung, php-fpm, Installer):
+    - Der Bestätigungslink nahm den Host aus der Anfrage. Wer den
+      `Host`-Header fälschen konnte (Proxy ohne Host-Prüfung), lenkte die
+      Mail an einen fremden Server und las dort das Token. Jetzt steht der
+      Link auf `APP_URL`, die Signatur deckt nur den Pfad (`signed:relative`),
+      also gilt er auch hinter einem anderen Hostnamen des Servers.
+    - Die Anwendung vertraute keinem Proxy, es gab aber auch keinen Weg,
+      einen einzutragen: hinter Caddy sah sie für alle Spieler die
+      Proxy-Adresse, und Drosselung wie Fingerabdruck der Sitzung trafen alle
+      zusammen. Jetzt `XGP_TRUSTED_PROXIES` (`config/trustedproxy.php`).
+      Der Docker-Stack braucht es nicht (Caddy übergibt die Adresse des
+      Spielers direkt an php-fpm); ohne den Wert bleibt es beim sicheren
+      Standard: kein Proxy, kein `X-Forwarded-For`.
+    - `innodb_flush_log_at_trx_commit = 2` konnte eine bestätigte Zahlung
+      beim Stromausfall verlieren (Stripe hat sie, die Datenbank nicht).
+      Jetzt `1`; das Spiel schreibt dafür nicht genug, um es zu merken.
+    - Die Namensbereinigung (Migration `clean_unsafe_names`) machte aus
+      `Bob<` ein zweites `Bob`. Spieler unterscheiden sich am Namen; jetzt
+      bekommt der zweite die Nutzer-Nummer angehängt (`Bob-8`).
+    - *Geprüft und in Ordnung:* Fingerabdruck der Sitzung mit HMAC und
+      `hash_equals`; Tooltip-Text escapet (`Html::scriptText`); php-fpm
+      schreibt Fehler der Worker ins Container-Log und reicht die
+      Umgebung des Containers durch (`clear_env = no`, so kommen die
+      Geheimnisse an); Installer fragt das Passwort ab statt es zu erzeugen.
   - *Geprüft und in Ordnung:* signierte Bestätigungslinks mit Universum in
     der Signatur; Einladungscodes atomar; Rechtstexte mit escapetem HTML und
     ohne `javascript:`-Links; Fehlermeldung ohne fremden Host; Shell-Werte der
@@ -2620,7 +2645,9 @@ Baseline-Einträge.
     gelöscht (mit altem Code: „still there“); Lobby mit archiviertem Universum
     ohne Fehlereintrag (mit altem Code: ein Eintrag); Stripe auf archiviertem
     Universum; View im Archiv; abgebrochene Wiederherstellung; Datei unter
-    `public/`; Mail ohne Werte.
+    `public/`; Mail ohne Werte; gefälschter `X-Forwarded-For` ohne eingetragenen Proxy
+    ignoriert, mit eingetragenem Proxy gesehen; Bestätigungslink auf `APP_URL`
+    trotz anderem Anfrage-Host; `Bob<` neben `Bob` wird `Bob-8`.
 
 ## Smoke-Test gegen eine echte Datenbank
 
