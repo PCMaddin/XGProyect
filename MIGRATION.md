@@ -2596,6 +2596,19 @@ Baseline-Einträge.
     ohnehin nicht.
   - ✅ **Datenauskunft** (`/account/privacy/export`) auf 10 je Stunde
     gedrosselt; die Abfrage liest rund zwanzig Tabellen.
+  - ✅ **Zweiter Durchgang** (Deploy-Skript, Universums-Umschaltung,
+    Operator-Seiten, Shop-Haken, Templates, CI):
+    - Die Registrierung prüfte nicht, ob die E-Mail-Adresse eine ist
+      (`required|max:255|unique`, aus dem Original). Mit der
+      Pflicht-Bestätigung ging die Mail an einen Tippfehler, und das Konto
+      wurde nach einer Woche gelöscht. Jetzt `email:rfc`, auch im Installer.
+    - Eine Kartenrückbuchung (Chargeback), deren Zahlung kein Universum mehr
+      kennt (archiviert), wurde still ignoriert. Geld weg, niemand erfährt
+      es. Jetzt ein Eintrag unter /operator → *Fehler*.
+    - Sonst nichts: Spieler können ihre Adresse nicht selbst ändern (keine
+      Lücke in der Bestätigung); alle neuen Templates escapen; das
+      Deploy-Skript erzeugt die Geheimnisse einmal und hält `.env` auf 600;
+      Redis und Datenbank ohne offenen Port.
   - *Geprüft und in Ordnung:* signierte Bestätigungslinks mit Universum in
     der Signatur; Einladungscodes atomar; Rechtstexte mit escapetem HTML und
     ohne `javascript:`-Links; Fehlermeldung ohne fremden Host; Shell-Werte der

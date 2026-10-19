@@ -36,13 +36,32 @@ class RegisterWelcomeMessageTest extends DatabaseTestCase
         $this->assertStringContainsString('Greetings, emperor New &lt;b&gt;bie!', $text);
     }
 
-    private function welcomeMessageFor(string $forumUrl): string
+    /**
+     * Regression: the address was not checked to be one; the confirmation
+     * mail went nowhere and the account was deleted a week later.
+     */
+    public function testTheAddressMustBeAnAddress(): void
+    {
+        $this->registrationOptions('');
+
+        $this->post('/register', ['username' => 'Newbie', 'password' => 'Geheim12345', 'email' => 'not an address', 'agb' => 'on'])
+            ->assertSessionHasErrorsIn('register', ['email']);
+
+        $this->assertSame(0, User::count());
+    }
+
+    private function registrationOptions(string $forumUrl): void
     {
         config(['INSTALLED' => 'true', 'SECRETWORD' => 'test-secret']);
 
         foreach (['lang' => 'en', 'reg_enable' => '1', 'reg_welcome_message' => '1', 'reg_welcome_email' => '0', 'reg_verify_email' => '0', 'reg_invite_only' => '0', 'reg_max_players' => '0', 'forum_url' => $forumUrl] as $name => $value) {
             Options::insert(['name' => $name, 'value' => $value, 'type' => 'string']);
         }
+    }
+
+    private function welcomeMessageFor(string $forumUrl): string
+    {
+        $this->registrationOptions($forumUrl);
 
         $registration = $this->createMock(RegistrationService::class);
         $registration->method('register')->willReturnCallback(function (array $data): User {

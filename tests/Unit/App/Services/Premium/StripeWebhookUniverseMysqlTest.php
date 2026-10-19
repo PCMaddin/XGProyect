@@ -104,6 +104,19 @@ class StripeWebhookUniverseMysqlTest extends MysqlTestCase
         $this->assertStringContainsString('archived universe shop', $reported);
     }
 
+    public function testAChargebackNoUniverseKnowsIsReported(): void
+    {
+        $this->webhook([
+            'id' => 'evt_dispute',
+            'type' => 'charge.dispute.created',
+            'data' => ['object' => ['id' => 'dp_1', 'payment_intent' => 'pi_nowhere', 'metadata' => []]],
+        ])->assertOk()->assertJson(['result' => 'ignored']);
+
+        $reported = DB::connection('central')->table('error_groups')->value('message');
+        $this->assertIsString($reported);
+        $this->assertStringContainsString('chargeback for a payment no universe knows: pi_nowhere', $reported);
+    }
+
     public function testARefundFindsTheUniverseOfThePayment(): void
     {
         $this->webhook($this->completed('shop'))->assertOk();

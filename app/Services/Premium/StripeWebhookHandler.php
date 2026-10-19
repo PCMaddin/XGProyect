@@ -149,6 +149,12 @@ class StripeWebhookHandler
             }
         }
 
+        // no universe knows the payment (an archived one?): a chargeback is
+        // money gone, so the operators see it among the errors
+        if ($status === DarkMatterOrder::DISPUTED) {
+            report(new RuntimeException('Stripe chargeback for a payment no universe knows: ' . $paymentId . ' (archived? xgp:instance:unarchive).'));
+        }
+
         return 'ignored';
     }
 
