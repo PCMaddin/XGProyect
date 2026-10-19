@@ -151,9 +151,9 @@ class Users
         DB::statement(
             $this->prepareSql(
                 'DELETE p,b,d,s FROM ' . PLANETS . ' AS p
-                INNER JOIN ' . BUILDINGS . ' AS b ON b.building_planet_id = p.`planet_id`
-                INNER JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
-                INNER JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id`
+                LEFT JOIN ' . BUILDINGS . ' AS b ON b.building_planet_id = p.`planet_id`
+                LEFT JOIN ' . DEFENSES . ' AS d ON d.defense_planet_id = p.`planet_id`
+                LEFT JOIN ' . SHIPS . ' AS s ON s.ship_planet_id = p.`planet_id`
                 WHERE `planet_user_id` = ?;'
             ),
             [$userId]
@@ -162,13 +162,15 @@ class Users
         DB::statement($this->prepareSql('DELETE FROM ' . BUDDY . ' WHERE `buddy_sender` = ? OR `buddy_receiver` = ?;'), [$userId, $userId]);
         DB::statement(
             $this->prepareSql(
+                // left joins: a planet or account missing one of its rows (an old
+                // import, a crashed registration) is deleted all the same
                 'DELETE r,f,n,p,pr,s,u FROM ' . USERS . ' AS u
-                INNER JOIN ' . RESEARCH . ' AS r ON r.research_user_id = u.id
+                LEFT JOIN ' . RESEARCH . ' AS r ON r.research_user_id = u.id
                 LEFT JOIN ' . FLEETS . ' AS f ON f.fleet_owner = u.id
                 LEFT JOIN ' . NOTES . ' AS n ON n.note_owner = u.id
-                INNER JOIN ' . PREMIUM . ' AS p ON p.premium_user_id = u.id
-                INNER JOIN ' . PREFERENCES . ' AS pr ON pr.preference_user_id = u.id
-                INNER JOIN ' . USERS_STATISTICS . ' AS s ON s.user_statistic_user_id = u.id
+                LEFT JOIN ' . PREMIUM . ' AS p ON p.premium_user_id = u.id
+                LEFT JOIN ' . PREFERENCES . ' AS pr ON pr.preference_user_id = u.id
+                LEFT JOIN ' . USERS_STATISTICS . ' AS s ON s.user_statistic_user_id = u.id
                 WHERE u.`id` = ?;'
             ),
             [$userId]

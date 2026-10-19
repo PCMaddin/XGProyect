@@ -2553,6 +2553,62 @@ Baseline-Einträge.
     zurückgeholt, geöffnet, Tick läuft.
 
 
+- **Audit der Alpha-Arbeiten (zweiter Blick auf a01–a13, Lasttest, Archiv)**
+  Alles seit dem Sicherheits-Audit Neue noch einmal mit der Frage gelesen,
+  wo es Geld, Daten oder den Spielstand kosten kann. Gefunden und behoben,
+  jeweils mit Test:
+  - 🔴→✅ **Konto löschen ließ das Konto stehen.** `Users::deleteUserRows`
+    verband die Zeilen des Kontos mit `INNER JOIN`: Fehlte eine davon
+    (Premium, Einstellungen, Forschung; bei Planeten Gebäude, Schiffe oder
+    Verteidigung, etwa nach einem Import oder einer abgebrochenen
+    Registrierung), löschte die Abfrage nichts, und der Spieler las „Konto
+    gelöscht“. Jetzt `LEFT JOIN`, und der `AccountEraser` prüft danach, dass
+    das Konto weg ist; sonst Fehler statt falscher Bestätigung. Das Aufräumen
+    inaktiver und unbestätigter Konten überspringt ein Konto, das sich nicht
+    löschen lässt, und meldet es, statt stehen zu bleiben.
+  - 🔴→✅ **Lobby fragte archivierte Universen ab.** Jeder Aufruf der Lobby
+    versuchte die gelöschte Datenbank zu lesen: ein Fehler je Aufruf, nach
+    kurzer Zeit die Fehlermail an die Betreiber. Archivierte Universen werden
+    nicht mehr befragt.
+  - ✅ **Stripe-Webhook für ein archiviertes Universum** lief in einen
+    Datenbankfehler; Stripe hätte ihn drei Tage lang wiederholt. Jetzt
+    Antwort 200 und ein Eintrag unter /operator → *Fehler*, damit der
+    Betreiber die Rückbuchung von Hand verbucht (`xgp:instance:unarchive`).
+  - ✅ **Passwörter in Fehler-Traces.** Das PHP-Image hat keine php.ini; die
+    eingebaute Voreinstellung schreibt die Argumente der Aufrufe in jeden
+    Trace, also auch das Passwort aus `Hash::check(…)`. Die Traces landen in
+    `error_groups` (/operator) und im Container-Log. `deploy/php/php.ini`
+    setzt `zend.exception_ignore_args = On`.
+  - ✅ **Fehler-Mail ohne Werte.** Die Mail an die Betreiber trug die ganze
+    Meldung, bei Datenbankfehlern also die Werte der Abfrage (E-Mail-Adressen,
+    Codes), unverschlüsselt per Mail. Sie trägt jetzt die bereinigte Fassung
+    (`ErrorMonitor::redact`, Zahlen und zitierte Werte ersetzt); die volle
+    Meldung bleibt unter /operator.
+  - ✅ **Archiv:** Views zählten als Tabellen, ein Universum mit View wäre
+    nie archiviert worden (gezählt werden jetzt nur Basistabellen). Eine
+    Archivdatei unter `public/` hätte der Webserver ausgeliefert: verweigert.
+    Eine abgebrochene Wiederherstellung hinterließ eine halbe Datenbank, die
+    den nächsten Versuch mit „exists already“ blockierte: sie wird wieder
+    gelöscht (`OffsiteBackup::restore`, gilt auch für `xgp:backup:restore`).
+  - ✅ **`tests/Browser/seed.php`** legt einen Betreiber mit bekanntem
+    Passwort und 2FA-Schlüssel an. Es läuft jetzt nur auf einer frischen
+    Installation (ein Konto, kein Betreiber). Das Image enthält `tests/`
+    ohnehin nicht.
+  - ✅ **Datenauskunft** (`/account/privacy/export`) auf 10 je Stunde
+    gedrosselt; die Abfrage liest rund zwanzig Tabellen.
+  - *Geprüft und in Ordnung:* signierte Bestätigungslinks mit Universum in
+    der Signatur; Einladungscodes atomar; Rechtstexte mit escapetem HTML und
+    ohne `javascript:`-Links; Fehlermeldung ohne fremden Host; Shell-Werte der
+    Sicherung nur als Umgebungsvariablen; Caddy ohne `/.…`; Datenbank und
+    Redis nur im internen Netz; Operator-Routen hinter `operator.auth`;
+    Lasttest nur ohne echte Spieler; Testzahlungen schließen Live-Schlüssel
+    aus.
+  - *Tests:* Konto ohne Premium-Zeile und Planet ohne Verteidigung werden
+    gelöscht (mit altem Code: „still there“); Lobby mit archiviertem Universum
+    ohne Fehlereintrag (mit altem Code: ein Eintrag); Stripe auf archiviertem
+    Universum; View im Archiv; abgebrochene Wiederherstellung; Datei unter
+    `public/`; Mail ohne Werte.
+
 ## Smoke-Test gegen eine echte Datenbank
 
 Bis hierhin war alles nur mit Unit-Tests auf SQLite und statischer Analyse

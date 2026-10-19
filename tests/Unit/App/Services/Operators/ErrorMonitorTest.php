@@ -145,6 +145,24 @@ class ErrorMonitorTest extends DatabaseTestCase
         $this->assertStringContainsString('https://game.example.org/operator/errors/', $html);
     }
 
+    /**
+     * The mail travels unencrypted: it names the kind of error, never the
+     * values in the message (a query's values, a token). /operator has them.
+     */
+    public function testTheMailNamesTheKindOfErrorButNotItsValues(): void
+    {
+        $monitor = app(ErrorMonitor::class);
+        $monitor->record(self::error("Token 'wax-link-s3cret' of player 42 rejected"), time());
+
+        $html = (new ErrorDigest(array_values(DB::connection('central')->table('error_groups')->get()->all())))->render();
+
+        $this->assertStringNotContainsString('s3cret', $html);
+        $this->assertStringContainsString('Token ? of player N rejected', $html);
+        $stored = DB::connection('central')->table('error_groups')->value('message');
+        $this->assertIsString($stored);
+        $this->assertStringContainsString('wax-link-s3cret', $stored);
+    }
+
     public function testResolvedErrorsGoneForThreeMonthsAreDeleted(): void
     {
         $monitor = app(ErrorMonitor::class);

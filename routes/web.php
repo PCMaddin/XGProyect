@@ -59,7 +59,7 @@ Route::prefix('account')->group(function () {
         Route::get('/report', [ReportController::class, 'show'])->name('account.report');
         Route::post('/report', [ReportController::class, 'store'])->middleware('throttle:5,60')->name('account.report.store');
         Route::get('/privacy', [PrivacyController::class, 'show'])->name('account.privacy');
-        Route::post('/privacy/export', [PrivacyController::class, 'download'])->name('account.privacy.export');
+        Route::post('/privacy/export', [PrivacyController::class, 'download'])->middleware('throttle:10,60')->name('account.privacy.export');
         Route::post('/privacy/delete', [PrivacyController::class, 'destroy'])->name('account.privacy.delete');
         Route::get('/wax', [WaxController::class, 'show'])->name('account.wax');
         Route::post('/wax/renew', [WaxController::class, 'renew'])->name('account.wax.renew');

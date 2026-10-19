@@ -91,6 +91,11 @@ class LobbyController extends BaseController
      */
     private function facts(Instance $instance): array
     {
+        // an archived universe has no database to ask (and would be an error a minute)
+        if (!$instance->hasDatabase()) {
+            return ['players' => null, 'payments' => [], 'test_payments' => false, 'invite_only' => false, 'full' => false];
+        }
+
         try {
             return $this->context->runIn($instance, static function () use ($instance): array {
                 $players = Cache::remember('lobby_players', 60, static fn (): int => DB::table('users')->where('user_is_bot', false)->count());

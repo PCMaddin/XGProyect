@@ -155,11 +155,18 @@ class OffsiteBackup
 
         $base->statement('CREATE DATABASE `' . $into . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
 
-        $this->shell->run('"$RESTIC" dump --tag "db:$DB" "$SNAPSHOT" "/$DB.sql" | ' . DumpShell::LOAD, [
-            'DB' => $database,
-            'INTO' => $into,
-            'SNAPSHOT' => $snapshot,
-        ]);
+        try {
+            $this->shell->run('"$RESTIC" dump --tag "db:$DB" "$SNAPSHOT" "/$DB.sql" | ' . DumpShell::LOAD, [
+                'DB' => $database,
+                'INTO' => $into,
+                'SNAPSHOT' => $snapshot,
+            ]);
+        } catch (RuntimeException $e) {
+            // a half database would block the next try ("exists already")
+            $base->statement('DROP DATABASE `' . $into . '`');
+
+            throw $e;
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\DarkMatterOrder;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 /**
  * What a verified Stripe event does to the orders:
@@ -169,6 +170,14 @@ class StripeWebhookHandler
 
         if ($instance === null) {
             throw new UnknownUniverseException('Unknown universe ' . $slug);
+        }
+
+        // its database is in the archive: nothing to credit or take back here;
+        // reported, so the operators see it (and Stripe stops sending it again)
+        if (!$instance->hasDatabase()) {
+            report(new RuntimeException('Stripe webhook for the archived universe ' . $slug . ': handle it by hand (xgp:instance:unarchive).'));
+
+            return 'universe archived';
         }
 
         return $this->context->runIn($instance, $work);

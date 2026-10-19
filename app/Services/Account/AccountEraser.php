@@ -9,6 +9,7 @@ use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 /**
  * Deletes an account of the current universe with everything that names
@@ -61,6 +62,11 @@ class AccountEraser
             }
 
             $this->users->deleteUser($userId);
+
+            // never tell a player the account is gone while it is not
+            if (DB::table('users')->where('id', $userId)->exists()) {
+                throw new RuntimeException('The account ' . $userId . ' is still there after deleting it.');
+            }
         });
 
         $this->eraseInBaseDatabase($userId);

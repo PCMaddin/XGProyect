@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Services\Account\AccountEraser;
+use Throwable;
 use App\Services\Account\EmailVerification;
 use App\Support\OfficerBonuses;
 use App\Services\Game\RelocationService;
@@ -144,7 +145,12 @@ class UpdatesLibrary
         $eraser = app(AccountEraser::class);
 
         foreach ($chooseToDelete as $delete) {
-            $eraser->erase((int) $delete['id']);
+            try {
+                $eraser->erase((int) $delete['id']);
+            } catch (Throwable $e) {
+                // the others still go; the operators see the one that did not
+                report($e);
+            }
         }
 
         app(EmailVerification::class)->pruneUnconfirmed(time());

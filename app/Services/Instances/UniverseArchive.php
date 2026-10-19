@@ -143,6 +143,11 @@ class UniverseArchive
             throw new RuntimeException('The file must be new, in a folder that exists: ' . $file);
         }
 
+        // the web server serves everything under public/: the whole universe would be a download
+        if (str_starts_with((string) realpath(dirname($file)) . DIRECTORY_SEPARATOR, (string) realpath(public_path()) . DIRECTORY_SEPARATOR)) {
+            throw new RuntimeException('Not under public/, the web server would serve it: ' . $file);
+        }
+
         $this->shell->run(DumpShell::DUMP . ' | gzip > "$FILE"', ['DB' => $database, 'FILE' => $file]);
         $found = $this->shell->run('gzip -dc "$FILE" | grep -c "^CREATE TABLE" || true', ['FILE' => $file]);
         self::check($database, $tables, $found);
@@ -181,7 +186,7 @@ class UniverseArchive
     private function tables(string $database): int
     {
         $row = DB::connection(InstanceRegistry::CONNECTION)
-            ->selectOne('SELECT COUNT(*) AS tables FROM information_schema.tables WHERE table_schema = ?', [$database]);
+            ->selectOne("SELECT COUNT(*) AS tables FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'", [$database]);
 
         return is_object($row) && is_numeric($row->tables ?? null) ? (int) $row->tables : 0;
     }

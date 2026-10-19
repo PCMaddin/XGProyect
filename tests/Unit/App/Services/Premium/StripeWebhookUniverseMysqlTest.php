@@ -90,6 +90,20 @@ class StripeWebhookUniverseMysqlTest extends MysqlTestCase
         $this->assertSame([0, DarkMatterOrder::PENDING], $this->state());
     }
 
+    public function testAnArchivedUniverseIsReportedAndNotTouched(): void
+    {
+        DB::connection('central')->table('instances')->where('slug', 'shop')->update(['status' => Instance::ARCHIVED, 'archive' => 'restic:abc']);
+
+        // 200: Stripe stops sending it; the operators see it among the errors
+        $this->webhook($this->completed('shop'))->assertOk()->assertJson(['result' => 'universe archived']);
+
+        $this->assertSame([0, DarkMatterOrder::PENDING], $this->inUniverse(fn (): array => $this->state()));
+        $this->assertSame([0, DarkMatterOrder::PENDING], $this->state());
+        $reported = DB::connection('central')->table('error_groups')->value('message');
+        $this->assertIsString($reported);
+        $this->assertStringContainsString('archived universe shop', $reported);
+    }
+
     public function testARefundFindsTheUniverseOfThePayment(): void
     {
         $this->webhook($this->completed('shop'))->assertOk();

@@ -150,9 +150,16 @@ class EmailVerification
         $deleted = 0;
 
         foreach ($ids as $id) {
-            if (is_numeric($id)) {
+            if (!is_numeric($id)) {
+                continue;
+            }
+
+            try {
                 $this->eraser->erase((int) $id);
                 $deleted++;
+            } catch (Throwable $e) {
+                // the others still go; the operators see the one that did not
+                report($e);
             }
         }
 

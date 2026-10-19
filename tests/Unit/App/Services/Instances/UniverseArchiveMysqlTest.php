@@ -11,6 +11,8 @@ use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
 use App\Services\Instances\UniverseArchive;
 use App\Services\Operators\OffsiteBackup;
+use Database\Seeders\LanguagesTableSeeder;
+use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -171,6 +173,57 @@ class UniverseArchiveMysqlTest extends MysqlTestCase
         $this->assertSame(0, Artisan::call('xgp:instance:archive', ['--due' => true]));
         $this->assertFalse($this->exists());
         $this->assertSame([], $archive->due(time()));
+    }
+
+    public function testTheLobbyShowsAnArchivedUniverseWithoutAskingItsDatabase(): void
+    {
+        config(['INSTALLED' => 'true', 'SECRETWORD' => 'test-secret', 'version.files' => '4.0.0']);
+        $this->seed([OptionsTableSeeder::class, LanguagesTableSeeder::class]);
+        Artisan::call('xgp:instance:archive', ['slug' => 'old']);
+
+        $this->get('/universes')->assertOk()->assertSee('Old');
+
+        // before, every view of the lobby asked the dropped database: an error a view
+        $this->assertSame(0, DB::connection('central')->table('error_groups')->count());
+    }
+
+    public function testNeverIntoAFileTheWebServerServes(): void
+    {
+        $file = public_path('old.sql.gz');
+
+        $this->assertSame(1, Artisan::call('xgp:instance:archive', ['slug' => 'old', '--file' => $file]));
+
+        $this->assertStringContainsString('Not under public/', Artisan::output());
+        $this->assertFileDoesNotExist($file);
+        $this->assertTrue($this->exists());
+    }
+
+    public function testAViewDoesNotCountAsATable(): void
+    {
+        $before = $this->checksums();
+        DB::connection('central')->statement('CREATE VIEW `' . self::UNIVERSE . '`.`v_users` AS SELECT id, name FROM `' . self::UNIVERSE . '`.`xgp_users`');
+
+        $this->assertSame(0, Artisan::call('xgp:instance:archive', ['slug' => 'old']));
+        $this->assertSame(0, Artisan::call('xgp:instance:unarchive', ['slug' => 'old']));
+
+        $this->assertSame($before, $this->checksums());
+        $this->assertSame([['id' => 1, 'name' => 'Winner'], ['id' => 2, 'name' => 'Second']], array_map(static fn (object $row): array => (array) $row, DB::connection('central')->select('SELECT id, name FROM `' . self::UNIVERSE . '`.`v_users` ORDER BY id')));
+    }
+
+    public function testARestoreThatBreaksOffLeavesNoHalfDatabase(): void
+    {
+        $before = $this->checksums();
+        Artisan::call('xgp:instance:archive', ['slug' => 'old']);
+
+        // a client that fails at once: the database was created, then nothing loaded
+        config(['offsite.client' => 'false']);
+        $this->assertSame(1, Artisan::call('xgp:instance:unarchive', ['slug' => 'old']));
+        $this->assertFalse($this->exists());
+        $this->assertSame(Instance::ARCHIVED, $this->universe()->status);
+
+        config(['offsite.client' => 'mariadb']);
+        $this->assertSame(0, Artisan::call('xgp:instance:unarchive', ['slug' => 'old']));
+        $this->assertSame($before, $this->checksums());
     }
 
     public function testAnArchivedUniverseCannotBeChanged(): void

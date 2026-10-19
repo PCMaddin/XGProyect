@@ -158,9 +158,17 @@ class ErrorMonitor
      */
     public static function fingerprint(Throwable $error): string
     {
-        $message = (string) preg_replace(['/([\'"`]).*?\1/s', '/\d+/'], ['?', 'N'], $error->getMessage());
+        return sha1($error::class . '|' . self::relative($error->getFile()) . '|' . $error->getLine() . '|' . mb_substr(self::redact($error->getMessage()), 0, 300));
+    }
 
-        return sha1($error::class . '|' . self::relative($error->getFile()) . '|' . $error->getLine() . '|' . mb_substr($message, 0, 300));
+    /**
+     * The message without what changes from one time to the next, and
+     * without what may be a secret (a query's values, a token): what the
+     * mail says; the full message stays on /operator.
+     */
+    public static function redact(string $message): string
+    {
+        return (string) preg_replace(['/([\'"`]).*?\1/s', '/\d+/'], ['?', 'N'], $message);
     }
 
     /**

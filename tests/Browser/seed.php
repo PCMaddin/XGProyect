@@ -43,6 +43,13 @@ const SHORT = '"\'><img src=x onerror=__xss=1>';
 const PASSWORD = 'Geheim12345';
 const OPERATOR_SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 
+// a fresh installation holds the admin and nobody else: this creates an
+// operator with a known password and secret, never on a game that is played
+if (User::count() !== 1 || Operator::query()->exists()) {
+    fwrite(STDERR, "Only on a fresh installation (one account, no operator): this seeds test accounts with known passwords.\n");
+    exit(1);
+}
+
 $now = time();
 $admin = User::where('email', 'admin@example.com')->firstOrFail();
 $marker = app(RegistrationService::class)->register(['name' => 'Marker', 'email' => 'marker@example.com', 'password' => PASSWORD]);

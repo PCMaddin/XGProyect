@@ -121,6 +121,26 @@ class PrivacyMysqlTest extends MysqlTestCase
         $this->assertGuest();
     }
 
+    /**
+     * Regression: the deletion joined the account's rows with INNER JOIN, so
+     * an account missing one of them (an old import, a crashed
+     * registration) stayed, while the player was told it was gone.
+     */
+    public function testAnAccountMissingSomeOfItsRowsIsStillDeleted(): void
+    {
+        $id = $this->player->id;
+        DB::table('premium')->where('premium_user_id', $id)->delete();
+        DB::table('defenses')->whereIn('defense_planet_id', DB::table('planets')->where('planet_user_id', $id)->pluck('planet_id'))->delete();
+
+        // as the admin and the cleanup delete (such an account cannot sign in)
+        app(AccountEraser::class)->erase($id);
+
+        $this->assertNull(DB::table('users')->find($id));
+        $this->assertSame(0, DB::table('planets')->where('planet_user_id', $id)->count());
+        $this->assertSame(0, DB::table('research')->where('research_user_id', $id)->count());
+        $this->assertNotNull(DB::table('users')->find($this->friend->id));
+    }
+
     public function testNothingIsDeletedWithoutPasswordConfirmationOrCode(): void
     {
         $this->asPlayer()->post('/account/privacy/delete', ['password' => 'wrong', 'confirm' => '1'])->assertRedirect(route('account.privacy'));
