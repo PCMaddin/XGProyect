@@ -79,7 +79,7 @@ class Users
         $userData = $userRow !== null ? (array) $userRow : [];
 
         if (self::asInt($userData['ally_id'] ?? 0) !== 0) {
-            $this->handleAllianceOnDelete(self::asInt($userData['ally_id'] ?? 0));
+            $this->handleAllianceOnDelete(self::asInt($userData['ally_id'] ?? 0), $userId);
         }
 
         $this->deleteUserRows($userId);
@@ -101,46 +101,38 @@ class Users
         return self::asInt($user['onlinetime'] ?? 0) < (time() - ONE_WEEK);
     }
 
-    private function handleAllianceOnDelete(int $allyId): void
+    /**
+     * A member leaves the alliance with its account. The last one takes the
+     * alliance along; the founder hands it to a right hand, or else to the
+     * longest member. (The original dissolved the alliance, or changed its
+     * founder, whenever any member was deleted.)
+     */
+    private function handleAllianceOnDelete(int $allyId, int $userId): void
     {
-        $allianceRow = DB::selectOne(
-            $this->prepareSql(
-                'SELECT a.`alliance_id`, a.`alliance_ranks`,
-                    (SELECT COUNT(id) AS `ally_members` FROM `' . USERS . '` WHERE `ally_id` = ?) AS `ally_members`
-                FROM `' . ALLIANCE . '` AS a
-                WHERE a.`alliance_id` = ?;'
-            ),
-            [$allyId, $allyId]
-        );
-        $alliance = $allianceRow !== null ? (array) $allianceRow : [];
-        $allianceId = self::asInt($alliance['alliance_id'] ?? 0);
+        $alliance = DB::table('alliance')->where('alliance_id', $allyId)->first(['alliance_owner', 'alliance_ranks']);
 
-        $ranksRaw = $alliance['alliance_ranks'] ?? null;
-        $hasRanks = self::asInt($alliance['ally_members'] ?? 0) > 1 && is_string($ranksRaw) && $ranksRaw !== '';
+        if ($alliance === null) {
+            return;
+        }
 
-        if (!$hasRanks) {
-            $this->deleteAllianceById($allianceId);
+        $others = DB::table('users')->where('ally_id', $allyId)->where('id', '!=', $userId);
+
+        if (!(clone $others)->exists()) {
+            $this->deleteAllianceById($allyId);
 
             return;
         }
 
-        $newOwnerRank = $this->findRightHandRank(new Ranks($ranksRaw));
-
-        if ($newOwnerRank === null) {
-            $this->deleteAllianceById($allianceId);
-
+        if (self::asInt($alliance->alliance_owner ?? 0) !== $userId) {
             return;
         }
 
-        DB::statement(
-            $this->prepareSql(
-                'UPDATE `' . ALLIANCE . '` SET `alliance_owner` = (
-                    SELECT `id` FROM `' . USERS . '`
-                    WHERE `ally_rank_id` = ? AND `ally_id` = ? LIMIT 1
-                ) WHERE `alliance_id` = ?;'
-            ),
-            [$newOwnerRank, $allianceId, $allianceId]
-        );
+        $ranks = $alliance->alliance_ranks ?? null;
+        $rightHand = is_string($ranks) && $ranks !== '' ? $this->findRightHandRank(new Ranks($ranks)) : null;
+        $successor = $rightHand !== null ? (clone $others)->where('ally_rank_id', $rightHand)->orderBy('id')->value('id') : null;
+        $successor ??= (clone $others)->orderBy('ally_register_time')->orderBy('id')->value('id');
+
+        DB::table('alliance')->where('alliance_id', $allyId)->update(['alliance_owner' => self::asInt($successor)]);
     }
 
     private function findRightHandRank(Ranks $ranks): ?int
@@ -202,11 +194,11 @@ class Users
         DB::statement(
             $this->prepareSql(
                 'UPDATE `' . USERS . "` SET
-                    `ally_id` = '0', `ally_request` = '0', `ally_request_text` = '',
-                    `ally_register_time` = '', `ally_rank_id` = '0'
-                WHERE `ally_id` = ?;"
+                    `ally_id` = 0, `ally_request` = 0, `ally_request_text` = '',
+                    `ally_register_time` = 0, `ally_rank_id` = 0
+                WHERE `ally_id` = ? OR `ally_request` = ?;"
             ),
-            [$allianceId]
+            [$allianceId, $allianceId]
         );
     }
 

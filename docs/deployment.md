@@ -162,6 +162,49 @@ docker compose exec app php artisan xgp:instance:list
 - **Neustart des Servers:** Alle Dienste starten von selbst wieder
   (`restart: unless-stopped`).
 
+## Lasttest vor dem Start
+
+Wie viele Spieler trägt der Server? Das misst du auf dem Zielserver selbst,
+bevor Tester kommen. Der Test läuft in einem eigenen Universum, nie in einem
+mit echten Spielern:
+
+```bash
+cd deploy
+docker compose exec app php artisan xgp:instance:create loadtest --name="Lasttest"
+docker compose exec app php artisan xgp:loadtest:seed --universe=loadtest --players=2000 --password='ein-langes-passwort'
+docker compose exec app php artisan xgp:loadtest:run https://play.example.com --universe=loadtest --password='ein-langes-passwort' --players=40 --requests=5000 --concurrency=40
+docker compose exec app php artisan xgp:loadtest:clear --universe=loadtest
+docker compose exec app php artisan xgp:instance:update loadtest --status=closed
+```
+
+- **`seed`** legt Spieler `load1@loadtest.invalid` … an, so wie die
+  Registrierung es tut. Danach baut es sie aus: Gebäude, Forschung, Schiffe
+  und Verteidigung in drei Stufen, je 20 Nachrichten, Allianzen zu je 50,
+  Freunde und Sonden im Flug. Es verweigert ein Universum, in dem schon
+  echte Spieler sind, und stellt die Anmeldung dort auf „nur mit
+  Einladung“. 2.000 Spieler dauern rund zwei Minuten. Ein zweiter Aufruf
+  mit höherer Zahl legt weitere dazu.
+- **`run`** meldet so viele Spieler an wie `--players` (der Server lässt 20
+  Anmeldungen pro Minute zu, das Werkzeug wartet dann). Danach öffnet es
+  Spielseiten in der Mischung echter Spieler, meist Übersicht und Galaxie.
+  Ausgabe: Seiten pro Sekunde, Antwortcodes, Median, 95 % und 99 % der
+  Zeiten. Daraus folgt eine grobe Spielerzahl: Ein Spieler öffnet etwa alle
+  10 Sekunden eine Seite.
+- **`clear`** löscht die Testspieler wie gelöschte Konten.
+
+So liest du das Ergebnis: Erhöhe `--concurrency` schrittweise (10, 20, 40,
+80). Solange die Seiten pro Sekunde mitsteigen und der Median unter etwa
+300 ms bleibt, hat der Server Luft. Steigen nur noch die Zeiten, ist die
+Grenze erreicht. Nebenher zeigt `docker stats`, ob PHP (`app`) oder die
+Datenbank (`db`) am Anschlag ist: mehr PHP-Prozesse oder Container
+(`PHP_FPM_CHILDREN`, `APP_REPLICAS`) beziehungsweise mehr
+`DB_BUFFER_POOL`. Jede Antwort außer 200 ist ein Fehler. 302 heißt
+abgemeldet, 5xx steht im Log und unter /operator → *Fehler*.
+
+Am besten läuft `run` von einem zweiten Rechner aus (Checkout mit
+`composer install`), sonst zählt seine eigene Last mit. Die Spielzeit
+(`xgp:tick`) läuft währenddessen weiter, wie im echten Betrieb.
+
 ## Häufige Fehler
 
 | Meldung | Ursache und Abhilfe |

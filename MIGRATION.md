@@ -2440,6 +2440,40 @@ Baseline-Einträge.
     beschränkt (`Html::UNSAFE_IN_NAMES`, Umbenennen nur `A-Z0-9_- `). Jetzt
     werden sie auch in diesen Meldungen escaped, wie in allen anderen.
 
+- **Alpha a12 — Lasttest-Werkzeug** (statt eines Skripts in `tools/` als
+  Befehle, damit es ohne weitere Installation im Container läuft;
+  Anleitung in [docs/deployment.md](docs/deployment.md), „Lasttest vor dem
+  Start“)
+  - `xgp:loadtest:seed`: Testspieler über die normale Registrierung, dann in
+    Blöcken zu 500 ausgebaut (`LoadTestWorld`). Nur in einem Universum ohne
+    echte Spieler, das danach nur noch Einladungen annimmt. Der Hash pro
+    Spieler wird mit niedrigen Kosten erzeugt und am Ende durch einen echten
+    ersetzt (1.200 Spieler in unter einer Minute).
+  - `xgp:loadtest:run`: Anmeldung wie im Browser (Token, Universum in der
+    Adresse, wartet die Anmeldesperre ab), dann parallele Seitenaufrufe mit
+    Guzzle. Ausgabe: Seiten pro Sekunde, Antwortcodes, Median, 95 % und
+    99 %.
+  - `xgp:loadtest:clear`: löscht die Testspieler über den `AccountEraser`.
+  - *Dabei gefunden, Konto löschen mit Allianz:* `Users::deleteUser`
+    behandelte jedes Mitglied wie den Gründer, ein Fehler aus dem Original:
+    - Hatte die Allianz keinen Rang „rechte Hand“, wurde sie für alle
+      aufgelöst.
+    - Hatte sie einen, bekam dieser Rang die Allianz, auch wenn nur ein
+      einfaches Mitglied ging.
+    - Auf MariaDB scheiterte das Auflösen zusätzlich an
+      `ally_register_time = ''` im strikten Modus. Die Löschung lief
+      deshalb gar nicht durch: weder „Konto löschen“ noch das Aufräumen
+      inaktiver Konten noch das Löschen durch den Admin.
+
+    Jetzt geht ein Mitglied einfach. Der Gründer übergibt an die rechte
+    Hand, sonst an das älteste Mitglied. Das letzte Mitglied nimmt die
+    Allianz mit, offene Bewerbungen werden frei.
+  - *Tests:* `LoadTestPlayersMysqlTest` (Ausbau, Passwort, Weitermachen,
+    Weigerung bei echten Spielern, nichts bleibt zurück), `LoadRunnerTest`
+    (Anmeldung mit Token, Warten auf die Sperre, falsches Passwort, Zählen
+    der Antworten), `AllianceOnDeleteMysqlTest` (drei der vier Fälle
+    scheitern mit dem alten Code).
+
 
 ## Smoke-Test gegen eine echte Datenbank
 
