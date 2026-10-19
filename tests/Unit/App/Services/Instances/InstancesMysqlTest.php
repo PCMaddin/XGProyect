@@ -158,6 +158,16 @@ class InstancesMysqlTest extends MysqlTestCase
         $this->get('/universes')->assertOk()->assertSeeInOrder(['Universe Two', 'Players: 2', 'Payment: WAX', 'Universe One', 'Players: 1'])->assertDontSee('card');
         app(InstanceContext::class)->runIn($u2, static fn (): int => DB::table('users')->where('name', 'Second')->delete());
 
+        // an alpha: u1 only with an invitation, u2 full at one player; WAX on the test network
+        $u1 = app(InstanceRegistry::class)->find('u1');
+        $this->assertInstanceOf(Instance::class, $u1);
+        app(InstanceContext::class)->runIn($u1, static fn (): bool => app(SettingsService::class)->write('reg_invite_only', 1));
+        app(InstanceContext::class)->runIn($u2, static fn (): bool => app(SettingsService::class)->write('reg_max_players', 1));
+        config(['premium.wax.network' => 'testnet']);
+        Cache::flush();
+        $this->get('/universes')->assertOk()->assertSeeInOrder(['Universe Two', 'full', 'test payments, no real money', 'Universe One', 'invitation only']);
+        config(['premium.wax.network' => 'mainnet']);
+
         $backupName = config('backup.backup.name');
         $this->assertIsString($backupName);
         $choice = $this->post('/universes/u1');

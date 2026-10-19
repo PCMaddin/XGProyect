@@ -61,7 +61,7 @@ class WaxChainTest extends TestCase
     {
         config(['premium.wax.api_url' => 'https://hyperion.example.org/']);
         Http::fake([
-            'hyperion.example.org/v1/chain/get_info' => Http::response(['head_block_num' => 1200, 'last_irreversible_block_num' => 1100]),
+            'hyperion.example.org/v1/chain/get_info' => Http::response(['chain_id' => WaxChain::CHAIN_IDS['mainnet'], 'head_block_num' => 1200, 'last_irreversible_block_num' => 1100]),
             'hyperion.example.org/v2/history/get_actions*' => Http::response(['lib' => 0, 'actions' => [self::action(), self::action(['contract' => 'fake.token'])]]),
         ]);
 

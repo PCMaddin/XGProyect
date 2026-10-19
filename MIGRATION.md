@@ -2299,6 +2299,43 @@ Baseline-Einträge.
     die Tests fehl. Im Browser durchgespielt: Registrierung, Hinweis,
     erneut senden, Link aus der Mail, Hinweis verschwindet.
 
+- **Alpha a07 — Einladungen, Spielerlimit, Testzahlungen**
+  - *Einladungen:* Option `reg_invite_only` je Universum und Tabelle
+    `invitations`:
+    - Code mit Anzahl Nutzungen, Ablauf und Notiz;
+    - unter Admin → Registrierung erzeugen, auflisten (mit Link) und
+      löschen;
+    - der Link `?invite=` füllt das Feld aus;
+    - eine Nutzung ist ein einziges `UPDATE … WHERE used < uses`, nie zwei
+      für die letzte; scheitert die Registrierung danach, zählt sie
+      wieder.
+  - *Spielerlimit:* `reg_max_players` (Bots zählen nicht). Startseite und
+    Lobby sagen „voll“, die Lobby auch „nur mit Einladung“.
+  - *Testzahlungen:* `XGP_PAYMENTS_TEST` lässt nur Stripe-Testschlüssel und
+    das WAX-Testnetz zu (`XGP_WAX_NETWORK=testnet`, eigener
+    History-Server). Shop, Lobby, Admin und Kaufbestätigung sagen dann,
+    dass kein echtes Geld fließt; das gilt auch ohne die Variable, wenn
+    alle Zahlungsarten Testarten sind. Die Regeln stehen in `PaymentMode`.
+    Der Docker-Stack startet mit Testzahlungen.
+  - *Chain-Prüfung (immer aktiv):* Die WAX-Prüfung vergleicht die `chain_id` des
+    History-Servers mit `XGP_WAX_NETWORK`; die IDs habe ich live von
+    Main- und Testnetz-Servern abgeglichen. Bisher hätte ein falsch
+    eingestellter Server Testnetz-Überweisungen als echte Zahlungen
+    gutgeschrieben.
+  - *Nebenbei:* Nach einer abgelehnten Registrierung waren Name und E-Mail
+    leer, die Startseite gab die Eingaben nie zurück. Jetzt bleiben sie.
+  - *Tests:*
+    - `RegistrationGateMysqlTest`: nur gültiger Code, Schreibweise egal,
+      verbraucht, abgelaufen, Link füllt aus, voll mit Bots, Rückgabe nach
+      Fehlschlag, Wettlauf um die letzte Nutzung;
+    - `InvitationsTest` (Admin);
+    - `TestPaymentsTest`: Testmodus, Live-Schlüssel, falsche Chain,
+      Testnetz-Standardwerte;
+    - Lobby-Kennzeichen in `InstancesMysqlTest`, Testhinweis im
+      Shop-Test.
+
+    Im Browser geprüft: Feld, Link, Fehlermeldung am Feld.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

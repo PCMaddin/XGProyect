@@ -229,6 +229,17 @@
                             <input class="validate[required,custom[email],length[0,255]]" type="text" id="email" name="email" value="{{ $userEmail }}">
 						</div>
 					</div>
+                    @if ($invite_only)
+                    <div class="input-wrap">
+                        <label for="invite">{{ __('home/welcome.hm_invite_code') }}</label>
+                        <div class="black-border">
+                            <input class="validate[required]" type="text" id="invite" name="invite" value="{{ $inviteCode }}" maxlength="32" autocomplete="off" autocapitalize="characters">
+                        </div>
+                    </div>
+                    @endif
+                    @if ($registration_full)
+                    <p id="registration-full" style="color:#ff9b91;">{{ __('home/register.re_universe_closed_full') }}</p>
+                    @endif
 					<div class="input-wrap">
                         <div id="securePwd">
 							<p>{{ __('home/welcome.hm_password_level') }}</p>

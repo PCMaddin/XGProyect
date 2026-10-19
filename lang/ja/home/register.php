@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'これで未来への準備は万全です。幸運を祈ります！<br><br>このメッセージは1週間後に削除されます。',
     're_username_not_available' => 'このユーザー名はすでに使用されています',
     're_email_not_available' => 'このメールアドレスはすでに使用されています！',
+    're_universe_closed_full' => 'この宇宙は満員です。ロビーで別の宇宙を選んでください。',
+    're_invite_invalid' => '招待コードが無効、期限切れ、または使用済みです。',
 ];

@@ -76,4 +76,6 @@ return [
     'pr_wax_result_linked' => 'WAX 账户已绑定',
     'pr_wax_result_paid_out' => '奖励已发放',
     'pr_wax_result_unconfirmed' => '未经第二台服务器确认',
+    'pr_test_payments' => '仅测试支付',
+    'pr_test_mode_forced' => 'XGP_PAYMENTS_TEST 已开启：仅提供 Stripe 测试密钥和 WAX 测试网（XGP_WAX_NETWORK=testnet）。',
 ];

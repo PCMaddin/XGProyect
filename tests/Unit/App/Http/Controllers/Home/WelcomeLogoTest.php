@@ -44,7 +44,7 @@ class WelcomeLogoTest extends DatabaseTestCase
     {
         config(['INSTALLED' => 'true', 'SECRETWORD' => 'test-secret']);
 
-        foreach (['lang' => 'en', 'game_name' => 'XG Proyect', 'game_logo' => $logo, 'forum_url' => ''] as $name => $value) {
+        foreach (['lang' => 'en', 'game_name' => 'XG Proyect', 'game_logo' => $logo, 'forum_url' => '', 'reg_invite_only' => '0', 'reg_max_players' => '0'] as $name => $value) {
             Options::insert(['name' => $name, 'value' => $value, 'type' => 'string']);
         }
 

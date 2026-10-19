@@ -42,6 +42,8 @@ class OptionsTableSeeder extends Seeder
             ['name' => 'reg_welcome_message', 'value' => '1', 'type' => 'int'],
             ['name' => 'reg_welcome_email', 'value' => '1', 'type' => 'int'],
             ['name' => 'reg_verify_email', 'value' => '1', 'type' => 'int'],
+            ['name' => 'reg_invite_only', 'value' => '0', 'type' => 'int'],
+            ['name' => 'reg_max_players', 'value' => '0', 'type' => 'int'],
             ['name' => 'stat_points', 'value' => '1000', 'type' => 'int'],
             ['name' => 'stat_update_time', 'value' => '1', 'type' => 'int'],
             ['name' => 'stat_admin_level', 'value' => '0', 'type' => 'int'],

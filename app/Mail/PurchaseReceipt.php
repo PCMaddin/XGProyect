@@ -21,6 +21,9 @@ class PurchaseReceipt extends Mailable
 {
     use Queueable;
 
+    /** a test purchase: no real money moved */
+    public bool $test = false;
+
     public function __construct(
         public int $orderId,
         public int $darkMatter,
@@ -31,12 +34,19 @@ class PurchaseReceipt extends Mailable
     ) {
     }
 
+    public function markAsTest(): static
+    {
+        $this->test = true;
+
+        return $this;
+    }
+
     public function envelope(): Envelope
     {
         $settings = app(SettingsService::class);
 
         return new Envelope(
-            subject: __('emails/receipt.rc_subject', ['game' => $settings->getString('game_name'), 'order' => $this->orderId]),
+            subject: ($this->test ? '[TEST] ' : '') . __('emails/receipt.rc_subject', ['game' => $settings->getString('game_name'), 'order' => $this->orderId]),
             from: new Address($settings->getString('admin_email'), $settings->getString('game_name')),
         );
     }

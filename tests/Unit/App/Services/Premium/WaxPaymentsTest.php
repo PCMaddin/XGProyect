@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Premium;
 
+use App\Services\Premium\WaxChain;
 use App\Models\DarkMatterOrder;
 use App\Services\Instances\SeasonPayouts;
 use App\Services\Premium\WaxException;
@@ -52,7 +53,7 @@ class WaxPaymentsTest extends DatabaseTestCase
         config(['premium.wax.account' => 'xgpshop', 'premium.wax.api_url' => 'https://hyperion.example.org', 'premium.wax.verify_url' => 'https://second.example.org']);
         Http::preventStrayRequests();
         Http::fake([
-            'hyperion.example.org/v1/chain/get_info' => fn () => Http::response(['last_irreversible_block_num' => $this->lastIrreversible]),
+            'hyperion.example.org/v1/chain/get_info' => fn () => Http::response(['chain_id' => WaxChain::CHAIN_IDS['mainnet'], 'last_irreversible_block_num' => $this->lastIrreversible]),
             'hyperion.example.org/v2/history/get_actions*' => fn (Request $request) => Http::response(['actions' => array_slice($this->actions, (is_numeric($request['skip']) ? (int) $request['skip'] : 0), 100)]),
             // the second server: knows the same transactions unless told otherwise
             'second.example.org/v2/history/get_transaction*' => function (Request $request) {

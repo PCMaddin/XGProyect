@@ -134,6 +134,8 @@ Route::prefix('admin')->group(function () {
             Route::post('/rebuildhighscores', [Admin\RebuildHighscoresController::class, 'run'])->name('admin.rebuildhighscores.run');
             Route::get('/registration', [Admin\RegistrationController::class, 'index'])->name('admin.registration');
             Route::post('/registration', [Admin\RegistrationController::class, 'update'])->name('admin.registration.update');
+            Route::post('/registration/invitations', [Admin\RegistrationController::class, 'invite'])->name('admin.registration.invite');
+            Route::delete('/registration/invitations/{invitation}', [Admin\RegistrationController::class, 'revoke'])->whereNumber('invitation')->name('admin.registration.revoke');
             Route::get('/repair', [Admin\RepairController::class, 'index'])->name('admin.repair');
             Route::post('/repair', [Admin\RepairController::class, 'run'])->name('admin.repair.run');
             Route::get('/reset', [Admin\ResetController::class, 'index'])->name('admin.reset');

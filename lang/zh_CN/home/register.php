@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => '现在你已做好迎接未来的一切准备，祝你好运！<br><br>此消息将在一周后删除。',
     're_username_not_available' => '该用户名已被占用',
     're_email_not_available' => '该电子邮箱已被使用！',
+    're_universe_closed_full' => '该宇宙已满。请在大厅选择其他宇宙。',
+    're_invite_invalid' => '邀请码无效、已过期或已用完。',
 ];

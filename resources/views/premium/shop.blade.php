@@ -17,6 +17,13 @@
             @endforeach
         </td>
     </tr>
+    @if ($test_payments)
+    <tr>
+        <th colspan="3" id="test-payments" style="text-align:left;color:#7fd8ff;">
+            {{ __('game/darkmatter.dm_test_payments') }}
+        </th>
+    </tr>
+    @endif
     @if ($two_factor_hint)
     <tr>
         <th colspan="3" id="two-factor-hint" style="text-align:left;color:orange;">

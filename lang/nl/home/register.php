@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'Nu ben je klaar voor de toekomst - veel succes!<br><br>Dit bericht wordt na een week verwijderd.',
     're_username_not_available' => 'Deze gebruikersnaam is niet meer beschikbaar',
     're_email_not_available' => 'Dit e-mailadres is al in gebruik!',
+    're_universe_closed_full' => 'Dit universum is vol. Kies een ander in de lobby.',
+    're_invite_invalid' => 'De uitnodigingscode is ongeldig, verlopen of al gebruikt.',
 ];

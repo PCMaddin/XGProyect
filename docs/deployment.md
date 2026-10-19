@@ -133,6 +133,7 @@ Die CA gilt nur während des Builds und landet nicht im Image.
 | `DB_BUFFER_POOL` | 2G | Cache der Datenbank, etwa so groß wie die Daten |
 | `REDIS_CACHE_MEMORY` | 512mb | Speicher des Caches |
 | `HTTP_PORT`, `HTTPS_PORT` | 80, 443 | Ports des Webservers |
+| `XGP_PAYMENTS_TEST`, `XGP_WAX_NETWORK` | true, testnet | Alpha: nur Testzahlungen (siehe [universes.md](universes.md)) |
 
 Nach einer Änderung `deploy/deploy.sh` erneut ausführen.
 

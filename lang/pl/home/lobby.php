@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Wojsko',
     'lb_rewards' => 'Nagrody sezonu: :amount ciemnej materii dla najlepszej dziesiątki',
     'lb_dm' => 'CM',
+    'lb_full' => 'pełne',
+    'lb_invite_only' => 'tylko z zaproszeniem',
+    'lb_test_payments' => 'płatności testowe, bez prawdziwych pieniędzy',
 ];

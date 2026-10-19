@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Ik verzoek uitdrukkelijk om de donkere materie direct bij te schrijven. Ik weet dat ik daarmee mijn herroepingsrecht verlies.',
     'dm_withdrawal_waiver_required' => 'Bevestig dat de donkere materie direct bijgeschreven moet worden en dat je daarmee je herroepingsrecht verliest.',
     'dm_verify_email_first' => 'Bevestig eerst je e-mailadres; daarna kun je donkere materie kopen.',
+    'dm_test_payments' => 'Testmodus: er wordt geen echt geld overgemaakt. Betaal met de testkaart 4242 4242 4242 4242 (willekeurige toekomstige vervaldatum en beveiligingscode) of met WAX van het testnetwerk.',
 ];

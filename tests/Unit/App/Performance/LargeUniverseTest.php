@@ -135,7 +135,7 @@ class LargeUniverseTest extends DatabaseTestCase
     {
         config(['INSTALLED' => 'true', 'SECRETWORD' => 'test-secret']);
 
-        foreach (['lang' => 'en', 'reg_enable' => '1', 'reg_welcome_message' => '0', 'reg_welcome_email' => '0', 'reg_verify_email' => '0'] as $name => $value) {
+        foreach (['lang' => 'en', 'reg_enable' => '1', 'reg_welcome_message' => '0', 'reg_welcome_email' => '0', 'reg_verify_email' => '0', 'reg_invite_only' => '0', 'reg_max_players' => '0'] as $name => $value) {
             Options::insert(['name' => $name, 'value' => $value, 'type' => 'int']);
         }
 

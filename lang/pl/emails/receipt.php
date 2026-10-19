@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Cena',
     'rc_waiver' => 'W dniu :date wyraźnie zażądałeś natychmiastowego zapisania ciemnej materii i potwierdziłeś, że tym samym tracisz prawo odstąpienia od umowy.',
     'rc_to_game' => 'Do gry',
+    'rc_test' => 'Zakup testowy: nie przesłano prawdziwych pieniędzy.',
 ];

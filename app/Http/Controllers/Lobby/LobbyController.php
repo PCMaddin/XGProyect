@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Lobby;
 
+use App\Services\Account\RegistrationGate;
 use App\Http\Middleware\SelectInstance;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
@@ -91,14 +92,23 @@ class LobbyController extends BaseController
     private function facts(Instance $instance): array
     {
         try {
-            return $this->context->runIn($instance, static fn (): array => [
-                'players' => Cache::remember('lobby_players', 60, static fn (): int => DB::table('users')->where('user_is_bot', false)->count()),
-                'payments' => $instance->mode === Instance::PAY2WIN ? app(DarkMatterShop::class)->methods() : [],
-            ]);
+            return $this->context->runIn($instance, static function () use ($instance): array {
+                $players = Cache::remember('lobby_players', 60, static fn (): int => DB::table('users')->where('user_is_bot', false)->count());
+                $gate = app(RegistrationGate::class);
+                $max = $gate->maxPlayers();
+
+                return [
+                    'players' => $players,
+                    'payments' => $instance->mode === Instance::PAY2WIN ? app(DarkMatterShop::class)->methods() : [],
+                    'test_payments' => $instance->mode === Instance::PAY2WIN && app(DarkMatterShop::class)->paysForTest(),
+                    'invite_only' => $gate->inviteOnly(),
+                    'full' => $max > 0 && $players >= $max,
+                ];
+            });
         } catch (Throwable $e) {
             report($e);
 
-            return ['players' => null, 'payments' => []];
+            return ['players' => null, 'payments' => [], 'test_payments' => false, 'invite_only' => false, 'full' => false];
         }
     }
 }

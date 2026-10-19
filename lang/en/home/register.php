@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'Now you are fully armed for the future - good luck!<br><br>This message will be deleted after one week.',
     're_username_not_available' => 'This username is not available anymore',
     're_email_not_available' => 'The E-mail address is already in use!',
+    're_universe_closed_full' => 'This universe is full. Choose another one in the lobby.',
+    're_invite_invalid' => 'The invitation code is invalid, expired or used up.',
 ];

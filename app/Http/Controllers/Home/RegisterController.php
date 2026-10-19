@@ -6,12 +6,14 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Requests\RegisterRequest;
 use App\Services\Account\EmailVerification;
+use App\Services\Account\RegistrationGate;
 use App\Services\RegistrationService;
 use App\Exceptions\UniverseFull;
 use App\Services\SessionService;
 use App\Services\SettingsService;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use App\Libraries\Functions;
@@ -24,6 +26,7 @@ class RegisterController extends BaseController
         private SessionService $sessionService,
         private SettingsService $settingsService,
         private EmailVerification $verification,
+        private RegistrationGate $gate,
     ) {
     }
 
@@ -56,8 +59,16 @@ class RegisterController extends BaseController
             ], 'register')->onlyInput('username');
         }
 
+        $refusal = $this->gate->admit($request->input('invite'), time());
+
+        if ($refusal !== null) {
+            return back()->withErrors([
+                $refusal === 're_invite_invalid' ? 'invite' : 'username' => __('home/register.' . $refusal),
+            ], 'register')->withInput($request->only('username', 'email', 'invite'));
+        }
+
         try {
-            $newUser = $this->registrationService->register(array_merge($request->validated(), [
+            $newUser = $this->registrationService->register(array_merge(Arr::except($request->validated(), ['invite']), [
                 'name' => $request->validated()['username'],
                 'lastip' => $request->ip(),
                 'ip_at_reg' => $request->ip(),
@@ -65,12 +76,16 @@ class RegisterController extends BaseController
                 'current_page' => $request->getRequestUri(),
             ]));
         } catch (UniverseFull) {
+            $this->gate->release();
+
             return back()->withErrors([
                 'username' => __('home/register.re_universe_full'),
             ], 'register')->onlyInput('username');
         }
 
         if ($newUser === null) {
+            $this->gate->release();
+
             return back()->withErrors([
                 'username' => __('home/register.re_create_fail'),
             ], 'register');

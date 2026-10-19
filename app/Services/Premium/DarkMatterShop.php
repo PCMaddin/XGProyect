@@ -75,6 +75,10 @@ class DarkMatterShop
 
     public function configured(string $method): bool
     {
+        if (!PaymentMode::allows($method)) {
+            return false;
+        }
+
         return match ($method) {
             self::STRIPE => $this->stripeConfigured(),
             self::WAX => $this->waxAccount() !== '',
@@ -82,6 +86,14 @@ class DarkMatterShop
             self::TOKEN => $this->waxAccount() !== '' && TokenSpec::game() !== null,
             default => false,
         };
+    }
+
+    /**
+     * Whether no way to pay here moves real money; the shop says so.
+     */
+    public function paysForTest(): bool
+    {
+        return PaymentMode::onlyTest($this->methods());
     }
 
     /**

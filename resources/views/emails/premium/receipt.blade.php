@@ -2,6 +2,10 @@
 # {{ __('emails/receipt.rc_title') }}
 
 {{ __('emails/receipt.rc_thanks', ['game' => $gameName]) }}
+@if ($test)
+
+**{{ __('emails/receipt.rc_test') }}**
+@endif
 
 <x-mail::table>
 | | |

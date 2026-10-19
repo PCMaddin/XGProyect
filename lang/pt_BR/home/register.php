@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'Agora você está pronto para o futuro - boa sorte!<br><br>Esta mensagem será apagada depois de uma semana.',
     're_username_not_available' => 'Este nome de usuário não está mais disponível',
     're_email_not_available' => 'Este endereço de e-mail já está em uso!',
+    're_universe_closed_full' => 'Este universo está cheio. Escolha outro no saguão.',
+    're_invite_invalid' => 'O código de convite é inválido, expirou ou já foi usado.',
 ];

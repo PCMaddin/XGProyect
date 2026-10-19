@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Prezzo',
     'rc_waiver' => 'Il :date hai chiesto espressamente che la materia oscura venisse accreditata subito e hai confermato di perdere così il diritto di recesso.',
     'rc_to_game' => 'Al gioco',
+    'rc_test' => 'Acquisto di prova: non si è mosso denaro vero.',
 ];

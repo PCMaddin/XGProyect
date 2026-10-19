@@ -79,6 +79,12 @@
                                 @else
                                     <span class="badge badge-warning">{{ __('admin/premium.pr_shop_closed_methods') }}</span>
                                 @endif
+                                @if ($pays_for_test)
+                                    <span class="badge badge-info" id="test-payments">{{ __('admin/premium.pr_test_payments') }}</span>
+                                @endif
+                                @if ($test_mode)
+                                    <br><small class="text-muted">{{ __('admin/premium.pr_test_mode_forced') }}</small>
+                                @endif
                                 <a href="{{ route('admin.premium.orders') }}" class="ml-2">
                                     <i class="fas fa-receipt fa-sm mr-1"></i>{{ __('admin/premium.pr_orders_show') }}
                                 </a>

@@ -19,6 +19,8 @@
         .mode { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; margin-left: 8px; }
         .mode.pay2win { background: #3d2a12; color: #ffbf66; }
         .mode.play2win { background: #12301f; color: #6fe3a0; }
+        .mode.full { background: #3d1c1a; color: #ff9b91; }
+        .mode.invite { background: #1c2a4d; color: #9db7ff; }
         button { background: #4f7cff; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-size: 15px; cursor: pointer; }
         button:hover { background: #3d68e6; }
         .ended { color: #9aa4b8; }
@@ -43,6 +45,11 @@
                 <div>
                     <span class="name">{{ $universe['name'] }}</span>
                     <span class="mode {{ $universe['mode'] }}">{{ __('home/lobby.lb_mode_' . $universe['mode']) }}</span>
+                    @if ($universe['open'] && $universe['full'])
+                        <span class="mode full">{{ __('home/lobby.lb_full') }}</span>
+                    @elseif ($universe['open'] && $universe['invite_only'])
+                        <span class="mode invite">{{ __('home/lobby.lb_invite_only') }}</span>
+                    @endif
                     <div class="meta">
                         {{ __('home/lobby.lb_opened', ['date' => date('d.m.Y', $universe['opened_at'])]) }}
                         @if ($universe['open'] && $universe['ends_at'] !== null)
@@ -60,7 +67,7 @@
                         </div>
                     @endif
                     @if ($universe['payments'] !== [])
-                        <div class="meta payments">{{ __('home/lobby.lb_payments', ['methods' => implode(', ', array_map(static fn (string $method): string => __('home/lobby.lb_payment_' . $method), $universe['payments']))]) }}</div>
+                        <div class="meta payments">{{ __('home/lobby.lb_payments', ['methods' => implode(', ', array_map(static fn (string $method): string => __('home/lobby.lb_payment_' . $method), $universe['payments']))]) }}@if ($universe['test_payments']) · {{ __('home/lobby.lb_test_payments') }}@endif</div>
                     @endif
                 </div>
                 @if ($universe['open'])

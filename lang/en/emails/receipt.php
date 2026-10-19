@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Price',
     'rc_waiver' => 'On :date you expressly requested that the dark matter be credited at once and confirmed that you thereby lose your right of withdrawal.',
     'rc_to_game' => 'To the game',
+    'rc_test' => 'Test purchase: no real money moved.',
 ];

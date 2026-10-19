@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Prijs',
     'rc_waiver' => 'Op :date heb je uitdrukkelijk gevraagd om de donkere materie direct bij te schrijven en bevestigd dat je daarmee je herroepingsrecht verliest.',
     'rc_to_game' => 'Naar het spel',
+    'rc_test' => 'Testaankoop: er is geen echt geld overgemaakt.',
 ];

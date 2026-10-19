@@ -76,4 +76,6 @@ return [
     'pr_wax_result_linked' => 'WAX-Konto verknüpft',
     'pr_wax_result_paid_out' => 'Preis ausgezahlt',
     'pr_wax_result_unconfirmed' => 'vom zweiten Server nicht bestätigt',
+    'pr_test_payments' => 'nur Testzahlungen',
+    'pr_test_mode_forced' => 'XGP_PAYMENTS_TEST ist an: nur Stripe-Testschlüssel und das WAX-Testnetz (XGP_WAX_NETWORK=testnet) werden angeboten.',
 ];

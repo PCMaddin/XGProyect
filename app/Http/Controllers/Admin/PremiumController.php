@@ -10,6 +10,7 @@ use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\DarkMatterShop;
+use App\Services\Premium\PaymentMode;
 use App\Services\Premium\TokenSpec;
 use App\Services\Premium\WaxChain;
 use App\Services\Premium\WaxPayments;
@@ -186,6 +187,8 @@ class PremiumController extends AdminSettingsController
                 'allowed' => in_array($method, $this->shop->allowedMethods(), true),
                 'configured' => $this->shop->configured($method),
             ], DarkMatterShop::METHODS),
+            'test_mode' => PaymentMode::testOnly(),
+            'pays_for_test' => $this->shop->paysForTest(),
             'registration_dark_matter' => $this->settings->getInt('registration_dark_matter'),
             'merchant_price' => $this->settings->getFloat('merchant_price'),
             'merchant_base_min_exchange_rate' => $this->settings->getFloat('merchant_base_min_exchange_rate'),

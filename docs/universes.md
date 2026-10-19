@@ -441,6 +441,49 @@ Mails eines Universums (Passwort vergessen, Willkommen, Rundmails) hängen
 anderen Gerät im richtigen Universum; der Link merkt sich die Wahl wie die
 Lobby.
 
+## Alpha: Einladungen, Spielerlimit, Testzahlungen
+
+**Einladungen.** Unter Admin → Registrierung schaltest du je Universum
+*Nur mit Einladung* ein. Darunter erzeugst du Codes: für wie viele Spieler,
+wie viele Tage gültig, mit einer Notiz (z. B. „Discord“). Jeder Code hat
+einen Link (`…/?invite=CODE&universe=<slug>`), der das Universum wählt und
+den Code ins Formular einträgt. Codes sind zehn Zeichen ohne
+Verwechslungsgefahr (kein 0/O, 1/I/L). Groß-/Kleinschreibung, Leerzeichen
+und Bindestriche spielen beim Eintippen keine Rolle. Eine Nutzung wird in
+einem einzigen Datenbank-Update genommen, zwei Spieler bekommen also nie
+beide die letzte. Scheitert die Registrierung danach, zählt die Nutzung
+wieder.
+
+**Spielerlimit.** *Höchstzahl Spieler* (0: keine Grenze) begrenzt die
+Registrierungen; Bots zählen nicht. Ist das Universum voll, sagt das die
+Startseite, und die Registrierung wird abgelehnt.
+
+Die Lobby zeigt beides an jedem Universum („voll“, „nur mit Einladung“).
+
+**Testzahlungen.** `XGP_PAYMENTS_TEST=true` lässt nur Testzahlungen zu.
+Der Docker-Stack setzt das für die Alpha:
+- Stripe nur mit einem Testschlüssel (`sk_test_…`); mit `sk_live_…` gibt
+  es keine Kartenzahlung.
+- WAX und Token nur im Testnetz (`XGP_WAX_NETWORK=testnet`). Der
+  History-Server ist dann standardmäßig `https://testnet.waxsweden.org`,
+  die zweite Bestätigung ist aus.
+
+Der Shop sagt, dass kein echtes Geld fließt, und nennt die Testkarte 4242
+4242 4242 4242. Die Lobby zeigt „Testzahlungen“, die Kaufbestätigung trägt
+`[TEST]` im Betreff, und Admin → Premium zeigt „nur Testzahlungen“. Das
+gilt auch ohne `XGP_PAYMENTS_TEST`, sobald alle Zahlungsarten Testarten
+sind.
+
+Unabhängig davon prüft die WAX-Anbindung bei jeder Runde die `chain_id`
+des History-Servers. Steht `XGP_WAX_NETWORK` auf `mainnet`, der Server
+gehört aber zum Testnetz (oder umgekehrt), wird nichts gutgeschrieben, und
+der Fehler steht im Log. Eine Test-Überweisung kann so nie als echte
+Zahlung zählen.
+
+Für echtes Geld: `XGP_PAYMENTS_TEST=false`, `XGP_WAX_NETWORK=mainnet`,
+Live-Schlüssel von Stripe. Vorher die Rechtstexte und einen externen
+Sicherheitstest.
+
 ## E-Mail-Bestätigung
 
 Wer sich auf der Startseite registriert, bekommt statt der

@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Preço',
     'rc_waiver' => 'Em :date você solicitou expressamente que a matéria escura fosse creditada imediatamente e confirmou que assim perde o direito de arrependimento.',
     'rc_to_game' => 'Ir para o jogo',
+    'rc_test' => 'Compra de teste: nenhum dinheiro real foi movimentado.',
 ];

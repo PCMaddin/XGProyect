@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Solicito expressamente que a matéria escura seja creditada imediatamente. Sei que assim perco meu direito de arrependimento.',
     'dm_withdrawal_waiver_required' => 'Confirme que a matéria escura deve ser creditada imediatamente e que assim você perde o direito de arrependimento.',
     'dm_verify_email_first' => 'Confirme primeiro seu endereço de e-mail; depois você pode comprar matéria escura.',
+    'dm_test_payments' => 'Modo de teste: nenhum dinheiro real é movimentado. Pague com o cartão de teste 4242 4242 4242 4242 (qualquer validade futura e código de segurança) ou com WAX da rede de testes.',
 ];

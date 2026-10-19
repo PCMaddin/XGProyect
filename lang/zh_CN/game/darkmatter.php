@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => '我明确要求立即发放暗物质。我知悉因此将失去撤销权。',
     'dm_withdrawal_waiver_required' => '请确认立即发放暗物质，并知悉因此将失去撤销权。',
     'dm_verify_email_first' => '请先确认你的电子邮件地址，之后即可购买暗物质。',
+    'dm_test_payments' => '测试模式：不涉及真实资金。请使用测试卡 4242 4242 4242 4242（任意未来有效期和安全码）或测试网的 WAX 支付。',
 ];

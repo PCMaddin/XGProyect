@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Ich verlange ausdrücklich, dass die Dunkle Materie sofort gutgeschrieben wird. Mir ist bekannt, dass ich damit mein Widerrufsrecht verliere.',
     'dm_withdrawal_waiver_required' => 'Bitte bestätige, dass die Dunkle Materie sofort gutgeschrieben werden soll und du damit dein Widerrufsrecht verlierst.',
     'dm_verify_email_first' => 'Bitte bestätige zuerst deine E-Mail-Adresse; danach kannst du Dunkle Materie kaufen.',
+    'dm_test_payments' => 'Testmodus: Es wird kein echtes Geld bewegt. Bezahle mit der Testkarte 4242 4242 4242 4242 (beliebiges künftiges Ablaufdatum und Prüfnummer) oder mit WAX aus dem Testnetz.',
 ];

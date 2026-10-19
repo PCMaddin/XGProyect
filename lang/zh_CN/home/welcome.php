@@ -44,4 +44,5 @@ return [
     'hm_about' => '关于 XGP',
     'hm_media' => '媒体',
     'hm_forum' => '论坛',
+    'hm_invite_code' => '邀请码',
 ];

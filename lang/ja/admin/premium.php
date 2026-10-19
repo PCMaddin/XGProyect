@@ -76,4 +76,6 @@ return [
     'pr_wax_result_linked' => 'WAXアカウント連携',
     'pr_wax_result_paid_out' => '賞品支払い済み',
     'pr_wax_result_unconfirmed' => '2台目のサーバーで未確認',
+    'pr_test_payments' => 'テスト決済のみ',
+    'pr_test_mode_forced' => 'XGP_PAYMENTS_TEST が有効：Stripe のテストキーと WAX テストネット（XGP_WAX_NETWORK=testnet）のみ利用できます。',
 ];

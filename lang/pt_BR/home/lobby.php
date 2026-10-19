@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militar',
     'lb_rewards' => 'Prêmios da temporada: :amount de matéria escura para os dez melhores',
     'lb_dm' => 'ME',
+    'lb_full' => 'cheio',
+    'lb_invite_only' => 'só com convite',
+    'lb_test_payments' => 'pagamentos de teste, sem dinheiro real',
 ];

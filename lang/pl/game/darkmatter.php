@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Wyraźnie żądam natychmiastowego zapisania ciemnej materii. Wiem, że tym samym tracę prawo odstąpienia od umowy.',
     'dm_withdrawal_waiver_required' => 'Potwierdź, że ciemna materia ma zostać zapisana natychmiast i że tym samym tracisz prawo odstąpienia od umowy.',
     'dm_verify_email_first' => 'Najpierw potwierdź adres e-mail; potem możesz kupić ciemną materię.',
+    'dm_test_payments' => 'Tryb testowy: nie są przesyłane prawdziwe pieniądze. Zapłać kartą testową 4242 4242 4242 4242 (dowolna przyszła data ważności i kod) albo WAX z sieci testowej.',
 ];

@@ -17,10 +17,19 @@ declare(strict_types=1);
 | is what the order stores and the shop posts: change the amount or the
 | price as you like, but give a package a new id rather than reusing one.
 |
+| XGP_PAYMENTS_TEST=true (an alpha) allows test payments only: Stripe with a
+| test key (sk_test_…), WAX on the test network (XGP_WAX_NETWORK=testnet).
+| A live key or the main network then closes that way to pay, and the shop
+| says that no real money moves.
+|
 */
+
+$waxTestnet = env('XGP_WAX_NETWORK', 'mainnet') === 'testnet';
 
 return [
     'currency' => strtolower((string) env('STRIPE_CURRENCY', 'eur')),
+
+    'test_mode' => (bool) env('XGP_PAYMENTS_TEST', false),
 
     'packages' => [
         ['id' => 'dm_10k', 'dark_matter' => 10000, 'price' => 199],
@@ -42,11 +51,13 @@ return [
     'wax' => [
         // the shop's WAX account (a-z, 1-5, dots; up to 12); empty: no WAX
         'account' => (string) env('XGP_WAX_ACCOUNT', ''),
+        // mainnet or testnet; the history server must be on that chain
+        'network' => $waxTestnet ? 'testnet' : 'mainnet',
         // a Hyperion history server of the WAX chain
-        'api_url' => rtrim((string) env('XGP_WAX_API', 'https://wax.eosusa.io'), '/'),
+        'api_url' => rtrim((string) env('XGP_WAX_API', $waxTestnet ? 'https://testnet.waxsweden.org' : 'https://wax.eosusa.io'), '/'),
         // a second one of another operator: confirms each transfer before it
         // counts (one server alone could make up payments); empty: off
-        'verify_url' => rtrim((string) env('XGP_WAX_VERIFY_API', 'https://api.waxsweden.org'), '/'),
+        'verify_url' => rtrim((string) env('XGP_WAX_VERIFY_API', $waxTestnet ? '' : 'https://api.waxsweden.org'), '/'),
         // the price of 1 WAX in the shop's currency: {"wax":{"eur":0.0043}}
         'rate_url' => (string) env('XGP_WAX_RATE_URL', 'https://api.coingecko.com/api/v3/simple/price?ids=wax&vs_currencies=:currency'),
         // the rate is read again after this many seconds

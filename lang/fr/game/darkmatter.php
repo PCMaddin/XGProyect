@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Je demande expressément que la matière noire soit créditée immédiatement. Je reconnais perdre ainsi mon droit de rétractation.',
     'dm_withdrawal_waiver_required' => 'Merci de confirmer que la matière noire doit être créditée immédiatement et que tu perds ainsi ton droit de rétractation.',
     'dm_verify_email_first' => 'Confirme d\'abord ton adresse e-mail ; ensuite tu pourras acheter de la matière noire.',
+    'dm_test_payments' => 'Mode test : aucun argent réel n\'est débité. Paie avec la carte de test 4242 4242 4242 4242 (date d\'expiration future et cryptogramme au choix) ou avec des WAX du réseau de test.',
 ];

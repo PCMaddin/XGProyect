@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Chiedo espressamente che la materia oscura venga accreditata subito. So che in questo modo perdo il diritto di recesso.',
     'dm_withdrawal_waiver_required' => 'Conferma che la materia oscura va accreditata subito e che così perdi il diritto di recesso.',
     'dm_verify_email_first' => 'Conferma prima il tuo indirizzo e-mail; poi potrai comprare materia oscura.',
+    'dm_test_payments' => 'Modalità di prova: non si muove denaro vero. Paga con la carta di prova 4242 4242 4242 4242 (qualsiasi scadenza futura e codice di sicurezza) o con WAX della rete di prova.',
 ];

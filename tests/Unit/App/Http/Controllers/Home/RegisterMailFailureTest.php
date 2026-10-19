@@ -30,7 +30,7 @@ class RegisterMailFailureTest extends DatabaseTestCase
             'mail.mailers.smtp.timeout' => 1,
         ]);
 
-        foreach (['lang' => 'en', 'reg_enable' => '1', 'reg_welcome_message' => '0', 'reg_welcome_email' => '1', 'reg_verify_email' => '0'] as $name => $value) {
+        foreach (['lang' => 'en', 'reg_enable' => '1', 'reg_welcome_message' => '0', 'reg_welcome_email' => '1', 'reg_verify_email' => '0', 'reg_invite_only' => '0', 'reg_max_players' => '0'] as $name => $value) {
             Options::insert(['name' => $name, 'value' => $value, 'type' => 'int']);
         }
 

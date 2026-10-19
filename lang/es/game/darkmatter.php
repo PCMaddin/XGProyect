@@ -47,4 +47,5 @@ return [
     'dm_withdrawal_waiver' => 'Solicito expresamente que la materia oscura se abone de inmediato. Sé que con ello pierdo mi derecho de desistimiento.',
     'dm_withdrawal_waiver_required' => 'Confirma que la materia oscura se abone de inmediato y que con ello pierdes tu derecho de desistimiento.',
     'dm_verify_email_first' => 'Confirma primero tu dirección de correo; después podrás comprar materia oscura.',
+    'dm_test_payments' => 'Modo de prueba: no se mueve dinero real. Paga con la tarjeta de prueba 4242 4242 4242 4242 (cualquier fecha futura y código de seguridad) o con WAX de la red de pruebas.',
 ];

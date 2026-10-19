@@ -30,6 +30,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|min:8',
             'email' => 'required|max:255|unique:users,email',
             'agb' => 'required',
+            'invite' => 'nullable|string|max:32',
         ];
     }
 

@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militare',
     'lb_rewards' => 'Premi della stagione: :amount di materia oscura per i primi dieci',
     'lb_dm' => 'MO',
+    'lb_full' => 'pieno',
+    'lb_invite_only' => 'solo su invito',
+    'lb_test_payments' => 'pagamenti di prova, niente soldi veri',
 ];

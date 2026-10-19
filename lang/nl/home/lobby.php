@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militair',
     'lb_rewards' => 'Seizoensprijzen: :amount donkere materie voor de top tien',
     'lb_dm' => 'DM',
+    'lb_full' => 'vol',
+    'lb_invite_only' => 'alleen met uitnodiging',
+    'lb_test_payments' => 'testbetalingen, geen echt geld',
 ];

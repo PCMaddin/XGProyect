@@ -88,6 +88,7 @@ class DarkMatterShopController extends BaseController
             // money is at stake: point to two-factor sign-in
             'two_factor_hint' => $user instanceof User && !$user->hasTwoFactor(),
             'methods' => $methods,
+            'test_payments' => $this->shop->paysForTest(),
             'packages' => $this->packages(in_array(DarkMatterShop::WAX, $methods, true), $token),
         ]);
     }

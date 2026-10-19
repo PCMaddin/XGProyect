@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Premium;
 
+use App\Services\Premium\WaxChain;
 use App\Console\Commands\Premium\CheckWaxPayments;
 use App\Models\DarkMatterOrder;
 use App\Services\Instances\Instance;
@@ -51,7 +52,7 @@ class WaxPaymentsUniverseMysqlTest extends MysqlTestCase
         Artisan::call('migrate', ['--path' => 'database/migrations/central', '--force' => true]);
         Http::preventStrayRequests();
         Http::fake([
-            'hyperion.example.org/v1/chain/get_info' => Http::response(['last_irreversible_block_num' => 5000]),
+            'hyperion.example.org/v1/chain/get_info' => Http::response(['chain_id' => WaxChain::CHAIN_IDS['mainnet'], 'last_irreversible_block_num' => 5000]),
             'hyperion.example.org/v2/history/get_actions*' => fn () => Http::response(['actions' => $this->actions]),
             // the second server knows the same transactions
             'second.example.org/v2/history/get_transaction*' => fn (\Illuminate\Http\Client\Request $request) => Http::response([

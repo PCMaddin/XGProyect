@@ -24,6 +24,12 @@ class WaxChain
 
     public const PAGE_SIZE = 100;
 
+    /** the chains by premium.wax.network */
+    public const CHAIN_IDS = [
+        'mainnet' => '1064487b3cd1a897ce03ae5b6a865651747e2e152090f99c1d19d44e01aea5a4',
+        'testnet' => 'f16b1833c747c43682f4386fca9cbb327929334a762755ebec17f6f23c9b8a12',
+    ];
+
     /**
      * @throws WaxException
      */
@@ -31,6 +37,14 @@ class WaxChain
     {
         $info = $this->get('/v1/chain/get_info', []);
         $block = $info['last_irreversible_block_num'] ?? null;
+        $network = config('premium.wax.network');
+        $expected = self::CHAIN_IDS[is_string($network) ? $network : 'mainnet'] ?? self::CHAIN_IDS['mainnet'];
+
+        // a test network transfer is worth nothing on the main network, and
+        // the other way round
+        if (($info['chain_id'] ?? null) !== $expected) {
+            throw new WaxException('The WAX history server is not on the ' . (is_string($network) ? $network : 'mainnet') . ' chain (XGP_WAX_NETWORK)');
+        }
 
         if (!is_int($block) || $block <= 0) {
             throw new WaxException('The chain did not name its last irreversible block');

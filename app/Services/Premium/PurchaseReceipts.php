@@ -36,14 +36,20 @@ class PurchaseReceipts
                 return;
             }
 
-            Mail::to($email)->locale($this->settings->getString('lang'))->send(new PurchaseReceipt(
+            $receipt = new PurchaseReceipt(
                 orderId: $order->id,
                 darkMatter: $order->dark_matter,
                 price: $this->shop->formatPrice($order->amount, $order->currency),
                 method: $order->provider,
                 paidAt: $order->paid_at ?? time(),
                 waivedAt: $order->withdrawal_waived_at ?? $order->created_at,
-            ));
+            );
+
+            if ($this->shop->paysForTest()) {
+                $receipt->markAsTest();
+            }
+
+            Mail::to($email)->locale($this->settings->getString('lang'))->send($receipt);
         } catch (Throwable $e) {
             report($e);
         }

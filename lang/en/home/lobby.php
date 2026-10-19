@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Military',
     'lb_rewards' => 'Season prizes: :amount dark matter for the top ten',
     'lb_dm' => 'DM',
+    'lb_full' => 'full',
+    'lb_invite_only' => 'invitation only',
+    'lb_test_payments' => 'test payments, no real money',
 ];

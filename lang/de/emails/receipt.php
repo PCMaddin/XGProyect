@@ -16,4 +16,5 @@ return [
     'rc_price' => 'Preis',
     'rc_waiver' => 'Du hast am :date ausdrücklich verlangt, dass die Dunkle Materie sofort gutgeschrieben wird, und bestätigt, dass du damit dein Widerrufsrecht verlierst.',
     'rc_to_game' => 'Zum Spiel',
+    'rc_test' => 'Testkauf: Es wurde kein echtes Geld bewegt.',
 ];

@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'Teraz jesteś w pełni przygotowany na przyszłość – powodzenia!<br><br>Ta wiadomość zostanie usunięta po tygodniu.',
     're_username_not_available' => 'Ta nazwa użytkownika jest już zajęta',
     're_email_not_available' => 'Ten adres e-mail jest już używany!',
+    're_universe_closed_full' => 'To uniwersum jest pełne. Wybierz inne w lobby.',
+    're_invite_invalid' => 'Kod zaproszenia jest nieprawidłowy, wygasł lub został już wykorzystany.',
 ];

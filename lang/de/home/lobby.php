@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militär',
     'lb_rewards' => 'Saisonpreise: :amount Dunkle Materie für die Top 10',
     'lb_dm' => 'DM',
+    'lb_full' => 'voll',
+    'lb_invite_only' => 'nur mit Einladung',
+    'lb_test_payments' => 'Testzahlungen, kein echtes Geld',
 ];

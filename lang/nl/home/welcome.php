@@ -44,4 +44,5 @@ return [
     'hm_about' => 'Over XGP',
     'hm_media' => 'Media',
     'hm_forum' => 'Forum',
+    'hm_invite_code' => 'Uitnodigingscode',
 ];

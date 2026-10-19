@@ -28,4 +28,7 @@ return [
     'lb_category_military' => '军事',
     'lb_rewards' => '赛季奖励：前十名共 :amount 暗物质',
     'lb_dm' => '暗物质',
+    'lb_full' => '已满',
+    'lb_invite_only' => '仅限邀请',
+    'lb_test_payments' => '测试支付，不涉及真实资金',
 ];

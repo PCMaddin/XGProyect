@@ -64,6 +64,8 @@ class DarkMatterShopMysqlTest extends MysqlTestCase
 
         $this->asPlayer()->get('/game.php?page=darkmatter')->assertOk()
             ->assertSee('Buy dark matter')
+            // a Stripe test key: no real money moves, and the page says so
+            ->assertSee('id="test-payments"', false)->assertSee('4242 4242 4242 4242')
             ->assertSee('120.000')
             ->assertSee('16.99 €')
             ->assertSee('name="package" value="dm_120k"', false)

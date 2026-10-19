@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militar',
     'lb_rewards' => 'Premios de temporada: :amount de materia oscura para los diez mejores',
     'lb_dm' => 'MO',
+    'lb_full' => 'lleno',
+    'lb_invite_only' => 'solo con invitación',
+    'lb_test_payments' => 'pagos de prueba, sin dinero real',
 ];

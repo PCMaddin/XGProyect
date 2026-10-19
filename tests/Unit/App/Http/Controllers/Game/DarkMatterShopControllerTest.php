@@ -134,6 +134,13 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $protected = $this->page(Request::create('/game.php?page=darkmatter'), twoFactor: true);
         $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $protected);
         $this->assertFalse($protected->getData()['two_factor_hint']);
+
+        // a Stripe test key: the page says that no real money moves
+        $this->assertTrue($view->getData()['test_payments']);
+        config(['premium.stripe.secret' => 'sk_live_key']);
+        $live = $this->page(Request::create('/game.php?page=darkmatter'));
+        $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $live);
+        $this->assertFalse($live->getData()['test_payments']);
     }
 
     public function testAClosedShopRefusesEveryRequest(): void

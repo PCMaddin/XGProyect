@@ -28,4 +28,7 @@ return [
     'lb_category_military' => 'Militaire',
     'lb_rewards' => 'Prix de la saison : :amount de matière noire pour le top 10',
     'lb_dm' => 'MN',
+    'lb_full' => 'complet',
+    'lb_invite_only' => 'sur invitation',
+    'lb_test_payments' => 'paiements de test, pas d\'argent réel',
 ];

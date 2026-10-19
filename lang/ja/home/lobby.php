@@ -28,4 +28,7 @@ return [
     'lb_category_military' => '軍事',
     'lb_rewards' => 'シーズン賞品：上位10名にダークマター :amount',
     'lb_dm' => 'DM',
+    'lb_full' => '満員',
+    'lb_invite_only' => '招待制',
+    'lb_test_payments' => 'テスト決済（実際のお金は動きません）',
 ];

@@ -13,4 +13,6 @@ return [
     're_welcome_message_closing' => 'Jetzt bist du bestens für die Zukunft gerüstet - viel Glück!<br><br>Diese Nachricht wird nach einer Woche gelöscht.',
     're_username_not_available' => 'Dieser Benutzername ist nicht mehr verfügbar',
     're_email_not_available' => 'Diese E-Mail-Adresse wird bereits verwendet!',
+    're_universe_closed_full' => 'Dieses Universum ist voll. Wähle in der Lobby ein anderes.',
+    're_invite_invalid' => 'Der Einladungscode ist ungültig, abgelaufen oder schon verbraucht.',
 ];
