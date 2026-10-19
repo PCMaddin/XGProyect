@@ -1,7 +1,7 @@
 @extends('master.game')
 
 @section('content')
-<table width="519">
+<table width="519" class="overview">
     <tr>
         <td class="c" colspan="4">
             <a href="#" title="{{ __('game/overview.ov_abandon_rename') }}" onclick="f('game.php?page=planetlayer', '{{ __('game/overview.ov_abandon_rename') }} {{ \App\Support\Html::scriptText($planetName) }}')">
@@ -34,7 +34,7 @@
         <td colspan="4" class="c">{{ __('game/overview.ov_events') }}</td>
     </tr>
     {!! $fleetList !!}
-    <tr>
+    <tr class="overview-planets">
         <th role="cell">{!! $moonImg !!}<br>{{ $moon }}</th>
         <th role="cell" colspan="2"><img src="{{ asset('assets/upload/skins/xgproyect/planets/' . $planetImage . '.jpg') }}" height="200" width="200" alt=""/><br>{!! $building !!}</th>
         <th role="cell" class="s">

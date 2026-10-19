@@ -140,14 +140,20 @@ await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')])
 for (const path of OPERATOR) await visit(path);
 
 // the main pages on a phone: nothing wider than the screen, the menu opens
-const PHONE = ['overview', 'supplies', 'facilities', 'research', 'shipyard', 'defenses', 'fleet1', `galaxy&galaxy=${seed.galaxy}&system=${seed.system}`, 'messages', 'movement', 'alliance', 'buddies'];
+const PHONE = [
+  'overview', 'supplies', 'facilities', 'research', 'shipyard', 'defenses', 'fleet1', `galaxy&galaxy=${seed.galaxy}&system=${seed.system}`, 'empire',
+  'messages', 'movement', 'alliance', 'alliance&mode=memberslist', 'buddies', 'resourcesettings', 'highscore', 'notices', 'search', 'preferences',
+];
+// these keep their columns and scroll sideways inside the page on purpose
+const SCROLLS = ['galaxy', 'empire'];
 const PHONE_SIZE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 let phone = await (await browser.newContext(PHONE_SIZE)).newPage();
 async function fits(path) {
   current = 'phone ' + path;
   await phone.goto(base + path, { waitUntil: 'load' });
-  const width = await phone.evaluate(() => document.documentElement.scrollWidth);
-  if (width > 391) {
+  const width = await phone.evaluate(() => Math.max(document.documentElement.scrollWidth, (document.getElementById('content') || document.body).scrollWidth));
+  const scrolls = SCROLLS.some((name) => path.includes('page=' + name));
+  if (width > 391 && !scrolls) {
     issues.push([current, 'phone', `${width} px wide`]);
     await phone.screenshot({ path: join(shots, `${label}-phone-${path.replace(/[^a-z0-9]+/gi, '_').slice(0, 60)}.png`), fullPage: true }).catch(() => {});
   }

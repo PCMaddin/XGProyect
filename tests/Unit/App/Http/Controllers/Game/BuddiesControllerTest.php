@@ -55,4 +55,16 @@ class BuddiesControllerTest extends TestCase
 
         $this->assertSame('&lt;script&gt;alert(1)&lt;/script&gt; &amp; hi', $text);
     }
+
+    /**
+     * Regression: the requests printed that escaped text with {{ }} again,
+     * so "I'm" showed as "I&#039;m". The view prints it as it comes.
+     */
+    public function testTheViewDoesNotEscapeTheTextASecondTime(): void
+    {
+        $view = (string) file_get_contents(resource_path('views/buddies/view.blade.php'));
+
+        $this->assertSame(3, substr_count($view, "{!! \$item['text'] !!}"));
+        $this->assertStringNotContainsString("{{ \$item['text'] }}", $view);
+    }
 }

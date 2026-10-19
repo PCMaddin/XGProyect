@@ -2499,8 +2499,23 @@ Baseline-Einträge.
     eine davon breiter ist als der Bildschirm oder das Menü nicht aufgeht.
     Gegenprobe ohne Viewport-Tag: 13 Treffer.
   - *Offen:* Nicht geprüft auf echten Geräten (iOS Safari, Android
-    Chrome). Breite Listen (Imperium, Bewegungen, Highscore) scrollen in
-    sich, statt sich umzubauen.
+    Chrome).
+  - *Nachtrag, breite Listen:*
+    - Bewegungen, Allianzmitglieder und Freunde werden auf dem Handy zu
+      Karten: eine Zeile pro Wert, davor der Spaltenname (`data-label`).
+      Die Sortierlinks der Mitgliederliste bleiben als Leiste.
+    - Imperium behält seine Planeten-Spalten und scrollt seitwärts. Die
+      Zeilennamen bleiben dabei links stehen.
+    - Übersicht: Mond und Planet oben, die Kolonien darunter. Mit
+      Kolonien war sie vorher 518 px breit.
+    - Ressourceneinstellungen sind enger gesetzt. Lange Wörter in
+      Nachrichten brechen um.
+    - *Dabei gefunden:* Der Text von Freundschaftsanfragen wurde doppelt
+      escaped, „I'm“ erschien als „I&#039;m“.
+    - *Test:* Der Phone-Teil des Crawls prüft jetzt 19 Seiten. Er misst
+      auch die Breite des Inhalts, nicht nur die der Seite. Bisher fiel eine
+      zu breite Tabelle nicht auf, weil sie in sich scrollte. Galaxie und
+      Imperium dürfen absichtlich scrollen.
 
 
 ## Smoke-Test gegen eine echte Datenbank

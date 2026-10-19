@@ -3,7 +3,7 @@
 @section('content')
 <script type="text/javascript" src="{{ asset('assets/js/flotten-min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/ocnt-min.js') }}"></script>
-<table width="519" border="0" cellpadding="0" cellspacing="1">
+<table width="519" border="0" cellpadding="0" cellspacing="1" class="cards">
     <tr height="20">
         <td colspan="9" class="c">
             <table border="0" width="100%">
@@ -15,7 +15,7 @@
             </table>
         </td>
     </tr>
-    <tr height="20">
+    <tr height="20" class="cards-head">
         <th>{{ __('game/fleet.fl_number') }}</th>
         <th>{{ __('game/fleet.fl_mission') }}</th>
         <th>{{ __('game/fleet.fl_ammount') }}</th>
@@ -28,30 +28,30 @@
     </tr>
     @foreach ($list_of_movements as $item)
     <tr height="20px">
-        <th scope="row">{{ $item['num'] }}</th>
-        <th role="cell">
+        <th scope="row" data-label="{{ __('game/fleet.fl_number') }}">{{ $item['num'] }}</th>
+        <th role="cell" data-label="{{ __('game/fleet.fl_mission') }}">
             <a>{{ $item['fleet_mission'] }}</a>
             <a title="{{ $item['tooltip'] }}">{{ $item['title'] }}</a>
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_ammount') }}">
             <a title="{{ $item['fleet'] }}">{{ $item['fleet_amount'] }}</a>
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_beginning') }}">
             {!! $item['fleet_start'] !!}
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_departure') }}">
             {{ $item['fleet_start_time'] }}
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_destiny') }}">
             {!! $item['fleet_end'] !!}
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_objective') }}">
             {{ $item['fleet_end_time'] }}
         </th>
-        <th role="cell">
+        <th role="cell" data-label="{{ __('game/fleet.fl_arrival') }}">
             {{ $item['fleet_arrival'] }}
         </th>
-        <th role="cell" style="vertical-align: middle">
+        <th role="cell" style="vertical-align: middle" data-label="{{ __('game/fleet.fl_order') }}">
             {!! $item['fleet_actions'] !!}
         </th>
     </tr>

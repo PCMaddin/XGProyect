@@ -160,6 +160,12 @@
         max-width: 100%;
     }
 
+    /* a long word (a link, a code) breaks where it would stick out */
+    #content th,
+    #content td {
+        overflow-wrap: break-word;
+    }
+
     /* buildings, research, shipyard, defence: picture and text side by
        side, what to do (button, amount) below over the full width */
     #content table.element-list,
@@ -174,7 +180,7 @@
         margin-bottom: 4px;
     }
 
-    #content table.element-list tr > * {
+    #content table.element-list tr > :not(script) {
         display: block;
         width: auto !important;
         height: auto !important;
@@ -203,7 +209,7 @@
     }
 
     /* two tables side by side (fleet: mission and resources) go below each other */
-    #content tr.side-by-side > * {
+    #content tr.side-by-side > :not(script) {
         display: block;
         width: auto !important;
     }
@@ -226,6 +232,177 @@
     #content table.galaxy th img {
         width: 24px;
         height: 24px;
+    }
+
+    /* overview: each row a line of its own; moon and planet, the colonies
+       below them */
+    #content table.overview,
+    #content table.overview > tbody {
+        display: block;
+        width: 100%;
+    }
+
+    #content table.overview > tbody > tr {
+        display: flex;
+    }
+
+    #content table.overview > tbody > tr > :not(script) {
+        display: block;
+        flex: 1;
+        width: auto !important;
+    }
+
+    #content table.overview > tbody > tr > [scope="row"] {
+        flex: 0 0 35%;
+        box-sizing: border-box;
+    }
+
+    #content table.overview > tbody > tr.overview-planets {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+    }
+
+    #content tr.overview-planets > :not(script) {
+        display: block;
+        width: auto !important;
+    }
+
+    #content tr.overview-planets > .s {
+        grid-column: 1 / -1;
+    }
+
+    #content tr.overview-planets img[width="200"] {
+        width: 150px;
+        height: 150px;
+    }
+
+    #content tr.overview-planets table.s,
+    #content tr.overview-planets table.s > tbody,
+    #content tr.overview-planets table.s tr {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    #content tr.overview-planets table.s th {
+        display: block;
+        width: 33%;
+        box-sizing: border-box;
+    }
+
+    /* messages: a long link or code breaks anywhere */
+    #content table.messages th,
+    #content table.messages td {
+        overflow-wrap: anywhere;
+    }
+
+    /* many columns of numbers (resource settings): tighter */
+    #content table.compact {
+        width: 100%;
+    }
+
+    #content table.compact th,
+    #content table.compact td {
+        padding: 2px 1px;
+        font-size: 11px;
+    }
+
+    #content table.compact select {
+        width: 58px;
+        font-size: 12px;
+    }
+
+    /* lists (movements, members, buddies): each row a card, each value with
+       the name of its column in front (data-label) */
+    #content table.cards,
+    #content table.cards > tbody {
+        display: block;
+        width: 100%;
+    }
+
+    #content table.cards tr {
+        display: block;
+        height: auto !important;
+        margin-bottom: 6px;
+    }
+
+    #content table.cards tr.cards-head {
+        display: none;
+    }
+
+    /* the header row with the sort links: a bar of links */
+    #content table.cards tr.cards-sort {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    #content table.cards tr.cards-sort > th {
+        flex: 1 1 auto;
+    }
+
+    #content table.cards tr.cards-sort > th:not(:has(a)) {
+        display: none;
+    }
+
+    #content table.cards tr.cards-sort a {
+        display: block;
+        padding: 8px 4px;
+    }
+
+    #content table.cards tr > :not(script) {
+        display: block;
+        width: auto !important;
+        box-sizing: border-box;
+    }
+
+    #content table.cards tr > [data-label] {
+        position: relative;
+        min-height: 22px;
+        padding: 3px 6px 3px 42%;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+
+    #content table.cards tr > [data-label]::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: calc(42% - 12px);
+        font-weight: bold;
+        color: #9fb0d0;
+        overflow-wrap: break-word;
+    }
+
+    /* the empire: planets side by side, scrolls sideways, the names of the
+       rows stay on the left */
+    #content table.empire {
+        width: auto;
+        max-width: none;
+    }
+
+    #content table.empire th {
+        min-width: 88px;
+    }
+
+    #content table.empire tr > th:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        min-width: 110px;
+        max-width: 110px;
+        text-align: left;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.5);
+    }
+
+    #content table.empire tr > td.c[colspan] {
+        position: sticky;
+        left: 0;
+    }
+
+    #content table.empire img {
+        width: 56px;
+        height: 56px;
     }
 
     /* fingers, not a mouse */

@@ -1,7 +1,7 @@
 @extends('master.game')
 
 @section('content')
-<table border="0" cellpadding="0" cellspacing="1" width="750px">
+<table border="0" cellpadding="0" cellspacing="1" width="750px" class="empire">
     <tbody>
         <tr height="20px" valign="left">
             <td class="c" colspan="{{ $planetsAmount }}">{{ __('game/empire.em_imperium_title') }}</td>

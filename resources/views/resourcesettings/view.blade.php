@@ -3,7 +3,7 @@
 @section('content')
 <form action="" method="post" role="form">
     @csrf
-    <table width="569">
+    <table width="569" class="compact">
         <tbody>
             <tr>
                 <td class="c" colspan="5">{{ $Production_of_resources_in_the_planet }}</td>
