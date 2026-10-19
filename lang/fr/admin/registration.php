@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => 'Envoyer un e-mail de bienvenue',
     'ur_all_ok_message' => 'Modifications enregistrées avec succès !',
     'ur_save_parameters' => 'Enregistrer les modifications',
+    'ur_verify_email' => 'Faire confirmer l\'adresse e-mail',
+    'ur_verify_email_help' => 'Les nouveaux joueurs reçoivent un lien par e-mail. Jusqu\'à la confirmation, la boutique leur est fermée ; les comptes non confirmés sont supprimés après 7 jours. Remplace l\'e-mail de bienvenue.',
 ];

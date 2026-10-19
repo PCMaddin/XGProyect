@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => 'Willkommens-E-Mail senden',
     'ur_all_ok_message' => 'Änderungen erfolgreich gespeichert!',
     'ur_save_parameters' => 'Änderungen speichern',
+    'ur_verify_email' => 'E-Mail-Adresse bestätigen lassen',
+    'ur_verify_email_help' => 'Neue Spieler bekommen einen Link per E-Mail. Bis zur Bestätigung ist der Shop gesperrt; unbestätigte Konten werden nach 7 Tagen gelöscht. Ersetzt die Willkommens-E-Mail.',
 ];

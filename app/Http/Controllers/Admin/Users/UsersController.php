@@ -213,6 +213,7 @@ class UsersController extends BaseController
             $updateData['password'] = $validated['password'];
         }
 
+        self::confirmNewEmail($user, $validated['email']);
         $user->fill($updateData);
         $user->authlevel = $newLevel;
         $user->save();
@@ -364,5 +365,15 @@ class UsersController extends BaseController
     private function dateFormatExtended(): string
     {
         return $this->settings->getString('date_format_extended') ?: 'Y-m-d H:i:s';
+    }
+
+    /**
+     * An address the admin set counts as confirmed.
+     */
+    private static function confirmNewEmail(User $user, string $email): void
+    {
+        if ($email !== $user->email) {
+            $user->email_verified_at = now();
+        }
     }
 }

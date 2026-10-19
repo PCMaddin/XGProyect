@@ -24,6 +24,7 @@ class RegistrationRequest extends FormRequest
             'reg_enable' => ['nullable'],
             'reg_welcome_message' => ['nullable'],
             'reg_welcome_email' => ['nullable'],
+            'reg_verify_email' => ['nullable'],
         ];
     }
 

@@ -86,6 +86,8 @@ class RecoverController extends BaseController
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password): void {
                 $user->password = $password; // hashed by the model's mutator
+                // the link came by mail: the address is the player's
+                $user->email_verified_at ??= now();
                 $user->save();
             }
         );

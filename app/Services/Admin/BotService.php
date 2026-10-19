@@ -106,6 +106,7 @@ class BotService
                     'register_time' => $time,
                     'onlinetime' => $time,
                 ]);
+                $bot->forceFill(['email_verified_at' => now()])->save();
 
                 $bot->preferences()->create();
                 $bot->premium()->create([

@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => 'Enviar e-mail de boas-vindas',
     'ur_all_ok_message' => 'Alterações salvas com sucesso!',
     'ur_save_parameters' => 'Salvar alterações',
+    'ur_verify_email' => 'Exigir confirmação do e-mail',
+    'ur_verify_email_help' => 'Novos jogadores recebem um link por e-mail. Até confirmarem, a loja fica fechada; contas não confirmadas são excluídas após 7 dias. Substitui o e-mail de boas-vindas.',
 ];

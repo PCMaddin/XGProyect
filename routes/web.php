@@ -6,6 +6,7 @@ use App\Http\Controllers\Account\PrivacyController;
 use App\Http\Controllers\Account\RecoverController;
 use App\Http\Controllers\Account\SecurityController;
 use App\Http\Controllers\Account\TwoFactorChallengeController;
+use App\Http\Controllers\Account\VerifyEmailController;
 use App\Http\Controllers\Account\WaxController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Ajax as AdminAjax;
@@ -42,6 +43,8 @@ Route::prefix('account')->group(function () {
     Route::post('/recover', [RecoverController::class, 'recover'])->middleware('throttle:recover');
     Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
     Route::post('/reset', [RecoverController::class, 'reset'])->middleware('throttle:recover')->name('account.reset.update');
+    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+        ->whereNumber('id')->middleware(['signed', 'throttle:20,1'])->name('account.verify');
     Route::get('/two-factor', [TwoFactorChallengeController::class, 'show'])->name('account.two-factor');
     Route::post('/two-factor', [TwoFactorChallengeController::class, 'verify'])->name('account.two-factor.verify');
 
@@ -51,6 +54,7 @@ Route::prefix('account')->group(function () {
         Route::post('/security/confirm', [SecurityController::class, 'confirm'])->name('account.security.confirm');
         Route::post('/security/disable', [SecurityController::class, 'disable'])->name('account.security.disable');
         Route::post('/security/codes', [SecurityController::class, 'codes'])->name('account.security.codes');
+        Route::post('/verify/resend', [VerifyEmailController::class, 'resend'])->middleware('throttle:3,60')->name('account.verify.resend');
         Route::get('/privacy', [PrivacyController::class, 'show'])->name('account.privacy');
         Route::post('/privacy/export', [PrivacyController::class, 'download'])->name('account.privacy.export');
         Route::post('/privacy/delete', [PrivacyController::class, 'destroy'])->name('account.privacy.delete');

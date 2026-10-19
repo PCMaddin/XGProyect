@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Libraries;
 
 use App\Services\Account\AccountEraser;
+use App\Services\Account\EmailVerification;
 use App\Support\OfficerBonuses;
 use App\Services\Game\RelocationService;
 use App\Services\Game\WreckFieldService;
@@ -145,6 +146,8 @@ class UpdatesLibrary
         foreach ($chooseToDelete as $delete) {
             $eraser->erase((int) $delete['id']);
         }
+
+        app(EmailVerification::class)->pruneUnconfirmed(time());
 
         // Misc deletions
         DB::statement($this->prepareSql('DELETE FROM ' . MESSAGES . " WHERE `message_time` < '" . $delBefore . "';"));

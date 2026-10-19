@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => 'Configura ora',
     'dm_withdrawal_waiver' => 'Chiedo espressamente che la materia oscura venga accreditata subito. So che in questo modo perdo il diritto di recesso.',
     'dm_withdrawal_waiver_required' => 'Conferma che la materia oscura va accreditata subito e che così perdi il diritto di recesso.',
+    'dm_verify_email_first' => 'Conferma prima il tuo indirizzo e-mail; poi potrai comprare materia oscura.',
 ];

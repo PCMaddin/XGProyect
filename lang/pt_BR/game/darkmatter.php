@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => 'Configurar agora',
     'dm_withdrawal_waiver' => 'Solicito expressamente que a matéria escura seja creditada imediatamente. Sei que assim perco meu direito de arrependimento.',
     'dm_withdrawal_waiver_required' => 'Confirme que a matéria escura deve ser creditada imediatamente e que assim você perde o direito de arrependimento.',
+    'dm_verify_email_first' => 'Confirme primeiro seu endereço de e-mail; depois você pode comprar matéria escura.',
 ];

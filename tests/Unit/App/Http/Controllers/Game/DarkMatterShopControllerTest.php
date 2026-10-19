@@ -427,6 +427,8 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
     {
         $user = new User();
         $user->id = self::PLAYER;
+        // a buyer with a confirmed address
+        $user->email_verified_at = now();
 
         if ($twoFactor) {
             $user->forceFill(['two_factor_secret' => 'JBSWY3DPEHPK3PXP', 'two_factor_confirmed_at' => time()]);

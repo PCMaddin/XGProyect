@@ -8,6 +8,7 @@ use App\Http\Controllers\Game\DarkMatterShopController;
 use App\Libraries\Users;
 use App\Models\DarkMatterOrder;
 use App\Models\User;
+use App\Services\Account\EmailVerification;
 use App\Services\Premium\StripeSignature;
 use App\Services\RegistrationService;
 use App\Services\SettingsService;
@@ -47,6 +48,8 @@ class DarkMatterShopMysqlTest extends MysqlTestCase
 
         $player = app(RegistrationService::class)->register(['name' => 'Buyer', 'email' => 'buyer@example.com', 'password' => 'secret-password']);
         $this->assertInstanceOf(User::class, $player);
+        // buyers have confirmed their address
+        app(EmailVerification::class)->confirm($player);
         $this->player = $player;
 
         Http::preventStrayRequests();

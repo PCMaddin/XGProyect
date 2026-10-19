@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => '立即设置',
     'dm_withdrawal_waiver' => '我明确要求立即发放暗物质。我知悉因此将失去撤销权。',
     'dm_withdrawal_waiver_required' => '请确认立即发放暗物质，并知悉因此将失去撤销权。',
+    'dm_verify_email_first' => '请先确认你的电子邮件地址，之后即可购买暗物质。',
 ];

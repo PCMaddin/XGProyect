@@ -41,6 +41,7 @@ class AdminAccount
                 'onlinetime' => time(),
             ]);
             $user->authlevel = UserRanksEnumerator::ADMIN;
+            $user->email_verified_at = now();
             $user->save();
 
             $user->preferences()->create();

@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => 'Welkomstmail sturen',
     'ur_all_ok_message' => 'Wijzigingen opgeslagen!',
     'ur_save_parameters' => 'Wijzigingen opslaan',
+    'ur_verify_email' => 'E-mailadres laten bevestigen',
+    'ur_verify_email_help' => 'Nieuwe spelers krijgen een link per e-mail. Tot de bevestiging is de winkel gesloten; onbevestigde accounts worden na 7 dagen verwijderd. Vervangt de welkomstmail.',
 ];

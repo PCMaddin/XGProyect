@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Home;
 
 use App\Http\Requests\RegisterRequest;
-use App\Mail\Welcome;
+use App\Services\Account\EmailVerification;
 use App\Services\RegistrationService;
 use App\Exceptions\UniverseFull;
 use App\Services\SessionService;
@@ -14,8 +14,6 @@ use Illuminate\Auth\AuthManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Throwable;
 use App\Libraries\Functions;
 
 class RegisterController extends BaseController
@@ -24,7 +22,8 @@ class RegisterController extends BaseController
         private AuthManager $auth,
         private RegistrationService $registrationService,
         private SessionService $sessionService,
-        private SettingsService $settingsService
+        private SettingsService $settingsService,
+        private EmailVerification $verification,
     ) {
     }
 
@@ -90,15 +89,8 @@ class RegisterController extends BaseController
             );
         }
 
-        // send welcome email; the account exists already, so a mail server
-        // that cannot be reached must not end the registration with an error
-        if ($this->settingsService->getString('reg_welcome_email')) {
-            try {
-                Mail::to($newUser->email)->send(new Welcome($newUser->name));
-            } catch (Throwable $e) {
-                report($e);
-            }
-        }
+        // the link that confirms the address, or the welcome email
+        $this->verification->greet($newUser, $this->settingsService->getBool('reg_welcome_email'));
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();

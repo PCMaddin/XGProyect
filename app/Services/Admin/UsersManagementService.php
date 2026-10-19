@@ -48,6 +48,8 @@ class UsersManagementService
                     'password' => $pass,
                 ]);
                 $user->authlevel = $auth;
+                // the admin vouches for the address
+                $user->email_verified_at = now();
                 $user->save();
 
                 $lastUserId = $user->id;

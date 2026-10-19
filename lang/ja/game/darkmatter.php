@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => '今すぐ設定',
     'dm_withdrawal_waiver' => 'ダークマターを直ちに付与することを明示的に求めます。これにより撤回権を失うことを了承します。',
     'dm_withdrawal_waiver_required' => 'ダークマターを直ちに付与し、それにより撤回権を失うことを確認してください。',
+    'dm_verify_email_first' => '先にメールアドレスを確認してください。確認後にダークマターを購入できます。',
 ];

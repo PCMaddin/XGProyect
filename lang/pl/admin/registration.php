@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => 'Wysyłaj e-mail powitalny',
     'ur_all_ok_message' => 'Zmiany zostały zapisane!',
     'ur_save_parameters' => 'Zapisz zmiany',
+    'ur_verify_email' => 'Wymagaj potwierdzenia adresu e-mail',
+    'ur_verify_email_help' => 'Nowi gracze dostają link e-mailem. Do potwierdzenia sklep jest zamknięty; niepotwierdzone konta są usuwane po 7 dniach. Zastępuje e-mail powitalny.',
 ];

@@ -25,6 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string             $current_page
  * @property string             $fleet_shortcuts
  * @property int                $authlevel
+ * @property \Illuminate\Support\Carbon|null $email_verified_at when the player confirmed the address
  * @property int                $home_planet_id
  * @property int                $galaxy
  * @property int                $system

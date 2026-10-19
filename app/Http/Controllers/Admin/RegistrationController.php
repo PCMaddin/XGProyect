@@ -15,6 +15,7 @@ class RegistrationController extends AdminSettingsController
         'reg_enable',
         'reg_welcome_message',
         'reg_welcome_email',
+        'reg_verify_email',
     ];
 
     public function __construct(SettingsService $settings)

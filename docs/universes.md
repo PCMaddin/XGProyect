@@ -441,6 +441,35 @@ Mails eines Universums (Passwort vergessen, Willkommen, Rundmails) hängen
 anderen Gerät im richtigen Universum; der Link merkt sich die Wahl wie die
 Lobby.
 
+## E-Mail-Bestätigung
+
+Wer sich auf der Startseite registriert, bekommt statt der
+Willkommens-E-Mail einen Link, der die Adresse bestätigt. Der Link ist
+signiert und gilt 7 Tage, nur für diese Adresse. Er funktioniert ohne
+Anmeldung und auf jedem Gerät.
+
+Bis zur Bestätigung:
+- erinnert jede Spielseite daran, mit dem Löschdatum und einem Knopf zum
+  erneuten Senden (höchstens 3 pro Stunde);
+- verkauft der Shop nichts.
+
+Ein Konto, das nach 7 Tagen nicht bestätigt ist, wird beim nächsten
+Aufräumen gelöscht. Das erschwert Wegwerf- und Zweitkonten.
+
+Als bestätigt gelten:
+- Admins, Bots und Spieler, die der Admin anlegt;
+- eine Adresse, die der Admin ändert;
+- ein Konto nach einem abgeschlossenen Passwort-Zurücksetzen (der Link kam
+  ja per E-Mail);
+- alle Konten, die es beim Update schon gab.
+
+Abschalten unter Admin → Registrierung → *E-Mail-Adresse bestätigen
+lassen* (Option `reg_verify_email`). Ohne die Option gilt jede neue Adresse
+sofort als bestätigt, und es geht wieder die Willkommens-E-Mail raus.
+Schaltest du sie später ein, wird deshalb niemand gelöscht. Voraussetzung
+ist ein funktionierender Mailversand: Ohne ihn verlieren neue Spieler
+nach einer Woche ihr Konto.
+
 ## Datenschutz
 
 **Für Spieler.** In den Einstellungen unter *Deine Daten*
@@ -480,6 +509,7 @@ Rohstoffübergaben bis zur regulären Löschung.
 | Nachrichten und Kampfberichte | 7 Tagen |
 | Konto, das 7 Tage im Löschmodus war | sofort danach |
 | Konto ohne Anmeldung (außer Admins und Bots) | 1 Monat |
+| Konto mit unbestätigter E-Mail-Adresse | 7 Tagen nach der Registrierung |
 | Sitzung | 120 Minuten ohne Aktivität (`SESSION_LIFETIME`) |
 | Log-Dateien | 14 Tagen mit `LOG_CHANNEL=daily` (Standard der Beispiel-`.env`); mit `stack` wächst eine einzige Datei ohne Ende |
 | letzte IP und Browser am Konto | mit dem Konto |

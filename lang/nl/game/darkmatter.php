@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => 'Nu instellen',
     'dm_withdrawal_waiver' => 'Ik verzoek uitdrukkelijk om de donkere materie direct bij te schrijven. Ik weet dat ik daarmee mijn herroepingsrecht verlies.',
     'dm_withdrawal_waiver_required' => 'Bevestig dat de donkere materie direct bijgeschreven moet worden en dat je daarmee je herroepingsrecht verliest.',
+    'dm_verify_email_first' => 'Bevestig eerst je e-mailadres; daarna kun je donkere materie kopen.',
 ];

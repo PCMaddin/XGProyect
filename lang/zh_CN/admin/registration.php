@@ -12,4 +12,6 @@ return [
     'ur_welcome_email' => '发送欢迎邮件',
     'ur_all_ok_message' => '更改已保存！',
     'ur_save_parameters' => '保存更改',
+    'ur_verify_email' => '要求确认电子邮件地址',
+    'ur_verify_email_help' => '新玩家会收到一封带链接的邮件。确认前商店关闭；未确认的账户 7 天后删除。替代欢迎邮件。',
 ];

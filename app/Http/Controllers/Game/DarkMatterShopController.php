@@ -11,10 +11,10 @@ use App\Models\User;
 use App\Services\FormatService;
 use App\Services\TimingService;
 use App\Services\Instances\InstanceContext;
-use App\Services\Legal\LegalPages;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\DarkMatterPackage;
 use App\Services\Premium\DarkMatterShop;
+use App\Services\Premium\PurchaseTerms;
 use App\Services\Premium\StripeCheckout;
 use App\Services\Premium\StripeException;
 use App\Services\Premium\TokenRates;
@@ -57,7 +57,7 @@ class DarkMatterShopController extends BaseController
         private InstanceContext $context,
         private FormatService $format,
         private TimingService $timing,
-        private LegalPages $legal,
+        private PurchaseTerms $terms,
     ) {
     }
 
@@ -82,16 +82,13 @@ class DarkMatterShopController extends BaseController
 
         $methods = $this->shop->methods();
         $token = in_array(DarkMatterShop::TOKEN, $methods, true) ? TokenSpec::game() : null;
-        $written = $this->legal->written();
 
-        return view('premium.shop', [
+        return view('premium.shop', $this->terms->links() + [
             'token_symbol' => $token === null ? '' : $token->symbol,
             // money is at stake: point to two-factor sign-in
             'two_factor_hint' => $user instanceof User && !$user->hasTwoFactor(),
             'methods' => $methods,
             'packages' => $this->packages(in_array(DarkMatterShop::WAX, $methods, true), $token),
-            'withdrawal_link' => in_array(LegalPages::WITHDRAWAL, $written, true),
-            'terms_link' => in_array(LegalPages::TERMS, $written, true),
         ]);
     }
 
@@ -174,10 +171,12 @@ class DarkMatterShopController extends BaseController
             $this->message('dm_unknown_method', DarkMatterShop::PAGE);
         }
 
-        // digital content: delivered at once only on the player's express
-        // request, giving up the right of withdrawal (kept with the order)
-        if (!$request->boolean('withdrawal_waiver')) {
-            $this->message('dm_withdrawal_waiver_required', DarkMatterShop::PAGE);
+        // a confirmed address, and the dark matter at once only on the
+        // player's express request (giving up the right of withdrawal)
+        $refusal = $this->terms->refusal($request);
+
+        if ($refusal !== null) {
+            $this->message($refusal, DarkMatterShop::PAGE);
         }
 
         if ($this->orders->pendingSince($userId, $now - self::OPEN_ORDERS_WINDOW) >= self::OPEN_ORDERS_LIMIT) {

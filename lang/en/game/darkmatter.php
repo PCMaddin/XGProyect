@@ -46,4 +46,5 @@ return [
     'dm_two_factor_link' => 'Set it up now',
     'dm_withdrawal_waiver' => 'I expressly request that the dark matter is credited at once. I understand that I thereby lose my right of withdrawal.',
     'dm_withdrawal_waiver_required' => 'Please confirm that the dark matter is to be credited at once and that you thereby lose your right of withdrawal.',
+    'dm_verify_email_first' => 'Please confirm your email address first; then you can buy dark matter.',
 ];

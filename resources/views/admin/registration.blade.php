@@ -58,6 +58,16 @@
                                 </div>
                             </td>
                         </tr>
+                        <tr>
+                            <td>{{ __('admin/registration.ur_verify_email') }}<br><small class="text-muted">{{ __('admin/registration.ur_verify_email_help') }}</small></td>
+                            <td>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="reg_verify_email"
+                                        name="reg_verify_email" {{ $reg_verify_email ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="reg_verify_email"></label>
+                                </div>
+                            </td>
+                        </tr>
                     </x-admin.settings-table>
                 </x-admin.card-collapsible>
             </div>

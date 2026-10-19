@@ -2260,6 +2260,45 @@ Baseline-Einträge.
 
     Gegenprobe: Ohne das Löschen der Anmeldungen schlägt der Test fehl.
 
+- **Alpha a06 — E-Mail-Adresse bei der Registrierung bestätigen**
+  - *Ablauf:* Nach der Registrierung geht ein signierter Link raus (7 Tage,
+    nur für diese Adresse, ohne Anmeldung nutzbar, Universum in der
+    Signatur), statt der Willkommens-E-Mail. Bis zur Bestätigung erinnert
+    jede Spielseite daran, mit Löschdatum und „erneut senden“ (3 pro
+    Stunde). Der Shop verkauft nichts. Nach 7 Tagen löscht das Aufräumen
+    das Konto über `AccountEraser`.
+  - *Als bestätigt gelten:*
+    - Admins, Bots, vom Admin angelegte Spieler und vom Admin geänderte
+      Adressen;
+    - ein abgeschlossenes Passwort-Zurücksetzen;
+    - alle bestehenden Konten (Migration setzt `email_verified_at`).
+
+    Ohne die Option `reg_verify_email` (Admin → Registrierung) gilt jede
+    neue Adresse sofort als bestätigt. Ein späteres Einschalten löscht
+    deshalb niemanden. `email_verified_at` ist nicht mass-assignable:
+    Keine Anfrage bestätigt sich selbst.
+  - *Gefunden:* Ein frisch von `RegistrationService` zurückgegebenes Modell
+    hat noch keinen `authlevel` (die Datenbank setzt ihn). Ein Vergleich
+    `authlevel === 0` hätte solche Spieler als „Admin“ durchgelassen. Jetzt
+    gilt „kein Rang über 0“; die Tests nehmen genau dieses Modell.
+  - *Aufgeräumt:* Die Regeln vor einem Kauf (bestätigte Adresse,
+    Widerrufsverzicht) stehen in `PurchaseTerms`, die erste Mail an neue
+    Spieler in `EmailVerification::greet()`.
+  - *Tests:* `EmailVerificationMysqlTest` deckt ab:
+    - Registrierung, Mail, Hinweis, Link ohne Anmeldung, Hinweis weg;
+    - gefälschter Link, fremde ID, geänderte Adresse;
+    - Shop gesperrt;
+    - erneut senden;
+    - Löschen nur unbestätigter Spieler (nicht frisch, bestätigt, Admin,
+      Bot);
+    - ohne Option bestätigt, späteres Einschalten löscht niemanden;
+    - Passwort-Reset bestätigt;
+    - Link und Mail.
+
+    Gegenproben: Ohne Adressprüfung im Link und ohne Bot-Ausnahme schlagen
+    die Tests fehl. Im Browser durchgespielt: Registrierung, Hinweis,
+    erneut senden, Link aus der Mail, Hinweis verschwindet.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 
