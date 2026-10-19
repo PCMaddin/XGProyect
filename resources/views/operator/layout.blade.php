@@ -48,6 +48,7 @@
     <strong>{{ __('operator/operator.op_title') }}</strong>
     @auth('operator')
         <a href="{{ route('operator.universes') }}">{{ __('operator/operator.op_universes') }}</a>
+        <a href="{{ route('operator.errors') }}">{{ __('operator/operator.op_errors') }}</a>
         <a href="{{ route('operator.reports') }}">{{ __('operator/operator.op_reports') }}</a>
         <a href="{{ route('operator.legal') }}">{{ __('operator/operator.op_legal') }}</a>
         <a href="{{ route('operator.account') }}">{{ __('operator/operator.op_account') }}</a>

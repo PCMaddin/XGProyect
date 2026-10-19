@@ -19,4 +19,10 @@ return [
 
     // a password and then a code: this many tries
     'attempts' => 5,
+
+    // the errors of every universe (/operator → Errors): a mail to these
+    // addresses (comma separated; empty: none) once a kind of error
+    // happened this often since the last mail, at most hourly per kind
+    'errors_mail' => (string) env('XGP_ERRORS_MAIL', ''),
+    'errors_threshold' => (int) env('XGP_ERRORS_THRESHOLD', 5),
 ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use App\Services\Operators\ErrorMonitor;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -49,8 +50,9 @@ class Handler extends ExceptionHandler
             return response($e->getView());
         });
 
-        $this->reportable(function (Throwable $e) {
-            //
+        // every universe's errors, grouped, for the operators (/operator)
+        $this->reportable(function (Throwable $e): void {
+            app(ErrorMonitor::class)->record($e, time());
         });
     }
 }

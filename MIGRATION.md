@@ -2354,6 +2354,36 @@ Baseline-Einträge.
     `EmailVerificationMysqlTest`, Export und Anonymisierung in
     `PrivacyMysqlTest`. Im Browser durchgespielt.
 
+- **Alpha a09 — Fehlerüberwachung unter /operator**
+  - *Sammeln:* Der Exception-Handler gibt jede gemeldete Ausnahme an
+    `ErrorMonitor`. Der fasst sie je Art in der Basisdatenbank zusammen
+    (`error_groups`): gleiche Klasse, Datei, Zeile und Meldung ohne Zahlen
+    und Werte in Anführungszeichen. Gespeichert werden Anzahl, erstes und
+    letztes Auftreten, Universum, Seite (Methode und Pfad, nie die Query)
+    oder Befehl und der Stacktrace des ersten Mals. Das Aufzeichnen wirft
+    nie, auch ohne Tabelle oder bei ausgefallener Datenbank.
+  - *Betreiber:* /operator → *Fehler* zeigt die Gruppen nach Status (offen,
+    stumm, erledigt), mit Details und Stacktrace. Eine erledigte Gruppe
+    öffnet sich wieder, wenn der Fehler wiederkommt.
+  - *Mail:* `xgp:errors:notify` läuft alle 5 Minuten. Er schickt eine
+    Zusammenfassung an `XGP_ERRORS_MAIL`, sobald eine offene Gruppe seit
+    der letzten Mail die Schwelle erreicht (`XGP_ERRORS_THRESHOLD`,
+    Standard 5), je Gruppe höchstens stündlich. Erledigte Gruppen, die 90
+    Tage nicht wiederkamen, löscht er.
+  - *Nebenbei (eigener Fehler):* Mit `LOG_CHANNEL=daily` aus a05 fand die
+    Fehlerliste im Admin die Logdatei nicht mehr und blieb leer. Behoben
+    in 086dacf, mit Test.
+  - *Tests:* `ErrorMonitorTest` deckt ab:
+    - eine Gruppe je Art;
+    - Wiederöffnen;
+    - nie werfen;
+    - Fehler auf einer echten Seite mit Pfad ohne Query;
+    - Betreiber sieht und erledigt;
+    - Mail erst ab Schwelle, stündlich, Link auf APP_URL;
+    - Löschen nach 90 Tagen.
+
+    Hochzählen und Wiederöffnen zusätzlich direkt auf MariaDB geprüft.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

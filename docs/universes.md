@@ -188,6 +188,23 @@ Spielseite, bei der Registrierung (AGB, Datenschutz) und im Shop (AGB,
 Widerruf). Ein leer gespeicherter Text entfernt die Seite in dieser
 Sprache. Jede Änderung steht im Protokoll.
 
+**Fehler.** Jede Ausnahme, die die App meldet, landet zusätzlich zum Log
+in der Basisdatenbank (`xgp_error_groups`). Das gilt für alle Universen,
+Seitenaufrufe und Befehle. Gleichartige Fehler sind eine Gruppe: gleiche
+Klasse, gleiche Stelle, gleiche Meldung ohne Zahlen und Werte in
+Anführungszeichen. Unter *Fehler* siehst du je Gruppe Anzahl, erstes und
+letztes Auftreten, Universum, Seite oder Befehl und den Stacktrace des
+ersten Mals. Von der Seite wird nur der Pfad gespeichert, nie die Query.
+- *Erledigt*: Die Gruppe öffnet sich wieder, sobald der Fehler
+  wiederkommt.
+- *Stumm*: Sie zählt weiter, schickt aber keine Mails.
+
+`xgp:errors:notify` (alle 5 Minuten im Scheduler) mailt an
+`XGP_ERRORS_MAIL` (mehrere durch Komma), sobald eine offene Gruppe seit
+der letzten Mail `XGP_ERRORS_THRESHOLD`-mal (Standard 5) auftrat, je
+Gruppe höchstens stündlich. Erledigte Gruppen, die 90 Tage nicht
+wiederkamen, löscht der Befehl.
+
 **Meldungen.** Unter jeder Spielseite steht *Fehler melden*. Der Spieler
 beschreibt das Problem. Seite (nur ein Pfad dieser Seite), Universum,
 Spieler und Browser kommen mit. Höchstens 5 Meldungen pro Stunde. Die
