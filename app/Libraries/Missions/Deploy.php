@@ -78,9 +78,9 @@ class Deploy extends Missions
             __('game/missions.mi_fleet_command'),
             __('game/deploy.dep_report_title'),
             StringsHelper::parseReplacements(__('game/deploy.dep_report_deployed'), [
-                $fleet['planet_start_name'],
+                e(self::str($fleet['planet_start_name'])),
                 app(FleetEventsService::class)->startLink($fleet, ''),
-                $fleet['planet_end_name'],
+                e(self::str($fleet['planet_end_name'])),
                 app(FleetEventsService::class)->targetLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),
@@ -98,18 +98,18 @@ class Deploy extends Missions
     {
         $text = __('game/deploy.dep_report_back');
         $replacements = [
-            $fleet['planet_end_name'],
+            e(self::str($fleet['planet_end_name'])),
             app(FleetEventsService::class)->targetLink($fleet, ''),
-            $fleet['planet_start_name'],
+            e(self::str($fleet['planet_start_name'])),
             app(FleetEventsService::class)->startLink($fleet, ''),
         ];
 
         if (app(FleetsService::class)->carriesResources($fleet)) {
             $text = __('game/deploy.dep_report_deployed');
             $replacements = [
-                $fleet['planet_end_name'],
+                e(self::str($fleet['planet_end_name'])),
                 app(FleetEventsService::class)->targetLink($fleet, ''),
-                $fleet['planet_start_name'],
+                e(self::str($fleet['planet_start_name'])),
                 app(FleetEventsService::class)->startLink($fleet, ''),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_metal'])),
                 $this->formatService->prettyNumber(self::int($fleet['fleet_resource_crystal'])),

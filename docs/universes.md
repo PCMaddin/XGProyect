@@ -735,7 +735,11 @@ Geldwege so:
   Code, auch in Tooltips. Admins können keine Namen mit `< > " ' & \`
   mehr setzen. Der Sprach-Editor im Admin ist geschlossen, sobald
   Universen registriert sind: Die Dateien in `lang/` gelten für alle
-  Universen, du bearbeitest sie auf dem Server.
+  Universen, du bearbeitest sie auf dem Server. Bei jedem Push öffnet die
+  CI alle Seiten in einem echten Browser. Jeder Name und Text ist dort
+  Code, der Test scheitert, sobald einer läuft (`tests/Browser/run.sh`,
+  lokal gegen eine leere Datenbank: `DB_DATABASE=… DB_USERNAME=…
+  DB_PASSWORD=… tests/Browser/run.sh`).
 - **Spielstand:** Gleichzeitige Seitenaufrufe (mehrere Tabs, Skripte)
   verdoppeln nichts mehr. Jede Flotte wird einmal verarbeitet, zwei Flotten
   auf dasselbe Ziel nacheinander. Rohstoffe und Schiffe werden nur

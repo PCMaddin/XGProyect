@@ -2414,6 +2414,32 @@ Baseline-Einträge.
     mit Prüfsummen, kein Überschreiben, falsches Passwort aufgezeichnet).
     Die CI installiert dafür restic und den MariaDB-Client.
 
+- **Alpha a11 — Seiten-Crawl und XSS-Test in der CI**
+  - *Ablauf:* Der CI-Job *Browser* führt `tests/Browser/run.sh` aus, lokal
+    genauso aufrufbar.
+    1. Das Skript installiert das Spiel in eine leere MariaDB.
+    2. `seed.php` legt einen zweiten Spieler, eine Allianz, eine Nachricht,
+       eine Freundschaftsanfrage, eine Notiz, einen Changelog-Eintrag, einen
+       Verdachtsfall, ein Impressum, eine Einladung, eine Fehlermeldung, eine
+       Fehlergruppe und einen Betreiber mit bekanntem 2FA-Schlüssel an. Jeder
+       Name und Text ist Code, der beim Ausführen `window.__xss` setzt.
+    3. `crawl.mjs` öffnet in Chromium (Playwright) 102 Seiten: Spiel, Konto,
+       Rechtsseiten, Admin und /operator, in Englisch und Deutsch. Dabei
+       löst er jedes `onmouseover` aus (Tooltips bauen ihr HTML erst dann).
+  - *Er schlägt fehl bei:*
+    - JavaScript-Fehlern, HTTP-Fehlern und fehlgeschlagenen Anfragen;
+    - rohen Sprachschlüsseln, übrigen Platzhaltern und Exceptions im Text;
+    - jedem Marker, der lief oder als Element in der Seite steht.
+
+    Screenshots der betroffenen Seiten und die Logs werden als Artifact
+    hochgeladen.
+  - *Dabei gefunden:* Planetennamen standen in einigen Flottenmeldungen
+    ungeschützt im HTML: Stationieren, Rückkehr eines Transports ohne
+    Ladung, Bauschleife ohne Rohstoffe. Ebenso der Spielername in der
+    AKS-Einladung. Namen sind beim Speichern schon auf sichere Zeichen
+    beschränkt (`Html::UNSAFE_IN_NAMES`, Umbenennen nur `A-Z0-9_- `). Jetzt
+    werden sie auch in diesen Meldungen escaped, wie in allen anderen.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

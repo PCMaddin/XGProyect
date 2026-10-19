@@ -170,9 +170,9 @@ class Transport extends Missions
     {
         $text = __('game/missions.mi_fleet_back_without_resources');
         $replacements = [
-            $tradingPlanets['target_name'],
+            e(self::str($tradingPlanets['target_name'])),
             app(FleetEventsService::class)->targetLink($fleet, ''),
-            $tradingPlanets['start_name'],
+            e(self::str($tradingPlanets['start_name'])),
             app(FleetEventsService::class)->startLink($fleet, ''),
         ];
 

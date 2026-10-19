@@ -36,3 +36,5 @@ config/xgp-db-config.php
 
 # deploy.sh: the releases it built (image tags to clean up)
 /deploy/.releases
+/tests/Browser/.seed.json
+/tests/Browser/shots/

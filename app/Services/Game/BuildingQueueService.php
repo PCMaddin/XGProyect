@@ -487,7 +487,7 @@ class BuildingQueueService
         $buildingName = $this->registry->get($item->building_id)->getName();
         $elementName = __('game/constructions.' . $buildingName);
         $galaxyUrl = 'game.php?page=galaxy&mode=3&galaxy=' . $planet->planet_galaxy . '&system=' . $planet->planet_system;
-        $coordsText = $planet->planet_name . ' ' . $this->formatService->prettyCoords(
+        $coordsText = e($planet->planet_name) . ' ' . $this->formatService->prettyCoords(
             $planet->planet_galaxy,
             $planet->planet_system,
             $planet->planet_planet

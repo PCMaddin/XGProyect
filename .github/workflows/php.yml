@@ -85,6 +85,62 @@ jobs:
           MYSQL_TEST_PASSWORD: root
           REDIS_TEST_HOST: 127.0.0.1
 
+  # every page in a real browser, with code in every name and text
+  # (tests/Browser): no JavaScript or HTTP error, no leftover key, no XSS
+  browser:
+    name: Browser (pages and XSS)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: xgp_browser
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, pdo_mysql, opcache, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Crawl every page
+        run: tests/Browser/run.sh
+        env:
+          DB_DATABASE: xgp_browser
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+      - name: Screenshots of the pages with a problem
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-screenshots
+          path: |
+            tests/Browser/shots/
+            storage/logs/
+          if-no-files-found: ignore
+
   # the production stack of deploy/, as on a server: build, install, HTTPS,
   # then a second rollout under load that must not drop a request
   deploy:
