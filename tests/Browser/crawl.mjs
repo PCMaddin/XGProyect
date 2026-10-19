@@ -142,7 +142,7 @@ for (const path of OPERATOR) await visit(path);
 // the main pages on a phone: nothing wider than the screen, the menu opens
 const PHONE = [
   'overview', 'supplies', 'facilities', 'research', 'shipyard', 'defenses', 'fleet1', `galaxy&galaxy=${seed.galaxy}&system=${seed.system}`, 'empire',
-  'messages', 'movement', 'alliance', 'alliance&mode=memberslist', 'buddies', 'resourcesettings', 'highscore', 'notices', 'search', 'preferences',
+  'messages', `chat&playerId=${seed.marker}`, 'movement', 'alliance', 'alliance&mode=memberslist', 'buddies', 'resourcesettings', 'highscore', 'notices', 'search', 'preferences',
 ];
 // these keep their columns and scroll sideways inside the page on purpose
 const SCROLLS = ['galaxy', 'empire'];

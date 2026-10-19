@@ -313,6 +313,18 @@
         font-size: 12px;
     }
 
+    /* longer words in other languages (Neu berechnen, Deuterium) */
+    #content table.compact th,
+    #content table.compact td {
+        overflow-wrap: anywhere;
+    }
+
+    #content table.compact input[type="submit"] {
+        white-space: normal;
+        font-size: 11px;
+        padding: 2px;
+    }
+
     /* lists (movements, members, buddies): each row a card, each value with
        the name of its column in front (data-label) */
     #content table.cards,
@@ -417,6 +429,24 @@
     #content input:not([type]) {
         min-height: 32px;
         box-sizing: border-box;
+    }
+
+    /* fields with a fixed size or cols never stick out: in a table only a
+       width in percent lets the column shrink */
+    #content input,
+    #content textarea,
+    #content select {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    #content td input[type="text"],
+    #content th input[type="text"],
+    #content td input:not([type]),
+    #content th input:not([type]),
+    #content td textarea,
+    #content th textarea {
+        width: 100%;
     }
 
     /* tooltips open on a tap; keep them on the screen */

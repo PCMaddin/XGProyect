@@ -2512,7 +2512,12 @@ Baseline-Einträge.
       Nachrichten brechen um.
     - *Dabei gefunden:* Der Text von Freundschaftsanfragen wurde doppelt
       escaped, „I'm“ erschien als „I&#039;m“.
-    - *Test:* Der Phone-Teil des Crawls prüft jetzt 19 Seiten. Er misst
+    - *Nachprüfung aller Spielerseiten bei 390 px:* Die Nachricht
+      schreiben ragte 48 px hinaus (Felder mit festem `size`/`cols`),
+      jetzt nehmen Textfelder in Tabellen die Zellenbreite. Auf Deutsch
+      waren die Ressourceneinstellungen 15 px zu breit. Lobby, Konto- und
+      Rechtsseiten passten schon.
+    - *Test:* Der Phone-Teil des Crawls prüft jetzt 20 Seiten. Er misst
       auch die Breite des Inhalts, nicht nur die der Seite. Bisher fiel eine
       zu breite Tabelle nicht auf, weil sie in sich scrollte. Galaxie und
       Imperium dürfen absichtlich scrollen.
