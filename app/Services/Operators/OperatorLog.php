@@ -37,6 +37,7 @@ class OperatorLog
     public const ACCOUNT_DELETED = 'operator_deleted';
     /** an admin of a universe set a player's dark matter by hand */
     public const ADMIN_DARK_MATTER = 'admin_dark_matter';
+    public const LEGAL = 'legal_changed';
 
     /**
      * @param array<string, mixed> $details

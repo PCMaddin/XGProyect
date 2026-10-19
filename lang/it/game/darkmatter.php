@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'L\'ordine è scaduto. Effettua un nuovo ordine; l\'admin controlla un trasferimento già inviato.',
     'dm_two_factor_hint' => 'Proteggi il tuo account prima di acquistare: con l\'accesso in due passaggi nessuno arriva alla tua materia oscura acquistata con la sola password.',
     'dm_two_factor_link' => 'Configura ora',
+    'dm_withdrawal_waiver' => 'Chiedo espressamente che la materia oscura venga accreditata subito. So che in questo modo perdo il diritto di recesso.',
+    'dm_withdrawal_waiver_required' => 'Conferma che la materia oscura va accreditata subito e che così perdi il diritto di recesso.',
 ];

@@ -66,7 +66,7 @@ class DarkMatterShopMysqlTest extends MysqlTestCase
             ->assertSee('name="package" value="dm_120k"', false)
             ->assertSee('name="_token"', false);
 
-        $this->asPlayer()->post('/game.php?page=darkmatter', ['package' => 'dm_120k'])
+        $this->asPlayer()->post('/game.php?page=darkmatter', ['withdrawal_waiver' => '1', 'package' => 'dm_120k'])
             ->assertStatus(303)
             ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_game');
 
@@ -98,7 +98,7 @@ class DarkMatterShopMysqlTest extends MysqlTestCase
     {
         Http::fake(['api.stripe.com/*' => Http::response(['error' => ['message' => 'Invalid API Key provided']], 401)]);
 
-        $this->asPlayer()->post('/game.php?page=darkmatter', ['package' => 'dm_10k'])
+        $this->asPlayer()->post('/game.php?page=darkmatter', ['withdrawal_waiver' => '1', 'package' => 'dm_10k'])
             ->assertOk()
             ->assertSee('The payment service cannot be reached right now.');
 
@@ -127,7 +127,7 @@ class DarkMatterShopMysqlTest extends MysqlTestCase
         $this->asPlayer()->get('/game.php?page=darkmatter')->assertOk()
             ->assertSee('Dark matter cannot be bought in this universe.')
             ->assertDontSee('dm_10k');
-        $this->asPlayer()->post('/game.php?page=darkmatter', ['package' => 'dm_10k'])->assertOk()
+        $this->asPlayer()->post('/game.php?page=darkmatter', ['withdrawal_waiver' => '1', 'package' => 'dm_10k'])->assertOk()
             ->assertSee('Dark matter cannot be bought in this universe.');
 
         Http::assertNothingSent();

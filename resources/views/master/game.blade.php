@@ -31,6 +31,7 @@
                 <div id="content" role="main">
                     <br>
                     @yield('content')
+                    <p class="legal-links" style="text-align:center;font-size:11px;margin:24px 0 8px;">@include('legal.links')</p>
                 </div>
             </div>
         </div>

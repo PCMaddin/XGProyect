@@ -149,7 +149,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
             }
 
             $this->assertRefused(Request::create('/game.php?page=darkmatter'), 'game/darkmatter.dm_shop_closed');
-            $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k']), 'game/darkmatter.dm_shop_closed');
+            $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k']), 'game/darkmatter.dm_shop_closed');
         }
 
         Http::assertNothingSent();
@@ -162,13 +162,14 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         Http::fake(['api.stripe.com/*' => Http::response(['id' => 'cs_test_new', 'url' => 'https://checkout.stripe.com/c/pay/cs_test_new'])]);
 
         // what the player sends besides the package is ignored
-        $response = $this->page(Request::create('https://game.example.org/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'price' => '1', 'dark_matter' => '999999']));
+        $response = $this->page(Request::create('https://game.example.org/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_50k', 'price' => '1', 'dark_matter' => '999999']));
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertSame(303, $response->getStatusCode());
         $this->assertSame('https://checkout.stripe.com/c/pay/cs_test_new', $response->getTargetUrl());
 
         $order = DarkMatterOrder::sole();
+        $this->assertSame($order->created_at, $order->withdrawal_waived_at);
         $this->assertSame(['user_id' => self::PLAYER, 'package' => 'dm_50k', 'dark_matter' => 50_000, 'amount' => 799, 'currency' => 'eur', 'provider_session' => 'cs_test_new', 'status' => 'pending'], [
             'user_id' => $order->user_id, 'package' => $order->package, 'dark_matter' => $order->dark_matter, 'amount' => $order->amount,
             'currency' => $order->currency, 'provider_session' => $order->provider_session, 'status' => $order->status,
@@ -199,11 +200,23 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         });
     }
 
+    public function testWithoutGivingUpTheRightOfWithdrawalNothingIsBought(): void
+    {
+        $this->inUniverse('andromeda');
+        Http::fake();
+
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k']), 'game/darkmatter.dm_withdrawal_waiver_required');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'withdrawal_waiver' => '0']), 'game/darkmatter.dm_withdrawal_waiver_required');
+
+        Http::assertNothingSent();
+        $this->assertSame(0, DarkMatterOrder::count());
+    }
+
     public function testAnUnknownPackageIsRefused(): void
     {
         Http::fake();
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_free']), 'game/darkmatter.dm_unknown_package');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_free']), 'game/darkmatter.dm_unknown_package');
         $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST'), 'game/darkmatter.dm_unknown_package');
 
         Http::assertNothingSent();
@@ -214,7 +227,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
     {
         Http::fake(['api.stripe.com/*' => Http::response(['error' => ['message' => 'Invalid API Key provided']], 401)]);
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k']), 'game/darkmatter.dm_checkout_failed');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k']), 'game/darkmatter.dm_checkout_failed');
 
         $this->assertSame(DarkMatterOrder::FAILED, DarkMatterOrder::sole()->status);
     }
@@ -223,7 +236,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
     {
         Http::fake(fn () => throw new ConnectionException('Could not resolve host: api.stripe.com'));
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k']), 'game/darkmatter.dm_checkout_failed');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k']), 'game/darkmatter.dm_checkout_failed');
 
         $this->assertSame(DarkMatterOrder::FAILED, DarkMatterOrder::sole()->status);
     }
@@ -236,7 +249,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
             $this->order(DarkMatterOrder::PENDING, self::PLAYER);
         }
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k']), 'game/darkmatter.dm_too_many_orders');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k']), 'game/darkmatter.dm_too_many_orders');
 
         Http::assertNothingSent();
         $this->assertSame(5, DarkMatterOrder::count());
@@ -293,8 +306,8 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         config(['premium.wax.account' => 'xgpshop']);
         Http::fake();
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_unknown_method');
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'paypal']), 'game/darkmatter.dm_unknown_method');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_unknown_method');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k', 'method' => 'paypal']), 'game/darkmatter.dm_unknown_method');
 
         Http::assertNothingSent();
         $this->assertSame(0, DarkMatterOrder::count());
@@ -310,7 +323,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $this->assertSame(['stripe', 'wax'], $view->getData()['methods']);
         $this->assertSame('1997.50 WAX', $view->getData()['packages'][1]['wax']);
 
-        $response = $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'method' => 'wax', 'price' => '1']));
+        $response = $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_50k', 'method' => 'wax', 'price' => '1']));
 
         $order = DarkMatterOrder::sole();
         $this->assertInstanceOf(RedirectResponse::class, $response);
@@ -359,7 +372,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         $this->assertInstanceOf(\Illuminate\Contracts\View\View::class, $view);
         $this->assertSame('', $view->getData()['packages'][0]['wax']);
 
-        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_wax_rate_failed');
+        $this->assertRefused(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k', 'method' => 'wax']), 'game/darkmatter.dm_wax_rate_failed');
         $this->assertSame(DarkMatterOrder::FAILED, DarkMatterOrder::sole()->status);
     }
 
@@ -380,7 +393,7 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
         // 50,000 dark matter at 100 per token; on the market 500 × 0.25 WAX
         $this->assertSame(['500.00 XGP', '125.00 WAX'], [$view->getData()['packages'][1]['token'], $view->getData()['packages'][1]['token_market']]);
 
-        $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['package' => 'dm_50k', 'method' => 'token']));
+        $this->page(Request::create('/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_50k', 'method' => 'token']));
 
         $order = DarkMatterOrder::sole();
         $this->assertSame(

@@ -24,7 +24,7 @@
         th { color: var(--muted); font-weight: 600; }
         label { display: block; font-weight: 600; margin: 12px 0 4px; }
         .help { color: var(--muted); font-size: 13px; font-weight: normal; }
-        input[type=text], input[type=email], input[type=password], input[type=number], input[type=datetime-local], select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+        input[type=text], input[type=email], input[type=password], input[type=number], input[type=datetime-local], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
         .checks label { display: inline-flex; gap: 6px; align-items: center; font-weight: normal; margin-right: 16px; }
         button, .button { display: inline-block; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font: inherit; cursor: pointer; text-decoration: none; }
         button.link { background: none; color: var(--accent); padding: 0; }
@@ -37,6 +37,8 @@
         .badge.ok { color: var(--ok); } .badge.warn { color: var(--warn); } .badge.muted { color: var(--muted); }
         pre, code, .codes { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
         pre { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 12px; overflow-x: auto; white-space: pre; }
+        textarea { min-height: 420px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.5; }
+        .preview { line-height: 1.6; }
         .langs { font-size: 13px; color: var(--muted); }
         .langs a { margin-left: 4px; }
     </style>
@@ -46,6 +48,7 @@
     <strong>{{ __('operator/operator.op_title') }}</strong>
     @auth('operator')
         <a href="{{ route('operator.universes') }}">{{ __('operator/operator.op_universes') }}</a>
+        <a href="{{ route('operator.legal') }}">{{ __('operator/operator.op_legal') }}</a>
         <a href="{{ route('operator.account') }}">{{ __('operator/operator.op_account') }}</a>
         <span class="help">{{ auth('operator')->user()?->email }}</span>
         <form method="post" action="{{ route('operator.logout') }}">@csrf<button type="submit" class="link">{{ __('operator/operator.op_logout') }}</button></form>

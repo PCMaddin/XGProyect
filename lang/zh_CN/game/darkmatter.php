@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => '订单已过期。请重新下单；已发送的转账将由管理员核查。',
     'dm_two_factor_hint' => '购买前请保护你的账户：开启两步验证后，仅凭密码无人能动你购买的暗物质。',
     'dm_two_factor_link' => '立即设置',
+    'dm_withdrawal_waiver' => '我明确要求立即发放暗物质。我知悉因此将失去撤销权。',
+    'dm_withdrawal_waiver_required' => '请确认立即发放暗物质，并知悉因此将失去撤销权。',
 ];

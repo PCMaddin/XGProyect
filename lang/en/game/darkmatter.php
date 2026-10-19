@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'The order has expired. Please order again; the admin checks a transfer already sent.',
     'dm_two_factor_hint' => 'Protect your account before you buy: with two-factor sign-in, nobody gets to your bought dark matter with your password alone.',
     'dm_two_factor_link' => 'Set it up now',
+    'dm_withdrawal_waiver' => 'I expressly request that the dark matter is credited at once. I understand that I thereby lose my right of withdrawal.',
+    'dm_withdrawal_waiver_required' => 'Please confirm that the dark matter is to be credited at once and that you thereby lose your right of withdrawal.',
 ];

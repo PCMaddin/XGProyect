@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'Die Bestellung ist abgelaufen. Bitte bestelle neu; eine schon gesendete Überweisung prüft der Admin.',
     'dm_two_factor_hint' => 'Schütze dein Konto, bevor du kaufst: Mit der Zwei-Faktor-Anmeldung kommt niemand mit deinem Passwort allein an deine gekaufte Dunkle Materie.',
     'dm_two_factor_link' => 'Jetzt einrichten',
+    'dm_withdrawal_waiver' => 'Ich verlange ausdrücklich, dass die Dunkle Materie sofort gutgeschrieben wird. Mir ist bekannt, dass ich damit mein Widerrufsrecht verliere.',
+    'dm_withdrawal_waiver_required' => 'Bitte bestätige, dass die Dunkle Materie sofort gutgeschrieben werden soll und du damit dein Widerrufsrecht verlierst.',
 ];

@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'La commande a expiré. Passe une nouvelle commande ; l\'admin vérifie un transfert déjà envoyé.',
     'dm_two_factor_hint' => 'Protège ton compte avant d\'acheter : avec la connexion en deux étapes, personne n\'accède à ta matière noire achetée avec ton seul mot de passe.',
     'dm_two_factor_link' => 'Configurer maintenant',
+    'dm_withdrawal_waiver' => 'Je demande expressément que la matière noire soit créditée immédiatement. Je reconnais perdre ainsi mon droit de rétractation.',
+    'dm_withdrawal_waiver_required' => 'Merci de confirmer que la matière noire doit être créditée immédiatement et que tu perds ainsi ton droit de rétractation.',
 ];

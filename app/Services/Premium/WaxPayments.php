@@ -68,6 +68,7 @@ class WaxPayments
         private WaxLinks $links,
         private SeasonPayouts $payouts,
         private WaxVerifier $verifier,
+        private PurchaseReceipts $receipts,
     ) {
     }
 
@@ -268,10 +269,16 @@ class WaxPayments
     private function credit(DarkMatterOrder $order, string $memo, WaxTransfer $transfer, int $now): string
     {
         try {
-            return $this->orders->credit($order->id, $memo, $order->amount, $order->currency, $transfer->trxId, $now) ? self::CREDITED : self::NOT_PENDING;
+            if (!$this->orders->credit($order->id, $memo, $order->amount, $order->currency, $transfer->trxId, $now)) {
+                return self::NOT_PENDING;
+            }
         } catch (OrderNotCreditedException) {
             return self::NO_PLAYER;
         }
+
+        $this->receipts->send($order->id);
+
+        return self::CREDITED;
     }
 
     private function known(WaxTransfer $transfer): bool

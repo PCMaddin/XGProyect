@@ -2192,6 +2192,41 @@ Baseline-Einträge.
     Lauf ohne Rückfrage, abgebrochene Installation hinterlässt eine leere
     Datenbank, fremde Tabellen bleiben unberührt, ohne Konfiguration nichts).
 
+- **Alpha a04 — Rechtsseiten, Widerrufsverzicht, Kaufbestätigung**
+  - *Rechtsseiten:* Impressum, Datenschutzerklärung, AGB und
+    Widerrufsbelehrung unter `/legal/{page}`, ohne Anmeldung und ohne
+    Universum. Die Texte schreiben Betreiber unter /operator →
+    *Rechtliches*: je Sprache ein Markdown-Text in der Basisdatenbank,
+    gleich für alle Universen, jede Änderung im Protokoll. Fehlt die
+    Sprache des Besuchers, erscheint der zuerst geschriebene Text. HTML
+    und `javascript:`-Links bleiben Text. Verlinkt ist nur, was einen Text
+    hat: Fußzeile von Start, Lobby und Spiel, Registrierung, Shop.
+  - *Toter Link:* Die Registrierung verwies auf `index.php?page=terms` und
+    `?page=policy`, Routen, die es seit dem Umbau nicht mehr gab.
+  - *Widerrufsverzicht:* Dunkle Materie ist ein digitaler Inhalt. Der Shop
+    hat jetzt ein Formular mit Paketwahl und einem Pflicht-Haken: „sofort
+    gutschreiben, Widerrufsrecht erlischt“. Der Server prüft den Haken bei
+    jedem Kauf, mit jeder Zahlungsart, und speichert den Zeitpunkt an der
+    Bestellung (`withdrawal_waived_at`).
+  - *Kaufbestätigung per Mail:* nach jeder Gutschrift (Stripe und WAX/Token)
+    einmal, in der Sprache des Universums, mit Bestellnummer, Menge,
+    Preis, Zahlungsart und der Erklärung zum Widerrufsrecht. Das ist die
+    Bestätigung auf dauerhaftem Datenträger. Ein ausgefallener Mailserver
+    nimmt keine Gutschrift zurück.
+  - *Tests:* `LegalPagesTest` deckt ab:
+    - ohne Text 404 und kein Link;
+    - Betreiber schreibt, alle lesen;
+    - Sprach-Rückfall auch per `Accept-Language`;
+    - HTML und Skript-Links bleiben Text;
+    - Vorschau speichert nicht, leer entfernt;
+    - ohne Anmeldung kein Zugriff, Längenlimit.
+
+    Dazu kommen der Shop ohne Haken (keine Bestellung, kein Aufruf bei
+    Stripe) und im Webhook genau eine Bestätigung trotz doppelt
+    gesendetem Ereignis. Die Mail rendert mit Verzichtserklärung, und ein
+    Mailfehler macht die Zahlung nicht rückgängig. Der
+    Sprach-Rückfall ist zusätzlich auf MariaDB geprüft.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

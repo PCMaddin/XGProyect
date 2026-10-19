@@ -23,7 +23,7 @@ class SelectInstance
     public const COOKIE = 'xgp_universe';
 
     /** paths that work without a universe */
-    private const WITHOUT_UNIVERSE = ['universes', 'universes/*', 'stripe/*'];
+    private const WITHOUT_UNIVERSE = ['universes', 'universes/*', 'stripe/*', 'legal/*'];
 
     public function __construct(
         private InstanceRegistry $registry,

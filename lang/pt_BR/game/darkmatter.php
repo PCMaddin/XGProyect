@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'O pedido expirou. Faça um novo pedido; o admin verifica uma transferência já enviada.',
     'dm_two_factor_hint' => 'Proteja sua conta antes de comprar: com o login em duas etapas, ninguém chega à sua matéria escura comprada só com a sua senha.',
     'dm_two_factor_link' => 'Configurar agora',
+    'dm_withdrawal_waiver' => 'Solicito expressamente que a matéria escura seja creditada imediatamente. Sei que assim perco meu direito de arrependimento.',
+    'dm_withdrawal_waiver_required' => 'Confirme que a matéria escura deve ser creditada imediatamente e que assim você perde o direito de arrependimento.',
 ];

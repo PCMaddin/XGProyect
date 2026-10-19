@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'El pedido ha caducado. Haz un pedido nuevo; el admin revisa una transferencia ya enviada.',
     'dm_two_factor_hint' => 'Protege tu cuenta antes de comprar: con la verificación en dos pasos nadie llega a tu materia oscura comprada solo con tu contraseña.',
     'dm_two_factor_link' => 'Configurar ahora',
+    'dm_withdrawal_waiver' => 'Solicito expresamente que la materia oscura se abone de inmediato. Sé que con ello pierdo mi derecho de desistimiento.',
+    'dm_withdrawal_waiver_required' => 'Confirma que la materia oscura se abone de inmediato y que con ello pierdes tu derecho de desistimiento.',
 ];

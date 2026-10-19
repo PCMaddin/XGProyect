@@ -22,6 +22,8 @@
         button { background: #4f7cff; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-size: 15px; cursor: pointer; }
         button:hover { background: #3d68e6; }
         .ended { color: #9aa4b8; }
+        footer.legal { margin-top: 32px; text-align: center; font-size: 13px; color: #9aa4b8; }
+        footer.legal a { color: #9aa4b8; }
         details.fame { flex-basis: 100%; margin-top: 4px; }
         details.fame summary { cursor: pointer; color: #ffd27a; font-size: 14px; }
         .fame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 24px; margin-top: 10px; }
@@ -89,6 +91,7 @@
             </li>
         @endforeach
     </ul>
+    <footer class="legal">@include('legal.links')</footer>
 </main>
 </body>
 </html>

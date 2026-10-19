@@ -20,9 +20,14 @@ use Illuminate\Support\Facades\DB;
  */
 class DarkMatterOrders
 {
+    /**
+     * Only once the player asked for the dark matter at once, giving up the
+     * right of withdrawal: that moment is kept with the order.
+     */
     public function open(int $userId, DarkMatterPackage $package, string $currency, int $now, string $provider = DarkMatterShop::STRIPE): DarkMatterOrder
     {
         return DarkMatterOrder::create([
+            'withdrawal_waived_at' => $now,
             'user_id' => $userId,
             'package' => $package->id,
             'dark_matter' => $package->darkMatter,

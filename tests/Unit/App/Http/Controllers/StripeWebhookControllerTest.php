@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Tests\Unit\App\Http\Controllers;
 
 use App\Http\Controllers\StripeWebhookController;
+use App\Mail\PurchaseReceipt;
 use App\Models\DarkMatterOrder;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\StripeSignature;
 use App\Services\Premium\StripeWebhookHandler;
+use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -25,6 +28,8 @@ use Tests\DatabaseTestCase;
 #[CoversClass(StripeWebhookController::class)]
 #[CoversClass(StripeWebhookHandler::class)]
 #[CoversClass(DarkMatterOrders::class)]
+#[CoversClass(\App\Services\Premium\PurchaseReceipts::class)]
+#[CoversClass(PurchaseReceipt::class)]
 class StripeWebhookControllerTest extends DatabaseTestCase
 {
     private const SECRET = 'whsec_test_webhook';
@@ -68,6 +73,49 @@ class StripeWebhookControllerTest extends DatabaseTestCase
         $this->assertSame(DarkMatterOrder::PAID, $order->status);
         $this->assertSame('pi_test_1', $order->provider_payment);
         $this->assertNotNull($order->paid_at);
+    }
+
+    public function testThePlayerGetsOneConfirmationWithTheWaiverOfWithdrawal(): void
+    {
+        $this->seed(OptionsTableSeeder::class);
+        Mail::fake();
+        DB::table('users')->insert(['id' => self::PLAYER, 'name' => 'buyer', 'email' => 'buyer@example.com', 'password' => 'x', 'home_planet_id' => 1, 'current_planet' => 1]);
+        $order = $this->order();
+        $order->forceFill(['withdrawal_waived_at' => 1_700_000_000])->save();
+        $event = $this->completed($order);
+
+        $this->webhook($event)->assertJson(['result' => 'credited']);
+        $this->webhook($event)->assertJson(['result' => 'already credited']);
+
+        Mail::assertSent(PurchaseReceipt::class, 1);
+        Mail::assertSent(PurchaseReceipt::class, function (PurchaseReceipt $mail) use ($order): bool {
+            return $mail->hasTo('buyer@example.com') && $mail->orderId === $order->id && $mail->darkMatter === 10_000 &&
+                $mail->method === 'stripe' && $mail->waivedAt === 1_700_000_000 && str_contains($mail->price, '1');
+        });
+    }
+
+    public function testTheConfirmationNamesWhatWasBoughtAndTheWaiver(): void
+    {
+        $this->seed(OptionsTableSeeder::class);
+        $mail = (new PurchaseReceipt(orderId: 42, darkMatter: 120_000, price: '19,99 €', method: 'wax', paidAt: 1_700_000_000, waivedAt: 1_699_999_000))->locale('de');
+
+        $html = $mail->render();
+
+        $this->assertStringContainsString('120.000', $html);
+        $this->assertStringContainsString('19,99 €', $html);
+        $this->assertStringContainsString(__('emails/receipt.rc_method_wax', [], 'de'), $html);
+        $this->assertStringContainsString('Widerrufsrecht verlierst', $html);
+        $mail->assertHasSubject(__('emails/receipt.rc_subject', ['game' => 'XG Proyect', 'order' => 42], 'de'));
+    }
+
+    public function testAMailServerThatFailsDoesNotUndoThePayment(): void
+    {
+        DB::table('users')->insert(['id' => self::PLAYER, 'name' => 'buyer', 'email' => 'buyer@example.com', 'password' => 'x', 'home_planet_id' => 1, 'current_planet' => 1]);
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('smtp down'));
+        $order = $this->order();
+
+        $this->webhook($this->completed($order))->assertOk()->assertJson(['result' => 'credited']);
+        $this->assertSame(10_500, $this->darkMatter());
     }
 
     public function testAWrongAmountIsNotCredited(): void

@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Operator\AccountController;
+use App\Http\Controllers\Operator\LegalController;
 use App\Http\Controllers\Operator\LoginController;
 use App\Http\Controllers\Operator\UniversesController;
+use App\Services\Legal\LegalPages;
 use Illuminate\Support\Facades\Route;
 
 // /operator: the operators of the server manage the universes (see config/operators.php)
@@ -24,6 +26,11 @@ Route::middleware('operator.auth')->group(function () {
     Route::get('/universes/{slug}/season', [UniversesController::class, 'season'])->name('operator.universes.season');
     Route::post('/universes/{slug}/payout', [UniversesController::class, 'payout'])->name('operator.universes.payout');
     Route::post('/universes/{slug}/release', [UniversesController::class, 'release'])->name('operator.universes.release');
+    Route::get('/legal', [LegalController::class, 'index'])->name('operator.legal');
+    Route::get('/legal/{page}/{locale}', [LegalController::class, 'edit'])
+        ->whereIn('page', LegalPages::PAGES)->name('operator.legal.edit');
+    Route::post('/legal/{page}/{locale}', [LegalController::class, 'update'])
+        ->whereIn('page', LegalPages::PAGES)->name('operator.legal.update');
     Route::get('/account', [AccountController::class, 'show'])->name('operator.account');
     Route::post('/account/password', [AccountController::class, 'password'])->name('operator.account.password');
     Route::post('/account/codes', [AccountController::class, 'codes'])->name('operator.account.codes');

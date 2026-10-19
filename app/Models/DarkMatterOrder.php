@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $provider_amount what to transfer in the provider's smallest unit (WAX: 1e-8)
  * @property string|null $provider_currency
  * @property int|null $expires_at until when a WAX quote holds
+ * @property int|null $withdrawal_waived_at when the player gave up the right of withdrawal
  */
 class DarkMatterOrder extends Model
 {
@@ -68,6 +69,7 @@ class DarkMatterOrder extends Model
         'provider_amount',
         'provider_currency',
         'expires_at',
+        'withdrawal_waived_at',
     ];
 
     /**
@@ -83,6 +85,7 @@ class DarkMatterOrder extends Model
         'refunded_at' => 'int',
         'provider_amount' => 'int',
         'expires_at' => 'int',
+        'withdrawal_waived_at' => 'int',
     ];
 
     /**

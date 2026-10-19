@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'Zamówienie wygasło. Złóż nowe zamówienie; admin sprawdzi już wysłany przelew.',
     'dm_two_factor_hint' => 'Zabezpiecz konto przed zakupem: dzięki logowaniu dwuetapowemu nikt nie dostanie się do kupionej ciemnej materii samym hasłem.',
     'dm_two_factor_link' => 'Skonfiguruj teraz',
+    'dm_withdrawal_waiver' => 'Wyraźnie żądam natychmiastowego zapisania ciemnej materii. Wiem, że tym samym tracę prawo odstąpienia od umowy.',
+    'dm_withdrawal_waiver_required' => 'Potwierdź, że ciemna materia ma zostać zapisana natychmiast i że tym samym tracisz prawo odstąpienia od umowy.',
 ];

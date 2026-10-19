@@ -44,4 +44,6 @@ return [
     'dm_status_token_expired' => 'De bestelling is verlopen. Bestel opnieuw; de admin controleert een al verzonden overboeking.',
     'dm_two_factor_hint' => 'Beveilig je account voordat je koopt: met tweestapsaanmelding komt niemand met alleen je wachtwoord bij je gekochte donkere materie.',
     'dm_two_factor_link' => 'Nu instellen',
+    'dm_withdrawal_waiver' => 'Ik verzoek uitdrukkelijk om de donkere materie direct bij te schrijven. Ik weet dat ik daarmee mijn herroepingsrecht verlies.',
+    'dm_withdrawal_waiver_required' => 'Bevestig dat de donkere materie direct bijgeschreven moet worden en dat je daarmee je herroepingsrecht verliest.',
 ];

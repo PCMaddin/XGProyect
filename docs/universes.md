@@ -174,8 +174,23 @@ Im Browser unter *Konto* änderst du dein Passwort und erzeugst neue
 Wiederherstellungscodes, beides nur mit dem aktuellen Passwort und einem
 Code.
 
-**Protokoll.** Jede Anmeldung, auch fehlgeschlagene, und jede Änderung an
-einem Universum steht mit Betreiber, Adresse und Zeit in
+**Rechtliches.** Unter *Rechtliches* schreibst du Impressum,
+Datenschutzerklärung, AGB und Widerrufsbelehrung, je Sprache ein Text in
+Markdown (`# Überschrift`, `**fett**`, `[Link](https://…)`, Listen mit `-`).
+HTML im Text erscheint als Text, nie als Code. Die Texte liegen in der
+Basisdatenbank (`xgp_legal_pages`) und gelten für alle Universen. Für
+alle sind sie unter `/legal/imprint`, `/legal/privacy`, `/legal/terms`
+und `/legal/withdrawal` erreichbar, auch ohne Anmeldung und ohne
+gewähltes Universum. Fehlt ein Text in der Sprache des Besuchers,
+erscheint der zuerst geschriebene. Verlinkt ist eine Seite erst, wenn sie
+einen Text hat: in der Fußzeile der Startseite, der Lobby und jeder
+Spielseite, bei der Registrierung (AGB, Datenschutz) und im Shop (AGB,
+Widerruf). Ein leer gespeicherter Text entfernt die Seite in dieser
+Sprache. Jede Änderung steht im Protokoll.
+
+**Protokoll.** Jede Anmeldung, auch fehlgeschlagene, jede Änderung an
+einem Universum und an einem Rechtstext steht mit Betreiber, Adresse und
+Zeit in
 `xgp_operator_events`; die letzten 30 Einträge zeigt die Universenliste.
 
 **Absichern.** In der `.env`:
@@ -369,12 +384,27 @@ Nachkommazahl; ein gleichnamiger Token eines anderen Vertrags zählt nicht,
 WAX für eine Token-Bestellung auch nicht (und umgekehrt). Die Ergebnisse
 stehen wie bei WAX in der Admin-Liste.
 
+### Widerrufsrecht und Bestätigung
+
+Dunkle Materie ist ein digitaler Inhalt. Der Spieler kauft erst, wenn er
+im Shop ankreuzt, dass sie sofort gutgeschrieben werden soll und er damit
+sein Widerrufsrecht verliert. Ohne Haken gibt es keine Bestellung, auch
+nicht mit einer selbst gebauten Anfrage. Der Zeitpunkt steht an der
+Bestellung (`withdrawal_waived_at`).
+
+Nach der Gutschrift bekommt der Spieler eine Bestätigung per Mail, in der
+Sprache des Universums: Bestellnummer, Datum, Menge, Preis, Zahlungsart
+und die Erklärung zum Widerrufsrecht. Das ist die Bestätigung auf einem
+dauerhaften Datenträger, die das Gesetz verlangt. Absender ist die
+Admin-Adresse des Universums. Ist der Mailserver nicht erreichbar, bleibt
+die Gutschrift bestehen; der Fehler steht im Log.
+
 ### Vor dem ersten echten Verkauf
 
-Impressum, AGB, Datenschutzerklärung und eine Widerrufsbelehrung für
-digitale Inhalte gehören auf die Seite. Einnahmen in WAX verbuchst du mit
-dem Euro-Wert am Zahlungstag; Bestellung und Admin-Liste zeigen Euro-Preis
-und WAX-Betrag.
+Impressum, AGB, Datenschutzerklärung und Widerrufsbelehrung unter
+*Rechtliches* im Betreiberbereich eintragen (siehe oben) und anwaltlich
+prüfen lassen. Einnahmen in WAX verbuchst du mit dem Euro-Wert am
+Zahlungstag; Bestellung und Admin-Liste zeigen Euro-Preis und WAX-Betrag.
 
 ## Updates
 

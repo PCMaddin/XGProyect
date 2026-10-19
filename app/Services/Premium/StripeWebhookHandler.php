@@ -29,6 +29,7 @@ class StripeWebhookHandler
         private DarkMatterOrders $orders,
         private InstanceRegistry $registry,
         private InstanceContext $context,
+        private PurchaseReceipts $receipts,
     ) {
     }
 
@@ -85,6 +86,7 @@ class StripeWebhookHandler
 
         if ($credited) {
             Log::info('Stripe webhook: order ' . $orderId . ' paid and credited', ['universe' => $this->universe()]);
+            $this->receipts->send($orderId);
 
             return 'credited';
         }
