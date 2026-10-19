@@ -150,17 +150,15 @@ docker compose exec app php artisan xgp:instance:list
 
 - **Logs** der Container rotieren (5 × 20 MB je Dienst). Die Logs des
   Spiels liegen im Volume `storage` unter `storage/logs/`.
-- **Backups:** Die Datenbank sichern, z. B. täglich per Cron auf dem
-  Host:
+- **Backups:** `XGP_BACKUP_REPOSITORY` und `XGP_BACKUP_PASSWORD` in
+  `deploy/.env` setzen. Der Scheduler sichert dann jede Nacht alle
+  Datenbanken verschlüsselt auf einen zweiten Server (restic steckt im
+  Image). Wiederherstellen und Einrichten: [universes.md](universes.md),
+  Abschnitt „Backups auf einem zweiten Server“.
 
-  ```bash
-  docker compose exec -T db sh -c 'mariadb-dump -uroot -p"$MARIADB_ROOT_PASSWORD" \
-    --all-databases --single-transaction' | gzip > /backup/xgp-$(date +%F).sql.gz
-  ```
-
-  Dazu `deploy/.env` sicher aufbewahren: Ohne `APP_KEY` und
+  Dazu `deploy/.env` getrennt vom Server aufbewahren: Ohne `APP_KEY` und
   `XGP_SECRETWORD` sind Sitzungen und gespeicherte Geheimnisse (z. B.
-  Zwei-Faktor) nicht mehr lesbar.
+  Zwei-Faktor) nicht mehr lesbar, ohne `XGP_BACKUP_PASSWORD` das Backup.
 - **Neustart des Servers:** Alle Dienste starten von selbst wieder
   (`restart: unless-stopped`).
 

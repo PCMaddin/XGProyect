@@ -2384,6 +2384,36 @@ Baseline-Einträge.
 
     Hochzählen und Wiederöffnen zusätzlich direkt auf MariaDB geprüft.
 
+- **Alpha a10 — Backups auf einem zweiten Server, Wiederherstellung geprobt**
+  - *Sichern:* `xgp:backup:run`, nachts per Scheduler. Er sichert die
+    Basisdatenbank und jedes Universum mit `mariadb-dump` direkt in ein
+    restic-Repository (S3, B2, SFTP …): verschlüsselt, dedupliziert, ein
+    Snapshot je Datenbank (`db:<name>`). Aufbewahrt werden 7 tägliche, 5
+    wöchentliche und 12 monatliche Stände. Werte gehen per Umgebung an die
+    Shell, `pipefail` lässt einen abgebrochenen Dump den Lauf scheitern.
+    Läufe stehen in `backup_runs` und unter /operator → *Backups*, ein
+    Fehlschlag geht sofort per Mail raus. restic ist im Docker-Image.
+  - *Wiederherstellen:* `xgp:backup:restore <db> --into=<neu>` nur in eine
+    neue Datenbank, dazu `xgp:backup:list`. `xgp:instance:update
+    --database=` stellt ein Universum um, nur auf eine Datenbank mit Spiel,
+    die keinem anderen gehört.
+  - *Probe auf MariaDB:*
+    1. Universum mit 6 Spielern, Sicherung (2 Snapshots, 1,1 MB, kein
+       Klartext im Repository);
+    2. alle Planeten gelöscht, Namen verändert;
+    3. Wiederherstellung: alle 44 Tabellen prüfsummengleich, Überschreiben
+       verweigert;
+    4. Universum umgestellt, Tick läuft, Planeten zurück.
+  - *Dabei gefunden:*
+    - `SHOW DATABASES LIKE ?` nimmt in MariaDB keinen Platzhalter.
+    - Der Tabellenpräfix landete vor `information_schema`-Tabellen.
+    - Ein falsches Passwort meldete „config file already exists“, weil der
+      Lauf dann ein neues Repository anlegen wollte. Jetzt wird nur bei
+      fehlendem Repository angelegt, sonst steht der echte Grund da.
+  - *Tests:* `OffsiteBackupMysqlTest` (Sichern, Beschädigen, Wiederherstellen
+    mit Prüfsummen, kein Überschreiben, falsches Passwort aufgezeichnet).
+    Die CI installiert dafür restic und den MariaDB-Client.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

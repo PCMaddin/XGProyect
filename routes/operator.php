@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Operator\AccountController;
+use App\Http\Controllers\Operator\BackupsController;
 use App\Http\Controllers\Operator\ErrorsController;
 use App\Http\Controllers\Operator\LegalController;
 use App\Http\Controllers\Operator\LoginController;
@@ -28,6 +29,7 @@ Route::middleware('operator.auth')->group(function () {
     Route::get('/universes/{slug}/season', [UniversesController::class, 'season'])->name('operator.universes.season');
     Route::post('/universes/{slug}/payout', [UniversesController::class, 'payout'])->name('operator.universes.payout');
     Route::post('/universes/{slug}/release', [UniversesController::class, 'release'])->name('operator.universes.release');
+    Route::get('/backups', [BackupsController::class, 'index'])->name('operator.backups');
     Route::get('/errors', [ErrorsController::class, 'index'])->name('operator.errors');
     Route::get('/errors/{group}', [ErrorsController::class, 'show'])->whereNumber('group')->name('operator.errors.show');
     Route::post('/errors/{group}', [ErrorsController::class, 'update'])->whereNumber('group')->name('operator.errors.update');

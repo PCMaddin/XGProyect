@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands\Instances;
 
 use App\Services\Instances\Instance;
+use App\Services\Instances\DatabaseSwitch;
 use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
 use Illuminate\Console\Command;
@@ -26,7 +27,8 @@ class UpdateInstance extends Command
         {--payments= : ways to pay in pay2win: stripe, wax, stripe,wax or none}
         {--ends= : when the season ends (a date, e.g. 2026-12-01 or "+2 weeks"), or none}
         {--rewards= : dark matter for the best ten per ranking, e.g. total=100000,military=20000}
-        {--shares= : percent of a ranking\'s dark matter for places 1, 2, 3 … e.g. 30,20,15,10,7,6,4,3,3,2}';
+        {--shares= : percent of a ranking\'s dark matter for places 1, 2, 3 … e.g. 30,20,15,10,7,6,4,3,3,2}
+        {--database= : play on this database from now on, e.g. one restored with xgp:backup:restore}';
 
     /** @var string */
     protected $description = 'Change the name, mode or status of a universe';
@@ -43,6 +45,13 @@ class UpdateInstance extends Command
         }
 
         try {
+            $database = $this->option('database');
+
+            if (is_string($database) && $database !== '') {
+                app(DatabaseSwitch::class)->switch($instance, $database);
+                $this->info('Universe ' . $instance->slug . ' now plays on the database ' . $database . '; ' . $instance->database . ' is kept.');
+            }
+
             $changed = $provisioner->change($instance, $this->changes());
             $this->changeRewards($provisioner, $changed);
         } catch (Throwable $e) {

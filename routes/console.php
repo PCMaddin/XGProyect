@@ -45,6 +45,12 @@ Schedule::command('xgp:tick')
     ->everyMinute()
     ->withoutOverlapping(10);
 
+// every database to the other server, see config/offsite.php
+Schedule::command('xgp:backup:run')
+    ->dailyAt((string) config('offsite.time'))
+    ->when(static fn (): bool => (string) config('offsite.repository') !== '')
+    ->withoutOverlapping(360);
+
 // the errors of every universe: a mail to the operators once a kind of
 // error piles up (XGP_ERRORS_MAIL), see config/operators.php
 Schedule::command('xgp:errors:notify')

@@ -10,7 +10,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libzip-dev libicu-dev \
-        libfcgi-bin mariadb-client unzip; \
+        libfcgi-bin mariadb-client restic unzip; \
     docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp; \
     docker-php-ext-install -j"$(nproc)" bcmath gd intl mysqli opcache pcntl pdo_mysql zip; \
     rm -rf /var/lib/apt/lists/*

@@ -449,15 +449,89 @@ bisher `php artisan migrate --path=database/migrations/400`.
 
 ## Backups und Logs
 
-- **Backups:** Das automatische Backup im Admin sichert die Datenbank des
-  aktiven Universums in einen eigenen Ordner unter
-  `storage/app/backups/<APP_NAME>_<slug>/`. Die Basisdatenbank sicherst du
-  zusätzlich selbst, z. B. per `mysqldump`, weil dort Universen-Liste und
-  WAX-Eingänge liegen.
+### Backups auf einem zweiten Server
+
+`xgp:backup:run` sichert jede Nacht (Scheduler, `XGP_BACKUP_TIME`,
+Standard 03:17) die Basisdatenbank und die Datenbank jedes Universums,
+offene wie geschlossene. Die Sicherung geht mit restic in ein Repository
+auf einem anderen Server:
+- verschlüsselt mit `XGP_BACKUP_PASSWORD`;
+- nur Geänderte wird übertragen;
+- je Datenbank ein Snapshot mit dem Tag `db:<name>`.
+
+Aufbewahrt werden 7 tägliche, 5 wöchentliche und 12 monatliche Snapshots
+je Datenbank (`XGP_BACKUP_KEEP_*`). Den Dump schreibt `mariadb-dump` direkt
+in restic, nichts liegt unverschlüsselt auf der Platte. Bricht der Dump ab,
+gilt der ganze Lauf als fehlgeschlagen.
+
+Einrichten in der `.env` (Beispiele in `config/offsite.php`):
+
+```
+XGP_BACKUP_REPOSITORY=s3:https://s3.eu-central-1.amazonaws.com/mein-bucket/xgproyect
+AWS_ACCESS_KEY_ID=…
+AWS_SECRET_ACCESS_KEY=…
+XGP_BACKUP_PASSWORD=<lang und zufällig>
+```
+
+Ebenso gehen `b2:bucket:pfad` (Backblaze, `B2_ACCOUNT_ID`/`B2_ACCOUNT_KEY`)
+und `sftp:user@host:/pfad`. Der erste Lauf legt das Repository an. Bewahre
+`XGP_BACKUP_PASSWORD` und `deploy/.env` (mit `APP_KEY`) getrennt vom Server
+auf, z. B. in einem Passwortmanager. Ohne das Passwort ist das Backup
+wertlos, ohne `APP_KEY` sind Sitzungen und Zwei-Faktor-Schlüssel nicht
+lesbar.
+
+Jeder Lauf steht unter /operator → *Backups*. Schlägt einer fehl (falsches
+Passwort, Ziel nicht erreichbar, Dump abgebrochen), geht sofort eine Mail
+an `XGP_ERRORS_MAIL`.
+
+### Ein Universum wiederherstellen
+
+So geprobt mit einem Universum mit 6 Spielern:
+1. Sicherung.
+2. Alle Planeten gelöscht und alle Namen verändert.
+3. Wiederherstellung in eine neue Datenbank: alle 44 Tabellen
+   prüfsummengleich mit der Sicherung.
+4. Universum umgestellt, der Tick lief, die Planeten waren zurück.
+
+`OffsiteBackupMysqlTest` macht dasselbe bei jedem Push.
+
+```bash
+# 1. die Snapshots ansehen
+php artisan xgp:backup:list xgp_uni_2026_11
+
+# 2. in eine NEUE Datenbank holen (nie über die laufende)
+php artisan xgp:backup:restore xgp_uni_2026_11 --into=xgp_uni_2026_11_r1
+#    ein bestimmter Stand: --snapshot=<id aus xgp:backup:list>
+
+# 3. prüfen, dann das Universum auf die neue Datenbank stellen
+php artisan xgp:instance:update 2026-11 --database=xgp_uni_2026_11_r1
+php artisan xgp:instance:migrate 2026-11
+
+# 4. die alte Datenbank erst löschen, wenn alles läuft (als root)
+```
+
+Mit Docker steht vor jedem Befehl `docker compose exec app`. Der neue
+Datenbankname muss mit `xgp_uni_` beginnen, dann darf der Spiel-Benutzer
+ihn anlegen. `--database` nimmt nur eine Datenbank, die ein Spiel enthält
+und keinem anderen Universum gehört. Spieler, die zwischen Sicherung und
+Ausfall gespielt haben, verlieren diese Zeit.
+
+Die **Basisdatenbank** (Universen-Liste, Betreiber, WAX-Eingänge,
+Rechtstexte) holst du genauso in eine neue Datenbank. Dann kopierst du als
+root die nötigen Tabellen zurück oder stellst `DB_DATABASE` um. Die Tabelle
+`backup_runs` enthält dort den Lauf, der sie gesichert hat, als „läuft“.
+
+### Admin-Backup und Logs
+
+- **Admin-Backup:** Das automatische Backup im Admin sichert weiterhin die
+  Datenbank des aktiven Universums lokal unter
+  `storage/app/backups/<APP_NAME>_<slug>/`. Das ist eine schnelle Kopie
+  auf demselben Server und ersetzt nicht die Sicherung oben.
 - **Logs:** Jedes Universum schreibt nach
-  `storage/logs/xgproyect-<slug>.log`; die Fehlerliste im Admin zeigt nur
-  diese Datei. Lobby, Befehle und alles ohne Universum schreiben nach
-  `storage/logs/xgproyect.log`.
+  `storage/logs/xgproyect-<slug>.log` (mit `LOG_CHANNEL=daily` eine Datei
+  je Tag); die Fehlerliste im Admin zeigt die neueste. Lobby, Befehle und
+  alles ohne Universum schreiben nach `storage/logs/xgproyect.log`. Alle
+  Fehler aller Universen sammelt zusätzlich /operator → *Fehler*.
 
 ## Mail-Links
 
