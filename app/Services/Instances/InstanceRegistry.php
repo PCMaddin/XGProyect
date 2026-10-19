@@ -67,6 +67,16 @@ class InstanceRegistry
         return array_values(array_filter($this->all(), static fn (Instance $instance): bool => $instance->isOpen()));
     }
 
+    /**
+     * The universes whose database is there: all but the archived ones.
+     *
+     * @return list<Instance>
+     */
+    public function withDatabase(): array
+    {
+        return array_values(array_filter($this->all(), static fn (Instance $instance): bool => $instance->hasDatabase()));
+    }
+
     public function find(string $slug): ?Instance
     {
         if (!$this->enabled()) {
@@ -93,7 +103,7 @@ class InstanceRegistry
     }
 
     /**
-     * @param array<string, string|int|null> $changes name, mode, status, ends_at
+     * @param array<string, string|int|null> $changes name, mode, status, ends_at, closed_at, archived_at, archive
      */
     public function update(string $slug, array $changes): void
     {
@@ -134,6 +144,8 @@ class InstanceRegistry
             self::asString($values['status'] ?? Instance::OPEN),
             self::asInt($values['opened_at'] ?? 0),
             is_numeric($values['ends_at'] ?? null) ? (int) $values['ends_at'] : null,
+            is_numeric($values['closed_at'] ?? null) ? (int) $values['closed_at'] : null,
+            self::asString($values['archive'] ?? ''),
         );
     }
 }

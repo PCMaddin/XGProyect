@@ -521,6 +521,46 @@ Rechtstexte) holst du genauso in eine neue Datenbank. Dann kopierst du als
 root die nötigen Tabellen zurück oder stellst `DB_DATABASE` um. Die Tabelle
 `backup_runs` enthält dort den Lauf, der sie gesichert hat, als „läuft“.
 
+### Alte Universen archivieren
+
+Jeder Monat bringt eine Datenbank mehr. Ein geschlossenes Universum
+braucht seine Datenbank nicht mehr: Die Ruhmeshalle in der Lobby liegt in
+der Basisdatenbank. Archivieren läuft so:
+
+1. Die Datenbank wird noch einmal gesichert, verschlüsselt auf den
+   Backup-Server, mit dem Tag `xgp-archive`. Die Aufräumregeln der
+   nächtlichen Sicherung löschen solche Snapshots nie.
+2. Geprüft wird, ob die Sicherung jede Tabelle enthält.
+3. Erst dann wird die Datenbank gelöscht.
+
+Fehlt in der Sicherung eine Tabelle, bleibt die Datenbank stehen.
+
+```bash
+php artisan xgp:instance:archive 2026-08            # ein geschlossenes Universum
+php artisan xgp:instance:archive 2026-08 --file=/backups/2026-08.sql.gz   # ohne Backup-Server
+php artisan xgp:instance:unarchive 2026-08          # zurückholen (danach geschlossen)
+```
+
+Automatisch: `XGP_ARCHIVE_AFTER_DAYS` in `deploy/.env` (Standard 0, also
+nie). Der Scheduler archiviert dann jede Nacht um 04:47 jedes Universum,
+das so lange geschlossen ist. Das geht nur mit Backup-Server, nie in eine
+Datei.
+
+- **Wie lange warten?** Mindestens 180 Tage. Die Käufe von Dunkler
+  Materie liegen in der Datenbank des Universums. Eine Kartenzahlung kann
+  bis zu 120 Tage danach angefochten werden. Ohne Datenbank kann die
+  Rückbuchung keinem Spieler mehr zugeordnet werden.
+- **Löschwünsche von Spielern** (Konto löschen) betreffen dann nur noch
+  die Sicherung. Sie verschwindet nicht von selbst, Snapshots mit
+  `xgp-archive` bleiben, bis du sie löschst
+  (`restic forget <id>` mit dem Passwort aus `XGP_BACKUP_PASSWORD`). In
+  der Datenschutzerklärung die Aufbewahrung nennen.
+- `xgp:instance:list` zeigt, wo das Archiv liegt (`restic:<snapshot>` oder
+  `file:<pfad>`). Unter /operator steht das Universum als „archiviert“,
+  ohne Bearbeiten.
+- Nach dem Zurückholen laufen die Migrationen. Erst danach
+  (`xgp:instance:update <slug> --status=open`) kann wieder gespielt werden.
+
 ### Admin-Backup und Logs
 
 - **Admin-Backup:** Das automatische Backup im Admin sichert weiterhin die

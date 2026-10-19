@@ -2517,6 +2517,36 @@ Baseline-Einträge.
       zu breite Tabelle nicht auf, weil sie in sich scrollte. Galaxie und
       Imperium dürfen absichtlich scrollen.
 
+- **Alte Universen archivieren (Tracker o11)**
+  - `xgp:instance:archive <slug>` nimmt nur ein geschlossenes Universum.
+    Die Datenbank geht noch einmal auf den Backup-Server (restic, Tag
+    `xgp-archive`, von den Aufräumregeln ausgenommen) oder mit `--file`
+    in eine neue `.sql.gz`. Danach wird gezählt, ob die Sicherung jede
+    Tabelle enthält. Erst dann wird die Datenbank gelöscht. Das Universum
+    bleibt als `archived` registriert, die Ruhmeshalle bleibt.
+    `xgp:instance:unarchive` holt die Datenbank unter ihrem alten Namen
+    zurück und spielt die Migrationen ein.
+  - Automatisch nach `XGP_ARCHIVE_AFTER_DAYS` Tagen (Standard 0, also
+    aus). Dafür neu: `closed_at` beim Schließen.
+  - Ohne Datenbank übersprungen: nächtliche Sicherung, Migrationen, Tick,
+    die Suche nach dem Universum einer Stripe-Rückbuchung. Bearbeiten
+    unter /operator und `xgp:instance:update` werden verweigert.
+  - Die Shell-Zeilen der Sicherung (Werte als Umgebungsvariablen,
+    pipefail) stehen jetzt in `DumpShell`, die Sicherung und Archiv teilen.
+  - *Tests:* `UniverseArchiveMysqlTest`:
+    - Hin und zurück über restic und über eine Datei, prüfsummengleich.
+    - Die nächtliche Sicherung lässt das archivierte Universum aus.
+    - Ein offenes Universum wird verweigert, eine vorhandene Datei nie
+      überschrieben.
+    - Eine Sicherung ohne Tabellen lässt die Datenbank stehen.
+    - Fälligkeit nach Tagen; Bearbeiten verweigert.
+
+    Zwei Mutationsproben schlugen an: die Tabellenprüfung abgeschaltet,
+    die Sicherung ohne Filter. Zusätzlich von Hand mit einem echten
+    Universum (44 Tabellen, Bots) geprobt: anlegen, schließen,
+    archivieren. Lobby, Tick und Migrationen liefen weiter. Danach
+    zurückgeholt, geöffnet, Tick läuft.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -28,6 +28,8 @@ class OperatorLog
     public const CREATED = 'universe_created';
     public const CHANGED = 'universe_changed';
     public const CLOSED = 'universe_closed';
+    public const ARCHIVED = 'universe_archived';
+    public const UNARCHIVED = 'universe_unarchived';
     public const PAYOUT = 'payout_reserved';
     public const RELEASED = 'payout_released';
     public const PASSWORD = 'password_changed';

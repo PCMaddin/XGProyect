@@ -98,9 +98,13 @@ class UniversesController extends BaseController
         return redirect()->route('operator.universes.edit', $instance->slug)->with('status', __('operator/operator.op_created', ['name' => $instance->name]));
     }
 
-    public function edit(string $slug): View
+    public function edit(string $slug): View | RedirectResponse
     {
         $instance = $this->instance($slug);
+
+        if (!$instance->hasDatabase()) {
+            return redirect()->route('operator.universes')->withErrors(['universe' => __('operator/operator.op_archived_note')]);
+        }
 
         return view('operator.universe_edit', [
             'instance' => $instance,

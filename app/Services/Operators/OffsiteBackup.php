@@ -7,7 +7,6 @@ namespace App\Services\Operators;
 use App\Services\Instances\InstanceRegistry;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
-use Symfony\Component\Process\Process;
 
 /**
  * Backups on another server (config/offsite.php): each database, the base
@@ -16,9 +15,8 @@ use Symfony\Component\Process\Process;
  * per database tagged db:<name>; old snapshots go by the keep rules. A
  * universe comes back on its own with restore(), into a new database.
  *
- * The values reach the shell as environment variables, never in the
- * command line; a dump that breaks off fails the run (pipefail), so a
- * half dump never counts as a backup.
+ * The shell lines run through DumpShell (values as environment variables,
+ * pipefail: a half dump never counts as a backup).
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
  */
@@ -28,10 +26,7 @@ class OffsiteBackup
     public const FAILED = 'failed';
     public const RUNNING = 'running';
 
-    private const DUMP = '"$DUMP" --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" --single-transaction --quick'
-        . ' --routines --events --triggers --hex-blob --default-character-set=utf8mb4 "$DB"';
-
-    public function __construct(private InstanceRegistry $registry)
+    public function __construct(private InstanceRegistry $registry, private DumpShell $shell)
     {
     }
 
@@ -41,7 +36,8 @@ class OffsiteBackup
     }
 
     /**
-     * The base database and those of all universes, open or closed.
+     * The base database and those of all universes, open or closed (an
+     * archived one has its own snapshot and no database any more).
      *
      * @return list<string>
      */
@@ -49,7 +45,7 @@ class OffsiteBackup
     {
         $databases = [self::connection('database')];
 
-        foreach ($this->registry->all() as $instance) {
+        foreach ($this->registry->withDatabase() as $instance) {
             $databases[] = $instance->database;
         }
 
@@ -74,13 +70,13 @@ class OffsiteBackup
         $run = $this->runs()->insertGetId(['started_at' => $now, 'status' => self::RUNNING, 'databases' => implode(',', $databases), 'message' => '']);
 
         try {
-            $this->openRepository();
+            $this->shell->openRepository();
 
             foreach ($databases as $database) {
-                $this->shell(self::DUMP . ' | "$RESTIC" backup --stdin --stdin-filename "$DB.sql" --tag xgp --tag "db:$DB" --host xgproyect --quiet', ['DB' => $database]);
+                $this->shell->run(DumpShell::DUMP . ' | "$RESTIC" backup --stdin --stdin-filename "$DB.sql" --tag xgp --tag "db:$DB" --host xgproyect --quiet', ['DB' => $database]);
             }
 
-            $this->shell('"$RESTIC" forget --tag xgp --group-by tags --keep-daily "$DAILY" --keep-weekly "$WEEKLY" --keep-monthly "$MONTHLY" --prune --quiet', [
+            $this->shell->run('"$RESTIC" forget --tag xgp --group-by tags --keep-daily "$DAILY" --keep-weekly "$WEEKLY" --keep-monthly "$MONTHLY" --prune --quiet', [
                 'DAILY' => (string) max(1, self::number('keep_daily')),
                 'WEEKLY' => (string) max(0, self::number('keep_weekly')),
                 'MONTHLY' => (string) max(0, self::number('keep_monthly')),
@@ -103,7 +99,7 @@ class OffsiteBackup
      */
     public function snapshots(): array
     {
-        $json = json_decode($this->shell('"$RESTIC" snapshots --tag xgp --json'), true);
+        $json = json_decode($this->shell->run('"$RESTIC" snapshots --tag xgp --json'), true);
         $snapshots = [];
 
         foreach (is_array($json) ? $json : [] as $snapshot) {
@@ -159,7 +155,7 @@ class OffsiteBackup
 
         $base->statement('CREATE DATABASE `' . $into . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
 
-        $this->shell('"$RESTIC" dump --tag "db:$DB" "$SNAPSHOT" "/$DB.sql" | "$CLIENT" --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" "$INTO"', [
+        $this->shell->run('"$RESTIC" dump --tag "db:$DB" "$SNAPSHOT" "/$DB.sql" | ' . DumpShell::LOAD, [
             'DB' => $database,
             'INTO' => $into,
             'SNAPSHOT' => $snapshot,
@@ -172,54 +168,6 @@ class OffsiteBackup
     public function latestRuns(int $limit = 30): array
     {
         return array_values($this->runs()->orderByDesc('id')->limit($limit)->get()->all());
-    }
-
-    /**
-     * A new repository is set up on the first run; any other trouble (a
-     * wrong password, a server out of reach) is the run's error.
-     *
-     * @throws RuntimeException
-     */
-    private function openRepository(): void
-    {
-        try {
-            $this->shell('"$RESTIC" cat config >/dev/null');
-        } catch (RuntimeException $e) {
-            if (preg_match('/repository does not exist|Is there a repository/i', $e->getMessage()) !== 1) {
-                throw $e;
-            }
-
-            $this->shell('"$RESTIC" init');
-        }
-    }
-
-    /**
-     * @param array<string, string> $env
-     *
-     * @throws RuntimeException
-     */
-    private function shell(string $script, array $env = []): string
-    {
-        $process = new Process(['bash', '-o', 'pipefail', '-c', $script], base_path(), $env + [
-            'RESTIC' => self::setting('restic'),
-            'DUMP' => self::setting('dump'),
-            'CLIENT' => self::setting('client'),
-            'RESTIC_REPOSITORY' => self::setting('repository'),
-            'RESTIC_PASSWORD' => self::setting('password'),
-            'DB_HOST' => self::connection('host'),
-            'DB_PORT' => self::connection('port') === '' ? '3306' : self::connection('port'),
-            'DB_USER' => self::connection('username'),
-            'MYSQL_PWD' => self::connection('password'),
-        ], null, 6 * 3600);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            $error = trim($process->getErrorOutput());
-
-            throw new RuntimeException($error !== '' ? $error : 'exit code ' . $process->getExitCode());
-        }
-
-        return $process->getOutput();
     }
 
     private function runs(): \Illuminate\Database\Query\Builder

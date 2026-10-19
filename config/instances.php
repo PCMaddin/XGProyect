@@ -35,4 +35,10 @@ return [
             'password' => env('XGP_MONTHLY_ADMIN_PASSWORD', ''),
         ],
     ],
+
+    // days a universe stays closed before the scheduler archives it (its
+    // database dumped to the backup server, then dropped; xgp:instance:archive);
+    // 0: only by hand. Keep it above the time a card payment can still be
+    // disputed (up to 120 days): the orders are in the universe's database.
+    'archive_after_days' => (int) env('XGP_ARCHIVE_AFTER_DAYS', 0),
 ];

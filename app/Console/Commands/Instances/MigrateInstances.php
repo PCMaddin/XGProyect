@@ -38,6 +38,13 @@ class MigrateInstances extends Command
         foreach ($instances as $instance) {
             $this->info($instance->slug . ' (' . $instance->database . ')');
 
+            if (!$instance->hasDatabase()) {
+                // xgp:instance:unarchive brings it back and migrates it then
+                $this->line('archived, no database');
+
+                continue;
+            }
+
             try {
                 $this->line(trim($provisioner->migrate($instance)));
             } catch (Throwable $e) {

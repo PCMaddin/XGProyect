@@ -159,6 +159,10 @@ class InstanceProvisioner
      */
     public function change(Instance $instance, array $changes): Instance
     {
+        if (!$instance->hasDatabase()) {
+            throw new InvalidArgumentException('The universe ' . $instance->slug . ' is archived: bring it back first (xgp:instance:unarchive).');
+        }
+
         $payments = isset($changes['payments']) ? $this->paymentMethods($changes['payments']) : null;
 
         $changed = new Instance(
@@ -183,7 +187,8 @@ class InstanceProvisioner
             $this->context->runIn($changed, fn () => $this->writeOptions($options));
         }
 
-        $this->registry->update($instance->slug, ['name' => $changed->name, 'mode' => $changed->mode, 'status' => $changed->status, 'ends_at' => $changed->endsAt]);
+        $this->registry->update($instance->slug, ['name' => $changed->name, 'mode' => $changed->mode, 'status' => $changed->status, 'ends_at' => $changed->endsAt]
+            + $changed->closedAtSince($instance, time()));
 
         return $changed;
     }

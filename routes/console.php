@@ -51,6 +51,13 @@ Schedule::command('xgp:backup:run')
     ->when(static fn (): bool => (string) config('offsite.repository') !== '')
     ->withoutOverlapping(360);
 
+// closed universes after XGP_ARCHIVE_AFTER_DAYS: dumped to the backup server,
+// then their database dropped, see config/instances.php
+Schedule::command('xgp:instance:archive --due')
+    ->dailyAt('04:47')
+    ->when(static fn (): bool => (int) config('instances.archive_after_days') > 0 && (string) config('offsite.repository') !== '')
+    ->withoutOverlapping(360);
+
 // the errors of every universe: a mail to the operators once a kind of
 // error piles up (XGP_ERRORS_MAIL), see config/operators.php
 Schedule::command('xgp:errors:notify')

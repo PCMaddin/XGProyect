@@ -27,7 +27,9 @@
                         <td><strong>{{ $instance->name }}</strong><br><code>{{ $instance->slug }}</code></td>
                         <td>{{ __('operator/operator.op_mode_' . $instance->mode) }}</td>
                         <td>
-                            @if ($instance->isOpen())
+                            @if ($instance->status === 'archived')
+                                <span class="badge muted" title="{{ __('operator/operator.op_archived_note') }}">{{ __('operator/operator.op_status_archived') }}</span>
+                            @elseif ($instance->isOpen())
                                 <span class="badge ok">{{ __('operator/operator.op_status_open') }}</span>
                             @elseif ($instance->status === 'open')
                                 <span class="badge warn">{{ __('operator/operator.op_status_ended') }}</span>
@@ -39,7 +41,9 @@
                         <td>{{ $instance->endsAt === null ? __('operator/operator.op_no_end') : date('Y-m-d H:i', $instance->endsAt) }}</td>
                         <td>{{ $universe['rewards'] === null || $universe['rewards']->isEmpty() ? '-' : number_format(array_sum($universe['rewards']->pools), 0, ',', '.') }}</td>
                         <td>
+                            @if ($instance->hasDatabase())
                             <a href="{{ route('operator.universes.edit', $instance->slug) }}">{{ __('operator/operator.op_edit') }}</a> ·
+                            @endif
                             <a href="{{ route('operator.universes.season', $instance->slug) }}">{{ __('operator/operator.op_season') }}</a>
                         </td>
                     </tr>

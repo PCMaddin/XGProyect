@@ -27,7 +27,7 @@ class ListInstances extends Command
         }
 
         $this->table(
-            ['Slug', 'Name', 'Database', 'Mode', 'Status', 'Opened'],
+            ['Slug', 'Name', 'Database', 'Mode', 'Status', 'Opened', 'Archive'],
             array_map(static fn (Instance $instance): array => [
                 $instance->slug,
                 $instance->name,
@@ -35,6 +35,7 @@ class ListInstances extends Command
                 $instance->mode,
                 $instance->status,
                 date('Y-m-d H:i', $instance->openedAt),
+                $instance->archive,
             ], $instances)
         );
 

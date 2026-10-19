@@ -140,7 +140,7 @@ class StripeWebhookHandler
             return $this->inUniverse(['metadata' => $metadata], $reverse);
         }
 
-        foreach ($this->registry->all() as $instance) {
+        foreach ($this->registry->withDatabase() as $instance) {
             if ($this->context->runIn($instance, $reverse) === $status) {
                 Log::warning('Stripe webhook: payment ' . $status, ['universe' => $instance->slug, 'payment' => $paymentId]);
 
