@@ -6,7 +6,9 @@
  *   - text that gives away a bug: an untranslated key (game/foo.bar), a
  *     placeholder left (%s, :attribute), an exception or a stack trace;
  *   - a marker from tests/Browser/seed.php that ran: names and texts that
- *     are code must stay text, also in tooltips (every onmouseover is fired).
+ *     are code must stay text, also in tooltips (every onmouseover is fired);
+ *   - on a phone (390 px): a main page wider than the screen, or a menu
+ *     that does not open.
  *
  *   php tests/Browser/seed.php
  *   php artisan serve --port=8000 &
@@ -60,7 +62,8 @@ const LOGS = ['/admin/errors', '/operator/errors', `/operator/errors/${seed.erro
 const issues = [];
 let current = '';
 const browser = await chromium.launch();
-const page = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+const desktop = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const page = await desktop.newPage();
 page.on('pageerror', (error) => issues.push([current, 'JavaScript', error.message.slice(0, 200)]));
 page.on('dialog', (dialog) => { issues.push([current, 'dialog', dialog.message().slice(0, 120)]); dialog.dismiss().catch(() => {}); });
 page.on('response', (response) => {
@@ -136,9 +139,32 @@ await page.fill('input[name=code]', totp(seed.operator.secret));
 await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')]);
 for (const path of OPERATOR) await visit(path);
 
+// the main pages on a phone: nothing wider than the screen, the menu opens
+const PHONE = ['overview', 'supplies', 'facilities', 'research', 'shipyard', 'defenses', 'fleet1', `galaxy&galaxy=${seed.galaxy}&system=${seed.system}`, 'messages', 'movement', 'alliance', 'buddies'];
+const PHONE_SIZE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
+let phone = await (await browser.newContext(PHONE_SIZE)).newPage();
+async function fits(path) {
+  current = 'phone ' + path;
+  await phone.goto(base + path, { waitUntil: 'load' });
+  const width = await phone.evaluate(() => document.documentElement.scrollWidth);
+  if (width > 391) {
+    issues.push([current, 'phone', `${width} px wide`]);
+    await phone.screenshot({ path: join(shots, `${label}-phone-${path.replace(/[^a-z0-9]+/gi, '_').slice(0, 60)}.png`), fullPage: true }).catch(() => {});
+  }
+}
+await fits('/');
+await fits('/account/recover');
+// signed in as in the desktop browser (each sign-in counts against the limit)
+phone = await (await browser.newContext({ ...PHONE_SIZE, storageState: await desktop.storageState() })).newPage();
+for (const name of PHONE) await fits('/game.php?page=' + name);
+const menuOpens = (await phone.isVisible('#menu-toggle'))
+  && (await phone.tap('#menu-toggle', { timeout: 5000 }).then(() => true, () => false))
+  && (await phone.isVisible('#leftmenu a[href*="page=galaxy"]'));
+if (!menuOpens) issues.push(['phone menu', 'phone', 'no menu button, or the menu does not open']);
+
 await browser.close();
 
-const pages = 1 + GAME.length + ACCOUNT.length + ADMIN.length + OPERATOR.length;
+const pages = 1 + GAME.length + ACCOUNT.length + ADMIN.length + OPERATOR.length + 2 + PHONE.length;
 const unique = [...new Set(issues.map((issue) => issue.join(' | ')))];
 for (const issue of unique) console.log(issue);
 console.log(`${label}: ${pages} pages, ${unique.length} problems`);

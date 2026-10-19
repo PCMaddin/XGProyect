@@ -2474,6 +2474,34 @@ Baseline-Einträge.
     der Antworten), `AllianceOnDeleteMysqlTest` (drei der vier Fälle
     scheitern mit dem alten Code).
 
+- **Alpha a13 — Die wichtigsten Seiten auf dem Handy**
+  - *Vorher*, geprüft bei 390 px (iPhone-Größe) in Chromium mit
+    Touch-Emulation, nicht auf echten Geräten: Kein Layout hatte ein
+    Viewport-Tag. Das Handy zeigte jede Seite als 980 px breiten Desktop,
+    auf 40 % verkleinert. Schrift etwa 4 pt, Links nicht zu treffen.
+  - *Jetzt* gibt es Viewport-Tags und zwei Stylesheets, die nur unter
+    760 px greifen (`assets/css/mobile.css`, `assets/css/home/mobile.css`).
+    Der Desktop bleibt unverändert.
+    - Das Menü klappt hinter einen Knopf „☰ Menü“ (zehn Sprachen) und
+      öffnet als Raster mit 44 px hohen Feldern.
+    - Kopf: Planetenwahl, Rohstoffe und Offiziere stehen untereinander.
+    - Gebäude, Forschung, Werft und Verteidigung: Bild (72 px) und Text
+      nebeneinander, der Knopf darunter über die volle Breite.
+    - Flotte: alle drei Schritte passen. In Schritt 3 stehen Auftrag und
+      Rohstoffe untereinander.
+    - Die Galaxie behält ihre Spalten und scrollt in sich seitwärts, die
+      Seite selbst nicht. Tooltips öffnen auf Antippen und bleiben auf dem
+      Bildschirm.
+    - Startseite (Anmelden, Registrieren) und „Passwort vergessen“ stehen
+      untereinander statt 718 px nebeneinander.
+  - *Tests:* Der Browser-Crawl der CI öffnet zusätzlich Startseite,
+    Passwortseite und zwölf Spielseiten bei 390 px. Er scheitert, sobald
+    eine davon breiter ist als der Bildschirm oder das Menü nicht aufgeht.
+    Gegenprobe ohne Viewport-Tag: 13 Treffer.
+  - *Offen:* Nicht geprüft auf echten Geräten (iOS Safari, Android
+    Chrome). Breite Listen (Imperium, Bewegungen, Highscore) scrollen in
+    sich, statt sich umzubauen.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

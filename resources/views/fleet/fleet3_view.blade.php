@@ -32,7 +32,7 @@
         <tr align="left" height="20">
             <td class="c" colspan="2">{!! $title !!}</td>
         </tr>
-        <tr align="left" valign="top">
+        <tr align="left" valign="top" class="side-by-side">
             <th width="50%">
                 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="259">
                     <tr height="20">

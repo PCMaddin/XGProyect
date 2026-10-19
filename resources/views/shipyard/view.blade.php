@@ -4,7 +4,7 @@
 {{ $message }}
 <form action="" method="post" role="form">
     @csrf
-    <table align="top" width="530">
+    <table align="top" width="530" class="element-list">
         @foreach ($list_of_items as $item)
         <tr>
             <th scope="row" class="l">

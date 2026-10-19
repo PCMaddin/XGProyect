@@ -1,0 +1,253 @@
+/*
+ * The game on a phone. The pages are built from tables of fixed width (530,
+ * 519, 656 px) next to a menu column; on a narrow screen the menu folds
+ * away behind a button, the head stacks, the tables take the width of the
+ * screen and what is still wider (galaxy) scrolls by itself, not the page.
+ */
+#menu-toggle {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    body {
+        margin: 0;
+        font-size: 13px;
+        background-size: cover;
+    }
+
+    td, th, table, table table td, p td,
+    th, td.a, td.b, td.c, td.f, input, select, textarea {
+        font-size: 13px;
+    }
+
+    #container {
+        display: block;
+        height: auto;
+    }
+
+    /* the menu: a button, then a grid of links to tap */
+    #menu-toggle {
+        display: block;
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        border-bottom: 1px solid #415680;
+        background: #344566;
+        color: #E6EBFB;
+        font: bold 15px Tahoma, sans-serif;
+        text-align: left;
+        padding: 0 16px;
+        cursor: pointer;
+    }
+
+    #container > #menu {
+        display: none;
+        width: auto;
+    }
+
+    body.menu-open #container > #menu {
+        display: block;
+    }
+
+    #leftmenu,
+    #leftmenu center,
+    #leftmenu #menu {
+        display: block;
+        width: 100% !important;
+    }
+
+    #leftmenu .menu-player {
+        width: auto !important;
+        margin: 8px 16px;
+    }
+
+    #leftmenu table,
+    #leftmenu tbody {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        width: 100% !important;
+    }
+
+    #leftmenu tr {
+        display: block;
+    }
+
+    #leftmenu td {
+        display: block;
+        border: 0;
+    }
+
+    #leftmenu .menu-divider {
+        display: none;
+    }
+
+    #leftmenu .menu-info {
+        grid-column: 1 / -1;
+        padding: 4px 0;
+    }
+
+    #leftmenu .menu-item a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        margin: 1px;
+        background: rgba(52, 69, 102, 0.85);
+        text-align: center;
+    }
+
+    /* the head: planet, resources and officers below each other */
+    #page-content {
+        display: block;
+    }
+
+    #header_top > table,
+    #header_top > table > tbody,
+    #header_top > table > tbody > tr,
+    #header_top > table > tbody > tr > td {
+        display: block;
+        width: auto !important;
+    }
+
+    #header_top > table > tbody > tr > td > table {
+        margin: 0 auto;
+    }
+
+    #header_top select {
+        max-width: 240px;
+        min-height: 36px;
+    }
+
+    #resources {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    #resources td {
+        width: auto !important;
+        padding: 0 1px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #resources img {
+        width: 36px;
+        height: 19px;
+    }
+
+    /* the page: tables as wide as the screen, the rest scrolls inside */
+    #content {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
+        padding: 0 4px;
+    }
+
+    #content > br:first-child {
+        display: none;
+    }
+
+    #content table[width="530"],
+    #content table[width="530px"],
+    #content table[width="519"],
+    #content table[width="519px"] {
+        width: 100%;
+    }
+
+    #content table {
+        max-width: 100%;
+    }
+
+    /* buildings, research, shipyard, defence: picture and text side by
+       side, what to do (button, amount) below over the full width */
+    #content table.element-list,
+    #content table.element-list > tbody {
+        display: block;
+        width: 100%;
+    }
+
+    #content table.element-list tr {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        margin-bottom: 4px;
+    }
+
+    #content table.element-list tr > * {
+        display: block;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    #content table.element-list tr > :nth-child(3),
+    #content table.element-list tr > [colspan] {
+        grid-column: 1 / -1;
+    }
+
+    #content table.element-list tr > :nth-child(3) {
+        text-align: center;
+        padding: 6px 0;
+    }
+
+    #content table.element-list tr > :nth-child(3) a {
+        display: inline-block;
+        min-width: 50%;
+        padding: 10px 0;
+    }
+
+    #content img[width="120"],
+    #content img[width="120px"] {
+        width: 72px;
+        height: 72px;
+    }
+
+    /* two tables side by side (fleet: mission and resources) go below each other */
+    #content tr.side-by-side > * {
+        display: block;
+        width: auto !important;
+    }
+
+    #content tr.side-by-side table {
+        width: 100%;
+    }
+
+    /* the galaxy keeps its columns and scrolls sideways, but narrower */
+    #content table.galaxy {
+        width: auto;
+        max-width: none;
+    }
+
+    #content table.galaxy th[width] {
+        width: auto;
+        white-space: normal !important;
+    }
+
+    #content table.galaxy th img {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* fingers, not a mouse */
+    #content input[type="submit"],
+    #content input[type="button"],
+    #content button,
+    #content select {
+        min-height: 36px;
+    }
+
+    #content input[type="text"],
+    #content input:not([type]) {
+        min-height: 32px;
+        box-sizing: border-box;
+    }
+
+    /* tooltips open on a tap; keep them on the screen */
+    #overDiv {
+        max-width: calc(100vw - 16px);
+    }
+
+    #overDiv table {
+        max-width: calc(100vw - 16px);
+    }
+}

@@ -8,7 +8,9 @@
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/redesign.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/formate.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('assets/upload/skins/xgproyect/formate.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/mobile.css') }}">
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="generator" content="XG Proyect {{ config('version.files') }}" />
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <script type="text/javascript" src="{{ asset('assets/js/overlib-min.js') }}"></script>
@@ -17,6 +19,11 @@
     </head>
     <body>
         <div id="container">
+            @if (!isset($noLeftMenu))
+            {{-- on a phone the menu folds away behind this button (assets/css/mobile.css) --}}
+            <button type="button" id="menu-toggle" aria-controls="menu" aria-expanded="false"
+                onclick="var open = document.body.classList.toggle('menu-open'); this.setAttribute('aria-expanded', open);">&#9776; {{ __('game/menu.lm_menu') }}</button>
+            @endif
             <div id="menu">
                 @if (!isset($noLeftMenu))
                 <x-game.leftmenu />

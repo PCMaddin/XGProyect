@@ -7,20 +7,20 @@
     </script>
     <center>
         <div id="menu">
-            <p style="width:110px;">
+            <p class="menu-player" style="width:110px;">
                 <NOBR>
                     {{ __('game/menu.lm_players') }} <strong>{!! $userName !!}</strong>
                 </NOBR>
             </p>
             <table width="110" cellspacing="0" cellpadding="0">
                 @foreach ($blocks as $blockIndex => $block)
-                <tr>
+                <tr class="menu-divider">
                     <td>
                         <img src="{{ asset('assets/upload/skins/xgproyect/menu/' . $block[0]) }}" width="{{ $block[1] }}" height="{{ $block[2] }}" />
                     </td>
                 </tr>
                 @foreach ($menu[$blockIndex] as $item)
-                <tr>
+                <tr class="menu-item">
                     <td>
                         <div align="center">
                             {!! $item['link'] !!}
@@ -30,7 +30,7 @@
                 @endforeach
                 @endforeach
                 @if ($isAdmin)
-                <tr>
+                <tr class="menu-item">
                     <td>
                         <div align="center">
                             <a href="admin" target="_blank" title="{{ __('game/menu.lm_administration') }}">
@@ -40,19 +40,19 @@
                     </td>
                 </tr>
                 @endif
-                <tr>
+                <tr class="menu-divider">
                     <td>
                         <img src="{{ asset('assets/upload/skins/xgproyect/menu/info-help.jpg') }}" width="110" height="19">
                     </td>
                 </tr>
-                <tr>
+                <tr class="menu-info">
                     <td>
                         <div style="text-align:center">
                             {{ $servername }} ({!! $changelog !!})
                         </div>
                     </td>
                 </tr>
-                <tr>
+                <tr class="menu-info">
                     <td>
                         <div style="text-align:center">
                             <span style="color:#FFFFFF">

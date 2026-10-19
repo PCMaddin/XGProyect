@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'lm_players' => 'Spieler:',
+    'lm_menu' => 'Menü',
     'lm_overview' => 'Übersicht',
     'lm_galaxy' => 'Galaxie',
     'lm_empire' => 'Imperium',

@@ -3,7 +3,7 @@
 @section('content')
 {!! $queueScript !!}
 <font color="#ff0000">{!! $noresearch !!}</font>
-<table align="top" width="530">
+<table align="top" width="530" class="element-list">
     @include('game.queue_rows', ['rows' => $queueRows])
     @foreach ($technologies as $item)
     <tr>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'lm_players' => 'プレイヤー:',
+    'lm_menu' => 'メニュー',
     'lm_overview' => '概要',
     'lm_galaxy' => '銀河',
     'lm_empire' => '帝国',

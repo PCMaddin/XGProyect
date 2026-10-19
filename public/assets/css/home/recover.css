@@ -317,3 +317,41 @@ div.captcha>label {
 #login .buttonSave {
     margin-top: 10px
 }
+/* on a phone: the form over the width of the screen */
+@media (max-width: 760px) {
+    body#login {
+        background-position: center top;
+    }
+
+    #login #loginwrapper,
+    #login #error {
+        position: static;
+        width: auto;
+        max-width: 360px;
+        margin: 16px auto 0;
+        box-sizing: border-box;
+    }
+
+    #login #loginwrapper .wrap-inner,
+    #login #loginwrapper #advice,
+    #login #loginwrapper #advice p {
+        float: none;
+        width: auto;
+        padding: 0 16px;
+    }
+
+    #login #loginwrapper .input,
+    #login #loginwrapper input.start {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #login h1 {
+        max-width: 100%;
+    }
+
+    input {
+        min-height: 36px;
+        font-size: 16px;
+    }
+}
