@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Libraries;
 
+use App\Services\Account\AccountEraser;
 use App\Support\OfficerBonuses;
 use App\Services\Game\RelocationService;
 use App\Services\Game\WreckFieldService;
@@ -139,10 +140,10 @@ class UpdatesLibrary
             )
         );
 
-        $users = new Users();
+        $eraser = app(AccountEraser::class);
 
         foreach ($chooseToDelete as $delete) {
-            $users->deleteUser((int) $delete['id']);
+            $eraser->erase((int) $delete['id']);
         }
 
         // Misc deletions

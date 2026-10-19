@@ -2227,6 +2227,39 @@ Baseline-Einträge.
     Mailfehler macht die Zahlung nicht rückgängig. Der
     Sprach-Rückfall ist zusätzlich auf MariaDB geprüft.
 
+- **Alpha a05 — DSGVO: Datenauskunft und Konto sofort löschen**
+  - *Deine Daten* (`/account/privacy`, verlinkt in den Einstellungen):
+    - Download aller Daten des Kontos als JSON: Konto, Planeten mit allem
+      darauf, Forschung, Flotten, Nachrichten, Freunde, Notizen, Allianz,
+      Käufe, Gegenstände, Gebote;
+    - dazu die Anmeldungen mit IP und Browser, Sitzungen, Aktivität,
+      WAX-Verknüpfung und Saisonplätze;
+    - nicht enthalten: Passwort, Zwei-Faktor-Schlüssel, Codes und die
+      Funde der Betrugserkennung;
+    - Sofort-Löschen des Kontos.
+
+    Beides nur mit Passwort (und Code), fünf Fehlversuche sperren 15
+    Minuten. Admins können sich nicht selbst löschen.
+  - *Gründliches Löschen für alle Wege:* Das alte Löschen (Admin,
+    Löschmodus, inaktive Konten) ließ Anmeldespuren mit IP-Adressen,
+    Sitzungen, Aktivität, Spionage-Protokoll, Verdachtsfälle,
+    Angriffsverbände, Passwort-Tokens und die WAX-Verknüpfung stehen. Jetzt
+    gehen alle Wege über `AccountEraser`. Bezahlte Bestellungen bleiben
+    (Aufbewahrungspflicht), die Ruhmeshalle behält den Platz ohne Namen.
+  - *Nebenbei:* Die Beispiel-`.env` schrieb mit `LOG_CHANNEL=stack` in eine
+    einzige Datei ohne Rotation. Jetzt `daily` (14 Tage) und
+    `LOG_LEVEL=warning`. Die Fristen für die Datenschutzerklärung stehen in
+    `docs/universes.md`.
+  - *Tests:* `PrivacyMysqlTest` (gegen MariaDB) prüft:
+    - Download mit allen Teilen, ohne Geheimnisse;
+    - kein Download ohne Passwort;
+    - Löschen entfernt alle Spuren, Bestellung und Ruhmeshallen-Platz
+      bleiben, der andere Spieler behält alles;
+    - nichts wird gelöscht ohne Passwort, Bestätigung oder Code;
+    - ein Admin kann sich nicht selbst löschen.
+
+    Gegenprobe: Ohne das Löschen der Anmeldungen schlägt der Test fehl.
+
 
 ## Smoke-Test gegen eine echte Datenbank
 

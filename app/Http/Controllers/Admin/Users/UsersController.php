@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Services\Account\AccountEraser;
 use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserInfoRequest;
 use App\Http\Requests\Admin\Users\UserSettingsRequest;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 use App\Libraries\Functions;
-use App\Libraries\Users as UsersLibrary;
 
 /**
  * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
@@ -292,7 +292,7 @@ class UsersController extends BaseController
             return redirect()->route('admin.users');
         }
 
-        (new UsersLibrary())->deleteUser($user->id);
+        app(AccountEraser::class)->erase($user->id);
         session()->flash('success', __('admin/users.us_user_deleted'));
 
         return redirect()->route('admin.users');

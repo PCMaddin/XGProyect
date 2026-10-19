@@ -441,6 +441,53 @@ Mails eines Universums (Passwort vergessen, Willkommen, Rundmails) hängen
 anderen Gerät im richtigen Universum; der Link merkt sich die Wahl wie die
 Lobby.
 
+## Datenschutz
+
+**Für Spieler.** In den Einstellungen unter *Deine Daten*
+(`/account/privacy`) lädt ein Spieler alles herunter, was das Universum
+über sein Konto speichert. Das ist eine JSON-Datei für Auskunft und
+Datenübertragbarkeit. Ebenso löscht er dort sein Konto sofort. Beides
+verlangt das Passwort und mit Zwei-Faktor-Anmeldung den Code. Fünf
+Fehlversuche sperren für 15 Minuten. Admin-Konten können sich nicht selbst
+löschen, weil ihre Sperren an ihnen hängen. Das verzögerte Löschen nach
+7 Tagen in den Einstellungen gibt es weiterhin.
+
+**Die Datei** enthält Konto, Planeten mit Gebäuden, Schiffen und
+Verteidigung, Forschung, Flotten, Nachrichten, Freunde, Notizen, Allianz,
+Käufe, Gegenstände, Gebote, Import/Export und die Anmeldungen mit
+IP-Adresse und Browser. Dazu kommen Sitzungen, Aktivität, die
+WAX-Verknüpfung und die Saisonplätze. Nicht enthalten sind Passwort,
+Zwei-Faktor-Schlüssel, Wiederherstellungscodes und die Funde der
+Betrugserkennung.
+
+**Löschen** entfernt alles, was das Konto nennt. Das gilt auch für den
+Admin und das automatische Löschen inaktiver Konten, die denselben Weg
+nehmen (`AccountEraser`):
+- Planeten, Nachrichten, Freunde, Notizen, Gegenstände, Gebote;
+- Anmeldungen, Sitzungen, Aktivität, Spionage-Protokoll;
+- Verdachtsfälle, Sperren, Angriffsverbände;
+- Tokens zum Zurücksetzen des Passworts und die WAX-Verknüpfung.
+
+Ohne Bezug zur Person bleiben bezahlte Bestellungen (Aufbewahrungspflicht)
+und die Ruhmeshalle, dort mit `-` statt Namen. Ebenso bleiben
+Rohstoffübergaben bis zur regulären Löschung.
+
+**Fristen für die Datenschutzerklärung** (Stand des Codes):
+
+| Daten | gelöscht nach |
+|---|---|
+| Anmeldungen mit IP und Browser, Rohstoffübergaben, Aktivität | 60 Tagen (`XGP_CHEATS_KEEP_DAYS`) |
+| Nachrichten und Kampfberichte | 7 Tagen |
+| Konto, das 7 Tage im Löschmodus war | sofort danach |
+| Konto ohne Anmeldung (außer Admins und Bots) | 1 Monat |
+| Sitzung | 120 Minuten ohne Aktivität (`SESSION_LIFETIME`) |
+| Log-Dateien | 14 Tagen mit `LOG_CHANNEL=daily` (Standard der Beispiel-`.env`); mit `stack` wächst eine einzige Datei ohne Ende |
+| letzte IP und Browser am Konto | mit dem Konto |
+| bezahlte Bestellungen | nie automatisch (gesetzliche Aufbewahrung, z. B. 10 Jahre) |
+
+Die Admin-Backups (Admin → Backup) enthalten alle Daten. Ihre
+Aufbewahrung stellst du dort ein; nenne sie in der Datenschutzerklärung.
+
 ## Betrugserkennung
 
 Weil sich die Top 10 lohnen, lohnen sich auch Zweitkonten und Pushing. Das
