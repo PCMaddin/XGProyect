@@ -7,11 +7,13 @@ namespace Tests\Unit\App\Http\Controllers;
 use App\Http\Controllers\StripeWebhookController;
 use App\Mail\PurchaseReceipt;
 use App\Models\DarkMatterOrder;
+use App\Services\Legal\LegalPages;
 use App\Services\Premium\DarkMatterOrders;
 use App\Services\Premium\StripeSignature;
 use App\Services\Premium\StripeWebhookHandler;
 use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -105,7 +107,53 @@ class StripeWebhookControllerTest extends DatabaseTestCase
         $this->assertStringContainsString('19,99 €', $html);
         $this->assertStringContainsString(__('emails/receipt.rc_method_wax', [], 'de'), $html);
         $this->assertStringContainsString('Widerrufsrecht verlierst', $html);
+        $this->assertStringNotContainsString('davon Umsatzsteuer', $html);
         $mail->assertHasSubject(__('emails/receipt.rc_subject', ['game' => 'XG Proyect', 'order' => 42], 'de'));
+    }
+
+    public function testTheTaxAndTheCountryStayWithThePaidOrderAndTheConfirmationNamesTheTax(): void
+    {
+        $this->seed(OptionsTableSeeder::class);
+        Mail::fake();
+        DB::table('users')->insert(['id' => self::PLAYER, 'name' => 'buyer', 'email' => 'buyer@example.com', 'password' => 'x', 'home_planet_id' => 1, 'current_planet' => 1]);
+        $order = $this->order();
+
+        // what Stripe adds to the session with Stripe Tax on
+        $this->webhook($this->completed($order, [
+            'customer_details' => ['email' => 'buyer@example.com', 'address' => ['country' => 'de', 'postal_code' => '10115']],
+            'total_details' => ['amount_tax' => 32, 'amount_discount' => 0],
+        ]))->assertJson(['result' => 'credited']);
+
+        $paid = $order->refresh();
+        $this->assertSame(['DE', 32], [$paid->country, $paid->tax]);
+        Mail::assertSent(PurchaseReceipt::class, fn (PurchaseReceipt $mail): bool => $mail->tax === '0.32 €');
+
+        $html = (new PurchaseReceipt(orderId: 42, darkMatter: 10_000, price: '1,99 €', method: 'stripe', paidAt: 1_700_000_000, waivedAt: 1_699_999_000, tax: '0,32 €'))->locale('de')->render();
+        $this->assertStringContainsString('davon Umsatzsteuer', $html);
+        $this->assertStringContainsString('0,32 €', $html);
+    }
+
+    public function testWithoutStripeTaxTheOrderKeepsNoTaxAndNoCountry(): void
+    {
+        $order = $this->order();
+
+        $this->webhook($this->completed($order))->assertJson(['result' => 'credited']);
+
+        $paid = $order->refresh();
+        $this->assertSame([null, null], [$paid->country, $paid->tax]);
+    }
+
+    public function testTheConfirmationLinksTheImprintOnTheConfiguredUrl(): void
+    {
+        $this->seed(OptionsTableSeeder::class);
+        Artisan::call('migrate', ['--database' => 'central', '--path' => 'database/migrations/central', '--force' => true]);
+        app(LegalPages::class)->save('imprint', 'de', '# Impressum', 'ops@example.com', 100);
+        config(['app.url' => 'https://game.example.org']);
+
+        $html = (new PurchaseReceipt(orderId: 42, darkMatter: 10_000, price: '1,99 €', method: 'stripe', paidAt: 1_700_000_000, waivedAt: 1_699_999_000))->locale('de')->render();
+
+        $this->assertStringContainsString('https://game.example.org/legal/imprint?lang=de', $html);
+        $this->assertStringContainsString('href="https://game.example.org/"', $html);
     }
 
     public function testAMailServerThatFailsDoesNotUndoThePayment(): void

@@ -70,6 +70,8 @@ class DarkMatterOrder extends Model
         'provider_currency',
         'expires_at',
         'withdrawal_waived_at',
+        'country',
+        'tax',
     ];
 
     /**
@@ -86,6 +88,7 @@ class DarkMatterOrder extends Model
         'provider_amount' => 'int',
         'expires_at' => 'int',
         'withdrawal_waived_at' => 'int',
+        'tax' => 'int',
     ];
 
     /**

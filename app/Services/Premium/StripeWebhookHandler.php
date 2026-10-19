@@ -77,7 +77,9 @@ class StripeWebhookHandler
                 self::int($session['amount_total'] ?? null),
                 self::str($session['currency'] ?? null),
                 self::str($session['payment_intent'] ?? null),
-                $now
+                $now,
+                self::str(self::arr(self::arr($session['customer_details'] ?? null)['address'] ?? null)['country'] ?? null),
+                self::tax($session),
             );
         } catch (OrderNotCreditedException $exception) {
             Log::error('Stripe webhook: paid order ' . $orderId . ' could not be credited: ' . $exception->getMessage());
@@ -101,6 +103,18 @@ class StripeWebhookHandler
         Log::warning('Stripe webhook: session ' . $sessionId . ' does not match a pending order ' . $orderId, ['universe' => $this->universe()]);
 
         return 'not credited';
+    }
+
+    /**
+     * The tax within the amount, when Stripe worked it out (automatic tax).
+     *
+     * @param array<mixed> $session
+     */
+    private static function tax(array $session): ?int
+    {
+        $details = self::arr($session['total_details'] ?? null);
+
+        return is_numeric($details['amount_tax'] ?? null) ? self::int($details['amount_tax']) : null;
     }
 
     /**

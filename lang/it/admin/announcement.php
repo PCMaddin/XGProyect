@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Invia come',
     'an_send_as_message' => 'Messaggio',
     'an_send_as_email' => 'E-mail (20 per riga)',
+    'an_email_consent' => 'E-mail solo per avvisi sul gioco (manutenzione, regole, fine stagione). La pubblicità via e-mail richiede il consenso dei giocatori.',
     'an_send_message' => 'Invia messaggio',
     'an_not_sent' => 'Non siamo riusciti a consegnare il tuo messaggio!',
     'an_sent' => 'Messaggio inviato con successo!',

@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Of met WAX: maak het getoonde bedrag met het memo van de bestelling over naar het account van de winkel. De donkere materie wordt bijgeschreven zodra de overboeking definitief is, meestal binnen enkele minuten.',
     'dm_intro_token' => 'Of met :symbol, de eigen token van het spel: maak het getoonde bedrag met het memo van de bestelling over naar het account van de winkel. :symbol wordt op Alcor tegen WAX verhandeld; in de winkel koopt hij altijd evenveel donkere materie. De donkere materie wordt bijgeschreven zodra de overboeking definitief is.',
     'dm_price' => 'Prijs',
+    'dm_price_note' => 'Eindprijzen inclusief btw.',
     'dm_buy_stripe' => 'Betalen met kaart',
     'dm_buy_wax' => 'Betalen met WAX',
     'dm_buy_token' => 'Betalen met :symbol',

@@ -29,5 +29,6 @@
             <br class="clear" />
         </div>
     </form>
+    <p id="legal" style="text-align:center;font-size:11px;margin:16px 0;">@include('legal.links')</p>
 </body>
 </html>

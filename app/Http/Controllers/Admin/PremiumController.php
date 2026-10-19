@@ -20,6 +20,7 @@ use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * The premium settings (dark matter, merchant, ways to pay) and the orders
@@ -110,6 +111,51 @@ class PremiumController extends AdminSettingsController
             'shown' => self::ORDERS_SHOWN,
             'transfers' => $this->waxTransfers($wax, $timing),
         ]);
+    }
+
+    /**
+     * Every order of the universe for the books: one line each, amounts in
+     * the currency (not cents), tax and country as Stripe reported them.
+     */
+    public function ordersCsv(DarkMatterOrders $orders): StreamedResponse
+    {
+        $universe = $this->context->current()->slug ?? 'universe';
+        $name = 'orders-' . preg_replace('/[^a-z0-9_-]+/i', '', $universe) . '-' . gmdate('Y-m-d') . '.csv';
+
+        return response()->streamDownload(static function () use ($orders): void {
+            $out = fopen('php://output', 'w');
+
+            if ($out === false) {
+                return;
+            }
+
+            fputcsv($out, ['order', 'status', 'created_at', 'paid_at', 'refunded_at', 'user_id', 'package', 'dark_matter', 'amount', 'currency', 'tax', 'country', 'provider', 'provider_session', 'provider_payment', 'provider_amount', 'provider_currency', 'withdrawal_waived_at'], ',', '"', '');
+
+            foreach ($orders->forTheBooks() as $order) {
+                fputcsv($out, [
+                    $order->id,
+                    $order->status,
+                    gmdate('Y-m-d H:i:s', $order->created_at),
+                    $order->paid_at === null ? '' : gmdate('Y-m-d H:i:s', $order->paid_at),
+                    $order->refunded_at === null ? '' : gmdate('Y-m-d H:i:s', $order->refunded_at),
+                    $order->user_id,
+                    $order->package,
+                    $order->dark_matter,
+                    $order->provider === DarkMatterShop::TOKEN ? '' : number_format($order->amount / 100, 2, '.', ''),
+                    $order->provider === DarkMatterShop::TOKEN ? '' : strtoupper($order->currency),
+                    $order->tax === null ? '' : number_format($order->tax / 100, 2, '.', ''),
+                    (string) $order->country,
+                    $order->provider,
+                    (string) $order->provider_session,
+                    (string) $order->provider_payment,
+                    $order->provider_amount === null ? '' : self::chainAmount($order->provider_amount, (string) $order->provider_currency),
+                    (string) $order->provider_currency,
+                    $order->withdrawal_waived_at === null ? '' : gmdate('Y-m-d H:i:s', $order->withdrawal_waived_at),
+                ], ',', '"', '');
+            }
+
+            fclose($out);
+        }, $name, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     /**

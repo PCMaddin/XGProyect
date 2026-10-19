@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => '收入（已付款订单）',
     'pr_orders_latest' => '最近 :count 个订单',
     'pr_orders_none' => '暂无订单。',
+    'pr_orders_csv' => '导出全部订单为 CSV（记账用）',
     'pr_orders_user' => '玩家',
     'pr_orders_package' => '套餐',
     'pr_orders_dark_matter' => '暗物质',

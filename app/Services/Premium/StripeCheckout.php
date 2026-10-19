@@ -43,28 +43,38 @@ class StripeCheckout
             'universe' => $universe,
         ];
 
+        $parameters = [
+            'mode' => 'payment',
+            'line_items' => [[
+                'quantity' => 1,
+                'price_data' => [
+                    'currency' => $order->currency,
+                    'unit_amount' => $order->amount,
+                    'product_data' => ['name' => $productName],
+                ],
+            ]],
+            'client_reference_id' => (string) $order->id,
+            'metadata' => $metadata,
+            'payment_intent_data' => ['metadata' => $metadata],
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'expires_at' => time() + self::SESSION_LIFETIME,
+        ];
+
+        if ((bool) config('premium.stripe.automatic_tax')) {
+            // Stripe Tax works the VAT of the buyer's country out of the
+            // price: the player pays what the shop shows, the books get the
+            // tax and the country with the payment (webhook)
+            $parameters['automatic_tax'] = ['enabled' => 'true'];
+            $parameters['line_items'][0]['price_data']['tax_behavior'] = 'inclusive';
+        }
+
         try {
             $response = Http::asForm()
                 ->withBasicAuth(self::secret(), '')
                 ->withHeaders(['Idempotency-Key' => 'xgp-dm-' . ($universe === '' ? '' : $universe . '-') . $order->id])
                 ->timeout(15)
-                ->post(self::apiUrl() . '/checkout/sessions', [
-                    'mode' => 'payment',
-                    'line_items' => [[
-                        'quantity' => 1,
-                        'price_data' => [
-                            'currency' => $order->currency,
-                            'unit_amount' => $order->amount,
-                            'product_data' => ['name' => $productName],
-                        ],
-                    ]],
-                    'client_reference_id' => (string) $order->id,
-                    'metadata' => $metadata,
-                    'payment_intent_data' => ['metadata' => $metadata],
-                    'success_url' => $successUrl,
-                    'cancel_url' => $cancelUrl,
-                    'expires_at' => time() + self::SESSION_LIFETIME,
-                ]);
+                ->post(self::apiUrl() . '/checkout/sessions', $parameters);
         } catch (HttpClientException | TransferException $exception) {
             Log::warning('Stripe checkout: Stripe could not be reached', ['order' => $order->id, 'error' => $exception->getMessage()]);
 

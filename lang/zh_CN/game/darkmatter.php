@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => '也可以用 WAX 支付：将显示的金额连同订单备注转账到商店账户。转账确认后（通常几分钟内）暗物质即会存入。',
     'dm_intro_token' => '也可以用游戏自有代币 :symbol 支付：将显示的金额连同订单备注转账到商店账户。:symbol 在 Alcor 上与 WAX 交易；在商店中它始终兑换相同数量的暗物质。转账确认后暗物质即会存入。',
     'dm_price' => '价格',
+    'dm_price_note' => '最终价格已含税。',
     'dm_buy_stripe' => '银行卡支付',
     'dm_buy_wax' => '用 WAX 支付',
     'dm_buy_token' => '用 :symbol 支付',

@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Przychód (opłacone zamówienia)',
     'pr_orders_latest' => 'Ostatnie zamówienia (:count)',
     'pr_orders_none' => 'Brak zamówień.',
+    'pr_orders_csv' => 'Wszystkie zamówienia jako CSV (księgowość)',
     'pr_orders_user' => 'Gracz',
     'pr_orders_package' => 'Pakiet',
     'pr_orders_dark_matter' => 'Ciemna materia',

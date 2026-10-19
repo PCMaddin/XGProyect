@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Oder mit WAX: Du überweist den angezeigten Betrag mit dem Memo der Bestellung an das Konto des Shops. Die Dunkle Materie wird gutgeschrieben, sobald die Überweisung endgültig ist, meist nach wenigen Minuten.',
     'dm_intro_token' => 'Oder mit :symbol, dem eigenen Token des Spiels: Du überweist den angezeigten Betrag mit dem Memo der Bestellung an das Konto des Shops. :symbol wird auf Alcor gegen WAX gehandelt; im Shop kauft er immer gleich viel Dunkle Materie. Die Dunkle Materie wird gutgeschrieben, sobald die Überweisung endgültig ist.',
     'dm_price' => 'Preis',
+    'dm_price_note' => 'Endpreise inkl. Umsatzsteuer.',
     'dm_buy_stripe' => 'Mit Karte zahlen',
     'dm_buy_wax' => 'Mit WAX zahlen',
     'dm_buy_token' => 'Mit :symbol zahlen',

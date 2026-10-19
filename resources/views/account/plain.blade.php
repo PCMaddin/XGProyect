@@ -35,6 +35,8 @@
         .codes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; font-size: 16px; margin: 10px 0; padding: 0; list-style: none; }
         label.check { display: flex; gap: 8px; align-items: flex-start; color: #d8dde8; font-size: 14px; margin-top: 12px; }
         .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+        footer.legal { text-align: center; font-size: 13px; color: #9aa4b8; }
+        footer.legal a { color: #9aa4b8; }
         a { color: #8fa9ff; }
         :focus-visible { outline: 2px solid #8fa9ff; outline-offset: 2px; }
     </style>
@@ -42,6 +44,7 @@
 <body>
 <main>
     @yield('content')
+    <footer class="legal">@include('legal.links')</footer>
 </main>
 </body>
 </html>

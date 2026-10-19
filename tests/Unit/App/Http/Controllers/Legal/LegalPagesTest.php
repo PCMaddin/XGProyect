@@ -9,6 +9,7 @@ use App\Http\Controllers\Operator\LegalController as OperatorLegalController;
 use App\Models\Operator;
 use App\Services\Auth\Totp;
 use App\Services\Auth\TwoFactor;
+use App\Models\User;
 use App\Services\Legal\LegalPages;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
@@ -70,6 +71,17 @@ class LegalPagesTest extends DatabaseTestCase
         $event = DB::connection('central')->table('operator_events')->where('action', 'legal_changed')->sole();
         $this->assertSame('imprint/de', $event->subject);
         $this->assertSame('ops@example.com', DB::connection('central')->table('legal_pages')->value('updated_by'));
+    }
+
+    public function testTheAccountAndPasswordPagesLinkTheImprintToo(): void
+    {
+        app(LegalPages::class)->save('imprint', 'en', '# Imprint', 'ops@example.com', 100);
+        $player = new User(['name' => 'Reader', 'email' => 'reader@example.com', 'password' => 'secret-password', 'home_planet_id' => 1, 'current_planet' => 1]);
+        $player->save();
+
+        $this->get('/account/recover')->assertOk()->assertSee('/legal/imprint', false);
+        $this->actingAs($player)->get('/account/report')->assertOk()->assertSee('/legal/imprint', false);
+        $this->actingAs($player)->get('/account/privacy')->assertOk()->assertSee('/legal/imprint', false);
     }
 
     public function testAVisitorInAnotherLanguageSeesTheTextWrittenFirst(): void

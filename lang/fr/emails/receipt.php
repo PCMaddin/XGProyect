@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => 'Jeton (WAX)',
     'rc_price' => 'Prix',
+    'rc_tax' => 'dont TVA',
     'rc_waiver' => 'Le :date, tu as expressément demandé que la matière noire soit créditée immédiatement et confirmé perdre ainsi ton droit de rétractation.',
     'rc_to_game' => 'Vers le jeu',
     'rc_test' => 'Achat de test : aucun argent réel n\'a été débité.',

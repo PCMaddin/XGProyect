@@ -12,6 +12,7 @@ return [
     'an_send_as' => '发送方式',
     'an_send_as_message' => '消息',
     'an_send_as_email' => '电子邮件（每批 20 封）',
+    'an_email_consent' => '电子邮件仅用于游戏通知（维护、规则、赛季结束）。发送广告邮件需要玩家同意。',
     'an_send_message' => '发送消息',
     'an_not_sent' => '无法投递你的消息！',
     'an_sent' => '消息已发送！',

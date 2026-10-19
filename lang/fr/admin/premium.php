@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Chiffre d\'affaires (commandes payées)',
     'pr_orders_latest' => 'Les :count dernières commandes',
     'pr_orders_none' => 'Aucune commande pour le moment.',
+    'pr_orders_csv' => 'Toutes les commandes en CSV (comptabilité)',
     'pr_orders_user' => 'Joueur',
     'pr_orders_package' => 'Pack',
     'pr_orders_dark_matter' => 'Matière noire',

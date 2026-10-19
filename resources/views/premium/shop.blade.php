@@ -60,6 +60,9 @@
     </tr>
     @endforeach
     <tr>
+        <td class="c" colspan="3"><small>{{ __('game/darkmatter.dm_price_note') }}</small></td>
+    </tr>
+    <tr>
         <th colspan="3" style="text-align:left;">
             <label for="withdrawal-waiver" style="display:flex;gap:6px;align-items:flex-start;">
                 <input type="checkbox" name="withdrawal_waiver" id="withdrawal-waiver" value="1" required/>

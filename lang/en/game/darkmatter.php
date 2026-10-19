@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Or with WAX: transfer the amount shown, with the memo of the order, to the shop\'s account. The dark matter is credited once the transfer is final, usually within a few minutes.',
     'dm_intro_token' => 'Or with :symbol, the game\'s own token: transfer the amount shown, with the memo of the order, to the shop\'s account. :symbol is traded against WAX on Alcor; in the shop it always buys the same dark matter. The dark matter is credited once the transfer is final.',
     'dm_price' => 'Price',
+    'dm_price_note' => 'Final prices, VAT included.',
     'dm_buy_stripe' => 'Pay by card',
     'dm_buy_wax' => 'Pay with WAX',
     'dm_buy_token' => 'Pay with :symbol',

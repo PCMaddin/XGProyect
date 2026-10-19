@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Oppure con WAX: trasferisci l\'importo indicato, con il memo dell\'ordine, al conto del negozio. La materia oscura viene accreditata quando il trasferimento è definitivo, di solito in pochi minuti.',
     'dm_intro_token' => 'Oppure con :symbol, il token del gioco: trasferisci l\'importo indicato, con il memo dell\'ordine, al conto del negozio. :symbol si scambia contro WAX su Alcor; nel negozio compra sempre la stessa materia oscura. La materia oscura viene accreditata quando il trasferimento è definitivo.',
     'dm_price' => 'Prezzo',
+    'dm_price_note' => 'Prezzi finali, IVA inclusa.',
     'dm_buy_stripe' => 'Paga con carta',
     'dm_buy_wax' => 'Paga con WAX',
     'dm_buy_token' => 'Paga con :symbol',

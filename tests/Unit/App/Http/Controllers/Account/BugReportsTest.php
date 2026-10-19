@@ -96,6 +96,19 @@ class BugReportsTest extends DatabaseTestCase
         $this->from('/operator/reports')->post('/operator/reports/' . $first, ['status' => 'deleted'])->assertSessionHasErrors('status');
     }
 
+    public function testAFixedReportIsDeletedAfterNinetyDays(): void
+    {
+        $reports = app(BugReports::class);
+        $fixed = $reports->submit($this->player, '/game.php?page=galaxy', 'Galaxy view is empty.', 'Browser/1.0', 1_000);
+        $reports->submit($this->player, '/game.php?page=research', 'Research never ends.', 'Browser/1.0', 1_000);
+        $reports->setStatus($fixed, BugReports::FIXED, 1_000);
+
+        $this->assertSame(0, $reports->prune(1_000 + BugReports::KEEP_FIXED_DAYS * 86400 - 1));
+        $this->assertSame(1, $reports->prune(1_000 + BugReports::KEEP_FIXED_DAYS * 86400 + 1));
+        // the open one stays, however old
+        $this->assertSame(['new' => 1, 'seen' => 0, 'fixed' => 0], $reports->counts());
+    }
+
     public function testOnlyOperatorsSeeTheReports(): void
     {
         $this->get('/operator/reports')->assertRedirect(route('operator.login'));

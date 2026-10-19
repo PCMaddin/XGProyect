@@ -9,6 +9,10 @@
         :subtitle="__('admin/premium.pr_orders_sub_title')"
     >
         <x-slot name="action">
+            <a href="{{ route('admin.premium.orders.csv') }}" class="btn btn-primary btn-icon-split mr-2">
+                <span class="icon text-white-50"><i class="fas fa-file-csv"></i></span>
+                <span class="text">{{ __('admin/premium.pr_orders_csv') }}</span>
+            </a>
             <a href="{{ route('admin.premium') }}" class="btn btn-secondary btn-icon-split">
                 <span class="icon text-white-50"><i class="fas fa-arrow-left"></i></span>
                 <span class="text">{{ __('admin/premium.pr_orders_back') }}</span>

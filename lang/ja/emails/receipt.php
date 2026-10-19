@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => 'トークン (WAX)',
     'rc_price' => '価格',
+    'rc_tax' => 'うち消費税',
     'rc_waiver' => ':date に、ダークマターを直ちに付与するよう明示的に求め、それにより撤回権を失うことを確認しました。',
     'rc_to_game' => 'ゲームへ',
     'rc_test' => 'テスト購入：実際のお金は動いていません。',

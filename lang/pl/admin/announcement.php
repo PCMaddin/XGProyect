@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Wyślij jako',
     'an_send_as_message' => 'Wiadomość',
     'an_send_as_email' => 'E-mail (20 na turę)',
+    'an_email_consent' => 'E-maile tylko do komunikatów o grze (konserwacja, zasady, koniec sezonu). Reklama e-mailowa wymaga zgody graczy.',
     'an_send_message' => 'Wyślij wiadomość',
     'an_not_sent' => 'Nie udało się dostarczyć wiadomości!',
     'an_sent' => 'Wiadomość wysłana!',

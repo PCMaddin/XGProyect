@@ -70,6 +70,19 @@ class Suspicions
     }
 
     /**
+     * Deletes the signs older than the given time that nobody acted on and
+     * those cleared, and takes the evidence (IP addresses, names) out of the
+     * exclusions decided before it: the decision stays, the trail does not.
+     */
+    public function prune(int $before): void
+    {
+        // a sign seen again at every scan keeps its updated_at young
+        DB::table('suspicions')->where('status', self::OPEN)->where('updated_at', '<', $before)->delete();
+        DB::table('suspicions')->where('status', self::CLEARED)->where('reviewed_at', '<', $before)->delete();
+        DB::table('suspicions')->where('status', self::EXCLUDED)->where('reviewed_at', '<', $before)->where('detail', '!=', '[]')->update(['detail' => '[]']);
+    }
+
+    /**
      * Players the admin has excluded from the season's rankings.
      *
      * @return list<int>

@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Umsatz (bezahlte Bestellungen)',
     'pr_orders_latest' => 'Letzte :count Bestellungen',
     'pr_orders_none' => 'Noch keine Bestellungen.',
+    'pr_orders_csv' => 'Alle Bestellungen als CSV (Buchhaltung)',
     'pr_orders_user' => 'Spieler',
     'pr_orders_package' => 'Paket',
     'pr_orders_dark_matter' => 'Dunkle Materie',

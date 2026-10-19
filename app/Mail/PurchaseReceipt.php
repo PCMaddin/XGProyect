@@ -12,7 +12,6 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Support\Facades\URL;
 
 /**
  * The confirmation of a paid dark matter order (PurchaseReceipts).
@@ -31,6 +30,8 @@ class PurchaseReceipt extends Mailable
         public string $method,
         public int $paidAt,
         public int $waivedAt,
+        /** the tax within the price, formatted, when known (Stripe Tax) */
+        public ?string $tax = null,
     ) {
     }
 
@@ -56,9 +57,14 @@ class PurchaseReceipt extends Mailable
         $written = app(LegalPages::class)->written();
         $links = [];
 
-        foreach ([LegalPages::TERMS, LegalPages::WITHDRAWAL] as $page) {
+        // who sold (imprint), on what terms, and the right of withdrawal;
+        // on APP_URL, whatever host the webhook's request named
+        $base = config('app.url');
+        $base = rtrim(is_string($base) ? $base : '', '/');
+
+        foreach ([LegalPages::IMPRINT, LegalPages::TERMS, LegalPages::WITHDRAWAL] as $page) {
             if (in_array($page, $written, true)) {
-                $links[$page] = route('legal.show', ['page' => $page, 'lang' => $this->locale]);
+                $links[$page] = $base . route('legal.show', ['page' => $page, 'lang' => $this->locale], false);
             }
         }
 
@@ -66,7 +72,7 @@ class PurchaseReceipt extends Mailable
             markdown: 'emails.premium.receipt',
             with: [
                 'gameName' => app(SettingsService::class)->getString('game_name'),
-                'gameUrl' => app(InstanceContext::class)->link(URL::to('/')),
+                'gameUrl' => app(InstanceContext::class)->link($base . '/'),
                 'darkMatterText' => number_format($this->darkMatter, 0, ',', '.'),
                 'links' => $links,
             ],

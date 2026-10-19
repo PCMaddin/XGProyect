@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => '売上（支払い済みの注文）',
     'pr_orders_latest' => '最新の注文 :count 件',
     'pr_orders_none' => 'まだ注文はありません。',
+    'pr_orders_csv' => '全注文をCSVで（経理用）',
     'pr_orders_user' => 'プレイヤー',
     'pr_orders_package' => 'パッケージ',
     'pr_orders_dark_matter' => 'ダークマター',

@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Versturen als',
     'an_send_as_message' => 'Bericht',
     'an_send_as_email' => 'E-mail (20 per regel)',
+    'an_email_consent' => 'E-mails alleen voor mededelingen over het spel (onderhoud, regels, seizoenseinde). Reclame per e-mail vereist toestemming van de spelers.',
     'an_send_message' => 'Bericht versturen',
     'an_not_sent' => 'We konden je bericht niet afleveren!',
     'an_sent' => 'Bericht met succes verstuurd!',

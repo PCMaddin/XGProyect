@@ -31,5 +31,23 @@
 	header -Server
 
 	file_server
-	log
+
+	# the access log without what names a person: the last bits of the
+	# address are cut (the game keeps whole addresses itself, for 60 days,
+	# with the sign-ins), cookies and credentials are never written
+	log {
+		format filter {
+			request>remote_ip ip_mask {
+				ipv4 24
+				ipv6 56
+			}
+			request>client_ip ip_mask {
+				ipv4 24
+				ipv6 56
+			}
+			request>headers>Cookie delete
+			request>headers>Authorization delete
+			request>headers>Stripe-Signature delete
+		}
+	}
 }

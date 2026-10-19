@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Revenue (paid orders)',
     'pr_orders_latest' => 'Latest :count orders',
     'pr_orders_none' => 'No orders yet.',
+    'pr_orders_csv' => 'All orders as CSV (bookkeeping)',
     'pr_orders_user' => 'Player',
     'pr_orders_package' => 'Package',
     'pr_orders_dark_matter' => 'Dark matter',

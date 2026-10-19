@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Senden als',
     'an_send_as_message' => 'Nachricht',
     'an_send_as_email' => 'E-Mail (20 pro Durchgang)',
+    'an_email_consent' => 'E-Mails nur für Mitteilungen zum Spiel (Wartung, Regeln, Saisonende). Werbung per E-Mail braucht die Einwilligung der Spieler.',
     'an_send_message' => 'Nachricht senden',
     'an_not_sent' => 'Deine Nachricht konnte nicht zugestellt werden!',
     'an_sent' => 'Nachricht erfolgreich gesendet!',

@@ -91,9 +91,9 @@ class DarkMatterOrders
      *
      * @return bool whether dark matter was credited now
      */
-    public function credit(int $orderId, string $sessionId, int $amount, string $currency, string $paymentId, int $now): bool
+    public function credit(int $orderId, string $sessionId, int $amount, string $currency, string $paymentId, int $now, string $country = '', ?int $tax = null): bool
     {
-        return DB::transaction(function () use ($orderId, $sessionId, $amount, $currency, $paymentId, $now): bool {
+        return DB::transaction(function () use ($orderId, $sessionId, $amount, $currency, $paymentId, $now, $country, $tax): bool {
             $order = DarkMatterOrder::whereKey($orderId)->lockForUpdate()->first();
 
             if ($order === null || $order->status !== DarkMatterOrder::PENDING || $sessionId === '' || $order->provider_session !== $sessionId || $order->amount !== $amount || $order->currency !== strtolower($currency)) {
@@ -103,7 +103,14 @@ class DarkMatterOrders
             // only the first of two concurrent calls finds the order pending
             $marked = DarkMatterOrder::whereKey($orderId)
                 ->where('status', DarkMatterOrder::PENDING)
-                ->update(['status' => DarkMatterOrder::PAID, 'paid_at' => $now, 'provider_payment' => $paymentId === '' ? null : $paymentId]);
+                ->update([
+                    'status' => DarkMatterOrder::PAID,
+                    'paid_at' => $now,
+                    'provider_payment' => $paymentId === '' ? null : $paymentId,
+                    // for the books: where the buyer is and how much was tax
+                    'country' => preg_match('/^[A-Za-z]{2}$/', $country) === 1 ? strtoupper($country) : null,
+                    'tax' => $tax,
+                ]);
 
             if ($marked !== 1) {
                 return false;
@@ -178,6 +185,23 @@ class DarkMatterOrders
             ->orderByDesc('dark_matter_orders.id')
             ->limit($limit)
             ->get(['dark_matter_orders.*', 'users.name as user_name']);
+    }
+
+    /**
+     * Every order that touched money or tokens (paid, refunded, disputed),
+     * oldest first: what the books need.
+     *
+     * @return \Generator<int, DarkMatterOrder>
+     */
+    public function forTheBooks(): \Generator
+    {
+        $query = DarkMatterOrder::query()
+            ->whereIn('status', [DarkMatterOrder::PAID, DarkMatterOrder::REFUNDED, DarkMatterOrder::DISPUTED])
+            ->orderBy('id');
+
+        foreach ($query->lazy(500) as $order) {
+            yield $order;
+        }
     }
 
     /**

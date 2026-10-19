@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Ou en WAX : transfère le montant indiqué, avec le mémo de la commande, sur le compte de la boutique. La matière noire est créditée dès que le transfert est définitif, généralement en quelques minutes.',
     'dm_intro_token' => 'Ou en :symbol, le jeton du jeu : transfère le montant indiqué, avec le mémo de la commande, sur le compte de la boutique. :symbol s\'échange contre du WAX sur Alcor ; à la boutique, il achète toujours la même quantité de matière noire. La matière noire est créditée dès que le transfert est définitif.',
     'dm_price' => 'Prix',
+    'dm_price_note' => 'Prix définitifs, TVA comprise.',
     'dm_buy_stripe' => 'Payer par carte',
     'dm_buy_wax' => 'Payer en WAX',
     'dm_buy_token' => 'Payer en :symbol',

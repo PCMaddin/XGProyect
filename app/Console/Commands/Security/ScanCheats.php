@@ -8,6 +8,7 @@ use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
 use App\Services\Security\CheatScanner;
 use App\Services\Security\PlayerTrail;
+use App\Services\Security\Suspicions;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -29,7 +30,9 @@ class ScanCheats extends Command
         $now = time();
         $work = static function () use ($now): int {
             $keep = config('cheats.keep_days');
-            app(PlayerTrail::class)->prune($now - (is_int($keep) ? $keep : 60) * 86400);
+            $before = $now - (is_int($keep) ? $keep : 60) * 86400;
+            app(PlayerTrail::class)->prune($before);
+            app(Suspicions::class)->prune($before);
 
             return app(CheatScanner::class)->scan($now);
         };

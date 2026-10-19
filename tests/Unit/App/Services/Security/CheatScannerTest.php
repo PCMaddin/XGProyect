@@ -153,6 +153,37 @@ class CheatScannerTest extends DatabaseTestCase
         $this->assertSame(0, DB::table('login_events')->count());
     }
 
+    public function testOldSignsGoWithTheTrailsAndADecisionKeepsNoEvidence(): void
+    {
+        $suspicions = app(Suspicions::class);
+        $old = self::NOW - 100;
+        $suspicions->note(self::ALPHA, 'shared_ip', self::BETA, 50, ['ip' => '10.0.0.1'], $old);
+        $suspicions->note(self::BETA, 'shared_ip', self::ALPHA, 50, ['ip' => '10.0.0.1'], $old);
+        $suspicions->note(self::GAMMA, 'pushing', self::ALPHA, 80, ['ip' => '10.0.0.2'], $old);
+        // seen again at the last scan: still a sign
+        $suspicions->note(self::GAMMA, 'machine_pace', 0, 50, ['ip' => '10.0.0.3'], $old);
+        $suspicions->note(self::GAMMA, 'machine_pace', 0, 60, ['ip' => '10.0.0.3'], self::NOW);
+        $suspicions->decide($this->sign(self::BETA, 'shared_ip'), Suspicions::CLEARED, 'siblings', $old);
+        $suspicions->decide($this->sign(self::GAMMA, 'pushing'), Suspicions::EXCLUDED, 'pushing', $old);
+
+        $suspicions->prune(self::NOW);
+
+        $this->assertSame([[self::GAMMA, 'machine_pace', 0, 60], [self::GAMMA, 'pushing', self::ALPHA, 80]], $this->signs());
+        $this->assertSame([self::GAMMA], $suspicions->excluded());
+        $this->assertSame('[]', DB::table('suspicions')->where('kind', 'pushing')->value('detail'));
+        $detail = DB::table('suspicions')->where('kind', 'machine_pace')->value('detail');
+        $this->assertIsString($detail);
+        $this->assertStringContainsString('10.0.0.3', $detail);
+    }
+
+    private function sign(int $user, string $kind): int
+    {
+        $id = DB::table('suspicions')->where('user_id', $user)->where('kind', $kind)->value('id');
+        $this->assertIsNumeric($id);
+
+        return (int) $id;
+    }
+
     /**
      * @return list<list<int|string>> user, kind, other user, score
      */

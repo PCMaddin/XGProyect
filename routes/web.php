@@ -133,6 +133,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/premium', [Admin\PremiumController::class, 'index'])->name('admin.premium');
             Route::post('/premium', [Admin\PremiumController::class, 'update'])->name('admin.premium.update');
             Route::get('/premium/orders', [Admin\PremiumController::class, 'orders'])->name('admin.premium.orders');
+            Route::get('/premium/orders.csv', [Admin\PremiumController::class, 'ordersCsv'])->name('admin.premium.orders.csv');
             Route::get('/rebuildhighscores', [Admin\RebuildHighscoresController::class, 'index'])->name('admin.rebuildhighscores');
             Route::post('/rebuildhighscores', [Admin\RebuildHighscoresController::class, 'run'])->name('admin.rebuildhighscores.run');
             Route::get('/registration', [Admin\RegistrationController::class, 'index'])->name('admin.registration');

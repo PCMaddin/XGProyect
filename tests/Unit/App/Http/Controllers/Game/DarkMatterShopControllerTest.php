@@ -202,6 +202,28 @@ class DarkMatterShopControllerTest extends DatabaseTestCase
             $this->assertSame(['metadata' => $metadata], $data['payment_intent_data']);
             $this->assertSame($back, $data['success_url']);
             $this->assertSame($back . '&cancelled=1', $data['cancel_url']);
+            // without Stripe Tax the price is charged as it is
+            $this->assertArrayNotHasKey('automatic_tax', $data);
+
+            return true;
+        });
+    }
+
+    public function testWithStripeTaxTheSessionAsksForTheTaxWithinThePrice(): void
+    {
+        config(['premium.stripe.automatic_tax' => true]);
+        Http::fake(['api.stripe.com/*' => Http::response(['id' => 'cs_test_tax', 'url' => 'https://checkout.stripe.com/c/pay/cs_test_tax'])]);
+
+        $this->page(Request::create('https://game.example.org/game.php?page=darkmatter', 'POST', ['withdrawal_waiver' => '1', 'package' => 'dm_10k']));
+
+        Http::assertSent(function (ClientRequest $request): bool {
+            parse_str($request->body(), $data);
+            $this->assertSame(['enabled' => 'true'], $data['automatic_tax']);
+            // the player pays what the shop shows; the tax is a part of it
+            $this->assertSame([[
+                'quantity' => '1',
+                'price_data' => ['currency' => 'eur', 'unit_amount' => '199', 'product_data' => ['name' => '10.000 dark matter'], 'tax_behavior' => 'inclusive'],
+            ]], $data['line_items']);
 
             return true;
         });

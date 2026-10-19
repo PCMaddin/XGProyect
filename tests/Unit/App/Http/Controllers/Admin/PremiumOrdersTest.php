@@ -147,6 +147,31 @@ class PremiumOrdersTest extends DatabaseTestCase
             ->assertSee('credited');
     }
 
+    public function testTheBooksGetEveryOrderThatMovedMoneyAsCsv(): void
+    {
+        $this->order($this->admin->id, 'dm_10k', 199, 'paid');
+        $this->order($this->admin->id, 'dm_50k', 799, 'pending');
+        $this->order(999, 'dm_300k', 3499, 'refunded');
+        DB::table('dark_matter_orders')->where('package', 'dm_10k')->update(['tax' => 32, 'country' => 'DE', 'provider_payment' => 'pi_1', 'paid_at' => 1_700_000_000]);
+
+        $response = $this->actingAs($this->admin)->get('/admin/premium/orders.csv');
+
+        $response->assertOk()->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('attachment; filename=orders-', (string) $response->headers->get('Content-Disposition'));
+        $lines = explode("\n", trim($response->streamedContent()));
+        $this->assertCount(3, $lines);
+        $this->assertSame('order,status,created_at,paid_at,refunded_at,user_id,package,dark_matter,amount,currency,tax,country,provider,provider_session,provider_payment,provider_amount,provider_currency,withdrawal_waived_at', $lines[0]);
+        $this->assertStringContainsString(',paid,', $lines[1]);
+        $this->assertStringContainsString('"2023-11-14 22:13:20"', $lines[1]);
+        $this->assertStringContainsString(',dm_10k,1000,1.99,EUR,0.32,DE,stripe,,pi_1,,,', $lines[1]);
+        $this->assertStringContainsString(',refunded,', $lines[2]);
+        $this->assertStringContainsString(',999,dm_300k,1000,34.99,EUR,,,stripe,', $lines[2]);
+        // the open order moved no money
+        $this->assertStringNotContainsString('dm_50k', $response->streamedContent());
+
+        $this->get('/admin/premium/orders')->assertOk()->assertSee('/admin/premium/orders.csv', false);
+    }
+
     public function testWithoutTheTransferTableTheOrdersStillShow(): void
     {
         $this->actingAs($this->admin)->get('/admin/premium/orders')

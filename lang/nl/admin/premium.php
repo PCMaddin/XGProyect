@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Omzet (betaalde bestellingen)',
     'pr_orders_latest' => 'Laatste :count bestellingen',
     'pr_orders_none' => 'Nog geen bestellingen.',
+    'pr_orders_csv' => 'Alle bestellingen als CSV (boekhouding)',
     'pr_orders_user' => 'Speler',
     'pr_orders_package' => 'Pakket',
     'pr_orders_dark_matter' => 'Donkere materie',

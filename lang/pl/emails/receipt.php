@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => 'Token (WAX)',
     'rc_price' => 'Cena',
+    'rc_tax' => 'w tym VAT',
     'rc_waiver' => 'W dniu :date wyraźnie zażądałeś natychmiastowego zapisania ciemnej materii i potwierdziłeś, że tym samym tracisz prawo odstąpienia od umowy.',
     'rc_to_game' => 'Do gry',
     'rc_test' => 'Zakup testowy: nie przesłano prawdziwych pieniędzy.',

@@ -29,6 +29,9 @@ class BugReports
 
     public const PAGE_SIZE = 50;
 
+    /** a fixed report is deleted after this many days (it names a player and a browser) */
+    public const KEEP_FIXED_DAYS = 90;
+
     public function __construct(private InstanceContext $context)
     {
     }
@@ -90,6 +93,14 @@ class BugReports
      * Only a path of this site (no other host, no scheme): the page the
      * player came from.
      */
+    /**
+     * Deletes the reports fixed before the given time.
+     */
+    public function prune(int $now): int
+    {
+        return $this->table()->where('status', self::FIXED)->where('updated_at', '<', $now - self::KEEP_FIXED_DAYS * 86400)->delete();
+    }
+
     public static function page(string $page): string
     {
         $path = parse_url($page, PHP_URL_PATH);

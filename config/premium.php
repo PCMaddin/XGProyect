@@ -43,6 +43,10 @@ return [
         'secret' => (string) env('STRIPE_SECRET', ''),
         // the signing secret of the webhook endpoint (whsec_…)
         'webhook_secret' => (string) env('STRIPE_WEBHOOK_SECRET', ''),
+        // Stripe Tax (set up in the dashboard) works the VAT of the buyer's
+        // country out of the package price and the webhook keeps tax and
+        // country with the order; off: the price is charged as it is
+        'automatic_tax' => (bool) env('STRIPE_AUTOMATIC_TAX', false),
         'api_url' => 'https://api.stripe.com/v1',
         // a signed event older than this (seconds) is refused (replays)
         'tolerance' => 300,

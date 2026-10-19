@@ -2634,6 +2634,50 @@ Baseline-Einträge.
       schreibt Fehler der Worker ins Container-Log und reicht die
       Umgebung des Containers durch (`clear_env = no`, so kommen die
       Geheimnisse an); Installer fragt das Passwort ab statt es zu erzeugen.
+  - ✅ **Vierter Durchgang** mit vier Brillen: Datenschutz, Recht,
+    Buchhaltung, Sicherheit.
+    - *Buchhaltung:* Die Bestellung kannte weder das Land des Käufers noch
+      den Steueranteil; für die Umsatzsteuer auf digitale Inhalte (Besteuerung
+      im Käuferland, OSS) fehlte damit die Grundlage, und einen Export gab es
+      nicht. Jetzt `STRIPE_AUTOMATIC_TAX` (Stripe Tax rechnet die Steuer aus
+      dem Preis heraus, `tax_behavior = inclusive`), der Webhook speichert
+      Steuer und Land an der Bestellung (`country`, `tax`), die
+      Kaufbestätigung nennt „davon Umsatzsteuer“, und unter *Premium →
+      Bestellungen* gibt es alle Bestellungen mit Geldbewegung als CSV.
+    - *Recht:* Der Shop zeigte Preise ohne den Hinweis auf die Umsatzsteuer
+      (PAngV); jetzt „Endpreise inkl. Umsatzsteuer“. Die Kaufbestätigung
+      verlinkt nun auch das Impressum (wer verkauft hat), und ihre Links
+      stehen auf `APP_URL` statt auf dem Host der Webhook-Anfrage. Die
+      Kontoseiten (Deine Daten, Sicherheit, Fehler melden, Passwort vergessen
+      und zurücksetzen) hatten keinen Link zum Impressum; jetzt in der
+      Fußzeile. Die `.env.example` nannte `charge.dispute.created` nicht
+      unter den Webhook-Ereignissen. Rundschreiben per E-Mail tragen einen
+      Hinweis, dass Werbung eine Einwilligung braucht.
+    - *Datenschutz:* Verdachtsfälle der Betrugserkennung (mit IP-Adressen)
+      und erledigte Fehlermeldungen (Name, Browser) blieben für immer. Jetzt
+      löscht `xgp:cheat:scan` offene und ausgeräumte Verdachtsfälle nach
+      `XGP_CHEATS_KEEP_DAYS` und nimmt Ausschlüssen die Belege; erledigte
+      Fehlermeldungen gehen nach 90 Tagen. Caddys Zugriffsprotokoll schrieb
+      volle IP-Adressen und alle Header, also auch das Sitzungs-Cookie;
+      jetzt werden die letzten Stellen der Adresse gekappt, Cookie,
+      Authorization und Stripe-Signature nicht geschrieben. Die Fristen in
+      `docs/universes.md` um Verdachtsfälle, Fehlermeldungen,
+      Zugriffsprotokoll und Sicherungen ergänzt.
+    - *Sicherheit:* `composer audit` ohne Befund. Geprüft und in Ordnung:
+      Passwort-Reset über Laravels Broker (gehashte Tokens, 60 Minuten,
+      gleiche Antwort für unbekannte Adressen); Zwei-Faktor-Geheimnis
+      verschlüsselt, Wiederherstellungscodes als SHA-256; Sitzung wird beim
+      Login erneuert; Cookies `HttpOnly`, `SameSite=Lax`, `Secure` per
+      `.env`; HSTS, `nosniff`, `X-Frame-Options`, Referrer-Policy aus der
+      Middleware; keine externen Skripte oder Schriften; Stripe-Checkout mit
+      Idempotency-Key, Betrag und Währung aus der Bestellung; Bestellungen
+      überleben Kontolöschung und Reset; Archiv-Snapshots von den Keep-Regeln
+      ausgenommen; Datenauskunft und Löschung decken alle Tabellen mit
+      Personenbezug (Rest hängt per Fremdschlüssel am Konto).
+    - *Für den Anwalt bleibt:* Zustimmung zu AGB und Datenschutz wird mit
+      der Registrierung (Zeitpunkt = Registrierung) verlangt, aber nicht
+      neu eingeholt, wenn sich die Texte ändern; Altersgrenze und Jugendschutz
+      bei Echtgeld sind Sache der AGB; MiCA für den Token (t01).
   - *Geprüft und in Ordnung:* signierte Bestätigungslinks mit Universum in
     der Signatur; Einladungscodes atomar; Rechtstexte mit escapetem HTML und
     ohne `javascript:`-Links; Fehlermeldung ohne fremden Host; Shell-Werte der
@@ -2647,7 +2691,11 @@ Baseline-Einträge.
     Universum; View im Archiv; abgebrochene Wiederherstellung; Datei unter
     `public/`; Mail ohne Werte; gefälschter `X-Forwarded-For` ohne eingetragenen Proxy
     ignoriert, mit eingetragenem Proxy gesehen; Bestätigungslink auf `APP_URL`
-    trotz anderem Anfrage-Host; `Bob<` neben `Bob` wird `Bob-8`.
+    trotz anderem Anfrage-Host; `Bob<` neben `Bob` wird `Bob-8`; Steuer und
+    Land aus dem Webhook an der Bestellung und in der Mail; Checkout mit und
+    ohne Stripe Tax; CSV ohne offene Bestellungen; alte Verdachtsfälle weg,
+    Ausschluss ohne Belege; erledigte Fehlermeldung nach 90 Tagen weg;
+    Impressum auf Konto- und Passwortseiten.
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Envoyer comme',
     'an_send_as_message' => 'Message',
     'an_send_as_email' => 'E-mail (20 par ligne)',
+    'an_email_consent' => 'E-mails uniquement pour les avis sur le jeu (maintenance, règles, fin de saison). La publicité par e-mail exige le consentement des joueurs.',
     'an_send_message' => 'Envoyer le message',
     'an_not_sent' => 'Nous n’avons pas pu envoyer votre message !',
     'an_sent' => 'Message envoyé avec succès !',

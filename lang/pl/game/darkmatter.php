@@ -8,6 +8,7 @@ return [
     'dm_intro_wax' => 'Albo w WAX: przelej podaną kwotę z memo zamówienia na konto sklepu. Ciemna materia zostanie dopisana, gdy przelew będzie ostateczny, zwykle w ciągu kilku minut.',
     'dm_intro_token' => 'Albo w :symbol, własnym tokenie gry: przelej podaną kwotę z memo zamówienia na konto sklepu. :symbol jest notowany wobec WAX na Alcor; w sklepie zawsze kupuje tyle samo ciemnej materii. Ciemna materia zostanie dopisana, gdy przelew będzie ostateczny.',
     'dm_price' => 'Cena',
+    'dm_price_note' => 'Ceny końcowe zawierają podatek VAT.',
     'dm_buy_stripe' => 'Zapłać kartą',
     'dm_buy_wax' => 'Zapłać w WAX',
     'dm_buy_token' => 'Zapłać w :symbol',

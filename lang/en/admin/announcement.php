@@ -12,6 +12,7 @@ return [
     'an_send_as' => 'Send as',
     'an_send_as_message' => 'Message',
     'an_send_as_email' => 'Email (20 per row)',
+    'an_email_consent' => 'Emails only for notices about the game (maintenance, rules, end of season). Advertising by email needs the players\' consent.',
     'an_send_message' => 'Send message',
     'an_not_sent' => 'We couldn\'t deliver your message!',
     'an_sent' => 'Message succesfully sent!',

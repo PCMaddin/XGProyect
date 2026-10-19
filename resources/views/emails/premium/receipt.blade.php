@@ -15,6 +15,9 @@
 | {{ __('emails/receipt.rc_item') }} | {{ $darkMatterText }} |
 | {{ __('emails/receipt.rc_method') }} | {{ __('emails/receipt.rc_method_' . $method) }} |
 | **{{ __('emails/receipt.rc_price') }}** | **{{ $price }}** |
+@if ($tax !== null)
+| {{ __('emails/receipt.rc_tax') }} | {{ $tax }} |
+@endif
 </x-mail::table>
 
 {{ __('emails/receipt.rc_waiver', ['date' => date('Y-m-d H:i T', $waivedAt)]) }}

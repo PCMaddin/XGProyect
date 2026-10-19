@@ -43,6 +43,7 @@ class PurchaseReceipts
                 method: $order->provider,
                 paidAt: $order->paid_at ?? time(),
                 waivedAt: $order->withdrawal_waived_at ?? $order->created_at,
+                tax: $order->tax === null ? null : $this->shop->formatPrice($order->tax, $order->currency),
             );
 
             if ($this->shop->paysForTest()) {

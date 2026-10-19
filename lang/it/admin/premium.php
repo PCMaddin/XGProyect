@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Ricavi (ordini pagati)',
     'pr_orders_latest' => 'Ultimi :count ordini',
     'pr_orders_none' => 'Nessun ordine finora.',
+    'pr_orders_csv' => 'Tutti gli ordini come CSV (contabilità)',
     'pr_orders_user' => 'Giocatore',
     'pr_orders_package' => 'Pacchetto',
     'pr_orders_dark_matter' => 'Materia oscura',

@@ -37,6 +37,7 @@ return [
     'pr_orders_revenue' => 'Receita (pedidos pagos)',
     'pr_orders_latest' => 'Últimos :count pedidos',
     'pr_orders_none' => 'Ainda não há pedidos.',
+    'pr_orders_csv' => 'Todos os pedidos em CSV (contabilidade)',
     'pr_orders_user' => 'Jogador',
     'pr_orders_package' => 'Pacote',
     'pr_orders_dark_matter' => 'Matéria escura',

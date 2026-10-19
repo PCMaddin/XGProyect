@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands\Operators;
 
 use App\Mail\ErrorDigest;
+use App\Services\Feedback\BugReports;
 use App\Services\Operators\ErrorMonitor;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -24,10 +25,11 @@ class NotifyErrors extends Command
     /** @var string */
     protected $description = 'Mail the operators the errors that piled up in all universes';
 
-    public function handle(ErrorMonitor $monitor): int
+    public function handle(ErrorMonitor $monitor, BugReports $reports): int
     {
         $now = time();
         $monitor->prune($now);
+        $reports->prune($now);
 
         $configured = config('operators.errors_mail');
         $to = array_values(array_filter(array_map('trim', explode(',', is_string($configured) ? $configured : '')), static fn (string $address): bool => filter_var($address, FILTER_VALIDATE_EMAIL) !== false));

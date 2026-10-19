@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => 'Token (WAX)',
     'rc_price' => 'Precio',
+    'rc_tax' => 'de los cuales IVA',
     'rc_waiver' => 'El :date solicitaste expresamente que la materia oscura se abonara de inmediato y confirmaste que con ello pierdes tu derecho de desistimiento.',
     'rc_to_game' => 'Ir al juego',
     'rc_test' => 'Compra de prueba: no se movió dinero real.',

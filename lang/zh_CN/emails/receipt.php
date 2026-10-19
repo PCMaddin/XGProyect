@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => '代币 (WAX)',
     'rc_price' => '价格',
+    'rc_tax' => '其中税额',
     'rc_waiver' => '您于 :date 明确要求立即发放暗物质，并确认因此失去撤销权。',
     'rc_to_game' => '进入游戏',
     'rc_test' => '测试购买：未涉及真实资金。',

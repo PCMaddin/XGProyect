@@ -14,6 +14,7 @@ return [
     'rc_method_wax' => 'WAX',
     'rc_method_token' => 'Token (WAX)',
     'rc_price' => 'Price',
+    'rc_tax' => 'of which VAT',
     'rc_waiver' => 'On :date you expressly requested that the dark matter be credited at once and confirmed that you thereby lose your right of withdrawal.',
     'rc_to_game' => 'To the game',
     'rc_test' => 'Test purchase: no real money moved.',

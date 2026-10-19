@@ -339,6 +339,23 @@ ein geänderter Preis sollte eine neue Paket-ID bekommen.
    Sein Signatur-Schlüssel (`whsec_…`) kommt als `STRIPE_WEBHOOK_SECRET` in
    die `.env`. Ein Endpunkt dient allen Universen.
 3. Optional `STRIPE_CURRENCY` (Standard `eur`).
+4. Für die Umsatzsteuer: Digitale Inhalte werden in der EU dort besteuert,
+   wo der Käufer wohnt (OSS-Verfahren). Mit `STRIPE_AUTOMATIC_TAX=true`
+   rechnet Stripe Tax (im Dashboard unter *Steuern* einrichten) die
+   Umsatzsteuer des Käuferlands aus dem Paketpreis heraus; der Spieler zahlt
+   den Preis, den der Shop zeigt, und die Bestellung merkt sich Steuerbetrag
+   und Land. Beides steht in der Kaufbestätigung („davon Umsatzsteuer“) und
+   im CSV für die Buchhaltung. Ohne den Schalter wird der Preis berechnet,
+   wie er ist, und die Bestellung kennt weder Steuer noch Land.
+
+**Für die Buchhaltung** lädt der Admin unter *Premium → Bestellungen* alle
+Bestellungen, die Geld oder Token bewegt haben (bezahlt, erstattet,
+Rückbuchung), als CSV: je Zeile Bestellnummer, Status, Zeiten (UTC), Spieler,
+Paket, Betrag in der Währung, Steuer, Land, Zahlungsart und die Kennungen
+bei Stripe (Session, Zahlung) oder auf der Kette (Memo). Bestellungen werden
+nie gelöscht, auch nicht mit dem Konto des Spielers oder beim Zurücksetzen
+des Universums; ein archiviertes Universum nimmt sie in die Sicherung mit.
+Im Shop steht unter den Paketen „Endpreise inkl. Umsatzsteuer“ (PAngV).
 
 Gutgeschrieben wird automatisch per Webhook. Eine volle Erstattung zieht die
 Dunkle Materie wieder ab, soweit der Spieler sie noch hat; Teilerstattungen
@@ -694,6 +711,10 @@ Rohstoffübergaben bis zur regulären Löschung.
 | Konto, das 7 Tage im Löschmodus war | sofort danach |
 | Konto ohne Anmeldung (außer Admins und Bots) | 1 Monat |
 | Konto mit unbestätigter E-Mail-Adresse | 7 Tagen nach der Registrierung |
+| Verdachtsfälle der Betrugserkennung (offen oder ausgeräumt, mit IP-Adressen) | 60 Tagen nach dem letzten Fund (`XGP_CHEATS_KEEP_DAYS`); ein Ausschluss bleibt, aber ohne die Belege |
+| Fehlermeldungen der Spieler (Name, Browser), erledigte | 90 Tagen |
+| Fehlergruppen unter /operator, erledigte | 90 Tagen |
+| Zugriffsprotokoll des Webservers (Docker-Stack) | ohne die letzten Stellen der IP-Adresse (IPv4 /24, IPv6 /56), ohne Cookies; 5 × 20 MB je Container, dann überschrieben |
 | Sitzung | 120 Minuten ohne Aktivität (`SESSION_LIFETIME`) |
 | Log-Dateien | 14 Tagen mit `LOG_CHANNEL=daily` (Standard der Beispiel-`.env`); mit `stack` wächst eine einzige Datei ohne Ende |
 | letzte IP und Browser am Konto | mit dem Konto |
@@ -701,6 +722,11 @@ Rohstoffübergaben bis zur regulären Löschung.
 
 Die Admin-Backups (Admin → Backup) enthalten alle Daten. Ihre
 Aufbewahrung stellst du dort ein; nenne sie in der Datenschutzerklärung.
+Dasselbe gilt für die Sicherungen außer Haus (`XGP_BACKUP_KEEP_DAILY`,
+`…_WEEKLY`, `…_MONTHLY`) und das Archiv eines geschlossenen Universums, das
+bis zum Löschen des Snapshots bleibt. Rundschreiben per E-Mail (Admin →
+Rundschreiben) sind für Mitteilungen zum Spiel gedacht; Werbung per E-Mail
+braucht die Einwilligung der Spieler (§ 7 UWG), die das Spiel nicht einholt.
 
 ## Betrugserkennung
 
