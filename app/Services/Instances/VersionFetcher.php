@@ -10,8 +10,8 @@ use Symfony\Component\Process\Process;
 
 /**
  * A new version of the code from git, into a folder of its own under the
- * versions path (a server without Docker): cloned at a tag or branch,
- * dependencies installed, caches built, settings linked. Nothing serves it
+ * versions path (a server without Docker): fetched at a tag, a branch or
+ * a commit, dependencies installed, caches built, settings linked. Nothing serves it
  * until `use` points the folder `current` at it; the web root is
  * <versions path>/current/public, so the switch is one symlink, and the
  * older versions stay beside it for the universes still playing on them.
@@ -30,8 +30,8 @@ class VersionFetcher
     }
 
     /**
-     * Clones the given tag or branch (the newest tag when none) of the
-     * repository (the origin of this checkout when none) into
+     * Fetches the given tag, branch or commit (the newest tag when none) of
+     * the repository (the origin of this checkout when none) into
      * <versions path>/<version>. Returns what was done, one line each.
      *
      * @return list<string>
@@ -47,10 +47,10 @@ class VersionFetcher
             throw new RuntimeException('Cannot create ' . $root);
         }
 
-        $done = ['Cloning ' . $ref . ' of ' . $repository . '.'];
+        $done = ['Fetching ' . $ref . ' of ' . $repository . '.'];
 
         try {
-            $this->run(['git', 'clone', '--quiet', '--depth', '1', '--branch', $ref, $repository, $temporary], $root);
+            $this->checkout($repository, $ref, $temporary);
             $version = $this->versionOf($temporary);
             $target = $root . '/' . $version;
 
@@ -109,6 +109,29 @@ class VersionFetcher
     }
 
     /**
+     * The code at a tag, a branch or a commit: without the history when the
+     * server hands the one commit out (tags, branches, full hashes), else
+     * with it (a short hash, or a server that gives only branch tips).
+     */
+    private function checkout(string $repository, string $ref, string $directory): void
+    {
+        if (!mkdir($directory, 0o750, true)) {
+            throw new RuntimeException('Cannot create ' . $directory);
+        }
+
+        $this->run(['git', 'init', '-q'], $directory);
+        $this->run(['git', 'remote', 'add', 'origin', $repository], $directory);
+
+        try {
+            $this->run(['git', 'fetch', '--quiet', '--depth', '1', 'origin', $ref], $directory);
+            $this->run(['git', 'checkout', '-q', '--detach', 'FETCH_HEAD'], $directory);
+        } catch (RuntimeException) {
+            $this->run(['git', 'fetch', '--quiet', '--tags', 'origin'], $directory);
+            $this->run(['git', 'checkout', '-q', '--detach', $ref], $directory);
+        }
+    }
+
+    /**
      * The repository this checkout came from.
      */
     private function origin(): string
@@ -133,7 +156,7 @@ class VersionFetcher
         }
 
         if ($tags === []) {
-            throw new RuntimeException('The repository has no tags; name a tag or branch.');
+            throw new RuntimeException('The repository has no tags; name a tag, a branch or a commit.');
         }
 
         usort($tags, static fn (string $one, string $other): int => version_compare(ltrim($one, 'v'), ltrim($other, 'v')));

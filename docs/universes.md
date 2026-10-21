@@ -531,9 +531,9 @@ Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
   `* * * * * php /srv/xgp/versions/current/artisan schedule:run`;
   `XGP_VERSIONS_PATH=/srv/xgp/versions` in der `.env`, die alle Versionen
   teilen (die `.env` liegt einmal da, jede Version bekommt einen Link).
-- `php artisan xgp:versions:fetch [tag|branch] [--repo=URL]` klont die
-  Version (Standard: das neueste Tag des `origin` dieses Checkouts) in
-  einen Ordner mit ihrer Nummer, installiert die Abhängigkeiten
+- `php artisan xgp:versions:fetch [tag|branch|commit] [--repo=URL]` holt
+  die Version (Standard: das neueste Tag des `origin` dieses Checkouts;
+  ein Commit auch als kurzer Hash) in einen Ordner mit ihrer Nummer, installiert die Abhängigkeiten
   (`composer install --no-dev`), verlinkt die `.env`, legt `storage/` an,
   merkt sich den Commit in `.release` und baut die Caches
   (`config:cache`, `route:cache`, `view:cache`). Ein Ordner, den es schon

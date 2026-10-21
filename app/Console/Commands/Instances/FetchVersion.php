@@ -16,11 +16,11 @@ class FetchVersion extends Command
 {
     /** @var string */
     protected $signature = 'xgp:versions:fetch
-        {ref? : the tag or branch to clone, default: the newest tag}
+        {ref? : the tag, branch or commit to fetch, default: the newest tag}
         {--repo= : the repository, default: the origin of this checkout}';
 
     /** @var string */
-    protected $description = 'Clone a new version of the code into a folder of its own';
+    protected $description = 'Fetch a new version of the code (tag, branch or commit) into a folder of its own';
 
     public function handle(VersionFetcher $fetcher): int
     {

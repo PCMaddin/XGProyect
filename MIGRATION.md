@@ -2736,8 +2736,9 @@ Baseline-Einträge.
     bei 4.0.0. Die Übergabe steht jetzt vor `define('LARAVEL_START')`, sonst
     warnte PHP über die doppelte Konstante.
   - Ohne Docker kommt eine neue Version per Git in einen neuen Ordner:
-    `xgp:versions:fetch [ref] [--repo=]` (`VersionFetcher`: `git clone
-    --depth 1 --branch`, Standard das neueste Tag des origin; Version aus
+    `xgp:versions:fetch [ref] [--repo=]` (`VersionFetcher`: Tag, Branch
+    oder Commit; `git fetch --depth 1 origin <ref>`, bei kurzem Hash die
+    ganze Historie; Standard das neueste Tag des origin; Version aus
     `config/version.php` des Klons, nie über einen vorhandenen Ordner;
     `composer install --no-dev`; `.env` verlinkt, `storage/` angelegt,
     Commit in `.release`; `config:cache`, `route:cache`, `view:cache`), dann

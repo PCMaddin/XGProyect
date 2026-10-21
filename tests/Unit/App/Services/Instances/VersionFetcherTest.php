@@ -68,7 +68,7 @@ class VersionFetcherTest extends DatabaseTestCase
         $this->git(['tag', 'v3.9.9']);
 
         $this->command('xgp:versions:fetch', ['--repo' => $this->repository])
-            ->expectsOutputToContain('Cloning v4.1.0 of ' . $this->repository)
+            ->expectsOutputToContain('Fetching v4.1.0 of ' . $this->repository)
             ->expectsOutputToContain('Version 4.1.0 (')
             ->expectsOutputToContain('No composer.json: nothing to install.')
             ->expectsOutputToContain('Configuration, routes and views cached.')
@@ -99,6 +99,27 @@ class VersionFetcherTest extends DatabaseTestCase
         $this->command('xgp:versions:fetch', ['ref' => 'next', '--repo' => $this->repository])->expectsOutputToContain('Version 4.2.0 (')->assertSuccessful();
 
         $this->assertDirectoryExists($this->folder . '/versions/4.2.0');
+    }
+
+    public function testACommitIsFetchedByItsHashLongOrShort(): void
+    {
+        $tagged = trim($this->git(['rev-parse', 'HEAD']));
+        file_put_contents($this->repository . '/config/version.php', "<?php return ['files' => '4.1.1'];");
+        $this->git(['commit', '-q', '-am', 'fix']);
+        $fix = trim($this->git(['rev-parse', 'HEAD']));
+        file_put_contents($this->repository . '/config/version.php', "<?php return ['files' => '4.2.0'];");
+        $this->git(['commit', '-q', '-am', 'later']);
+
+        // a commit behind the branch tip, by its full hash
+        $this->command('xgp:versions:fetch', ['ref' => $fix, '--repo' => $this->repository])->expectsOutputToContain('Version 4.1.1 (')->assertSuccessful();
+        $this->assertSame($fix . "\n", file_get_contents($this->folder . '/versions/4.1.1/.release'));
+
+        // and by a short one
+        $this->command('xgp:versions:fetch', ['ref' => substr($tagged, 0, 8), '--repo' => $this->repository])->expectsOutputToContain('Version 4.1.0 (')->assertSuccessful();
+        $this->assertSame($tagged . "\n", file_get_contents($this->folder . '/versions/4.1.0/.release'));
+
+        $this->command('xgp:versions:fetch', ['ref' => 'deadbeef', '--repo' => $this->repository])->expectsOutputToContain('git checkout failed')->assertFailed();
+        $this->assertSame([], glob($this->folder . '/versions/.fetching-*') ?: []);
     }
 
     public function testWithoutTagsARefMustBeNamedAndACloneWithoutTheGameIsRefused(): void
