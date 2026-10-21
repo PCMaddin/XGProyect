@@ -453,7 +453,9 @@ Zahlungstag; Bestellung und Admin-Liste zeigen Euro-Preis und WAX-Betrag.
 ## Updates
 
 Mit dem Docker-Stack: `deploy/deploy.sh` (siehe [deployment.md](deployment.md)).
-Sonst nach jedem Code-Update:
+Sonst holt `xgp:versions:fetch` die neue Version per Git in einen neuen
+Ordner und `xgp:versions:use` schaltet um (Abschnitt „Versionen je
+Universum“). Ein einzelner Checkout ohne Versionen braucht wie bisher:
 
 ```bash
 composer install --no-dev
@@ -514,6 +516,37 @@ Wie es läuft:
   Migrationen spielt das Universum noch auf dem alten Code.
 - `xgp:instance:list` und der Betreiberbereich zeigen die Version je
   Universum.
+
+**Ohne Docker: neue Version per Git in einen neuen Ordner.** Auf einem
+Server ohne Docker ist jede Version ein eigener Git-Checkout unter dem
+Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
+
+```
+/srv/xgp/versions/4.0.0/      git clone, composer install --no-dev
+/srv/xgp/versions/4.1.0/
+/srv/xgp/versions/current -> /srv/xgp/versions/4.1.0
+```
+
+- Webserver-Root: `/srv/xgp/versions/current/public`; Cron:
+  `* * * * * php /srv/xgp/versions/current/artisan schedule:run`;
+  `XGP_VERSIONS_PATH=/srv/xgp/versions` in der `.env`, die alle Versionen
+  teilen (die `.env` liegt einmal da, jede Version bekommt einen Link).
+- `php artisan xgp:versions:fetch [tag|branch] [--repo=URL]` klont die
+  Version (Standard: das neueste Tag des `origin` dieses Checkouts) in
+  einen Ordner mit ihrer Nummer, installiert die Abhängigkeiten
+  (`composer install --no-dev`), verlinkt die `.env`, legt `storage/` an,
+  merkt sich den Commit in `.release` und baut die Caches
+  (`config:cache`, `route:cache`, `view:cache`). Ein Ordner, den es schon
+  gibt, wird nie überschrieben: Jedes Release braucht eine neue Nummer in
+  `config/version.php`. Bis hier bedient die neue Version niemanden.
+- `php artisan xgp:versions:use <version>` stellt den Link `current` um;
+  die neue Version schreibt dabei die Router-Karte. Ab der nächsten Anfrage
+  läuft die Lobby auf der neuen Version, jedes Universum weiter auf seiner.
+  Danach `php artisan xgp:instance:migrate` aus dem neuen Ordner (Universen
+  auf der neuen Version, also noch keine) und je Universum
+  `xgp:instance:upgrade`, wenn es soweit ist.
+- Zurück zur vorigen Version: `xgp:versions:use <alte>`. Die Datenbanken
+  bleiben, wie sie sind (Migrationen laufen nicht rückwärts).
 
 Grenzen: Statische Dateien (`public/assets`) liefert der Webserver aus der
 neuesten Version; neue Dateien kommen dazu, alte bleiben, nur eine

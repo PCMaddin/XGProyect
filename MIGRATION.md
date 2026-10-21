@@ -2735,6 +2735,16 @@ Baseline-Einträge.
     Danach: Cookie `old` und `?universe=old` landen bei 3.9.0, ohne Cookie
     bei 4.0.0. Die Übergabe steht jetzt vor `define('LARAVEL_START')`, sonst
     warnte PHP über die doppelte Konstante.
+  - Ohne Docker kommt eine neue Version per Git in einen neuen Ordner:
+    `xgp:versions:fetch [ref] [--repo=]` (`VersionFetcher`: `git clone
+    --depth 1 --branch`, Standard das neueste Tag des origin; Version aus
+    `config/version.php` des Klons, nie über einen vorhandenen Ordner;
+    `composer install --no-dev`; `.env` verlinkt, `storage/` angelegt,
+    Commit in `.release`; `config:cache`, `route:cache`, `view:cache`), dann
+    `xgp:versions:use <version>` (Link `current` im Versionsverzeichnis,
+    Webserver-Root `current/public`; die neue Version schreibt die Karte).
+    `available()` übergeht den Link. Tests mit einem lokalen Git-Repository:
+    neuestes Tag, Branch, kein Tag, Klon ohne Spiel, Link `current`.
   - Doku: `docs/universes.md` „Versionen je Universum“, `docs/deployment.md`,
     `.env.example`.
   - Tests: Router (Cookie, Query, Webhook, laufende Version, fehlendes

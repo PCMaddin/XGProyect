@@ -86,7 +86,8 @@ class Versions
         $versions = [$this->current()];
 
         foreach (is_dir($this->root()) ? scandir($this->root()) ?: [] : [] as $entry) {
-            if (preg_match(self::PATTERN, $entry) === 1 && is_file($this->root() . '/' . $entry . '/artisan')) {
+            // not the link "current" (xgp:versions:use), only the folders
+            if (preg_match(self::PATTERN, $entry) === 1 && !is_link($this->root() . '/' . $entry) && is_file($this->root() . '/' . $entry . '/artisan')) {
                 $versions[] = $entry;
             }
         }
@@ -109,7 +110,7 @@ class Versions
 
         $directory = $this->root() . '/' . $version;
 
-        return preg_match(self::PATTERN, $version) === 1 && is_file($directory . '/artisan') ? $directory : null;
+        return preg_match(self::PATTERN, $version) === 1 && !is_link($directory) && is_file($directory . '/artisan') ? $directory : null;
     }
 
     /**
