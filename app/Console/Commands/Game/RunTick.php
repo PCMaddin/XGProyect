@@ -7,8 +7,10 @@ namespace App\Console\Commands\Game;
 use App\Libraries\Functions;
 use App\Libraries\UpdatesLibrary;
 use App\Services\Game\GameBootstrap;
+use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\Versions;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -23,12 +25,12 @@ use Throwable;
 class RunTick extends Command
 {
     /** @var string */
-    protected $signature = 'xgp:tick';
+    protected $signature = 'xgp:tick {slug? : one universe (how a universe on another version is ticked)}';
 
     /** @var string */
     protected $description = 'Run the game tick of every open universe (fleets, statistics, cleanup, bots)';
 
-    public function handle(InstanceRegistry $registry, InstanceContext $context): int
+    public function handle(InstanceRegistry $registry, InstanceContext $context, Versions $versions): int
     {
         $work = static function (): string {
             Functions::setLanguage();
@@ -45,10 +47,13 @@ class RunTick extends Command
         }
 
         $failed = false;
+        $slug = $this->argument('slug');
+        $instances = is_string($slug) ? array_filter([$registry->find($slug)], static fn (?Instance $instance): bool => $instance?->isOpen() ?? false) : $registry->open();
 
-        foreach ($registry->open() as $instance) {
+        foreach ($instances as $instance) {
             try {
-                $this->info($instance->slug . ': ' . $context->runIn($instance, $work));
+                // a universe on another version is ticked by that version's code
+                $this->info($instance->slug . ': ' . trim($versions->runFor($instance, 'xgp:tick', [$instance->slug], fn (): string => $context->runIn($instance, $work))));
             } catch (Throwable $e) {
                 report($e);
                 $this->error($instance->slug . ': ' . $e->getMessage());

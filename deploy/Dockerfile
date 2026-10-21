@@ -56,7 +56,7 @@ COPY deploy/php/selftest.conf /usr/local/etc/php-fpm-selftest.conf
 COPY deploy/entrypoint.sh /usr/local/bin/xgp-entrypoint
 COPY --from=build --chown=www-data:www-data /srv/app /srv/app
 # where the static files for the web server go (a volume takes this owner)
-RUN install -d -o www-data -g www-data /srv/public
+RUN install -d -o www-data -g www-data /srv/public /srv/versions
 
 ENV VIEW_COMPILED_PATH=/srv/app/bootstrap/views \
     PHP_FPM_CHILDREN=16

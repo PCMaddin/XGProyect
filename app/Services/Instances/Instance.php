@@ -7,6 +7,8 @@ namespace App\Services\Instances;
 /**
  * A universe of its own: a database with its own players, set up by
  * `xgp:instance:create` and listed in the lobby.
+ *
+ * @SuppressWarnings("PHPMD.ExcessiveParameterList")
  */
 final class Instance
 {
@@ -29,7 +31,17 @@ final class Instance
         public readonly ?int $closedAt = null,
         // where an archived universe's dump lies: restic:<snapshot> or file:<path>
         public readonly string $archive = '',
+        // the version of the code it plays on ('' : the one that runs)
+        public readonly string $version = '',
     ) {
+    }
+
+    /**
+     * Whether the code of the given version is the one this universe plays on.
+     */
+    public function runsOn(string $version): bool
+    {
+        return $this->version === '' || $this->version === $version;
     }
 
     /**

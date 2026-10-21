@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Universe',
     'op_col_mode' => 'Mode',
     'op_col_status' => 'Status',
+    'op_col_version' => 'Version',
     'op_col_opened' => 'Opened',
     'op_col_ends' => 'Season ends',
     'op_col_rewards' => 'Prizes (dark matter)',

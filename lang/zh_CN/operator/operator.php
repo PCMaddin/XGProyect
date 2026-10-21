@@ -25,6 +25,7 @@ return [
     'op_col_name' => '宇宙',
     'op_col_mode' => '模式',
     'op_col_status' => '状态',
+    'op_col_version' => '版本',
     'op_col_opened' => '开启时间',
     'op_col_ends' => '赛季结束',
     'op_col_rewards' => '奖励（暗物质）',

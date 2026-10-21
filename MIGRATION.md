@@ -2697,6 +2697,53 @@ Baseline-Einträge.
     Ausschluss ohne Belege; erledigte Fehlermeldung nach 90 Tagen weg;
     Impressum auf Konto- und Passwortseiten.
 
+- **Versionen je Universum** ✅ Ein Universum spielt auf der Version des
+  Codes, mit der es angelegt wurde (`instances.version`, zentrale Migration;
+  bestehende bekommen die laufende). Jede Version von der kleinsten
+  genutzten bis zur neuesten liegt als Verzeichnis unter
+  `XGP_VERSIONS_PATH` (Docker: Volume `/srv/versions`):
+  - `Versions` (Service): verfügbare Versionen, Nutzung je Version,
+    Verzeichnis, `sync()` (laufenden Code einmal kopieren, ohne `storage/`
+    und Konfigurations-Cache, `.env` verlinkt, `.release` als Marke;
+    Konfigurations-Cache der anderen Versionen erneuern; Router-Karte
+    `storage/framework/versions.php`), `prune()`, `artisan()` (Befehl einer
+    anderen Version als Prozess), `runFor()` (eigene Version im Prozess,
+    sonst deren artisan).
+  - Router `bootstrap/version-router.php`, von `public/index.php` vor dem
+    Framework gerufen: Universum aus `?universe=`, Lobby-Cookie oder dem
+    Stripe-Webhook-Payload, Version aus der Karte, Übergabe an das
+    `public/index.php` dieser Version (eigener Autoloader, eigenes
+    `vendor/`); nie zweimal (`XGP_VERSION_DISPATCHED`); Versionsname nur
+    als Verzeichnisname. `config/view.php` nimmt die kompilierten Views der
+    eigenen Version statt `VIEW_COMPILED_PATH` eines fremden Verzeichnisses.
+  - `SelectInstance` antwortet 503, wenn ein Universum einer anderen Version
+    doch bei diesem Code landet (Verzeichnis fehlt, Karte veraltet).
+  - `xgp:tick {slug?}`, `xgp:cheat:scan {slug?}`, `xgp:instance:close-ended`,
+    `xgp:instance:migrate`, `xgp:instance:unarchive` laufen für ein
+    Universum auf anderer Version über deren artisan; `xgp:instance:migrate`
+    ohne Slug lässt solche Universen aus.
+  - Neu: `xgp:instance:upgrade {slug} {--to=}` (nur vorwärts, Migrationen
+    mit dem Zielcode, dann Umstellung; Zwischenversion macht es selbst),
+    `xgp:versions {--prune}`, `xgp:versions:sync`. Version in
+    `xgp:instance:list` und im Betreiberbereich.
+  - Deploy: Volume `versions` für app und Scheduler, `XGP_VERSIONS_PATH`,
+    `xgp:versions:sync` im Entrypoint und in `deploy.sh`.
+  - `config/version.php` liest `APP_VERSION` nicht mehr aus der `.env`: alle
+    Versionen teilen sich die Datei, der Wert gehört zum Code. Der
+    Praxistest (eine Kopie als „3.9.0“ unter `/tmp`, Anfragen per CLI durch
+    `public/index.php`) fand genau das: Die Kopie meldete sich als 4.0.0.
+    Danach: Cookie `old` und `?universe=old` landen bei 3.9.0, ohne Cookie
+    bei 4.0.0. Die Übergabe steht jetzt vor `define('LARAVEL_START')`, sonst
+    warnte PHP über die doppelte Konstante.
+  - Doku: `docs/universes.md` „Versionen je Universum“, `docs/deployment.md`,
+    `.env.example`.
+  - Tests: Router (Cookie, Query, Webhook, laufende Version, fehlendes
+    Verzeichnis, kein Verzeichnisname, nie zweimal, ohne Karte); Versionen
+    (Pin bei Registrierung, Auffüllen der Migration, Liste mit MISSING,
+    Sync-Kopie mit Ausschlüssen, Warnung bei gleicher Nummer, Karte weg ohne
+    Pins, Prune, Tick und Migration über Stub-artisan, fehlende Version
+    schlägt laut fehl, Upgrade vorwärts/zurück/dazwischen, 503).
+
 ## Smoke-Test gegen eine echte Datenbank
 
 Bis hierhin war alles nur mit Unit-Tests auf SQLite und statischer Analyse

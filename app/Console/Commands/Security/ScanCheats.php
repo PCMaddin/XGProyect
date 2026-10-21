@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Security;
 
+use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\Versions;
 use App\Services\Security\CheatScanner;
 use App\Services\Security\PlayerTrail;
 use App\Services\Security\Suspicions;
@@ -20,12 +22,12 @@ use Throwable;
 class ScanCheats extends Command
 {
     /** @var string */
-    protected $signature = 'xgp:cheat:scan';
+    protected $signature = 'xgp:cheat:scan {slug? : one universe (how a universe on another version is scanned)}';
 
     /** @var string */
     protected $description = 'Look for signs of cheating and list them for the admin';
 
-    public function handle(InstanceRegistry $registry, InstanceContext $context): int
+    public function handle(InstanceRegistry $registry, InstanceContext $context, Versions $versions): int
     {
         $now = time();
         $work = static function () use ($now): int {
@@ -44,10 +46,12 @@ class ScanCheats extends Command
         }
 
         $failed = false;
+        $slug = $this->argument('slug');
+        $instances = is_string($slug) ? array_filter([$registry->find($slug)], static fn (?Instance $instance): bool => $instance?->isOpen() ?? false) : $registry->open();
 
-        foreach ($registry->open() as $instance) {
+        foreach ($instances as $instance) {
             try {
-                $this->info($instance->slug . ': ' . $context->runIn($instance, $work));
+                $this->info($instance->slug . ': ' . trim($versions->runFor($instance, 'xgp:cheat:scan', [$instance->slug], fn (): string => (string) $context->runIn($instance, $work))));
             } catch (Throwable $e) {
                 report($e);
                 $this->error($instance->slug . ': ' . $e->getMessage());

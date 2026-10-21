@@ -28,9 +28,18 @@ return [
     |
     */
 
-    'compiled' => env(
-        'VIEW_COMPILED_PATH',
-        realpath(storage_path('framework/views'))
-    ),
+    'compiled' => (static function (): string {
+        $configured = env('VIEW_COMPILED_PATH');
+        $own = base_path('bootstrap/views');
+
+        // the Docker image compiles the views into bootstrap/views and names
+        // that path; a version copied beside the running one (xgp:versions:sync)
+        // has its own compiled views and must never use another version's
+        if (is_string($configured) && $configured !== '' && (str_starts_with($configured, base_path()) || !is_dir($own))) {
+            return $configured;
+        }
+
+        return is_dir($own) ? $own : (string) realpath(storage_path('framework/views'));
+    })(),
 
 ];

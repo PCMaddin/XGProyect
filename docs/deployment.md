@@ -92,9 +92,14 @@ Ablauf:
 
 1. Neues Image bauen. Die Konfiguration kommt erst beim Start aus
    `deploy/.env` und steckt nie im Image.
-2. Migrationen der Basisdatenbank und aller Universen einspielen, während
-   die alte Version weiterläuft. Migrationen müssen deshalb zur laufenden
-   Version passen: erst hinzufügen, entfernen erst im nächsten Release.
+2. Die neue Version in das Volume `versions` kopieren
+   (`xgp:versions:sync`), dann die Migrationen der Basisdatenbank und der
+   Universen auf der laufenden Version einspielen, während die alte Version
+   weiterläuft. Migrationen müssen deshalb zur laufenden Version passen:
+   erst hinzufügen, entfernen erst im nächsten Release. Universen auf einer
+   älteren Version bleiben darauf, bis `xgp:instance:upgrade` sie bewegt
+   (siehe [universes.md](universes.md), „Versionen je Universum“); dafür
+   braucht jedes Release eine höhere Nummer in `config/version.php`.
 3. Neue App-Container neben den alten starten. Jeder rendert zuerst
    intern die Startseite und nimmt erst danach Anfragen an. Ein Container,
    der das nicht schafft, bekommt nie eine Anfrage.

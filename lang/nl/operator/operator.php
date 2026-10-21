@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Universum',
     'op_col_mode' => 'Modus',
     'op_col_status' => 'Status',
+    'op_col_version' => 'Versie',
     'op_col_opened' => 'Geopend',
     'op_col_ends' => 'Einde seizoen',
     'op_col_rewards' => 'Prijzen (donkere materie)',

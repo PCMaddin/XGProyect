@@ -115,6 +115,7 @@ class InstanceProvisioner
 
         $this->registry->register($instance);
         $this->registry->setRewardPlan($instance->slug, RewardPlan::configured());
+        app(Versions::class)->writeMap();
     }
 
     /**
@@ -132,6 +133,7 @@ class InstanceProvisioner
         $this->context->runIn($instance, fn () => $this->writeOptions(['premium_mode' => $instance->mode]));
         $this->registry->register($instance);
         $this->registry->setRewardPlan($instance->slug, RewardPlan::configured());
+        app(Versions::class)->writeMap();
     }
 
     /**

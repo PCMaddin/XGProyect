@@ -98,12 +98,13 @@ class InstanceRegistry
             'status' => $instance->status,
             'opened_at' => $instance->openedAt,
             'ends_at' => $instance->endsAt,
+            'version' => $instance->version !== '' ? $instance->version : self::asString(config('version.files')),
         ]);
         $this->enabled = true;
     }
 
     /**
-     * @param array<string, string|int|null> $changes name, mode, status, ends_at, closed_at, archived_at, archive
+     * @param array<string, string|int|null> $changes name, mode, status, ends_at, closed_at, archived_at, archive, version
      */
     public function update(string $slug, array $changes): void
     {
@@ -146,6 +147,7 @@ class InstanceRegistry
             is_numeric($values['ends_at'] ?? null) ? (int) $values['ends_at'] : null,
             is_numeric($values['closed_at'] ?? null) ? (int) $values['closed_at'] : null,
             self::asString($values['archive'] ?? ''),
+            self::asString($values['version'] ?? ''),
         );
     }
 }

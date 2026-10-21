@@ -33,9 +33,12 @@ services:
       dockerfile: deploy/Dockerfile
     environment:
       PUBLIC_DIR: /srv/public
+      XGP_VERSIONS_PATH: /srv/versions
     volumes:
       - storage:/srv/app/storage
       - public:/srv/public
+      # every version of the code a universe still plays on (xgp:versions)
+      - versions:/srv/versions
     deploy:
       replicas: ${APP_REPLICAS:-2}
     # php-fpm ends the requests it is serving, then stops
@@ -46,8 +49,11 @@ services:
   scheduler:
     <<: *game
     command: ["php", "artisan", "schedule:work"]
+    environment:
+      XGP_VERSIONS_PATH: /srv/versions
     volumes:
       - storage:/srv/app/storage
+      - versions:/srv/versions
     healthcheck:
       disable: true
     stop_grace_period: 120s
@@ -122,6 +128,7 @@ networks:
 volumes:
   storage:
   public:
+  versions:
   db:
   sessions:
   caddy-data:

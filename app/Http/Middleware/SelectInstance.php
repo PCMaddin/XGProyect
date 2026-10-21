@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use App\Services\Instances\InstanceContext;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\Versions;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
  * universe's database). A link sent by mail names its universe in the
  * query (?universe=slug), which wins over the cookie and is remembered like
  * a choice in the lobby. Without a valid choice the player goes to the
- * lobby. A single universe (no registry) passes untouched.
+ * lobby. A single universe (no registry) passes untouched. A universe on
+ * another version of the code is never served by this one.
  */
 class SelectInstance
 {
@@ -28,6 +30,7 @@ class SelectInstance
     public function __construct(
         private InstanceRegistry $registry,
         private InstanceContext $context,
+        private Versions $versions,
     ) {
     }
 
@@ -46,6 +49,12 @@ class SelectInstance
 
         if ($instance === null || !$instance->isOpen()) {
             return redirect()->route('lobby.index');
+        }
+
+        // its version's directory serves it (public/index.php); this code
+        // reached here only when that directory is missing or the map is stale
+        if (!$instance->runsOn($this->versions->current())) {
+            abort(503, 'The universe ' . $instance->slug . ' plays on version ' . $instance->version . ', which is not on this server.');
         }
 
         $this->context->activate($instance);

@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Univers',
     'op_col_mode' => 'Mode',
     'op_col_status' => 'Statut',
+    'op_col_version' => 'Version',
     'op_col_opened' => 'Ouvert le',
     'op_col_ends' => 'Fin de saison',
     'op_col_rewards' => 'Prix (matière noire)',

@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Universum',
     'op_col_mode' => 'Modus',
     'op_col_status' => 'Status',
+    'op_col_version' => 'Version',
     'op_col_opened' => 'Eröffnet',
     'op_col_ends' => 'Saisonende',
     'op_col_rewards' => 'Preise (Dunkle Materie)',

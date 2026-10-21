@@ -6,6 +6,7 @@ namespace App\Console\Commands\Instances;
 
 use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\Versions;
 use App\Services\Instances\UniverseArchive;
 use App\Services\Operators\OperatorLog;
 use Illuminate\Console\Command;
@@ -24,7 +25,7 @@ class UnarchiveInstance extends Command
     /** @var string */
     protected $description = 'Restore the database of an archived universe';
 
-    public function handle(InstanceRegistry $registry, InstanceProvisioner $provisioner, UniverseArchive $archive, OperatorLog $log): int
+    public function handle(InstanceRegistry $registry, InstanceProvisioner $provisioner, UniverseArchive $archive, OperatorLog $log, Versions $versions): int
     {
         $instance = $registry->find((string) $this->argument('slug'));
 
@@ -36,7 +37,9 @@ class UnarchiveInstance extends Command
 
         try {
             $archive->unarchive($instance);
-            $this->line(trim($provisioner->migrate($instance)));
+            // migrated by the code it plays on, never by a newer one
+            $this->line(trim($versions->runFor($instance, 'xgp:instance:migrate', [$instance->slug], static fn (): string => $provisioner->migrate($instance))));
+            $versions->writeMap();
         } catch (RuntimeException $e) {
             $this->error($e->getMessage());
 

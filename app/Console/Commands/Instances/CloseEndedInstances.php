@@ -7,6 +7,7 @@ namespace App\Console\Commands\Instances;
 use App\Services\Instances\Instance;
 use App\Services\Instances\InstanceProvisioner;
 use App\Services\Instances\InstanceRegistry;
+use App\Services\Instances\Versions;
 use Illuminate\Console\Command;
 use Throwable;
 
@@ -22,7 +23,7 @@ class CloseEndedInstances extends Command
     /** @var string */
     protected $description = 'Close the universes whose season has ended';
 
-    public function handle(InstanceRegistry $registry, InstanceProvisioner $provisioner): int
+    public function handle(InstanceRegistry $registry, InstanceProvisioner $provisioner, Versions $versions): int
     {
         $now = time();
         $failed = false;
@@ -33,7 +34,8 @@ class CloseEndedInstances extends Command
             }
 
             try {
-                $provisioner->close($instance);
+                // the rankings are frozen by the code the universe plays on
+                $versions->runFor($instance, 'xgp:instance:update', [$instance->slug, '--status=closed'], static fn (): Instance => $provisioner->close($instance));
                 $this->info('Closed ' . $instance->slug . '.');
             } catch (Throwable $e) {
                 report($e);

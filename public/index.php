@@ -3,6 +3,28 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+/*
+|--------------------------------------------------------------------------
+| A Universe On Another Version
+|--------------------------------------------------------------------------
+|
+| Universes play on the version of the code they were created with; every
+| version in use lies in a directory of its own. A request of a universe on
+| another version is served by that version's public/index.php (see
+| bootstrap/version-router.php), never by this code.
+|
+*/
+
+$versionIndex = (require __DIR__.'/../bootstrap/version-router.php')($_SERVER, $_GET, $_COOKIE, __DIR__.'/../storage/framework/versions.php');
+
+if ($versionIndex !== null) {
+    $_SERVER['XGP_VERSION_DISPATCHED'] = dirname($versionIndex, 2);
+    chdir(dirname($versionIndex, 2));
+    require $versionIndex;
+
+    exit;
+}
+
 define('LARAVEL_START', microtime(true));
 
 /*

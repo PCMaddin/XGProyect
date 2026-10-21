@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'ユニバース',
     'op_col_mode' => 'モード',
     'op_col_status' => '状態',
+    'op_col_version' => 'バージョン',
     'op_col_opened' => '開始日',
     'op_col_ends' => 'シーズン終了',
     'op_col_rewards' => '賞品（ダークマター）',

@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Uniwersum',
     'op_col_mode' => 'Tryb',
     'op_col_status' => 'Status',
+    'op_col_version' => 'Wersja',
     'op_col_opened' => 'Otwarte',
     'op_col_ends' => 'Koniec sezonu',
     'op_col_rewards' => 'Nagrody (ciemna materia)',

@@ -462,9 +462,66 @@ php artisan xgp:instance:migrate
 ```
 
 `xgp:instance:migrate` spielt die Update-Migrationen
-(`database/migrations/400`) in allen Universen ein und die Migrationen der
-Basisdatenbank (`database/migrations/central`). Ohne Universen genügt wie
-bisher `php artisan migrate --path=database/migrations/400`.
+(`database/migrations/400`) in allen Universen ein, die auf der laufenden
+Version spielen, und die Migrationen der Basisdatenbank
+(`database/migrations/central`). Ohne Universen genügt wie bisher
+`php artisan migrate --path=database/migrations/400`. Universen auf einer
+älteren Version bleiben unberührt (nächster Abschnitt).
+
+## Versionen je Universum
+
+Ein Universum spielt auf der Version des Codes, mit der es angelegt wurde,
+bis du es ausdrücklich weiterbewegst. Ein laufendes Universum bekommt also
+mit einem Update keine neuen Regeln, Schiffe oder Formeln; neue Universen
+starten auf der neuesten Version. Dafür liegt jede Version, von der
+kleinsten, auf der noch ein Universum spielt, bis zur neuesten, als eigenes
+Verzeichnis auf dem Server (`XGP_VERSIONS_PATH`, Standard
+`storage/versions`; im Docker-Stack das Volume `/srv/versions`). Die
+Versionsnummer ist `config/version.php` (`files`); **jedes Release braucht
+eine höhere Nummer**, sonst landet neuer Code nicht in einem eigenen
+Verzeichnis (`xgp:versions:sync` warnt dann).
+
+Wie es läuft:
+
+- `php artisan xgp:versions:sync` kopiert den laufenden Code einmal in sein
+  Verzeichnis (ohne `storage/`, mit `vendor/` und den kompilierten Views;
+  die `.env` wird verlinkt), erneuert den Konfigurations-Cache der anderen
+  Versionen und schreibt die Karte für den Router
+  (`storage/framework/versions.php`). Im Docker-Stack läuft es bei jedem
+  Containerstart und in `deploy.sh`; sonst nach jedem Update von Hand.
+- **Seiten:** `public/index.php` liest vor dem Framework die Karte und das
+  Universum aus der Anfrage (Lobby-Cookie, `?universe=` aus Mail-Links,
+  bei Stripes Webhook das Universum in den Metadaten) und übergibt eine
+  Anfrage für ein Universum auf einer anderen Version an deren
+  `public/index.php`. Das läuft im selben php-fpm, mit dem Code und `vendor/`
+  dieser Version. Fehlt das Verzeichnis, antwortet das Spiel mit 503 statt
+  das Universum mit fremdem Code zu bedienen.
+- **Tick, Betrugserkennung, Saisonende, Migrationen:** Der Scheduler ruft
+  für ein Universum auf einer anderen Version deren `artisan` auf
+  (`xgp:tick <slug>`, `xgp:cheat:scan <slug>`, `xgp:instance:update <slug>
+  --status=closed`, `xgp:instance:migrate <slug>`). Lobby, Betreiberbereich,
+  Sicherung, Archiv und WAX-Prüfung laufen auf der neuesten Version; sie
+  lesen aus den Universen nur, was sich zwischen Versionen nicht ändert.
+- `php artisan xgp:versions` zeigt die Versionen auf dem Server, welche
+  Universen darauf spielen und ob eine fehlt (`MISSING`).
+  `xgp:versions --prune` löscht die Verzeichnisse unterhalb der kleinsten
+  genutzten Version; die laufende bleibt immer.
+- `php artisan xgp:instance:upgrade <slug>` bewegt ein Universum auf die
+  neueste Version: erst die Update-Migrationen mit dem neuen Code, dann die
+  Umstellung. `--to=<version>` nimmt eine Version dazwischen, die die Arbeit
+  dann mit ihrem eigenen Code macht. Zurück geht es nie (Migrationen laufen
+  nicht rückwärts). Mach das in einer ruhigen Minute: Während der
+  Migrationen spielt das Universum noch auf dem alten Code.
+- `xgp:instance:list` und der Betreiberbereich zeigen die Version je
+  Universum.
+
+Grenzen: Statische Dateien (`public/assets`) liefert der Webserver aus der
+neuesten Version; neue Dateien kommen dazu, alte bleiben, nur eine
+*geänderte* Datei gleichen Namens sieht auch ein älteres Universum neu.
+Sitzungen und Cache liegen auf Redis und sind je Universum getrennt;
+`storage/` (Logs, Admin-Backups) hat jede Version für sich. Versionen vor
+diesem Stand (ohne Router und ohne `xgp:tick <slug>`) lassen sich nicht
+festpinnen.
 
 ## Backups und Logs
 

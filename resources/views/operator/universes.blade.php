@@ -14,6 +14,7 @@
                     <th>{{ __('operator/operator.op_col_name') }}</th>
                     <th>{{ __('operator/operator.op_col_mode') }}</th>
                     <th>{{ __('operator/operator.op_col_status') }}</th>
+                    <th>{{ __('operator/operator.op_col_version') }}</th>
                     <th>{{ __('operator/operator.op_col_opened') }}</th>
                     <th>{{ __('operator/operator.op_col_ends') }}</th>
                     <th>{{ __('operator/operator.op_col_rewards') }}</th>
@@ -37,6 +38,7 @@
                                 <span class="badge muted">{{ __('operator/operator.op_status_closed') }}</span>
                             @endif
                         </td>
+                        <td><code>{{ $instance->version }}</code></td>
                         <td>{{ date('Y-m-d', $instance->openedAt) }}</td>
                         <td>{{ $instance->endsAt === null ? __('operator/operator.op_no_end') : date('Y-m-d H:i', $instance->endsAt) }}</td>
                         <td>{{ $universe['rewards'] === null || $universe['rewards']->isEmpty() ? '-' : number_format(array_sum($universe['rewards']->pools), 0, ',', '.') }}</td>

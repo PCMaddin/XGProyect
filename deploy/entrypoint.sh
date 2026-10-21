@@ -5,6 +5,13 @@ set -eu
 
 php artisan config:cache --no-interaction >/dev/null
 
+# this version of the code into the versions volume (once), and the map of
+# the universes on other versions for the router; a copy that fails must
+# not keep the game from serving
+if [ -n "${XGP_VERSIONS_PATH:-}" ] && [ -d "$XGP_VERSIONS_PATH" ]; then
+    php artisan xgp:versions:sync --no-interaction || echo "xgp:versions:sync failed; universes on older versions may not be served" >&2
+fi
+
 # the web server serves the static files from a volume shared with it; old
 # files stay, so pages of the version still running find theirs. One
 # container at a time: two copying the same file at once fail.

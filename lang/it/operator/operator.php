@@ -25,6 +25,7 @@ return [
     'op_col_name' => 'Universo',
     'op_col_mode' => 'Modalità',
     'op_col_status' => 'Stato',
+    'op_col_version' => 'Versione',
     'op_col_opened' => 'Aperto il',
     'op_col_ends' => 'Fine stagione',
     'op_col_rewards' => 'Premi (materia oscura)',

@@ -41,4 +41,10 @@ return [
     // 0: only by hand. Keep it above the time a card payment can still be
     // disputed (up to 120 days): the orders are in the universe's database.
     'archive_after_days' => (int) env('XGP_ARCHIVE_AFTER_DAYS', 0),
+
+    // where the versions of the code lie, one directory per version
+    // (xgp:versions:sync puts the running one there): a universe pinned to
+    // an older version is served and ticked by that directory. Empty:
+    // storage/versions. The Docker stack mounts a volume at /srv/versions.
+    'versions_path' => (string) env('XGP_VERSIONS_PATH', ''),
 ];
