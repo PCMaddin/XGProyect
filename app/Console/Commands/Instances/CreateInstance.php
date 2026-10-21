@@ -61,7 +61,7 @@ class CreateInstance extends Command
                 $instance,
                 $this->text('admin-name') ?: self::str($this->ask('Administrator name')),
                 $this->text('admin-email') ?: self::str($this->ask('Administrator e-mail')),
-                $this->text('admin-password') ?: self::str($this->secret('Administrator password')),
+                $this->adminPassword(),
                 $options,
                 max(0, (int) $this->text('bots')),
             );
@@ -91,6 +91,17 @@ class CreateInstance extends Command
         }
 
         return $options;
+    }
+
+    /**
+     * The option, else XGP_ADMIN_PASSWORD (handed over by another version's
+     * code, never on the command line), else asked.
+     */
+    private function adminPassword(): string
+    {
+        $password = $this->text('admin-password') ?: self::str(getenv('XGP_ADMIN_PASSWORD'));
+
+        return $password !== '' ? $password : self::str($this->secret('Administrator password'));
     }
 
     private function text(string $option): string

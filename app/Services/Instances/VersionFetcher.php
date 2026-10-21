@@ -17,6 +17,7 @@ use Symfony\Component\Process\Process;
  * older versions stay beside it for the universes still playing on them.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class VersionFetcher
 {
@@ -25,8 +26,71 @@ class VersionFetcher
     /** a clone with dependencies: minutes, not seconds */
     private const TIMEOUT = 1800;
 
-    public function __construct(private Versions $versions, private ?string $source = null)
+    public function __construct(private Versions $versions, private ?string $source = null, private ?string $logFile = null)
     {
+    }
+
+    /**
+     * Starts the fetch as a process of its own (a clone with dependencies
+     * takes minutes, a page cannot wait): xgp:versions:fetch of this
+     * checkout, its output appended to the log. Returns the log file.
+     */
+    public function fetchInBackground(?string $ref, ?string $repository): string
+    {
+        if ($this->inProgress()) {
+            throw new RuntimeException('A version is being fetched already.');
+        }
+
+        $log = $this->logFile();
+        $command = [PHP_BINARY, ($this->source ?? base_path()) . '/artisan', 'xgp:versions:fetch', '--no-interaction'];
+
+        if ($ref !== null && $ref !== '') {
+            $command[] = $ref;
+        }
+
+        if ($repository !== null && $repository !== '') {
+            $command[] = '--repo=' . $repository;
+        }
+
+        file_put_contents($log, "\n== " . gmdate('Y-m-d H:i:s') . ' UTC: ' . implode(' ', array_slice($command, 2)) . "\n", FILE_APPEND);
+        $shell = 'nohup ' . implode(' ', array_map('escapeshellarg', $command)) . ' >> ' . escapeshellarg($log) . ' 2>&1 &';
+        $process = Process::fromShellCommandline($shell, $this->source ?? base_path(), ['XGP_VERSIONS_PATH' => $this->versions->root()], null, 10);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new RuntimeException('The fetch could not be started: ' . trim($process->getErrorOutput()));
+        }
+
+        return $log;
+    }
+
+    /**
+     * Whether a fetch is going on (its temporary folder is there).
+     */
+    public function inProgress(): bool
+    {
+        return (glob($this->versions->root() . '/.fetching-*', GLOB_ONLYDIR) ?: []) !== [];
+    }
+
+    /**
+     * The last lines of the fetch log.
+     */
+    public function log(int $lines = 40): string
+    {
+        $log = $this->logFile();
+
+        if (!is_file($log)) {
+            return '';
+        }
+
+        $all = explode("\n", rtrim((string) file_get_contents($log)));
+
+        return implode("\n", array_slice($all, -$lines));
+    }
+
+    public function logFile(): string
+    {
+        return $this->logFile ?? storage_path('logs/versions.log');
     }
 
     /**

@@ -30,6 +30,10 @@ class OperatorLog
     public const CLOSED = 'universe_closed';
     public const ARCHIVED = 'universe_archived';
     public const UNARCHIVED = 'universe_unarchived';
+    public const UPGRADED = 'universe_upgraded';
+    public const VERSION_FETCH = 'version_fetch';
+    public const VERSION_USED = 'version_used';
+    public const VERSIONS_PRUNED = 'versions_pruned';
     public const PAYOUT = 'payout_reserved';
     public const RELEASED = 'payout_released';
     public const PASSWORD = 'password_changed';

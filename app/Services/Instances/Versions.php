@@ -114,6 +114,19 @@ class Versions
     }
 
     /**
+     * Whether this checkout lies under the versions path, as a server
+     * without Docker is laid out (the web root is the folder "current"):
+     * then another version can be switched to from here.
+     */
+    public function servesFromRoot(): bool
+    {
+        $base = realpath($this->source ?? base_path());
+        $root = realpath($this->root());
+
+        return $base !== false && $root !== false && str_starts_with($base, $root . '/');
+    }
+
+    /**
      * Which universes play on which version (the running one for those that
      * name none), the version in use longest first.
      *
@@ -165,9 +178,10 @@ class Versions
      * An artisan command of another version's directory, run as a process
      * with this environment (the same .env or container variables).
      *
-     * @param list<string> $arguments
+     * @param list<string>          $arguments
+     * @param array<string, string> $environment variables for the process besides this one's
      */
-    public function artisan(string $version, string $command, array $arguments = []): string
+    public function artisan(string $version, string $command, array $arguments = [], array $environment = []): string
     {
         $directory = $this->directory($version);
 
@@ -175,7 +189,7 @@ class Versions
             throw new RuntimeException('The version ' . $version . ' is not on the server (' . $this->root() . '); xgp:versions lists the ones there.');
         }
 
-        $process = new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, null, null, self::TIMEOUT);
+        $process = new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, $environment === [] ? null : $environment, null, self::TIMEOUT);
         $process->run();
 
         if (!$process->isSuccessful()) {

@@ -9,6 +9,7 @@ use App\Http\Controllers\Operator\LegalController;
 use App\Http\Controllers\Operator\LoginController;
 use App\Http\Controllers\Operator\ReportsController;
 use App\Http\Controllers\Operator\UniversesController;
+use App\Http\Controllers\Operator\VersionsController;
 use App\Services\Legal\LegalPages;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,11 @@ Route::middleware('operator.auth')->group(function () {
     Route::get('/universes/{slug}/season', [UniversesController::class, 'season'])->name('operator.universes.season');
     Route::post('/universes/{slug}/payout', [UniversesController::class, 'payout'])->name('operator.universes.payout');
     Route::post('/universes/{slug}/release', [UniversesController::class, 'release'])->name('operator.universes.release');
+    Route::post('/universes/{slug}/upgrade', [UniversesController::class, 'upgrade'])->name('operator.universes.upgrade');
+    Route::get('/versions', [VersionsController::class, 'index'])->name('operator.versions');
+    Route::post('/versions/fetch', [VersionsController::class, 'fetch'])->name('operator.versions.fetch');
+    Route::post('/versions/use', [VersionsController::class, 'use'])->name('operator.versions.use');
+    Route::post('/versions/prune', [VersionsController::class, 'prune'])->name('operator.versions.prune');
     Route::get('/backups', [BackupsController::class, 'index'])->name('operator.backups');
     Route::get('/errors', [ErrorsController::class, 'index'])->name('operator.errors');
     Route::get('/errors/{group}', [ErrorsController::class, 'show'])->whereNumber('group')->name('operator.errors.show');

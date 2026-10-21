@@ -2746,6 +2746,19 @@ Baseline-Einträge.
     Webserver-Root `current/public`; die neue Version schreibt die Karte).
     `available()` übergeht den Link. Tests mit einem lokalen Git-Repository:
     neuestes Tag, Branch, kein Tag, Klon ohne Spiel, Link `current`.
+  - Betreiberbereich `/operator/versions` (`VersionsController`): Liste
+    mit laufender und fehlender Version, Holen im Hintergrund
+    (`VersionFetcher::fetchInBackground`, `nohup … xgp:versions:fetch`, Log
+    `storage/logs/versions.log`, Fortschritt am Ordner `.fetching-*`),
+    Umschalten nur bei Ordner-Layout (`Versions::servesFromRoot`),
+    Aufräumen, Universum heben (`xgp:instance:upgrade` über Artisan);
+    Versionsauswahl beim Anlegen, eine ältere Version legt das Universum
+    über ihr `xgp:instance:create` an (Passwort als `XGP_ADMIN_PASSWORD`
+    in der Umgebung, `CreateInstance` liest es). Vier neue
+    Protokoll-Aktionen, Texte in zehn Sprachen. Tests: Liste, Holen im
+    Hintergrund gegen ein lokales Git-Repository (wartet auf den Prozess),
+    Umschalten mit und ohne Ordner-Layout, Aufräumen, Heben vor/zurück,
+    Anlegen auf älterer Version (Argumente und Passwort beim Stub).
   - Doku: `docs/universes.md` „Versionen je Universum“, `docs/deployment.md`,
     `.env.example`.
   - Tests: Router (Cookie, Query, Webhook, laufende Version, fehlendes

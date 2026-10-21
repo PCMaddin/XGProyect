@@ -12,6 +12,7 @@ use App\Services\Instances\InstanceRegistry;
 use App\Services\Instances\RewardPlan;
 use App\Services\Instances\SeasonPayouts;
 use App\Services\Instances\SeasonResults;
+use App\Services\Instances\Versions;
 use App\Services\Operators\OperatorLog;
 use App\Services\Operators\OperatorLogin;
 use App\Services\Premium\DarkMatterShop;
@@ -20,6 +21,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
@@ -44,6 +46,7 @@ class UniversesController extends BaseController
         private InstanceContext $context,
         private SeasonPayouts $payouts,
         private OperatorLog $log,
+        private Versions $versions,
     ) {
     }
 
@@ -63,6 +66,8 @@ class UniversesController extends BaseController
         return view('operator.universe_create', [
             'methods' => DarkMatterShop::METHODS,
             'admin_email' => self::operator()->email,
+            'versions' => $this->versions->available(),
+            'current' => $this->versions->current(),
         ]);
     }
 
@@ -79,23 +84,43 @@ class UniversesController extends BaseController
             'admin_name' => ['required', 'string', 'max:64'],
             'admin_email' => ['required', 'email', 'max:254'],
             'admin_password' => ['required', 'string', 'min:8', 'max:200'],
+            'version' => ['nullable', 'string', Rule::in($this->versions->available())],
         ]);
         $now = time();
-        $instance = new Instance($data['slug'], $data['name'], $this->provisioner->databaseFor($data['slug']), $data['mode'], Instance::OPEN, $now, self::time($data['ends'] ?? null));
+        $version = $data['version'] ?? $this->versions->current();
+        $instance = new Instance($data['slug'], $data['name'], $this->provisioner->databaseFor($data['slug']), $data['mode'], Instance::OPEN, $now, self::time($data['ends'] ?? null), null, '', $version);
         $payments = implode(',', self::strings($data['payments'] ?? []));
 
         // a new database with all tables takes a while
         set_time_limit(600);
 
         try {
-            $this->provisioner->create($instance, $data['admin_name'], $data['admin_email'], $data['admin_password'], ['payment_methods' => $this->provisioner->paymentMethods($payments)], (int) ($data['bots'] ?? 0));
+            $version === $this->versions->current()
+                ? $this->provisioner->create($instance, $data['admin_name'], $data['admin_email'], $data['admin_password'], ['payment_methods' => $this->provisioner->paymentMethods($payments)], (int) ($data['bots'] ?? 0))
+                : $this->createOnVersion($instance, $payments, (int) ($data['bots'] ?? 0), $data['admin_name'], $data['admin_email'], $data['admin_password']);
         } catch (InvalidArgumentException | RuntimeException $e) {
             return back()->withInput($request->except('admin_password'))->withErrors(['slug' => $e->getMessage()]);
         }
 
-        $this->record($request, OperatorLog::CREATED, $instance->slug, ['mode' => $instance->mode, 'payments' => $payments, 'ends_at' => $instance->endsAt, 'database' => $instance->database]);
+        $this->record($request, OperatorLog::CREATED, $instance->slug, ['mode' => $instance->mode, 'payments' => $payments, 'ends_at' => $instance->endsAt, 'database' => $instance->database, 'version' => $version]);
 
         return redirect()->route('operator.universes.edit', $instance->slug)->with('status', __('operator/operator.op_created', ['name' => $instance->name]));
+    }
+
+    /**
+     * An older version sets the universe up with its own code
+     * (xgp:instance:create of its directory; the password through the
+     * environment, never on the command line).
+     */
+    private function createOnVersion(Instance $instance, string $payments, int $bots, string $adminName, string $adminEmail, string $adminPassword): void
+    {
+        $this->versions->artisan($instance->version, 'xgp:instance:create', [
+            $instance->slug, '--name=' . $instance->name, '--mode=' . $instance->mode, '--payments=' . $payments, '--bots=' . $bots,
+            '--ends=' . ($instance->endsAt === null ? '' : date('Y-m-d H:i:s', $instance->endsAt)),
+            '--admin-name=' . $adminName, '--admin-email=' . $adminEmail,
+        ], ['XGP_ADMIN_PASSWORD' => $adminPassword]);
+        $this->registry->refresh();
+        $this->versions->writeMap();
     }
 
     public function edit(string $slug): View | RedirectResponse
@@ -158,6 +183,26 @@ class UniversesController extends BaseController
         }
 
         return redirect()->route('operator.universes.season', $slug)->with('status', __('operator/operator.op_closed', ['name' => $instance->name]));
+    }
+
+    /**
+     * The universe moves to a newer version (xgp:instance:upgrade).
+     */
+    public function upgrade(Request $request, string $slug): RedirectResponse
+    {
+        $instance = $this->instance($slug);
+        $version = (string) $request->validate(['version' => ['required', 'string', 'regex:' . Versions::PATTERN]])['version'];
+
+        // the migrations of a large universe take a while
+        set_time_limit(600);
+
+        if (Artisan::call('xgp:instance:upgrade', ['slug' => $slug, '--to' => $version]) !== 0) {
+            return redirect()->route('operator.versions')->withErrors(['upgrade' => trim(Artisan::output())]);
+        }
+
+        $this->record($request, OperatorLog::UPGRADED, $slug, ['from' => $instance->version, 'to' => $version]);
+
+        return redirect()->route('operator.versions')->with('status', __('operator/operator.op_upgraded', ['name' => $instance->name, 'version' => $version]));
     }
 
     public function season(string $slug): View

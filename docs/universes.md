@@ -548,6 +548,17 @@ Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
 - Zurück zur vorigen Version: `xgp:versions:use <alte>`. Die Datenbanken
   bleiben, wie sie sind (Migrationen laufen nicht rückwärts).
 
+**Im Betreiberbereich** (`/operator` → *Versionen*) geht dasselbe im
+Browser: die Versionen auf dem Server mit den Universen darauf (eine
+fehlende ist markiert), *Neue Version holen* (Tag, Branch oder Commit;
+läuft im Hintergrund, das Protokoll steht auf der Seite), *Bedienen lassen*
+(nur auf einem Server mit dem Ordner `current`; im Docker-Stack bleibt es
+bei `deploy.sh`), *Ungenutzte Versionen löschen* und *Universum heben* mit
+Auswahl der Zielversion. Beim Anlegen eines Universums wählst du die
+Version; eine ältere legt es mit ihrem eigenen Code an (ihr
+`xgp:instance:create`, das Passwort geht über die Umgebung, nie über die
+Kommandozeile). Jede Aktion steht im Protokoll der Betreiber.
+
 Grenzen: Statische Dateien (`public/assets`) liefert der Webserver aus der
 neuesten Version; neue Dateien kommen dazu, alte bleiben, nur eine
 *geänderte* Datei gleichen Namens sieht auch ein älteres Universum neu.

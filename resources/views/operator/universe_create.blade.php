@@ -26,6 +26,14 @@
     <input type="datetime-local" id="ends" name="ends" value="{{ old('ends') }}">
     <label for="bots">{{ __('operator/operator.op_bots') }}</label>
     <input type="number" id="bots" name="bots" value="{{ old('bots', 0) }}" min="0" max="1000">
+    @if (count($versions) > 1)
+    <label for="version">{{ __('operator/operator.op_version_choose') }} <span class="help">{{ __('operator/operator.op_version_choose_help') }}</span></label>
+    <select id="version" name="version">
+        @foreach ($versions as $version)
+            <option value="{{ $version }}" @selected(old('version', $current) === $version)>{{ $version }}@if ($version === $current) ({{ __('operator/operator.op_version_running') }})@endif</option>
+        @endforeach
+    </select>
+    @endif
 
     <h2>{{ __('operator/operator.op_admin') }}</h2>
     <p class="help">{{ __('operator/operator.op_admin_help') }}</p>
