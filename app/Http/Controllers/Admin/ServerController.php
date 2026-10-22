@@ -9,7 +9,7 @@ use App\Services\Admin\ServerSettingsService;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class ServerController extends AdminSettingsController
 {
@@ -25,6 +25,9 @@ class ServerController extends AdminSettingsController
         return $this->view('admin.server', $this->buildViewData());
     }
 
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     public function update(ServerRequest $request): RedirectResponse
     {
         foreach ($request->toSettings() as $key => $value) {
@@ -41,6 +44,8 @@ class ServerController extends AdminSettingsController
 
     /**
      * @return array<string, mixed>
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function buildViewData(): array
     {

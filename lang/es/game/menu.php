@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'lm_players' => 'Jugadores:',
+    'lm_menu' => 'Menú',
     'lm_overview' => 'Resumen',
     'lm_galaxy' => 'Galaxia',
     'lm_empire' => 'Imperio',
@@ -17,6 +18,8 @@ return [
     'lm_defenses' => 'Defensa',
     'lm_officiers' => 'Casino',
     'lm_trader' => 'Mercader',
+    'lm_items' => 'Objetos',
+    'lm_characterclass' => 'Clase',
     'lm_technology' => 'Técnica',
     'lm_messages' => 'Mensajes',
     'lm_alliance' => 'Alianza',

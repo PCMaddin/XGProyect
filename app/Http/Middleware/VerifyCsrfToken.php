@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // signed by Stripe instead (routes/webhooks.php has no session anyway)
+        'stripe/webhook',
     ];
 }

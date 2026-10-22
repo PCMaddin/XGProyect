@@ -135,19 +135,6 @@ class ProductionFormulaTest extends TestCase
         $this->assertLessThan(0, $result);
     }
 
-    public function testToLegacyArray(): void
-    {
-        $formula = $this->createMetalMineFormula();
-
-        $legacy = $formula->toLegacyArray();
-
-        $this->assertSame(60, $legacy['metal']);
-        $this->assertSame(15, $legacy['crystal']);
-        $this->assertSame(0, $legacy['deuterium']);
-        $this->assertSame(0, $legacy['energy']);
-        $this->assertSame(1.5, $legacy['factor']);
-    }
-
     public function testCalculateMetalAtLevelZero(): void
     {
         $formula = $this->createMetalMineFormula();

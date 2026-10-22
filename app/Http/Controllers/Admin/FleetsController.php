@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\FleetShips;
 use App\Models\Fleets;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\FleetsService;
@@ -12,10 +13,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Libraries\FleetsLib;
 
 class FleetsController extends BaseController
 {
+    private const SHOWN = 500;
+
     public function __construct(
         private FleetsService $fleetsService,
         private FormatService $formatService,
@@ -79,13 +81,17 @@ class FleetsController extends BaseController
 
     /**
      * @return array<int, array<string, mixed>>
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function buildFleetMovements(): array
     {
+        // the next ones to come back; all fleets of a big universe make a page PHP cannot build
         return Fleets::orderBy('fleet_end_time')
+            ->limit(self::SHOWN)
             ->get()
             ->map(function (Fleets $fleet): array {
-                $shipLines = collect(FleetsLib::getFleetShipsArray($fleet->fleet_array))
+                $shipLines = collect(FleetShips::decode($fleet->fleet_array))
                     ->map(fn ($amount, $ship) => __('admin/objects.objects')[$ship] . ': ' . $this->formatService->prettyNumber((int) $amount))
                     ->values()
                     ->implode('<br>');

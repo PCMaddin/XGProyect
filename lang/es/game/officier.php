@@ -51,4 +51,6 @@ return [
             'benefits' => '+2 al nivel de espionaje, 25% menos de tiempo de investigación',
         ],
     ],
+    'of_commanding_staff' => 'Estado mayor',
+    'of_commanding_staff_benefits' => 'Con los cinco oficiales activos a la vez: +1 ranura de flota, +2% de producción de energía, +2% de producción de minas, +1 nivel de espionaje.',
 ];

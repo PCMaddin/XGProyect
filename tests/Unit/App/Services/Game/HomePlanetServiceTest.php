@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 #[CoversClass(HomePlanetService::class)]
 class HomePlanetServiceTest extends TestCase

@@ -4,7 +4,7 @@
     <td class="k">
         @if ($row['is_active'])
         <div id="blc" class="z">{{ $row['time_left'] }}<br>
-            <a href="{{ $row['cancel_url'] }}">{{ $row['cancel_label'] }}</a>
+            <a href="{{ $row['cancel_url'] }}" data-post>{{ $row['cancel_label'] }}</a>
         </div>
         <script language="JavaScript">
 @foreach ($row['timer_variables'] as $name => $value)
@@ -14,7 +14,7 @@ t();
         </script>
         <strong><font color="lime">{{ $row['finish_at'] }}</font></strong>
         @else
-        <font color="red"><a href="{{ $row['remove_url'] }}">{{ $row['remove_label'] }}</a></font>
+        <font color="red"><a href="{{ $row['remove_url'] }}" data-post>{{ $row['remove_label'] }}</a></font>
         @endif
     </td>
 </tr>

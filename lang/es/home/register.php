@@ -5,24 +5,14 @@ declare(strict_types=1);
 return [
     're_disabled' => 'En estos momentos el registro a nuevos usuarios se encuentra cerrado.',
     're_create_fail' => 'No pudimos completar tu registro en este momento. Por favor, inténtalo de nuevo en unos instantes.',
+    're_universe_full' => 'Este universo está lleno: no queda sitio libre para un nuevo planeta principal. Elige otro universo.',
     're_welcome_message_from' => 'Admin',
     're_welcome_message_subject' => '¡Te damos la bienvenida a XGProyect!',
-    're_welcome_message_content' => 'Hola %s - ¡Bienvenido a XGProyect!
-    <br><br>
-    Al principio empieza por construir una mina de metal.<br>
-    Para hacer esto haz click en el enlace "Recursos" de la izquierda, selecciona la mina de metal, y haz click en "Construir".<br>
-    Mientras esperas tienes la oportunidad de leer más sobre el juego.<br>
-    Encontrarás ayuda:<br>
-    En el <a href="game.php?page=tutorial">Tutorial</a><br>
-    En el <a href="game.php?page=forums">Foro</a><br>
-    O puedes pedir ayuda en el canal de soporte de IRC: #xgproyect.org y #xgproyect.org-support en:<br>
-    https://www.onlinegamesnet.net/javaChat.php?game=xgproyect&cc=en<br>
-    <br><br>
-    También puedes solicitar soporte del equipo utilizando el <a href="game.php?page=ticket">Sistema de Tickets</a><br>
-    Ahora la mina debería estar construida.<br>
-    Como las minas no producen nada sin energía, deberías construir también una planta de energía solar, vuelve a "Recursos", selecciona la planta de energía solar y construyela.<br>
-    Para ver todas las naves, estructuras defensivas, edificios e investigaciones que podrás desarrollar puedes echar un vistazo al árbol tecnológico en "Tecnología" en el menu de la izquierda.<br>
-    Ahora puede comentar la conquista del universo... ¡Buena suerte!',
-    're_username_not_available' => 'Este nombre de usuario ya no est\u00e1 disponible.',
+    're_welcome_message_content' => '¡Saludos, emperador %s!<br><br>Te felicito de todo corazón por el inicio de tu reinado y espero poder ayudarte en tus primeros pasos.<br><br>A la izquierda verás el menú, con el que dirigirás el destino de tu imperio galáctico.<br><br>Seguro que ya conoces el «Resumen». En «Recursos» e «Instalaciones» construyes los edificios que necesita tu imperio. El mejor comienzo es mejorar primero tu planta de energía solar, para obtener energía y abastecer con ella tus minas.<br><br>Después mejora tus minas de metal y de cristal para producir los recursos necesarios. También puedes echar un vistazo a los menús; seguro que enseguida te orientarás.',
+    're_welcome_message_forum' => 'Noticias, ayuda y consejos de otros jugadores los encontrarás en el <a href=":url" target="_blank" rel="noopener">foro</a>.',
+    're_welcome_message_closing' => 'Ahora estás preparado para el futuro: ¡buena suerte!<br><br>Este mensaje se borrará al cabo de una semana.',
+    're_username_not_available' => 'Este nombre de usuario ya no está disponible.',
     're_email_not_available' => '¡La dirección de E-mail ya está en uso!',
+    're_universe_closed_full' => 'Este universo está lleno. Elige otro en el vestíbulo.',
+    're_invite_invalid' => 'El código de invitación no es válido, ha caducado o ya se usó.',
 ];

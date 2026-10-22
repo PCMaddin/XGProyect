@@ -68,6 +68,22 @@ sail up -d
 
 If you already created your own `.env`, those values may be different. Check that file because it overrides `.env.example`.
 
+`.env.example` is set up for a public server (`APP_ENV=production`, `APP_DEBUG=false`). For local development set `APP_ENV=local` and `APP_DEBUG=true` in your `.env` to get detailed error pages and the debug bar; never on a public server, since error pages then show source code, queries and request data to every visitor.
+
+## Production server
+
+`deploy/` runs the game on a server of your own with one command: HTTPS with automatic certificates (Caddy), several php-fpm 8.4 containers with OPcache, MariaDB, Redis for sessions and cache, and the scheduler for the game clock. Updates roll out without downtime, and a release that does not render its pages never goes live.
+
+```bash
+deploy/deploy.sh   # first run creates deploy/.env; set the domain and mail, then run it again
+```
+
+See [docs/deployment.md](docs/deployment.md) (German).
+
+## Several universes
+
+One server can run several universes, each in a database of its own, with a lobby, a new universe every month and dark matter sold by card (Stripe), WAX or an own token, managed on the command line or in the operators’ area `/operator` (always with two-factor sign-in). See [docs/universes.md](docs/universes.md) (German) for setup, commands and payments.
+
 ## Mailpit
 
 Mailpit captures outgoing emails locally so you can inspect them from a simple web UI.

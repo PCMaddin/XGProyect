@@ -2,7 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Account\PrivacyController;
 use App\Http\Controllers\Account\RecoverController;
+use App\Http\Controllers\Account\ReportController;
+use App\Http\Controllers\Account\SecurityController;
+use App\Http\Controllers\Account\TwoFactorChallengeController;
+use App\Http\Controllers\Account\VerifyEmailController;
+use App\Http\Controllers\Account\WaxController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\Ajax as AdminAjax;
 use App\Http\Controllers\Admin\Users as AdminUsers;
@@ -12,12 +18,19 @@ use App\Http\Controllers\Home\Ajax\MediaController;
 use App\Http\Controllers\Home\LoginController;
 use App\Http\Controllers\Home\RegisterController;
 use App\Http\Controllers\Home\WelcomeController;
+use App\Http\Controllers\Legal\LegalController;
+use App\Http\Controllers\Lobby\LobbyController;
+use App\Services\Legal\LegalPages;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/universes', [LobbyController::class, 'index'])->name('lobby.index');
+Route::get('/legal/{page}', LegalController::class)->whereIn('page', LegalPages::PAGES)->name('legal.show');
+Route::post('/universes/{slug}', [LobbyController::class, 'choose'])->name('lobby.choose');
 
 Route::prefix('/')->group(function () {
     Route::get('/', WelcomeController::class)->name('home.index');
-    Route::post('/login', LoginController::class)->name('home.login');
-    Route::post('/register', RegisterController::class)->name('home.register');
+    Route::post('/login', LoginController::class)->middleware('throttle:login')->name('home.login');
+    Route::post('/register', RegisterController::class)->middleware('throttle:register')->name('home.register');
 });
 
 Route::prefix('home/ajax')->group(function () {
@@ -28,15 +41,38 @@ Route::prefix('home/ajax')->group(function () {
 
 Route::prefix('account')->group(function () {
     Route::get('/recover', RecoverController::class)->name('account.recover');
-    Route::post('/recover', [RecoverController::class, 'recover']);
+    Route::post('/recover', [RecoverController::class, 'recover'])->middleware('throttle:recover');
+    Route::get('/reset/{token}', [RecoverController::class, 'showReset'])->name('account.reset');
+    Route::post('/reset', [RecoverController::class, 'reset'])->middleware('throttle:recover')->name('account.reset.update');
+    Route::get('/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+        ->whereNumber('id')->middleware(['signed:relative', 'throttle:20,1'])->name('account.verify');
+    Route::get('/two-factor', [TwoFactorChallengeController::class, 'show'])->name('account.two-factor');
+    Route::post('/two-factor', [TwoFactorChallengeController::class, 'verify'])->name('account.two-factor.verify');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/security', [SecurityController::class, 'show'])->name('account.security');
+        Route::post('/security/start', [SecurityController::class, 'start'])->name('account.security.start');
+        Route::post('/security/confirm', [SecurityController::class, 'confirm'])->name('account.security.confirm');
+        Route::post('/security/disable', [SecurityController::class, 'disable'])->name('account.security.disable');
+        Route::post('/security/codes', [SecurityController::class, 'codes'])->name('account.security.codes');
+        Route::post('/verify/resend', [VerifyEmailController::class, 'resend'])->middleware('throttle:3,60')->name('account.verify.resend');
+        Route::get('/report', [ReportController::class, 'show'])->name('account.report');
+        Route::post('/report', [ReportController::class, 'store'])->middleware('throttle:5,60')->name('account.report.store');
+        Route::get('/privacy', [PrivacyController::class, 'show'])->name('account.privacy');
+        Route::post('/privacy/export', [PrivacyController::class, 'download'])->middleware('throttle:10,60')->name('account.privacy.export');
+        Route::post('/privacy/delete', [PrivacyController::class, 'destroy'])->name('account.privacy.delete');
+        Route::get('/wax', [WaxController::class, 'show'])->name('account.wax');
+        Route::post('/wax/renew', [WaxController::class, 'renew'])->name('account.wax.renew');
+        Route::post('/wax/claim', [WaxController::class, 'claim'])->name('account.wax.claim');
+    });
 });
 
 Route::prefix('admin')->group(function () {
     Route::get('/', Admin\IndexController::class)->name('admin.index');
-    Route::post('/login', Admin\LoginController::class)->name('admin.login');
+    Route::post('/login', Admin\LoginController::class)->middleware('throttle:login')->name('admin.login');
     Route::get('/logout', Admin\LogoutController::class)->name('admin.logout');
 
-    Route::middleware(['admin.auth', 'admin.authorize'])
+    Route::middleware(['admin.auth', 'admin.two_factor', 'admin.authorize'])
         ->group(function () {
             Route::get('/announcement', [Admin\AnnouncementController::class, 'index'])->name('admin.announcement');
             Route::post('/announcement', [Admin\AnnouncementController::class, 'send'])->name('admin.announcement.send');
@@ -91,14 +127,19 @@ Route::prefix('admin')->group(function () {
             Route::post('/planets', [Admin\PlanetsController::class, 'update'])->name('admin.planets.update');
             Route::get('/bots', [Admin\BotsController::class, 'index'])->name('admin.bots');
             Route::post('/bots', [Admin\BotsController::class, 'generate'])->name('admin.bots.generate');
+            Route::post('/bots/play', [Admin\BotsController::class, 'play'])->name('admin.bots.play');
             Route::get('/expeditions', [Admin\ExpeditionsController::class, 'index'])->name('admin.expeditions');
             Route::post('/expeditions', [Admin\ExpeditionsController::class, 'update'])->name('admin.expeditions.update');
             Route::get('/premium', [Admin\PremiumController::class, 'index'])->name('admin.premium');
             Route::post('/premium', [Admin\PremiumController::class, 'update'])->name('admin.premium.update');
+            Route::get('/premium/orders', [Admin\PremiumController::class, 'orders'])->name('admin.premium.orders');
+            Route::get('/premium/orders.csv', [Admin\PremiumController::class, 'ordersCsv'])->name('admin.premium.orders.csv');
             Route::get('/rebuildhighscores', [Admin\RebuildHighscoresController::class, 'index'])->name('admin.rebuildhighscores');
             Route::post('/rebuildhighscores', [Admin\RebuildHighscoresController::class, 'run'])->name('admin.rebuildhighscores.run');
             Route::get('/registration', [Admin\RegistrationController::class, 'index'])->name('admin.registration');
             Route::post('/registration', [Admin\RegistrationController::class, 'update'])->name('admin.registration.update');
+            Route::post('/registration/invitations', [Admin\RegistrationController::class, 'invite'])->name('admin.registration.invite');
+            Route::delete('/registration/invitations/{invitation}', [Admin\RegistrationController::class, 'revoke'])->whereNumber('invitation')->name('admin.registration.revoke');
             Route::get('/repair', [Admin\RepairController::class, 'index'])->name('admin.repair');
             Route::post('/repair', [Admin\RepairController::class, 'run'])->name('admin.repair.run');
             Route::get('/reset', [Admin\ResetController::class, 'index'])->name('admin.reset');
@@ -113,6 +154,8 @@ Route::prefix('admin')->group(function () {
             // Ajax
             Route::get('/ajax/update/check', AdminAjax\UpdateCheckController::class)->name('admin.update.check');
             // Users — core (search, create, info, settings, delete)
+            Route::get('/suspicions', [Admin\SuspicionsController::class, 'index'])->name('admin.suspicions');
+            Route::post('/suspicions/{suspicion}', [Admin\SuspicionsController::class, 'decide'])->whereNumber('suspicion')->name('admin.suspicions.decide');
             Route::get('/users', [AdminUsers\UsersController::class, 'index'])->name('admin.users');
             Route::get('/users/create', [AdminUsers\UsersController::class, 'create'])->name('admin.users.create');
             Route::post('/users', [AdminUsers\UsersController::class, 'store'])->name('admin.users.store');

@@ -9,8 +9,9 @@ use App\Models\Changelog;
 use App\Services\SettingsService;
 use App\Services\TimingService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Routing\Controller as BaseController;
-use Xgp\App\Libraries\Functions;
+use App\Libraries\Functions;
 
 class ChangelogController extends BaseController
 {
@@ -27,21 +28,36 @@ class ChangelogController extends BaseController
     {
         Functions::moduleMessage(Functions::isModuleAccesible(Module::Changelog));
 
+        $changes = $this->entries($this->settings->getString('lang'));
+
+        // a language without changelog entries of its own (German, French) shows the
+        // English ones
+        if ($changes->isEmpty()) {
+            $changes = $this->entries('en');
+        }
+
         return view('changelog.view', [
             'gameTitle' => $this->settings->getString('game_name'),
-            'changes' => Changelog::query()
-                ->join('languages', 'languages.id', '=', 'changelog.changelog_lang_id')
-                ->where('languages.code', $this->settings->getString('lang'))
-                ->orderByDesc('changelog_date')
-                ->get(['changelog_version', 'changelog_date', 'changelog_description'])
-                ->map(fn ($entry) => [
-                    'versionNumber' => $entry->changelog_version,
-                    'description' => nl2br(
-                        $this->timingService->formatShortDate($entry->changelog_date->timestamp)
-                        . '<br>'
-                        . $entry->changelog_description
-                    ),
-                ]),
+            'changes' => $changes->map(fn ($entry) => [
+                'versionNumber' => $entry->changelog_version,
+                'description' => nl2br(
+                    $this->timingService->formatShortDate($entry->changelog_date->timestamp)
+                    . '<br>'
+                    . e($entry->changelog_description)
+                ),
+            ]),
         ]);
+    }
+
+    /**
+     * @return Collection<int, Changelog>
+     */
+    private function entries(string $languageCode): Collection
+    {
+        return Changelog::query()
+            ->join('languages', 'languages.id', '=', 'changelog.changelog_lang_id')
+            ->where('languages.code', $languageCode)
+            ->orderByDesc('changelog_date')
+            ->get(['changelog_version', 'changelog_date', 'changelog_description']);
     }
 }

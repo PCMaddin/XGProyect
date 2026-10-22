@@ -1,4 +1,5 @@
 <form action="game.php?page=alliance&mode=admin&edit=members&id={{ $id }}" name="edit_user_rank" method="POST" role="form">
+    @csrf
     <select name="newrang">
         @foreach ($options as $item)
         <option onclick="document.edit_user_rank.submit();" value="{{ $item['id'] }}"{{ $item['selected'] }}>

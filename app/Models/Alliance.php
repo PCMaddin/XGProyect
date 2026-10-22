@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $alliance_owner
  * @property int    $alliance_register_time
  * @property int    $alliance_request_notallow
+ * @property int    $alliance_class
+ * @property-read int $alliance_members  only when selected with the member count
  */
 class Alliance extends Model
 {
@@ -74,6 +76,7 @@ class Alliance extends Model
      */
     protected $casts = [
         'alliance_name' => 'string',
+        'alliance_members' => 'int',
         'alliance_tag' => 'string',
         'alliance_owner' => 'int',
         'alliance_register_time' => 'int',
@@ -83,6 +86,7 @@ class Alliance extends Model
         'alliance_image' => 'string',
         'alliance_request' => 'string',
         'alliance_request_notallow' => 'int',
+        'alliance_class' => 'int',
         'alliance_ranks' => 'string',
     ];
 
@@ -114,11 +118,10 @@ class Alliance extends Model
     }
 
     /**
-     * @return BelongsTo<User, self>
+     * @return BelongsTo<User, $this>
      */
     public function owner(): BelongsTo
     {
-        // @phpstan-ignore-next-line
         return $this->belongsTo(User::class, 'alliance_owner', 'id');
     }
 

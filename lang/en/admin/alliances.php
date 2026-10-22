@@ -44,7 +44,7 @@ return [
     'al_send_data' => 'Save changes',
     'al_error_alliance_name' => '<br>Invalid alliance name.<br><br><strong>Possible reasons:</strong><br>-Name already exists.<br>-The alliance name is shorter than 3 characters<br>-The alliance name is longer than 30 characters',
     'al_error_alliance_tag' => '<br>Invalid alliance tag.<br><br><strong>Possible reasons:</strong><br>-Tag already exists.<br>-The alliance tag is shorter than 3 characters<br>-The alliance tag is longer than 8 characters',
-    'al_error_founder' => 'El fundador seleccionado no puede ser establecido. Es posible que ya esté asignado a otra alianza.',
+    'al_error_founder' => 'The selected founder cannot be set. They may already belong to another alliance.',
     'al_all_ok_message' => 'Changes saved successfully!',
     'al_alliance_ranks' => '":alliance" ranks',
     'al_no_ranks' => 'Ranks not defined',

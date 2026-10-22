@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+|--------------------------------------------------------------------------
+| Universes
+|--------------------------------------------------------------------------
+|
+| A new universe every month (xgp:instance:monthly, run by the scheduler on
+| the first of the month when enabled). Name and slug take :year, :month and
+| :number (the count of universes so far plus one). Options are given as
+| name=value pairs separated by commas (game_speed=5000,fleet_speed=5000).
+| keep_open closes all but the newest universes; 0 keeps every one open.
+|
+*/
+
+return [
+    'monthly' => [
+        'enabled' => (bool) env('XGP_MONTHLY_ENABLED', false),
+        'slug' => env('XGP_MONTHLY_SLUG', ':year-:month'),
+        'name' => env('XGP_MONTHLY_NAME', 'Universe :year-:month'),
+        'mode' => env('XGP_MONTHLY_MODE', 'play2win'),
+        // ways to pay in a pay2win universe: stripe, wax or stripe,wax
+        'payments' => env('XGP_MONTHLY_PAYMENTS', 'stripe'),
+        'options' => env('XGP_MONTHLY_OPTIONS', ''),
+        'keep_open' => (int) env('XGP_MONTHLY_KEEP_OPEN', 0),
+        // how long a season runs (strtotime: "1 month", "4 weeks"); empty: no end
+        'duration' => env('XGP_MONTHLY_DURATION', '1 month'),
+        // AI opponents the new universe starts with
+        'bots' => (int) env('XGP_MONTHLY_BOTS', 0),
+        'admin' => [
+            'name' => env('XGP_MONTHLY_ADMIN_NAME', ''),
+            'email' => env('XGP_MONTHLY_ADMIN_EMAIL', ''),
+            'password' => env('XGP_MONTHLY_ADMIN_PASSWORD', ''),
+        ],
+    ],
+
+    // days a universe stays closed before the scheduler archives it (its
+    // database dumped to the backup server, then dropped; xgp:instance:archive);
+    // 0: only by hand. Keep it above the time a card payment can still be
+    // disputed (up to 120 days): the orders are in the universe's database.
+    'archive_after_days' => (int) env('XGP_ARCHIVE_AFTER_DAYS', 0),
+
+    // where the versions of the code lie, one directory per version
+    // (xgp:versions:sync puts the running one there): a universe pinned to
+    // an older version is served and ticked by that directory. Empty:
+    // storage/versions. The Docker stack mounts a volume at /srv/versions.
+    'versions_path' => (string) env('XGP_VERSIONS_PATH', ''),
+];

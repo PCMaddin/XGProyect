@@ -1,0 +1,982 @@
+# Betrieb mit mehreren Universen
+
+Dieses Handbuch beschreibt, wie ein XG-Proyect-Server mehrere Universen
+betreibt: jedes in einer eigenen Datenbank, mit Lobby, monatlichem Start und
+dem Kauf von Dunkler Materie per Karte (Stripe) oder WAX.
+
+Ein Server ohne eingetragene Universen läuft wie bisher als ein einziges
+Spiel. Alles hier ist also optional.
+
+## Überblick
+
+- **Universum:** ein vollständiges Spiel in einer eigenen Datenbank, mit
+  eigenen Konten, Optionen, Sitzungen, eigenem Cache, eigenem Backup-Ordner
+  und eigener Fehler-Logdatei. Konten gelten nur in ihrem Universum.
+- **Basisdatenbank:** die Datenbank aus `config/xgp-db-config.php`. Sie
+  enthält die Liste der Universen (`xgp_instances`) und die eingegangenen
+  WAX-Überweisungen (`xgp_wax_transfers`). Sie kann selbst eines der
+  Universen sein.
+- **Lobby** unter `/universes`: zeigt alle Universen, neueste zuerst, mit
+  Modus, Startdatum, Spielerzahl und Zahlungsarten. Die Wahl wird im Cookie
+  `xgp_universe` gespeichert; ohne Wahl führt jede Seite zur Lobby.
+- **Betreiberbereich** unter `/operator`: die Universen im Browser verwalten,
+  mit eigenen Betreiberkonten und immer mit Zwei-Faktor-Anmeldung (siehe
+  *Betreiberbereich im Browser*).
+- **Modus:** `pay2win` (Dunkle Materie kann gekauft werden) oder
+  `play2win` (nichts zu kaufen; Dunkle Materie nur aus Expeditionen und vom
+  Admin).
+
+## Voraussetzungen
+
+- MySQL oder MariaDB. Mit SQLite gibt es keine Universen.
+- Der Datenbank-Benutzer des Spiels darf Datenbanken anlegen, mindestens
+  nach dem Muster der Universen, zum Beispiel:
+
+  ```sql
+  GRANT ALL PRIVILEGES ON `xgp\_uni\_%`.* TO 'xgp'@'localhost';
+  ```
+
+- Mit dem Docker-Stack aus `deploy/` ist alles Folgende schon eingerichtet
+  (Datenbank-Rechte, Scheduler, Redis), siehe
+  [deployment.md](deployment.md); Befehle dort mit
+  `docker compose exec app php artisan …`.
+- Der Scheduler läuft per Cron. Er hält die Spielzeit aller Universen am
+  Laufen (`xgp:tick`) und startet den Monatsstart und die WAX-Gutschrift:
+
+  ```
+  * * * * * cd /pfad/zum/spiel && php artisan schedule:run >> /dev/null 2>&1
+  ```
+
+## Erste Einrichtung
+
+1. Das Spiel wie gewohnt mit dem Installer einrichten.
+2. Optional das installierte Spiel als erstes Universum übernehmen:
+
+   ```bash
+   php artisan xgp:instance:adopt classic --name="Classic" --mode=play2win
+   ```
+
+3. Weitere Universen anlegen:
+
+   ```bash
+   php artisan xgp:instance:create nov --name="November" --mode=pay2win \
+     --payments=stripe,wax --bots=20 \
+     --admin-name=Admin --admin-email=admin@example.com --admin-password='…' \
+     --option=game_speed=5000 --option=fleet_speed=5000
+   ```
+
+Sobald ein Universum eingetragen ist, zeigt der Server die Lobby.
+
+## Befehle
+
+| Befehl | Was er tut |
+|---|---|
+| `xgp:instance:create {slug}` | legt ein Universum in einer eigenen Datenbank an (siehe unten) |
+| `xgp:instance:adopt {slug}` | trägt das schon installierte Spiel als Universum ein |
+| `xgp:instance:list` | zeigt alle Universen mit Datenbank, Modus, Status und Start |
+| `xgp:instance:update {slug}` | ändert Name, Modus, Status oder Zahlungsarten |
+| `xgp:instance:migrate {slug?}` | spielt die Update-Migrationen in einem oder allen Universen ein |
+| `xgp:instance:monthly` | öffnet das Universum des Monats (läuft per Scheduler) |
+| `xgp:instance:close-ended` | schließt Universen, deren Saison vorbei ist (läuft per Scheduler alle fünf Minuten) |
+| `xgp:wax:check` | schreibt WAX-Zahlungen gut (läuft per Scheduler jede Minute) |
+| `xgp:tick` | berechnet in jedem offenen Universum Flotten, Umzüge, Auktionen, Statistik, Aufräumen, Backup und Bots (läuft per Scheduler jede Minute) |
+
+`php artisan <befehl> --help` zeigt alle Optionen.
+
+Solange der Tick läuft (sein letzter Lauf ist jünger als fünf Minuten,
+Option `tick_last_run`), berechnen Seitenaufrufe nur noch, was der Spieler
+sofort sieht: fällige Flotten, Umzüge und Auktionen. Statistik, Aufräumen,
+Backup und Bots macht der Scheduler. Fällt der Cron aus, übernehmen die
+Seitenaufrufe nach fünf Minuten wieder alles.
+
+### `xgp:instance:create`
+
+| Option | Standard | Bedeutung |
+|---|---|---|
+| `slug` | – | Kurzname: Kleinbuchstaben, Ziffern, Bindestrich, bis 32 Zeichen. Steht im Cookie, im Datenbanknamen und in Mail-Links. |
+| `--name` | der Slug | Name in der Lobby und als Spielname |
+| `--mode` | `play2win` | `pay2win` oder `play2win` |
+| `--payments` | `stripe` | Zahlungsarten in Pay2Win: `stripe`, `wax` oder `stripe,wax` |
+| `--bots` | `0` | KI-Gegner zum Start, über alle Galaxien verteilt |
+| `--ends` | – | Saisonende: ein Datum (`2026-12-01`) oder eine Dauer (`"+1 month"`); ohne läuft das Universum unbegrenzt |
+| `--database` | `xgp_uni_<slug>` | Datenbank des Universums |
+| `--admin-name`, `--admin-email`, `--admin-password` | – | erster Administrator; fehlt etwas, fragt der Befehl nach |
+| `--option=name=wert` | – | weitere Spieloptionen, mehrfach möglich (`game_speed=5000`) |
+
+Der Befehl legt die Datenbank an und richtet sie wie der Installer ein:
+Tabellen, Update-Migrationen als gelaufen markiert, Changelog, Sprachen,
+Optionen und den Administrator mit Heimatplanet auf 1:1:1. Sprache und
+Zeitzone übernimmt er aus dem Basisspiel, wenn `--option` sie nicht setzt.
+
+Er bricht ab, ohne etwas zu verändern, wenn der Slug schon vergeben ist, die
+Datenbank einem anderen Universum gehört oder schon ein Spiel enthält. Bricht
+er mitten in der Einrichtung ab, bleibt die halb eingerichtete Datenbank
+liegen; dann die Datenbank von Hand löschen und den Befehl wiederholen.
+
+### `xgp:instance:update`
+
+```bash
+php artisan xgp:instance:update nov --name="November 2026"
+php artisan xgp:instance:update nov --mode=pay2win --payments=stripe,wax
+php artisan xgp:instance:update nov --payments=none
+php artisan xgp:instance:update nov --status=closed
+php artisan xgp:instance:update nov --ends="2026-12-01 00:00"
+php artisan xgp:instance:update nov --ends=none
+```
+
+Nach dem Saisonende kommt niemand mehr hinein; `xgp:instance:close-ended`
+schließt das Universum dann auch in der Liste. Beim Schließen wird die
+Rangliste eingefroren: Die Top 10 jeder Wertung (ohne Bots und Admins)
+stehen danach in der Basisdatenbank (`xgp_season_results`) und in der Lobby
+als Ruhmeshalle. Lobby, Startseite und die
+Übersicht im Spiel zeigen das Saisonende an.
+
+Ein geschlossenes Universum steht in der Lobby als „Beendet“; niemand kann
+es mehr betreten. Die Daten bleiben erhalten.
+
+## Betreiberbereich im Browser
+
+Unter `/operator` kann man alles erledigen, was die `xgp:instance`-Befehle
+tun: Universen anlegen, Name, Modus, Zahlungsarten, Saisonende und Preise
+ändern, ein Universum schließen und Saisonpreise im eigenen Token
+auszahlen. Die Befehle bleiben daneben bestehen.
+
+**Konten.** Betreiberkonten liegen in der Basisdatenbank
+(`xgp_operators`) und haben nichts mit den Spiel- oder Admin-Konten eines
+Universums zu tun. Ein Konto legst du auf dem Server an:
+
+```bash
+php artisan xgp:operator:create du@example.com
+```
+
+Der Befehl fragt nach dem Passwort (mindestens 12 Zeichen), zeigt einen
+QR-Code im Terminal (oder den Schlüssel zum Abtippen) und fragt nach dem
+Code aus deiner Authenticator-App. Erst dann gibt es das Konto. Danach
+zeigt er die Wiederherstellungscodes einmal an; bewahre sie sicher auf.
+
+**Anmeldung.** Immer Passwort und dann Code aus der App oder ein
+Wiederherstellungscode. Eingerichtet wird die Zwei-Faktor-Anmeldung nur auf
+der Kommandozeile, nie im Browser: Wer nur das Passwort kennt, kann keine
+eigene App eintragen. Nach fünf falschen Codes muss das Passwort neu
+eingegeben werden; jeder Code gilt einmal. Die Sitzung endet nach 30
+Minuten ohne Klick und spätestens 8 Stunden nach der Anmeldung. Sie ist
+von den Universen getrennt (eigenes Cookie `xgp_operator`).
+
+| Befehl | Zweck |
+|---|---|
+| `xgp:operator:create <e-mail>` | Konto mit Zwei-Faktor-Anmeldung anlegen |
+| `xgp:operator:reset <e-mail> --new-password` | neues Passwort |
+| `xgp:operator:reset <e-mail> --two-factor` | neue Authenticator-App (Handy verloren); die alte gilt, bis die neue bestätigt ist |
+| `xgp:operator:list` | Konten mit letzter Anmeldung |
+| `xgp:operator:delete <e-mail>` | Konto löschen |
+
+Im Browser unter *Konto* änderst du dein Passwort und erzeugst neue
+Wiederherstellungscodes, beides nur mit dem aktuellen Passwort und einem
+Code.
+
+**Rechtliches.** Unter *Rechtliches* schreibst du Impressum,
+Datenschutzerklärung, AGB und Widerrufsbelehrung, je Sprache ein Text in
+Markdown (`# Überschrift`, `**fett**`, `[Link](https://…)`, Listen mit `-`).
+HTML im Text erscheint als Text, nie als Code. Die Texte liegen in der
+Basisdatenbank (`xgp_legal_pages`) und gelten für alle Universen. Für
+alle sind sie unter `/legal/imprint`, `/legal/privacy`, `/legal/terms`
+und `/legal/withdrawal` erreichbar, auch ohne Anmeldung und ohne
+gewähltes Universum. Fehlt ein Text in der Sprache des Besuchers,
+erscheint der zuerst geschriebene. Verlinkt ist eine Seite erst, wenn sie
+einen Text hat: in der Fußzeile der Startseite, der Lobby und jeder
+Spielseite, bei der Registrierung (AGB, Datenschutz) und im Shop (AGB,
+Widerruf). Ein leer gespeicherter Text entfernt die Seite in dieser
+Sprache. Jede Änderung steht im Protokoll.
+
+**Fehler.** Jede Ausnahme, die die App meldet, landet zusätzlich zum Log
+in der Basisdatenbank (`xgp_error_groups`). Das gilt für alle Universen,
+Seitenaufrufe und Befehle. Gleichartige Fehler sind eine Gruppe: gleiche
+Klasse, gleiche Stelle, gleiche Meldung ohne Zahlen und Werte in
+Anführungszeichen. Unter *Fehler* siehst du je Gruppe Anzahl, erstes und
+letztes Auftreten, Universum, Seite oder Befehl und den Stacktrace des
+ersten Mals. Von der Seite wird nur der Pfad gespeichert, nie die Query.
+- *Erledigt*: Die Gruppe öffnet sich wieder, sobald der Fehler
+  wiederkommt.
+- *Stumm*: Sie zählt weiter, schickt aber keine Mails.
+
+`xgp:errors:notify` (alle 5 Minuten im Scheduler) mailt an
+`XGP_ERRORS_MAIL` (mehrere durch Komma), sobald eine offene Gruppe seit
+der letzten Mail `XGP_ERRORS_THRESHOLD`-mal (Standard 5) auftrat, je
+Gruppe höchstens stündlich. Erledigte Gruppen, die 90 Tage nicht
+wiederkamen, löscht der Befehl.
+
+**Meldungen.** Unter jeder Spielseite steht *Fehler melden*. Der Spieler
+beschreibt das Problem. Seite (nur ein Pfad dieser Seite), Universum,
+Spieler und Browser kommen mit. Höchstens 5 Meldungen pro Stunde. Die
+Meldungen aller Universen liegen in der Basisdatenbank (`xgp_bug_reports`).
+Unter *Meldungen* setzt du jede auf *gesehen* oder *behoben*; gefiltert
+wird nach Status. Löscht ein Spieler sein Konto, bleibt die Meldung ohne
+Namen und Browser.
+
+**Protokoll.** Jede Anmeldung, auch fehlgeschlagene, jede Änderung an
+einem Universum und an einem Rechtstext steht mit Betreiber, Adresse und
+Zeit in
+`xgp_operator_events`; die letzten 30 Einträge zeigt die Universenliste.
+
+**Absichern.** In der `.env`:
+
+| Variable | Bedeutung |
+|---|---|
+| `XGP_OPERATOR_IPS` | nur von diesen Adressen oder Netzen, z. B. `203.0.113.7,10.0.0.0/8`; sonst gibt es `/operator` nicht (404) |
+| `XGP_OPERATOR_WEB=false` | `/operator` ganz abschalten; die Befehle gehen weiter |
+
+Hinter einem Reverse-Proxy, der per HTTP mit dem Spiel spricht (nicht im
+Docker-Stack: Caddy übergibt die Adresse des Spielers direkt), zählt die
+Adresse des Proxys, bis er in `XGP_TRUSTED_PROXIES` steht
+(`203.0.113.7,10.0.0.0/8` oder `*`). Erst dann gilt `X-Forwarded-For`; ein
+gefälschter Header hilft also nicht. Ein Universum anzulegen dauert bis zu einer Minute,
+weil seine Datenbank mit allen Tabellen eingerichtet wird.
+
+## Monatlicher Start
+
+`xgp:instance:monthly` öffnet am Ersten jedes Monats um 00:05 Uhr ein neues
+Universum, wenn `XGP_MONTHLY_ENABLED=true` gesetzt ist. Läuft er öfter, legt
+er nichts doppelt an.
+
+| Variable | Standard | Bedeutung |
+|---|---|---|
+| `XGP_MONTHLY_ENABLED` | `false` | Monatsstart ein |
+| `XGP_MONTHLY_SLUG` | `:year-:month` | Slug, z. B. `2026-11` |
+| `XGP_MONTHLY_NAME` | `Universe :year-:month` | Name in der Lobby |
+| `XGP_MONTHLY_MODE` | `play2win` | Modus |
+| `XGP_MONTHLY_PAYMENTS` | `stripe` | Zahlungsarten |
+| `XGP_MONTHLY_OPTIONS` | – | Spieloptionen, `name=wert` durch Kommas getrennt |
+| `XGP_MONTHLY_BOTS` | `0` | KI-Gegner zum Start |
+| `XGP_MONTHLY_DURATION` | `1 month` | Saisonlänge; leer: kein Ende |
+| `XGP_MONTHLY_KEEP_OPEN` | `0` | lässt nur die neuesten N Universen offen und schließt die älteren; `0` schließt keines |
+| `XGP_MONTHLY_ADMIN_NAME`, `…_EMAIL`, `…_PASSWORD` | – | Administrator jedes neuen Universums |
+
+Platzhalter in Slug und Name: `:year`, `:month` und `:number` (Anzahl der
+Universen bisher plus eins). Einen bestimmten Monat von Hand öffnen:
+
+```bash
+php artisan xgp:instance:monthly --date=2026-12-01
+```
+
+Das Admin-Passwort steht dafür im Klartext in der `.env`. Die `.env` darf
+deshalb nur für den Server lesbar sein.
+
+## Saisonpreise
+
+Die Top 10 jeder Wertung (Gesamt, Gebäude, Forschung, Flotte,
+Verteidigung, Militär) teilen beim Saisonende einen Topf Dunkler Materie,
+gestaffelt nach Platz. Standard: Gesamt 100.000, die anderen Wertungen je
+20.000; die Plätze 1–10 bekommen 30/20/15/10/7/6/4/3/3/2 % ihres Topfs.
+
+| Variable | Bedeutung |
+|---|---|
+| `XGP_SEASON_REWARDS` | Topf je Wertung, z. B. `total=100000,military=20000` |
+| `XGP_SEASON_SHARES` | Prozent je Platz, z. B. `30,20,15,10,7,6,4,3,3,2` (höchstens zehn, zusammen höchstens 100) |
+
+Ein Universum behält den Plan, mit dem es angelegt wurde. Für ein einzelnes
+Universum ändern:
+
+```bash
+php artisan xgp:instance:update nov --rewards=total=50000,military=10000 --shares=50,30,20
+```
+
+Die Lobby zeigt die Preise offener Universen, die Ruhmeshalle den Preis
+jedes Platzes.
+
+Ausgezahlt wird an das WAX-Konto, das ein Spieler unter `/account/wax`
+mit seinem Spielkonto verknüpft hat: Er überweist eine Kleinstmenge WAX mit
+dem angezeigten Memo `xgp-link:<code>` an das Shop-Konto. Das setzt
+`XGP_WAX_ACCOUNT` und den Cron voraus. In einem späteren Pay2Win-Universum
+sieht er auf derselben Seite seine Preise und löst sie dort als Dunkle
+Materie ein, jeden einmal. Wer bis zum Saisonende nicht verknüpft hat,
+bekommt seinen Preis nicht automatisch; der Admin kann ihn in
+`xgp_season_results` nachtragen (Spalte `wax_account`).
+
+### Preise im eigenen Token auszahlen
+
+Gibt es einen eigenen Token (siehe *Dunkle Materie kaufen → Eigener
+Token*), kannst du die Preise eines beendeten Universums stattdessen als
+Token auszahlen, zum festen Kurs abgerundet:
+
+```bash
+php artisan xgp:season:payout nov
+```
+
+Der Befehl reserviert alle noch nicht eingelösten Preise verknüpfter
+WAX-Konten (sie lassen sich dann nicht mehr als Dunkle Materie einlösen)
+und gibt eine Tabelle sowie die fertigen `transfer`-Aktionen als JSON aus.
+Die unterschreibst du **in deiner Wallet** mit dem Shop-Konto, zum
+Beispiel als eine Transaktion mit mehreren Aktionen oder mit
+`cleos push actions`. Der Server bekommt nie einen Schlüssel.
+`xgp:wax:check` erkennt jede Überweisung am Memo `xgp-prize:<nummer>` und
+markiert den Preis als ausgezahlt (Admin-Liste: „Preis ausgezahlt“). Ein
+erneuter Aufruf listet nur noch die offenen. Willst du doch nicht
+auszahlen: `xgp:season:payout nov --release` gibt die reservierten Preise
+zum Einlösen frei.
+
+## Dunkle Materie kaufen
+
+Der Shop ist nur in Pay2Win-Universen offen und nur mit einer Zahlungsart,
+die das Universum erlaubt **und** die auf dem Server eingerichtet ist.
+Play2Win zeigt nie einen Kauf-Button.
+
+Die Zahlungsarten eines Universums legst du mit `--payments` fest oder im
+Admin unter *Premium-Einstellungen*. Dort steht auch, was in der `.env`
+noch fehlt. Die Pakete stehen in `config/premium.php`, mit Preisen in Cent;
+ein geänderter Preis sollte eine neue Paket-ID bekommen.
+
+### Stripe (Karte)
+
+1. Im Stripe-Dashboard unter *Entwickler → API-Schlüssel* den geheimen
+   Schlüssel als `STRIPE_SECRET` eintragen (`sk_test_…` zum Testen,
+   `sk_live_…` für echte Zahlungen).
+2. Unter *Entwickler → Webhooks* einen Endpunkt
+   `https://<deine-domain>/stripe/webhook` mit diesen Ereignissen anlegen:
+   `checkout.session.completed`, `checkout.session.expired`,
+   `checkout.session.async_payment_succeeded`,
+   `checkout.session.async_payment_failed`, `charge.refunded`,
+   `charge.dispute.created`.
+   Sein Signatur-Schlüssel (`whsec_…`) kommt als `STRIPE_WEBHOOK_SECRET` in
+   die `.env`. Ein Endpunkt dient allen Universen.
+3. Optional `STRIPE_CURRENCY` (Standard `eur`).
+4. Für die Umsatzsteuer: Digitale Inhalte werden in der EU dort besteuert,
+   wo der Käufer wohnt (OSS-Verfahren). Mit `STRIPE_AUTOMATIC_TAX=true`
+   rechnet Stripe Tax (im Dashboard unter *Steuern* einrichten) die
+   Umsatzsteuer des Käuferlands aus dem Paketpreis heraus; der Spieler zahlt
+   den Preis, den der Shop zeigt, und die Bestellung merkt sich Steuerbetrag
+   und Land. Beides steht in der Kaufbestätigung („davon Umsatzsteuer“) und
+   im CSV für die Buchhaltung. Ohne den Schalter wird der Preis berechnet,
+   wie er ist, und die Bestellung kennt weder Steuer noch Land.
+
+**Für die Buchhaltung** lädt der Admin unter *Premium → Bestellungen* alle
+Bestellungen, die Geld oder Token bewegt haben (bezahlt, erstattet,
+Rückbuchung), als CSV: je Zeile Bestellnummer, Status, Zeiten (UTC), Spieler,
+Paket, Betrag in der Währung, Steuer, Land, Zahlungsart und die Kennungen
+bei Stripe (Session, Zahlung) oder auf der Kette (Memo). Bestellungen werden
+nie gelöscht, auch nicht mit dem Konto des Spielers oder beim Zurücksetzen
+des Universums; ein archiviertes Universum nimmt sie in die Sicherung mit.
+Im Shop steht unter den Paketen „Endpreise inkl. Umsatzsteuer“ (PAngV).
+
+Gutgeschrieben wird automatisch per Webhook. Eine volle Erstattung zieht die
+Dunkle Materie wieder ab, soweit der Spieler sie noch hat; Teilerstattungen
+regelst du von Hand. Eine Rückbuchung der Bank (Chargeback) zieht die Dunkle
+Materie ebenso ab; die Bestellung steht dann auf „Rückbuchung“. Gewinnst
+du den Streitfall, schreibst du sie von Hand wieder gut.
+
+### WAX
+
+1. Ein WAX-Konto für den Shop anlegen und als `XGP_WAX_ACCOUNT` eintragen.
+   Der Server braucht nur den Kontonamen, nie einen privaten Schlüssel:
+   leg die Schlüssel nicht auf den Server.
+2. Optional `XGP_WAX_MARKUP` (Aufschlag in Prozent gegen Kursschwankungen)
+   und `XGP_WAX_API` (Hyperion-Server, Standard `https://wax.eosusa.io`).
+   `XGP_WAX_VERIFY_API` ist ein zweiter Hyperion-Server **eines anderen
+   Betreibers** (Standard `https://api.waxsweden.org`): Jede Überweisung, die
+   etwas gutschreibt, verknüpft oder auszahlt, muss er bestätigen. Ein
+   einzelner Server, der falsche Daten liefert oder übernommen wurde, kann so
+   keine Zahlungen erfinden. Leer schaltet die Prüfung ab (nicht empfohlen).
+   `XGP_WAX_MAX_RATE_JUMP` (Standard 50): Ein WAX-Kurs, der mehr als so viele
+   Prozent vom letzten abweicht, wird nicht geglaubt; bis er sich beruhigt
+   (oder ein Tag ohne Kurs vergangen ist), gibt es kein WAX-Angebot.
+3. Cron für den Scheduler einrichten (siehe Voraussetzungen).
+
+Der Preis in WAX wird aus dem Euro-Preis zum aktuellen Kurs (CoinGecko)
+berechnet und auf 0,01 WAX aufgerundet; das Angebot gilt 30 Minuten. Der
+Spieler überweist den Betrag mit dem angezeigten Memo
+(`xgp:<universum>:<bestellung>`).
+
+`xgp:wax:check` schreibt jede Überweisung einmal gut, sobald ihr Block
+endgültig ist. Es zählt nur echtes WAX vom Vertrag `eosio.token`. Was nicht
+passt, steht im Admin unter *Bestellungen anzeigen → WAX-Eingänge*:
+
+| Ergebnis | Bedeutung | Was tun |
+|---|---|---|
+| gutgeschrieben | alles in Ordnung | nichts |
+| zu spät | nach Ablauf des Angebots bezahlt | von Hand gutschreiben oder zurücksenden |
+| zu wenig | Betrag unter dem Angebot | Rest anfordern, von Hand gutschreiben oder zurücksenden |
+| Bestellung nicht offen | z. B. doppelt bezahlt | zurücksenden |
+| unbekanntes Memo | kein Universum oder keine Bestellung erkannt | Spieler fragen oder zurücksenden |
+| Spieler gelöscht | Konto existiert nicht mehr | zurücksenden |
+| vom zweiten Server nicht bestätigt | der zweite Hyperion-Server kennt die Überweisung anders oder nach 30 Minuten gar nicht | auf einem Block-Explorer prüfen; echt: von Hand gutschreiben; sonst ist der erste Server verdächtig |
+| WAX-Konto verknüpft | Verknüpfung per `xgp-link:`-Memo | nichts |
+| Preis ausgezahlt | deine Token-Auszahlung mit `xgp-prize:`-Memo | nichts |
+
+Von Hand gutschreiben: im Admin unter *Benutzer → Premium* des Spielers.
+
+### Eigener Token
+
+Statt oder neben WAX kann der Shop einen eigenen Token annehmen, den du auf
+der WAX-Chain herausgibst und der an der Börse (z. B. Alcor) gegen WAX
+gehandelt wird. Im Shop kauft er immer gleich viel Dunkle Materie; was er
+am Markt wert ist, entscheidet der Handel. Spieler, die Preise in Token
+bekommen, verkaufen sie nicht billiger, als der Shop sie annimmt: wer weiter
+spielt, bekommt dafür Dunkle Materie.
+
+1. Token herausgeben (eigener Vertrag, z. B. mit dem Standard
+   `eosio.token`-Code) und `XGP_TOKEN_CONTRACT`, `XGP_TOKEN_SYMBOL` und
+   `XGP_TOKEN_DECIMALS` (Standard 4) eintragen. `XGP_WAX_ACCOUNT` ist das
+   Konto, an das gezahlt wird.
+2. `XGP_TOKEN_DARK_MATTER`: Dunkle Materie für einen Token (Standard 100).
+3. Optional `XGP_TOKEN_MARKET_URL` für den Marktpreis (Standard: Alcor,
+   `:id` wird zu `symbol-vertrag`). Der Shop zeigt ihn zum Vergleich in WAX.
+4. Im Universum die Zahlungsart `token` erlauben
+   (`--payments=stripe,wax,token` oder im Admin).
+
+Eine Token-Bestellung gilt 24 Stunden, der Preis ist fest. Es zählt nur der
+Token genau dieses Vertrags mit genau diesem Symbol und dieser
+Nachkommazahl; ein gleichnamiger Token eines anderen Vertrags zählt nicht,
+WAX für eine Token-Bestellung auch nicht (und umgekehrt). Die Ergebnisse
+stehen wie bei WAX in der Admin-Liste.
+
+### Widerrufsrecht und Bestätigung
+
+Dunkle Materie ist ein digitaler Inhalt. Der Spieler kauft erst, wenn er
+im Shop ankreuzt, dass sie sofort gutgeschrieben werden soll und er damit
+sein Widerrufsrecht verliert. Ohne Haken gibt es keine Bestellung, auch
+nicht mit einer selbst gebauten Anfrage. Der Zeitpunkt steht an der
+Bestellung (`withdrawal_waived_at`).
+
+Nach der Gutschrift bekommt der Spieler eine Bestätigung per Mail, in der
+Sprache des Universums: Bestellnummer, Datum, Menge, Preis, Zahlungsart
+und die Erklärung zum Widerrufsrecht. Das ist die Bestätigung auf einem
+dauerhaften Datenträger, die das Gesetz verlangt. Absender ist die
+Admin-Adresse des Universums. Ist der Mailserver nicht erreichbar, bleibt
+die Gutschrift bestehen; der Fehler steht im Log.
+
+### Vor dem ersten echten Verkauf
+
+Impressum, AGB, Datenschutzerklärung und Widerrufsbelehrung unter
+*Rechtliches* im Betreiberbereich eintragen (siehe oben) und anwaltlich
+prüfen lassen. Einnahmen in WAX verbuchst du mit dem Euro-Wert am
+Zahlungstag; Bestellung und Admin-Liste zeigen Euro-Preis und WAX-Betrag.
+
+## Updates
+
+Mit dem Docker-Stack: `deploy/deploy.sh` (siehe [deployment.md](deployment.md)).
+Sonst holt `xgp:versions:fetch` die neue Version per Git in einen neuen
+Ordner und `xgp:versions:use` schaltet um (Abschnitt „Versionen je
+Universum“). Ein einzelner Checkout ohne Versionen braucht wie bisher:
+
+```bash
+composer install --no-dev
+php artisan config:cache
+php artisan xgp:instance:migrate
+```
+
+`xgp:instance:migrate` spielt die Update-Migrationen
+(`database/migrations/400`) in allen Universen ein, die auf der laufenden
+Version spielen, und die Migrationen der Basisdatenbank
+(`database/migrations/central`). Ohne Universen genügt wie bisher
+`php artisan migrate --path=database/migrations/400`. Universen auf einer
+älteren Version bleiben unberührt (nächster Abschnitt).
+
+## Versionen je Universum
+
+Ein Universum spielt auf der Version des Codes, mit der es angelegt wurde,
+bis du es ausdrücklich weiterbewegst. Ein laufendes Universum bekommt also
+mit einem Update keine neuen Regeln, Schiffe oder Formeln; neue Universen
+starten auf der neuesten Version. Dafür liegt jede Version, von der
+kleinsten, auf der noch ein Universum spielt, bis zur neuesten, als eigenes
+Verzeichnis auf dem Server (`XGP_VERSIONS_PATH`, Standard
+`storage/versions`; im Docker-Stack das Volume `/srv/versions`). Die
+Versionsnummer ist `config/version.php` (`files`); **jedes Release braucht
+eine höhere Nummer**, sonst landet neuer Code nicht in einem eigenen
+Verzeichnis (`xgp:versions:sync` warnt dann).
+
+Wie es läuft:
+
+- `php artisan xgp:versions:sync` kopiert den laufenden Code einmal in sein
+  Verzeichnis (ohne `storage/`, mit `vendor/` und den kompilierten Views;
+  die `.env` wird verlinkt), erneuert den Konfigurations-Cache der anderen
+  Versionen und schreibt die Karte für den Router
+  (`storage/framework/versions.php`). Im Docker-Stack läuft es bei jedem
+  Containerstart und in `deploy.sh`; sonst nach jedem Update von Hand.
+- **Seiten:** `public/index.php` liest vor dem Framework die Karte und das
+  Universum aus der Anfrage (Lobby-Cookie, `?universe=` aus Mail-Links,
+  bei Stripes Webhook das Universum in den Metadaten) und übergibt eine
+  Anfrage für ein Universum auf einer anderen Version an deren
+  `public/index.php`. Das läuft im selben php-fpm, mit dem Code und `vendor/`
+  dieser Version. Fehlt das Verzeichnis, antwortet das Spiel mit 503 statt
+  das Universum mit fremdem Code zu bedienen.
+- **Tick, Betrugserkennung, Saisonende, Migrationen:** Der Scheduler ruft
+  für ein Universum auf einer anderen Version deren `artisan` auf
+  (`xgp:tick <slug>`, `xgp:cheat:scan <slug>`, `xgp:instance:update <slug>
+  --status=closed`, `xgp:instance:migrate <slug>`). Lobby, Betreiberbereich,
+  Sicherung, Archiv und WAX-Prüfung laufen auf der neuesten Version; sie
+  lesen aus den Universen nur, was sich zwischen Versionen nicht ändert.
+- `php artisan xgp:versions` zeigt die Versionen auf dem Server, welche
+  Universen darauf spielen und ob eine fehlt (`MISSING`).
+  `xgp:versions --prune` löscht die Verzeichnisse unterhalb der kleinsten
+  genutzten Version; die laufende bleibt immer.
+- `php artisan xgp:instance:upgrade <slug>` bewegt ein Universum auf die
+  neueste Version: erst die Update-Migrationen mit dem neuen Code, dann die
+  Umstellung. `--to=<version>` nimmt eine Version dazwischen, die die Arbeit
+  dann mit ihrem eigenen Code macht. Zurück geht es nie (Migrationen laufen
+  nicht rückwärts). Mach das in einer ruhigen Minute: Während der
+  Migrationen spielt das Universum noch auf dem alten Code.
+- `xgp:instance:list` und der Betreiberbereich zeigen die Version je
+  Universum.
+
+**Ohne Docker: neue Version per Git in einen neuen Ordner.** Auf einem
+Server ohne Docker ist jede Version ein eigener Git-Checkout unter dem
+Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
+
+```
+/srv/xgp/versions/4.0.0/      git clone, composer install --no-dev
+/srv/xgp/versions/4.1.0/
+/srv/xgp/versions/current -> /srv/xgp/versions/4.1.0
+```
+
+- Webserver-Root: `/srv/xgp/versions/current/public`; Cron:
+  `* * * * * php /srv/xgp/versions/current/artisan schedule:run`;
+  `XGP_VERSIONS_PATH=/srv/xgp/versions` in der `.env`, die alle Versionen
+  teilen (die `.env` liegt einmal da, jede Version bekommt einen Link).
+- `php artisan xgp:versions:fetch [tag|branch|commit] [--repo=URL]` holt
+  die Version (Standard: das neueste Tag des `origin` dieses Checkouts;
+  ein Commit auch als kurzer Hash) in einen Ordner mit ihrer Nummer, installiert die Abhängigkeiten
+  (`composer install --no-dev`), verlinkt die `.env`, legt `storage/` an,
+  merkt sich den Commit in `.release` und baut die Caches
+  (`config:cache`, `route:cache`, `view:cache`). Ein Ordner, den es schon
+  gibt, wird nie überschrieben: Jedes Release braucht eine neue Nummer in
+  `config/version.php`. Bis hier bedient die neue Version niemanden.
+- `php artisan xgp:versions:use <version>` stellt den Link `current` um;
+  die neue Version schreibt dabei die Router-Karte. Ab der nächsten Anfrage
+  läuft die Lobby auf der neuen Version, jedes Universum weiter auf seiner.
+  Danach `php artisan xgp:instance:migrate` aus dem neuen Ordner (Universen
+  auf der neuen Version, also noch keine) und je Universum
+  `xgp:instance:upgrade`, wenn es soweit ist.
+- Zurück zur vorigen Version: `xgp:versions:use <alte>`. Die Datenbanken
+  bleiben, wie sie sind (Migrationen laufen nicht rückwärts).
+
+**Im Betreiberbereich** (`/operator` → *Versionen*) geht dasselbe im
+Browser: die Versionen auf dem Server mit den Universen darauf (eine
+fehlende ist markiert), *Neue Version holen* (Tag, Branch oder Commit;
+läuft im Hintergrund, das Protokoll steht auf der Seite), *Bedienen lassen*
+(nur auf einem Server mit dem Ordner `current`; im Docker-Stack bleibt es
+bei `deploy.sh`), *Ungenutzte Versionen löschen* und *Universum heben* mit
+Auswahl der Zielversion. Beim Anlegen eines Universums wählst du die
+Version; eine ältere legt es mit ihrem eigenen Code an (ihr
+`xgp:instance:create`, das Passwort geht über die Umgebung, nie über die
+Kommandozeile). Jede Aktion steht im Protokoll der Betreiber.
+
+Grenzen: Statische Dateien (`public/assets`) liefert der Webserver aus der
+neuesten Version; neue Dateien kommen dazu, alte bleiben, nur eine
+*geänderte* Datei gleichen Namens sieht auch ein älteres Universum neu.
+Sitzungen und Cache liegen auf Redis und sind je Universum getrennt;
+`storage/` (Logs, Admin-Backups) hat jede Version für sich. Versionen vor
+diesem Stand (ohne Router und ohne `xgp:tick <slug>`) lassen sich nicht
+festpinnen.
+
+## Backups und Logs
+
+### Backups auf einem zweiten Server
+
+`xgp:backup:run` sichert jede Nacht (Scheduler, `XGP_BACKUP_TIME`,
+Standard 03:17) die Basisdatenbank und die Datenbank jedes Universums,
+offene wie geschlossene. Die Sicherung geht mit restic in ein Repository
+auf einem anderen Server:
+- verschlüsselt mit `XGP_BACKUP_PASSWORD`;
+- nur Geänderte wird übertragen;
+- je Datenbank ein Snapshot mit dem Tag `db:<name>`.
+
+Aufbewahrt werden 7 tägliche, 5 wöchentliche und 12 monatliche Snapshots
+je Datenbank (`XGP_BACKUP_KEEP_*`). Den Dump schreibt `mariadb-dump` direkt
+in restic, nichts liegt unverschlüsselt auf der Platte. Bricht der Dump ab,
+gilt der ganze Lauf als fehlgeschlagen.
+
+Einrichten in der `.env` (Beispiele in `config/offsite.php`):
+
+```
+XGP_BACKUP_REPOSITORY=s3:https://s3.eu-central-1.amazonaws.com/mein-bucket/xgproyect
+AWS_ACCESS_KEY_ID=…
+AWS_SECRET_ACCESS_KEY=…
+XGP_BACKUP_PASSWORD=<lang und zufällig>
+```
+
+Ebenso gehen `b2:bucket:pfad` (Backblaze, `B2_ACCOUNT_ID`/`B2_ACCOUNT_KEY`)
+und `sftp:user@host:/pfad`. Der erste Lauf legt das Repository an. Bewahre
+`XGP_BACKUP_PASSWORD` und `deploy/.env` (mit `APP_KEY`) getrennt vom Server
+auf, z. B. in einem Passwortmanager. Ohne das Passwort ist das Backup
+wertlos, ohne `APP_KEY` sind Sitzungen und Zwei-Faktor-Schlüssel nicht
+lesbar.
+
+Jeder Lauf steht unter /operator → *Backups*. Schlägt einer fehl (falsches
+Passwort, Ziel nicht erreichbar, Dump abgebrochen), geht sofort eine Mail
+an `XGP_ERRORS_MAIL`.
+
+### Ein Universum wiederherstellen
+
+So geprobt mit einem Universum mit 6 Spielern:
+1. Sicherung.
+2. Alle Planeten gelöscht und alle Namen verändert.
+3. Wiederherstellung in eine neue Datenbank: alle 44 Tabellen
+   prüfsummengleich mit der Sicherung.
+4. Universum umgestellt, der Tick lief, die Planeten waren zurück.
+
+`OffsiteBackupMysqlTest` macht dasselbe bei jedem Push.
+
+```bash
+# 1. die Snapshots ansehen
+php artisan xgp:backup:list xgp_uni_2026_11
+
+# 2. in eine NEUE Datenbank holen (nie über die laufende)
+php artisan xgp:backup:restore xgp_uni_2026_11 --into=xgp_uni_2026_11_r1
+#    ein bestimmter Stand: --snapshot=<id aus xgp:backup:list>
+
+# 3. prüfen, dann das Universum auf die neue Datenbank stellen
+php artisan xgp:instance:update 2026-11 --database=xgp_uni_2026_11_r1
+php artisan xgp:instance:migrate 2026-11
+
+# 4. die alte Datenbank erst löschen, wenn alles läuft (als root)
+```
+
+Mit Docker steht vor jedem Befehl `docker compose exec app`. Der neue
+Datenbankname muss mit `xgp_uni_` beginnen, dann darf der Spiel-Benutzer
+ihn anlegen. `--database` nimmt nur eine Datenbank, die ein Spiel enthält
+und keinem anderen Universum gehört. Spieler, die zwischen Sicherung und
+Ausfall gespielt haben, verlieren diese Zeit.
+
+Die **Basisdatenbank** (Universen-Liste, Betreiber, WAX-Eingänge,
+Rechtstexte) holst du genauso in eine neue Datenbank. Dann kopierst du als
+root die nötigen Tabellen zurück oder stellst `DB_DATABASE` um. Die Tabelle
+`backup_runs` enthält dort den Lauf, der sie gesichert hat, als „läuft“.
+
+### Alte Universen archivieren
+
+Jeder Monat bringt eine Datenbank mehr. Ein geschlossenes Universum
+braucht seine Datenbank nicht mehr: Die Ruhmeshalle in der Lobby liegt in
+der Basisdatenbank. Archivieren läuft so:
+
+1. Die Datenbank wird noch einmal gesichert, verschlüsselt auf den
+   Backup-Server, mit dem Tag `xgp-archive`. Die Aufräumregeln der
+   nächtlichen Sicherung löschen solche Snapshots nie.
+2. Geprüft wird, ob die Sicherung jede Tabelle enthält.
+3. Erst dann wird die Datenbank gelöscht.
+
+Fehlt in der Sicherung eine Tabelle, bleibt die Datenbank stehen.
+
+```bash
+php artisan xgp:instance:archive 2026-08            # ein geschlossenes Universum
+php artisan xgp:instance:archive 2026-08 --file=/backups/2026-08.sql.gz   # ohne Backup-Server
+php artisan xgp:instance:unarchive 2026-08          # zurückholen (danach geschlossen)
+```
+
+Automatisch: `XGP_ARCHIVE_AFTER_DAYS` in `deploy/.env` (Standard 0, also
+nie). Der Scheduler archiviert dann jede Nacht um 04:47 jedes Universum,
+das so lange geschlossen ist. Das geht nur mit Backup-Server, nie in eine
+Datei.
+
+- **Wie lange warten?** Mindestens 180 Tage. Die Käufe von Dunkler
+  Materie liegen in der Datenbank des Universums. Eine Kartenzahlung kann
+  bis zu 120 Tage danach angefochten werden. Ohne Datenbank kann die
+  Rückbuchung keinem Spieler mehr zugeordnet werden.
+- **Löschwünsche von Spielern** (Konto löschen) betreffen dann nur noch
+  die Sicherung. Sie verschwindet nicht von selbst, Snapshots mit
+  `xgp-archive` bleiben, bis du sie löschst
+  (`restic forget <id>` mit dem Passwort aus `XGP_BACKUP_PASSWORD`). In
+  der Datenschutzerklärung die Aufbewahrung nennen.
+- `xgp:instance:list` zeigt, wo das Archiv liegt (`restic:<snapshot>` oder
+  `file:<pfad>`). Unter /operator steht das Universum als „archiviert“,
+  ohne Bearbeiten.
+- Nach dem Zurückholen laufen die Migrationen. Erst danach
+  (`xgp:instance:update <slug> --status=open`) kann wieder gespielt werden.
+
+### Admin-Backup und Logs
+
+- **Admin-Backup:** Das automatische Backup im Admin sichert weiterhin die
+  Datenbank des aktiven Universums lokal unter
+  `storage/app/backups/<APP_NAME>_<slug>/`. Das ist eine schnelle Kopie
+  auf demselben Server und ersetzt nicht die Sicherung oben.
+- **Logs:** Jedes Universum schreibt nach
+  `storage/logs/xgproyect-<slug>.log` (mit `LOG_CHANNEL=daily` eine Datei
+  je Tag); die Fehlerliste im Admin zeigt die neueste. Lobby, Befehle und
+  alles ohne Universum schreiben nach `storage/logs/xgproyect.log`. Alle
+  Fehler aller Universen sammelt zusätzlich /operator → *Fehler*.
+
+## Mail-Links
+
+Mails eines Universums (Passwort vergessen, Willkommen, Rundmails) hängen
+`?universe=<slug>` an ihre Links. So landet der Spieler auch auf einem
+anderen Gerät im richtigen Universum; der Link merkt sich die Wahl wie die
+Lobby.
+
+## Alpha: Einladungen, Spielerlimit, Testzahlungen
+
+**Einladungen.** Unter Admin → Registrierung schaltest du je Universum
+*Nur mit Einladung* ein. Darunter erzeugst du Codes: für wie viele Spieler,
+wie viele Tage gültig, mit einer Notiz (z. B. „Discord“). Jeder Code hat
+einen Link (`…/?invite=CODE&universe=<slug>`), der das Universum wählt und
+den Code ins Formular einträgt. Codes sind zehn Zeichen ohne
+Verwechslungsgefahr (kein 0/O, 1/I/L). Groß-/Kleinschreibung, Leerzeichen
+und Bindestriche spielen beim Eintippen keine Rolle. Eine Nutzung wird in
+einem einzigen Datenbank-Update genommen, zwei Spieler bekommen also nie
+beide die letzte. Scheitert die Registrierung danach, zählt die Nutzung
+wieder.
+
+**Spielerlimit.** *Höchstzahl Spieler* (0: keine Grenze) begrenzt die
+Registrierungen; Bots zählen nicht. Ist das Universum voll, sagt das die
+Startseite, und die Registrierung wird abgelehnt.
+
+Die Lobby zeigt beides an jedem Universum („voll“, „nur mit Einladung“).
+
+**Testzahlungen.** `XGP_PAYMENTS_TEST=true` lässt nur Testzahlungen zu.
+Der Docker-Stack setzt das für die Alpha:
+- Stripe nur mit einem Testschlüssel (`sk_test_…`); mit `sk_live_…` gibt
+  es keine Kartenzahlung.
+- WAX und Token nur im Testnetz (`XGP_WAX_NETWORK=testnet`). Der
+  History-Server ist dann standardmäßig `https://testnet.waxsweden.org`,
+  die zweite Bestätigung ist aus.
+
+Der Shop sagt, dass kein echtes Geld fließt, und nennt die Testkarte 4242
+4242 4242 4242. Die Lobby zeigt „Testzahlungen“, die Kaufbestätigung trägt
+`[TEST]` im Betreff, und Admin → Premium zeigt „nur Testzahlungen“. Das
+gilt auch ohne `XGP_PAYMENTS_TEST`, sobald alle Zahlungsarten Testarten
+sind.
+
+Unabhängig davon prüft die WAX-Anbindung bei jeder Runde die `chain_id`
+des History-Servers. Steht `XGP_WAX_NETWORK` auf `mainnet`, der Server
+gehört aber zum Testnetz (oder umgekehrt), wird nichts gutgeschrieben, und
+der Fehler steht im Log. Eine Test-Überweisung kann so nie als echte
+Zahlung zählen.
+
+Für echtes Geld: `XGP_PAYMENTS_TEST=false`, `XGP_WAX_NETWORK=mainnet`,
+Live-Schlüssel von Stripe. Vorher die Rechtstexte und einen externen
+Sicherheitstest.
+
+## E-Mail-Bestätigung
+
+Wer sich auf der Startseite registriert, bekommt statt der
+Willkommens-E-Mail einen Link, der die Adresse bestätigt. Der Link ist
+signiert und gilt 7 Tage, nur für diese Adresse. Er funktioniert ohne
+Anmeldung und auf jedem Gerät.
+
+Bis zur Bestätigung:
+- erinnert jede Spielseite daran, mit dem Löschdatum und einem Knopf zum
+  erneuten Senden (höchstens 3 pro Stunde);
+- verkauft der Shop nichts.
+
+Ein Konto, das nach 7 Tagen nicht bestätigt ist, wird beim nächsten
+Aufräumen gelöscht. Das erschwert Wegwerf- und Zweitkonten.
+
+Als bestätigt gelten:
+- Admins, Bots und Spieler, die der Admin anlegt;
+- eine Adresse, die der Admin ändert;
+- ein Konto nach einem abgeschlossenen Passwort-Zurücksetzen (der Link kam
+  ja per E-Mail);
+- alle Konten, die es beim Update schon gab.
+
+Abschalten unter Admin → Registrierung → *E-Mail-Adresse bestätigen
+lassen* (Option `reg_verify_email`). Ohne die Option gilt jede neue Adresse
+sofort als bestätigt, und es geht wieder die Willkommens-E-Mail raus.
+Schaltest du sie später ein, wird deshalb niemand gelöscht. Voraussetzung
+ist ein funktionierender Mailversand: Ohne ihn verlieren neue Spieler
+nach einer Woche ihr Konto.
+
+## Datenschutz
+
+**Für Spieler.** In den Einstellungen unter *Deine Daten*
+(`/account/privacy`) lädt ein Spieler alles herunter, was das Universum
+über sein Konto speichert. Das ist eine JSON-Datei für Auskunft und
+Datenübertragbarkeit. Ebenso löscht er dort sein Konto sofort. Beides
+verlangt das Passwort und mit Zwei-Faktor-Anmeldung den Code. Fünf
+Fehlversuche sperren für 15 Minuten. Admin-Konten können sich nicht selbst
+löschen, weil ihre Sperren an ihnen hängen. Das verzögerte Löschen nach
+7 Tagen in den Einstellungen gibt es weiterhin.
+
+**Die Datei** enthält Konto, Planeten mit Gebäuden, Schiffen und
+Verteidigung, Forschung, Flotten, Nachrichten, Freunde, Notizen, Allianz,
+Käufe, Gegenstände, Gebote, Import/Export und die Anmeldungen mit
+IP-Adresse und Browser. Dazu kommen Sitzungen, Aktivität, die
+WAX-Verknüpfung und die Saisonplätze. Nicht enthalten sind Passwort,
+Zwei-Faktor-Schlüssel, Wiederherstellungscodes und die Funde der
+Betrugserkennung.
+
+**Löschen** entfernt alles, was das Konto nennt. Das gilt auch für den
+Admin und das automatische Löschen inaktiver Konten, die denselben Weg
+nehmen (`AccountEraser`):
+- Planeten, Nachrichten, Freunde, Notizen, Gegenstände, Gebote;
+- Anmeldungen, Sitzungen, Aktivität, Spionage-Protokoll;
+- Verdachtsfälle, Sperren, Angriffsverbände;
+- Tokens zum Zurücksetzen des Passworts und die WAX-Verknüpfung.
+
+Ohne Bezug zur Person bleiben bezahlte Bestellungen (Aufbewahrungspflicht)
+und die Ruhmeshalle, dort mit `-` statt Namen. Ebenso bleiben
+Rohstoffübergaben bis zur regulären Löschung.
+
+**Fristen für die Datenschutzerklärung** (Stand des Codes):
+
+| Daten | gelöscht nach |
+|---|---|
+| Anmeldungen mit IP und Browser, Rohstoffübergaben, Aktivität | 60 Tagen (`XGP_CHEATS_KEEP_DAYS`) |
+| Nachrichten und Kampfberichte | 7 Tagen |
+| Konto, das 7 Tage im Löschmodus war | sofort danach |
+| Konto ohne Anmeldung (außer Admins und Bots) | 1 Monat |
+| Konto mit unbestätigter E-Mail-Adresse | 7 Tagen nach der Registrierung |
+| Verdachtsfälle der Betrugserkennung (offen oder ausgeräumt, mit IP-Adressen) | 60 Tagen nach dem letzten Fund (`XGP_CHEATS_KEEP_DAYS`); ein Ausschluss bleibt, aber ohne die Belege |
+| Fehlermeldungen der Spieler (Name, Browser), erledigte | 90 Tagen |
+| Fehlergruppen unter /operator, erledigte | 90 Tagen |
+| Zugriffsprotokoll des Webservers (Docker-Stack) | ohne die letzten Stellen der IP-Adresse (IPv4 /24, IPv6 /56), ohne Cookies; 5 × 20 MB je Container, dann überschrieben |
+| Sitzung | 120 Minuten ohne Aktivität (`SESSION_LIFETIME`) |
+| Log-Dateien | 14 Tagen mit `LOG_CHANNEL=daily` (Standard der Beispiel-`.env`); mit `stack` wächst eine einzige Datei ohne Ende |
+| letzte IP und Browser am Konto | mit dem Konto |
+| bezahlte Bestellungen | nie automatisch (gesetzliche Aufbewahrung, z. B. 10 Jahre) |
+
+Die Admin-Backups (Admin → Backup) enthalten alle Daten. Ihre
+Aufbewahrung stellst du dort ein; nenne sie in der Datenschutzerklärung.
+Dasselbe gilt für die Sicherungen außer Haus (`XGP_BACKUP_KEEP_DAILY`,
+`…_WEEKLY`, `…_MONTHLY`) und das Archiv eines geschlossenen Universums, das
+bis zum Löschen des Snapshots bleibt. Rundschreiben per E-Mail (Admin →
+Rundschreiben) sind für Mitteilungen zum Spiel gedacht; Werbung per E-Mail
+braucht die Einwilligung der Spieler (§ 7 UWG), die das Spiel nicht einholt.
+
+## Betrugserkennung
+
+Weil sich die Top 10 lohnen, lohnen sich auch Zweitkonten und Pushing. Das
+Spiel protokolliert deshalb je Universum:
+
+- Logins mit IP, Browser und einem Geräte-Cookie;
+- Rohstofflieferungen an andere Spieler;
+- Anfragen pro Stunde.
+
+`xgp:cheat:scan` (stündlich) macht daraus Hinweise unter
+*Admin → Information → Verdachtsfälle*. Die Schwellen stehen in
+`config/cheats.php` (`XGP_CHEATS_*`).
+
+| Hinweis | Bedeutung |
+|---|---|
+| gleicher Browser | zwei Konten im selben Browser (starkes Zeichen) |
+| gleiche IP-Adresse | kann auch ein Haushalt oder ein Handynetz sein |
+| schickt Stärkerem Rohstoffe / bekommt Rohstoffe | netto über 100.000 an einen Stärkeren; stärker gewertet, wenn die beiden auch Browser oder IP teilen |
+| fast rund um die Uhr aktiv | an drei Tagen der letzten Woche je mindestens 20 Stunden aktiv |
+| Klicktempo wie ein Skript | über 1.200 Anfragen in einer Stunde |
+
+Die Hinweise sind keine Beweise; du entscheidest je Hinweis: „in Ordnung“
+oder „ausgeschlossen“. Ausgeschlossene Spieler fehlen beim Saisonende in
+allen Wertungen und bekommen keinen Preis. Prüfe die Liste vor jedem
+Saisonende; Spieler in den Top 10 sind markiert. Protokolle älter als 60
+Tage werden gelöscht.
+
+## Zwei-Faktor-Anmeldung
+
+Der Admin-Bereich verlangt eine Zwei-Faktor-Anmeldung mit einer
+Authenticator-App (TOTP). Ein Admin ohne sie wird nach dem Login zur
+Einrichtung unter `/account/security` geschickt. Spieler können sie dort
+freiwillig einschalten. Da die Konten je Universum getrennt sind, richtet
+man sie in jedem Universum einzeln ein.
+
+- Das Geheimnis wird mit dem `APP_KEY` verschlüsselt gespeichert. Wer den
+  `APP_KEY` ändert, macht alle eingerichteten Apps ungültig.
+- Hat ein Spieler Handy und Wiederherstellungscodes verloren, schaltet ein
+  Admin sie in der Datenbank ab: in der Tabelle `xgp_users` des
+  Universums die Spalten `two_factor_secret`,
+  `two_factor_recovery_codes`, `two_factor_confirmed_at` und
+  `two_factor_last_step` auf `NULL` setzen.
+- Nur für lokale Arbeit: `XGP_ADMIN_TWO_FACTOR=false` hebt die Pflicht auf.
+
+Für den Betreiberbereich `/operator` gilt die Zwei-Faktor-Anmeldung immer
+und lässt sich nicht abschalten. Sie wird beim Anlegen des Kontos auf der
+Kommandozeile eingerichtet (siehe *Betreiberbereich im Browser*). Verlorenes
+Handy: `php artisan xgp:operator:reset <e-mail> --two-factor`.
+
+## Sicherheit im Betrieb
+
+Mit echtem Geld im Spiel lohnt sich der Angriff. Der Code schützt die
+Geldwege so:
+
+- **Zahlungen:** Stripe nur mit gültiger Signatur. WAX und Token erst, wenn
+  der Block unumkehrbar ist und ein zweiter Server die Überweisung
+  bestätigt. Jede Zahlung zählt einmal. Rückbuchungen nehmen die Dunkle
+  Materie zurück.
+- **Ausgeben:** Dunkle Materie wird nur abgebucht, wenn sie im selben
+  Moment noch da ist; zwei gleichzeitige Käufe zahlen nicht aus demselben
+  Guthaben.
+- **Konten:** Begrenzte Versuche bei Login, Admin-Login, Registrierung und
+  „Passwort vergessen“; Zwei-Faktor-Code nach fünf Fehlern 15 Minuten
+  gesperrt. Der Link in der Reset-Mail zeigt immer auf `APP_URL`.
+- **WAX-Verknüpfung:** Ein Code gilt einmal. Wer ein öffentlich sichtbares
+  Memo noch einmal sendet, übernimmt keine fremde Verknüpfung.
+- **Insider:** Setzt ein Admin eines Universums die Dunkle Materie eines
+  Spielers, steht das mit altem und neuem Wert im Protokoll unter
+  `/operator`, wo der Admin es nicht löschen kann.
+- **Seiten:** Keine fremde Seite darf das Spiel einbetten (Klick-Fallen auf
+  Kauf-Buttons); über HTTPS gilt HSTS.
+- **Eingaben:** Namen, Texte und Nachrichten erscheinen als Text, nie als
+  Code, auch in Tooltips. Admins können keine Namen mit `< > " ' & \`
+  mehr setzen. Der Sprach-Editor im Admin ist geschlossen, sobald
+  Universen registriert sind: Die Dateien in `lang/` gelten für alle
+  Universen, du bearbeitest sie auf dem Server. Bei jedem Push öffnet die
+  CI alle Seiten in einem echten Browser. Jeder Name und Text ist dort
+  Code, der Test scheitert, sobald einer läuft (`tests/Browser/run.sh`,
+  lokal gegen eine leere Datenbank: `DB_DATABASE=… DB_USERNAME=…
+  DB_PASSWORD=… tests/Browser/run.sh`).
+- **Spielstand:** Gleichzeitige Seitenaufrufe (mehrere Tabs, Skripte)
+  verdoppeln nichts mehr. Jede Flotte wird einmal verarbeitet, zwei Flotten
+  auf dasselbe Ziel nacheinander. Rohstoffe und Schiffe werden nur
+  abgezogen, wenn sie im selben Moment noch da sind. Die Produktion schreibt
+  nur Zuwächse.
+
+Was du auf dem Server tun musst:
+
+- `APP_URL` auf die öffentliche HTTPS-Adresse setzen (sonst zeigen
+  Reset-Links ins Leere), `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`.
+- Das Webverzeichnis auf `public/` zeigen lassen, nie auf das Projekt.
+- `composer install --no-dev` (keine Debug-Werkzeuge auf dem Server).
+- Den Shop-Schlüssel für WAX nie auf den Server legen.
+- Das Protokoll unter `/operator` regelmäßig ansehen, besonders
+  „Admin hat Dunkle Materie gesetzt“ und nicht bestätigte WAX-Eingänge.
+
+## Viele Spieler
+
+Ein Universum fasst 22.455 neue Spieler (Heimatplaneten auf den Positionen
+4 bis 12 jedes Systems). Ist es voll, sagt die Registrierung das; öffne
+dann ein weiteres Universum. Mit 1 Mio. Spielern in einem (absichtlich
+überfüllten) Universum getestet: jede Spielerseite unter 130 ms.
+
+- **Statistik:** Der Neuaufbau aller Punkte und Ränge braucht bei
+  1 Mio. Spielern rund zwei Minuten. Stelle `stat_update_time`
+  (Admin → Server) für große Universen auf 15 Minuten oder mehr. Der
+  Scheduler (`xgp:tick`) baut sie im Hintergrund; ohne Cron übernimmt
+  ein Seitenaufruf, unter php-fpm erst nach seiner Antwort.
+- **Webserver:** php-fpm, nicht `php artisan serve` (dort wartet der
+  Aufruf, der die Statistik übernimmt, bis sie fertig ist).
+- **Sitzungen und Cache auf Redis:** Ab einigen tausend gleichzeitigen
+  Spielern oder mit mehreren App-Servern:
+
+  ```
+  CACHE_DRIVER=redis
+  SESSION_DRIVER=redis
+  ```
+
+  Alle Universen teilen sich den Redis-Server. Jedes bekommt eigene
+  Schlüssel (`<CACHE_PREFIX>_<slug>:…`), eine Sitzung aus einem Universum
+  gilt in keinem anderen. Der Cache liegt in Redis-Datenbank 1, die
+  Sitzungen in Datenbank 2 (`REDIS_SESSION_DB`), damit `cache:clear` niemanden
+  abmeldet. Am besten bekommen die Sitzungen einen eigenen Redis ohne
+  Verdrängung (`maxmemory-policy noeviction`, mit AOF) über
+  `REDIS_SESSION_HOST`/`REDIS_SESSION_PORT`, der Cache einen mit
+  `allkeys-lru`. Platzbedarf der Sitzungen: etwa 1 KB je angemeldetem
+  Spieler. Beim Umstellen von `database` auf `redis` melden sich alle
+  einmal neu an. `cache:clear` leert den Cache aller Universen.
+- **Cache in Dateien:** Ohne Redis bekommt jedes Universum einen eigenen
+  Ordner (`storage/framework/cache/data_<slug>`).
+- **Datenbank:** `innodb_buffer_pool_size` etwa so groß wie die Daten
+  (1 Mio. Spieler ≈ 2,5 GB).
+- **Betrugserkennung:** Browser und Adressen mit mehr als
+  `XGP_CHEATS_SHARED_MAX_ACCOUNTS` (Standard 20) Konten gelten als
+  öffentliches Netz (Mobilfunk, Uni) und nicht als Hinweis.
+- **Admin:** Listen von Spielern und Allianzen zeigen die ersten 500 nach
+  Namen; das Suchfeld darüber findet die anderen nach dem Namensanfang.
+
+## Häufige Fehler
+
+| Meldung | Ursache | Lösung |
+|---|---|---|
+| `Universes need a MySQL or MariaDB server.` | Spiel läuft mit SQLite | auf MySQL oder MariaDB umstellen |
+| `Access denied … to database 'xgp_uni_…'` | Datenbank-Benutzer darf keine Datenbanken anlegen | Rechte wie unter Voraussetzungen vergeben |
+| `The universe … exists already.` | Slug vergeben | anderen Slug wählen |
+| `The database … holds a game already.` | Datenbank enthält Tabellen | andere Datenbank wählen oder die alte von Hand löschen |
+| Spieler landen immer in der Lobby | Universum geschlossen oder Cookie fehlt | `xgp:instance:list` prüfen, ggf. `--status=open` |
+| Kein Kauf-Button | Play2Win, keine erlaubte oder keine eingerichtete Zahlungsart | Admin → Premium-Einstellungen zeigt, was fehlt |
+| `/operator` zeigt 404 | `XGP_OPERATOR_IPS` lässt deine Adresse nicht zu, oder `XGP_OPERATOR_WEB=false` | Adresse eintragen oder Variable entfernen |
+| Betreiber-Login schlägt immer fehl | Konto ohne Zwei-Faktor-Anmeldung oder falsches Passwort | `xgp:operator:list`, dann `xgp:operator:reset` |
+| WAX-Zahlungen kommen nicht an | Cron läuft nicht, `XGP_WAX_ACCOUNT` fehlt oder Hyperion-Server nicht erreichbar | `php artisan xgp:wax:check` von Hand ausführen und Ausgabe lesen |

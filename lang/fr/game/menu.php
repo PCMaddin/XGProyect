@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'lm_players' => 'Joueur :',
+    'lm_menu' => 'Menu',
+    'lm_overview' => 'Vue d’ensemble',
+    'lm_galaxy' => 'Galaxie',
+    'lm_empire' => 'Empire',
+    'lm_fleet' => 'Flotte',
+    'lm_movement' => 'Mouvements de flotte',
+    'lm_resources' => 'Ressources',
+    'lm_resources_settings' => 'Paramètres des ressources',
+    'lm_station' => 'Installations',
+    'lm_research' => 'Recherche',
+    'lm_shipyard' => 'Chantier spatial',
+    'lm_defenses' => 'Défense',
+    'lm_officiers' => 'Recruter des officiers',
+    'lm_trader' => 'Marchand',
+    'lm_items' => 'Objets',
+    'lm_characterclass' => 'Classe',
+    'lm_technology' => 'Technologie',
+    'lm_messages' => 'Messages',
+    'lm_alliance' => 'Alliance',
+    'lm_buddylist' => 'Amis',
+    'lm_notes' => 'Notes',
+    'lm_playerprofile' => 'Profil',
+    'lm_statistics' => 'Classement',
+    'lm_search' => 'Recherche',
+    'lm_options' => 'Options',
+    'lm_forums' => 'Forum',
+    'lm_logout' => 'Déconnexion',
+    'lm_administration' => 'Administration',
+];

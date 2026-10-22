@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Sospechas',
+    'su_sub_title' => 'Indicios de multicuentas, pushing y scripts. Indicios, no pruebas: decides tú.',
+    'su_list' => 'Indicios',
+    'su_none' => 'Sin indicios.',
+    'su_player' => 'Jugador',
+    'su_sign' => 'Indicio',
+    'su_score' => 'Intensidad',
+    'su_evidence' => 'Pruebas',
+    'su_seen' => 'Última vez',
+    'su_decision' => 'Decisión',
+    'su_top_ten' => 'puesto :rank',
+    'su_with' => 'con :player',
+    'su_kind_shared_device' => 'mismo navegador',
+    'su_kind_shared_ip' => 'misma dirección IP',
+    'su_kind_pushing' => 'envía recursos a uno más fuerte',
+    'su_kind_pushed' => 'recibe recursos',
+    'su_kind_around_clock' => 'activo casi las 24 horas',
+    'su_kind_machine_pace' => 'ritmo de clics de un script',
+    'su_status_open' => 'abierto',
+    'su_status_cleared' => 'correcto',
+    'su_status_excluded' => 'excluido',
+    'su_note' => 'Nota',
+    'su_save' => 'Guardar',
+    'su_saved' => 'Decisión guardada.',
+    'su_not_saved' => 'No se pudo guardar la decisión.',
+    'su_help' => '«Excluido» deja al jugador fuera de todas las clasificaciones y premios al terminar la temporada. Una IP compartida también puede ser un hogar. La revisión se ejecuta cada hora (xgp:cheat:scan).',
+    'su_detail_logins' => 'inicios de sesión',
+    'su_detail_resources' => 'recursos netos',
+    'su_detail_days' => 'días completos',
+    'su_detail_requests' => 'peticiones por hora',
+];

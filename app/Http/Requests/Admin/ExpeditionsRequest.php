@@ -24,6 +24,7 @@ class ExpeditionsRequest extends FormRequest
             'expedition_result_nothing_weight',
             'expedition_result_merchant_weight',
             'expedition_result_black_hole_weight',
+            'expedition_result_item_weight',
         ],
         'darkMatter' => [
             'expedition_dark_matter_source_small_weight',

@@ -28,15 +28,13 @@ class ResearchControllerTest extends TestCase
         $result = $this->callGetActionLink(
             $controller,
             techId: 106,
-            isWorking: true,
-            queueCount: 1,
-            labInQueue: false,
-            isOnVacation: false,
-            commanderActive: true,
-            activeItem: $activeItem,
-            planet: $planet,
-            workingPlanet: null,
             currentLevel: 0,
+            planet: $planet,
+            activeItem: $activeItem,
+            workingPlanet: null,
+            commanderActive: true,
+            blocked: false,
+            queueFull: false,
         );
 
         $this->assertStringContainsString('game.php?page=research&cmd=search&tech=106', $result);
@@ -61,15 +59,13 @@ class ResearchControllerTest extends TestCase
         $result = $this->callGetActionLink(
             $controller,
             techId: 106,
-            isWorking: true,
-            queueCount: 1,
-            labInQueue: false,
-            isOnVacation: false,
-            commanderActive: false,
-            activeItem: $activeItem,
-            planet: $planet,
-            workingPlanet: null,
             currentLevel: 0,
+            planet: $planet,
+            activeItem: $activeItem,
+            workingPlanet: null,
+            commanderActive: false,
+            blocked: false,
+            queueFull: false,
         );
 
         $this->assertStringContainsString('id="brp"', $result);
@@ -93,30 +89,26 @@ class ResearchControllerTest extends TestCase
     private function callGetActionLink(
         ResearchController $controller,
         int $techId,
-        bool $isWorking,
-        int $queueCount,
-        bool $labInQueue,
-        bool $isOnVacation,
-        bool $commanderActive,
-        ?ResearchQueue $activeItem,
-        Planets $planet,
-        ?Planets $workingPlanet,
         int $currentLevel,
+        Planets $planet,
+        ?ResearchQueue $activeItem,
+        ?Planets $workingPlanet,
+        bool $commanderActive,
+        bool $blocked,
+        bool $queueFull,
     ): string {
         $method = new ReflectionMethod(ResearchController::class, 'getActionLink');
 
         $result = $method->invoke(
             $controller,
             $techId,
-            $isWorking,
-            $queueCount,
-            $labInQueue,
-            $isOnVacation,
-            $commanderActive,
-            $activeItem,
-            $planet,
-            $workingPlanet,
             $currentLevel,
+            $planet,
+            $activeItem,
+            $workingPlanet,
+            $commanderActive,
+            $blocked,
+            $queueFull,
         );
 
         $this->assertIsString($result);

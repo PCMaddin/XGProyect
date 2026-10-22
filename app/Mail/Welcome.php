@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Services\Instances\InstanceContext;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\URL;
 
@@ -19,13 +20,12 @@ class Welcome extends Mailable
     use SerializesModels;
 
     /**
-     * Create a new message instance.
+     * Create a new message instance. The password is not part of it: the
+     * player chose it, and it was sent back in plain text.
      */
     public function __construct(
         public string $userName,
-        public string $userPass
     ) {
-        //
     }
 
     /**
@@ -51,7 +51,7 @@ class Welcome extends Mailable
             markdown: 'emails.account.welcome',
             with: [
                 'gameName' => app(SettingsService::class)->getString('game_name'),
-                'gameUrl' => URL::to('/'),
+                'gameUrl' => app(InstanceContext::class)->link(URL::to('/')),
             ],
         );
     }

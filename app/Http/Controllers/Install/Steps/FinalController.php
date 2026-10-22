@@ -6,9 +6,16 @@ namespace App\Http\Controllers\Install\Steps;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class FinalController extends RequirementsController
 {
+    /**
+     * The APP_KEY shipped in .env.example, so the same on every server
+     * installed from the release package.
+     */
+    private const PUBLIC_APP_KEY = 'base64:S5umA/0fcvXfOda1+4J+Rh1gLi33kRKQm+FVWMv6OII=';
+
     /** @var array<string, non-empty-string> */
     protected array $requirements = [
         'install' => 'checkInstallDir',
@@ -111,6 +118,30 @@ class FinalController extends RequirementsController
         // wipe install progress so the flow can be started fresh next time
         session()->flush();
 
+        $this->replacePublicAppKey();
+
         return true;
+    }
+
+    /**
+     * Give the server its own APP_KEY (it signs and encrypts cookies and
+     * sessions). Security fix: every installation from the release package
+     * kept the public key of .env.example. Done at the very end, since a new
+     * key ends the installer's session.
+     */
+    private function replacePublicAppKey(): void
+    {
+        $key = config('app.key');
+
+        if (is_string($key) && $key !== '' && $key !== self::PUBLIC_APP_KEY) {
+            return;
+        }
+
+        try {
+            Artisan::call('key:generate', ['--force' => true]);
+        } catch (Throwable $exception) {
+            // .env not writable: the installation works, but keeps the public key
+            report($exception);
+        }
     }
 }

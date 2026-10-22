@@ -7,7 +7,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
-use Xgp\App\Helpers\UrlHelper;
+use App\Helpers\UrlHelper;
 
 class ServerRequest extends FormRequest
 {

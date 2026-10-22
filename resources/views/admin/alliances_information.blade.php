@@ -64,6 +64,7 @@
                                 {{ __('admin/alliances.al_alliance_information_owner') }}
                             </label>
                             <div class="col-md-8">
+                                <x-admin.player-find :find="$player_find['find']" :more="$player_find['more']" />
                                 <select id="alliance_owner" name="alliance_owner"
                                     class="form-control @error('alliance_owner') is-invalid @enderror">
                                     @foreach ($users as $user)

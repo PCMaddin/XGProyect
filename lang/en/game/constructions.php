@@ -18,6 +18,7 @@ return [
     'building_laboratory' => 'Research Lab',
     'building_terraformer' => 'Terraformer',
     'building_ally_deposit' => 'Alliance Depot',
+    'building_space_dock' => 'Space Dock',
     'building_mondbasis' => 'Lunar Base',
     'building_phalanx' => 'Sensor Phalanx',
     'building_jump_gate' => 'Jump Gate',

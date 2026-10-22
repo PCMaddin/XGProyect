@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => '更新日志',
+    'ch_new_item' => '添加新条目',
+    'ch_sub_title' => '你可以在这里修改服务器的更新日志（changelog）。该部分位于游戏的左侧菜单中。',
+    'ch_general' => '更新列表',
+    'ch_date' => '条目日期',
+    'ch_version' => '条目版本',
+    'ch_language' => '条目语言',
+    'ch_language_locked' => '创建后无法更改语言。',
+    'ch_translations' => '翻译',
+    'ch_edit_translation' => '编辑翻译',
+    'ch_delete_translation' => '删除翻译',
+    'ch_actions' => '操作',
+    'ch_the_description' => '说明',
+    'ch_edit_this' => '编辑此条目',
+    'ch_delete_this' => '删除此条目',
+    'ch_delete_confirm' => '确定要删除此条目吗？',
+    'ch_add_action' => '添加新条目',
+    'ch_edit_action' => '编辑条目: %s',
+    'ch_version_info' => '有效的版本示例:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => '选择语言',
+    'ch_characters' => '字符',
+    'ch_save' => '保存条目',
+    'ch_back' => '返回列表',
+    'ch_no_entries' => '还没有更新日志条目。添加第一条吧！',
+    'ch_description_placeholder' => '描述此版本带来的变更...',
+    'ch_entry_details' => '条目详情',
+    'ch_action_add_done' => '条目已添加！',
+    'ch_action_edit_done' => '条目已编辑！',
+    'ch_action_delete_done' => '条目已删除！',
+];

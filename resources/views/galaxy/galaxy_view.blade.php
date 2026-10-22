@@ -7,9 +7,28 @@
         document.getElementById('galaxy_form').submit();
     }
 
+    // the phalanx scan costs deuterium: the popup is opened by a POST with
+    // the CSRF token, so a plain link cannot spend it
     function fenster(target_url, win_name) {
-        var new_win = window.open(target_url, win_name, 'scrollbars=yes,menubar=no,top=0,left=0,toolbar=no,width=550,height=280,resizable=yes');
-        new_win.focus();
+        var name = win_name || 'phalanx';
+        var new_win = window.open('', name, 'scrollbars=yes,menubar=no,top=0,left=0,toolbar=no,width=550,height=280,resizable=yes');
+        var form = document.createElement('form');
+        var token = document.createElement('input');
+
+        form.method = 'post';
+        form.action = target_url;
+        form.target = name;
+        token.type = 'hidden';
+        token.name = '_token';
+        token.value = '{{ csrf_token() }}';
+        form.appendChild(token);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        if (new_win) {
+            new_win.focus();
+        }
     }
 
 
@@ -81,49 +100,49 @@
         // each case gets a different table entry, no language file used :P
         switch (parseInt(retVals[0])) {
             case 600:
-                addToTable("{{ __('game/galaxy.gl_success') }}", "success");
+                addToTable(@json(__('game/galaxy.gl_success')), "success");
                 break;
             case 601:
-                addToTable("{{ __('game/galaxy.gl_error') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_error')), "error");
                 break;
             case 602:
-                addToTable("{{ __('game/galaxy.gl_no_moon') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_moon')), "error");
                 break;
             case 603:
-                addToTable("{{ __('game/galaxy.gl_noob_protection') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_noob_protection')), "error");
                 break;
             case 604:
-                addToTable("{{ __('game/galaxy.gl_too_strong') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_too_strong')), "error");
                 break;
             case 605:
-                addToTable("{{ __('game/galaxy.gl_vacation_mode') }}", "vacation");
+                addToTable(@json(__('game/galaxy.gl_vacation_mode')), "vacation");
                 break;
             case 610:
-                addToTable("{{ __('game/galaxy.gl_only_amount_ships_1') }} " + retVals[1] + " {{ __('game/galaxy.gl_only_amount_ships_2') }}", "notice");
+                addToTable(@json(__('game/galaxy.gl_only_some_sent')).replace(':count', retVals[1]), "notice");
                 break;
             case 611:
-                addToTable("{{ __('game/galaxy.gl_no_ships') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_ships')), "error");
                 break;
             case 612:
-                addToTable("{{ __('game/galaxy.gl_no_slots') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_slots')), "error");
                 break;
             case 613:
-                addToTable("{{ __('game/galaxy.gl_no_deuterium') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_deuterium')), "error");
                 break;
             case 614:
-                addToTable("{{ __('game/galaxy.gl_no_planet') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_no_planet')), "error");
                 break;
             case 615:
-                addToTable("{{ __('game/galaxy.gl_not_enought_storage') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_not_enough_storage')), "error");
                 break;
             case 616:
-                addToTable("{{ __('game/galaxy.gl_multi_alarm') }}", "error");
+                addToTable(@json(__('game/galaxy.gl_multi_alarm')), "error");
                 break;
         }
     }
 
     function doit(order, galaxy, system, planet, planettype, shipcount) {
-        strInfo = "{{ __('game/galaxy.gl_send') }} " + shipcount + " {{ __('game/galaxy.gl_ship') }}" + (shipcount != 1 ? "{{ __('game/galaxy.gl_ships') }}" : "") + " {{ __('game/galaxy.gl_to') }}  " + galaxy + ":" + system + ":" + planet + "...";
+        strInfo = @json(__('game/galaxy.gl_sending')).replace(':count', shipcount).replace(':target', galaxy + ":" + system + ":" + planet);
         ajax.requestFile = "game.php?page=galaxy&fleet=true&action=send";
 
         // no longer needed, since we don't want to write the cryptic
@@ -138,6 +157,7 @@
         ajax.runResponse = whenResponse;
         ajax.execute = true;
 
+        ajax.setVar("_token", "{{ csrf_token() }}");
         ajax.setVar("session", "");
         ajax.setVar("order", order);
         ajax.setVar("galaxy", galaxy);
@@ -216,10 +236,11 @@
     document.onkeydown = cursorevent;
 </script>
 {!! $mip !!}
-<table width="656px">
+<table width="656px" class="galaxy">
     <tr>
         <td class="c" colspan="8">
             <form action="game.php?page=galaxy&mode=1" method="post" id="galaxy_form" style="margin:0" role="form">
+                @csrf
                 <input type="hidden" id="auto" value="dr" >
                 <table width="100%">
                     <tr>
@@ -251,6 +272,9 @@
                             <input type="submit" value="{{ __('game/galaxy.gl_go') }}">
                         </td>
                         <td style="background-color: transparent; width: 50%; text-align: right;">
+                            @if ($system_phalanx)
+                            <input type="button" value="{{ __('game/phalanx.px_system_phalanx') }}" onClick="fenster('game.php?page=phalanx&amp;mode=system&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}', 'phalanx')">
+                            @endif
                             <a href="game.php?page=fleet1&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}&amp;planet=16&amp;planettype=1&amp;target_mission=15">
                                 <input type="button" value="{{ __('game/galaxy.gl_expedition') }}">
                             </a>
@@ -303,6 +327,49 @@
         <th role="cell" width="125px" style="white-space: nowrap;">{!! $item['actions'] !!}</th>
     </tr>
     @endforeach
+    @if ($system_spy !== null)
+    <tr>
+        <th role="cell" colspan="8" style="text-align: left">
+            <form method="POST" action="game.php?page=galaxy&amp;mode=3&amp;systemspy=true" style="display: inline">
+                @csrf
+                <input type="hidden" name="galaxy" value="{{ $selected_galaxy }}">
+                <input type="hidden" name="system" value="{{ $selected_system }}">
+                {{ __('game/galaxy.gl_system_spy') }}:
+                <input type="number" name="probes" value="{{ $system_spy['probes'] }}" min="1" max="999" style="width: 50px" title="{{ __('game/galaxy.gl_system_spy_probes') }}">
+                {{ __('game/galaxy.gl_system_spy_probes') }}
+                <select name="targets">
+                    @foreach (['both', 'planets', 'moons'] as $option)
+                    <option value="{{ $option }}"{{ $system_spy['targets'] === $option ? ' selected' : '' }}>{{ __('game/galaxy.gl_system_spy_targets_' . $option) }}</option>
+                    @endforeach
+                </select>
+                <select name="activity">
+                    @foreach (['both', 'active', 'inactive'] as $option)
+                    <option value="{{ $option }}"{{ $system_spy['activity'] === $option ? ' selected' : '' }}>{{ __('game/galaxy.gl_system_spy_activity_' . $option) }}</option>
+                    @endforeach
+                </select>
+                {{ __('game/galaxy.gl_system_spy_skip') }}
+                <input type="number" name="skip_hours" value="{{ $system_spy['skip_hours'] }}" min="0" max="720" style="width: 50px">
+                {{ __('game/galaxy.gl_system_spy_hours') }}
+                <input type="submit" value="{{ __('game/galaxy.gl_system_spy_send') }}">
+            </form>
+            @if ($system_spy_result !== '')
+            <br><span style="color: lime">{{ $system_spy_result }}</span>
+            @endif
+        </th>
+    </tr>
+    @endif
+    @if ($deep_space !== null)
+    <tr>
+        <th role="cell" width="30px">16</th>
+        <th role="cell" colspan="5" style="text-align: left">
+            {{ __('game/galaxy.gl_deep_space') }}: {{ __('game/galaxy.gl_debris_field') }}
+            ({{ __('game/global.metal') }}: {{ $deep_space['metal'] }}, {{ __('game/global.crystal') }}: {{ $deep_space['crystal'] }})
+        </th>
+        <th role="cell" colspan="2">
+            <a href="game.php?page=fleet1&amp;galaxy={{ $selected_galaxy }}&amp;system={{ $selected_system }}&amp;planet=16&amp;planettype=2&amp;target_mission=8">{{ __('game/galaxy.gl_collect') }}</a>
+        </th>
+    </tr>
+    @endif
     <tr id="fleetstatusrow">
         <th role="cell" class="c" colspan="8">
             <table style="font-weight: bold" width="100%" id="fleetstatustable">

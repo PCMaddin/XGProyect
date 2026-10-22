@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => '不正の疑い',
+    'su_sub_title' => '複数アカウント、プッシング、スクリプトの兆候です。証拠ではなく兆候なので、判断は管理者が行います。',
+    'su_list' => '兆候',
+    'su_none' => '兆候はありません。',
+    'su_player' => 'プレイヤー',
+    'su_sign' => '兆候',
+    'su_score' => '強さ',
+    'su_evidence' => '根拠',
+    'su_seen' => '最終検出',
+    'su_decision' => '判断',
+    'su_top_ten' => ':rank 位',
+    'su_with' => ':player と',
+    'su_kind_shared_device' => '同じブラウザ',
+    'su_kind_shared_ip' => '同じIPアドレス',
+    'su_kind_pushing' => '格上に資源を送っている',
+    'su_kind_pushed' => '資源を受け取っている',
+    'su_kind_around_clock' => 'ほぼ24時間活動',
+    'su_kind_machine_pace' => 'スクリプト並みのクリック速度',
+    'su_status_open' => '未判断',
+    'su_status_cleared' => '問題なし',
+    'su_status_excluded' => '除外',
+    'su_note' => 'メモ',
+    'su_save' => '保存',
+    'su_saved' => '判断を保存しました。',
+    'su_not_saved' => '判断を保存できませんでした。',
+    'su_help' => '「除外」にするとシーズン終了時にすべてのランキングと賞品から外れます。同じIPは同じ家庭の場合もあります。チェックは毎時実行されます（xgp:cheat:scan）。',
+    'su_detail_logins' => 'ログイン数',
+    'su_detail_resources' => '差し引き資源',
+    'su_detail_days' => 'フル稼働日数',
+    'su_detail_requests' => '1時間あたりのリクエスト',
+];

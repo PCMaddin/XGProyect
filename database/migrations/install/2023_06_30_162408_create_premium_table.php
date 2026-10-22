@@ -18,6 +18,9 @@ return new class () extends Migration {
             $table->integer('premium_officier_engineer')->default(0);
             $table->integer('premium_officier_geologist')->default(0);
             $table->integer('premium_officier_technocrat')->default(0);
+            $table->string('premium_merchant_offer', 64)->nullable();
+            $table->unsignedTinyInteger('premium_scrap_rate')->nullable();
+            $table->unsignedTinyInteger('premium_scrap_bargains')->default(0);
         });
     }
 

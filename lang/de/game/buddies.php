@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'An diesen Spieler gibt es bereits eine Anfrage!',
+    'bu_cannot_request_yourself' => 'Du kannst dich nicht selbst als Buddy anfragen',
+    'bu_request_message' => 'Anfragetext',
+    'bu_player' => 'Name',
+    'bu_request_text' => 'Anfragetext',
+    'bu_characters' => 'Zeichen',
+    'bu_back' => 'Zurück',
+    'bu_send' => 'Senden',
+    'bu_cancel_request' => 'Anfrage zurückziehen',
+    'bu_accept' => 'Annehmen',
+    'bu_decline' => 'Ablehnen',
+    'bu_delete' => 'Löschen',
+    'bu_buddy_list' => 'Buddyliste',
+    'bu_requests' => 'Anfragen',
+    'bu_alliance' => 'Allianz',
+    'bu_coords' => 'Koordinaten',
+    'bu_text' => 'Text',
+    'bu_action' => 'Aktion',
+    'bu_my_requests' => 'Meine Anfragen',
+    'bu_partners' => 'Meine Buddies',
+    'bu_estate' => 'Status',
+    'bu_deleted_title' => 'Buddy verloren',
+    'bu_deleted_text' => 'Spieler %u hat dich von seiner Buddyliste gelöscht.',
+    'bu_accepted_title' => 'Anfrage angenommen',
+    'bu_accepted_text' => 'Spieler %u hat deine Buddyanfrage angenommen.',
+    'bu_rejected_title' => 'Anfrage abgelehnt',
+    'bu_rejected_text' => 'Spieler %u hat deine Buddyanfrage abgelehnt.',
+    'bu_to_accept_title' => 'Neue Buddyanfrage',
+    'bu_to_accept_text' => 'Spieler %u hat dir eine Buddyanfrage geschickt.',
+];

@@ -23,6 +23,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\SecurityHeaders::class,
     ];
 
     /**
@@ -33,12 +34,14 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\RedirectIfNotInstalled::class,
+            \App\Http\Middleware\SelectInstance::class,
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\ServerLanguage::class,
         ],
 
         'install' => [
@@ -53,16 +56,35 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\CheckInstalled::class,
         ],
 
-        'legacy' => [
+        'game' => [
             \App\Http\Middleware\RedirectIfNotInstalled::class,
+            \App\Http\Middleware\SelectInstance::class,
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            //\App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\Authenticate::class,
-            //\App\Http\Middleware\Locale::class,
+            \App\Http\Middleware\ServerLanguage::class,
+            \App\Http\Middleware\TrackActivity::class,
+        ],
+
+        // the operators' area (routes/operator.php): apart from every universe
+        'operator' => [
+            \App\Http\Middleware\OperatorArea::class,
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\OperatorLocale::class,
+        ],
+
+        // payment providers (routes/webhooks.php): no session, cookies or CSRF token
+        'webhook' => [
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
         'api' => [
@@ -82,7 +104,9 @@ class Kernel extends HttpKernel
     protected $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'admin.auth' => \App\Http\Middleware\AdminAuthenticate::class,
+        'admin.two_factor' => \App\Http\Middleware\RequireTwoFactor::class,
         'admin.authorize' => \App\Http\Middleware\AdminAuthorize::class,
+        'operator.auth' => \App\Http\Middleware\AuthenticateOperator::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,

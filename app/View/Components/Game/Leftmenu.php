@@ -10,7 +10,7 @@ use App\Services\SettingsService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator;
 
 class Leftmenu extends Component
 {
@@ -25,15 +25,13 @@ class Leftmenu extends Component
 
     /**
      * Get the view / contents that represent the component.
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     public function render(): View | Closure | string
     {
         $rawId = session('user_id');
         $user = User::findOrFail(is_int($rawId) ? $rawId : 0);
-
-        // @todo review - future reference in case there is a bug
-        // $tota_rank = $this->current_user['user_statistic_total_rank'] == '' ?
-        // :$this->current_planet['stats_users'] : $this->current_user['user_statistic_total_rank'];
 
         $menu = [];
         $modules = explode(';', $this->settingsService->getString('modules'));
@@ -53,6 +51,8 @@ class Leftmenu extends Component
             ['game.php?page=empire', 'lm_empire', '', '#ffffff', false, '1', '2'],
             ['game.php?page=alliance', 'lm_alliance', '', '#ffffff', false, '1', '13'],
             ['game.php?page=premium', 'lm_officiers', '', '#ff8900', false, '1', '15'],
+            ['game.php?page=items', 'lm_items', '', '#ff8900', false, '1', '15'],
+            ['game.php?page=characterclass', 'lm_characterclass', '', '#ff8900', false, '1', '15'],
             ['game.php?page=messages', 'lm_messages', '', '#ffffff', false, '1', '18'],
             ['game.php?page=playerprofile', 'lm_playerprofile', '', '#ff8900', false, '2', ''],
             ['game.php?page=highscore', 'lm_statistics', '&range=' . $user->stats->user_statistic_total_rank, '#ffffff', false, '2', '16'],

@@ -25,14 +25,152 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
-      - name: Ensure lockfile exists
-        run: test -f composer.lock
-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
       - name: Run PHPUnit
         run: composer phpunit
+
+  phpunit-mariadb:
+    name: PHPUnit (MariaDB)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: xgp_test
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      # sessions and cache of several universes in one Redis
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, pdo_mysql, opcache, zip, redis
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      # the backup drill (OffsiteBackupMysqlTest) dumps and restores for real
+      - name: Install restic and the MariaDB client
+        run: sudo apt-get update && sudo apt-get install -y restic mariadb-client
+
+      # the tests on MySQL/MariaDB (whole game pages, strict SQL mode)
+      - name: Run PHPUnit against MariaDB
+        run: vendor/bin/phpunit --filter Mysql
+        env:
+          MYSQL_TEST_DATABASE: xgp_test
+          MYSQL_TEST_HOST: 127.0.0.1
+          MYSQL_TEST_PORT: 3306
+          MYSQL_TEST_USERNAME: root
+          MYSQL_TEST_PASSWORD: root
+          REDIS_TEST_HOST: 127.0.0.1
+
+  # every page in a real browser, with code in every name and text
+  # (tests/Browser): no JavaScript or HTTP error, no leftover key, no XSS
+  browser:
+    name: Browser (pages and XSS)
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: xgp_browser
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, pdo_mysql, opcache, zip
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Crawl every page
+        run: tests/Browser/run.sh
+        env:
+          DB_DATABASE: xgp_browser
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+      - name: Screenshots of the pages with a problem
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-screenshots
+          path: |
+            tests/Browser/shots/
+            storage/logs/
+          if-no-files-found: ignore
+
+  # the production stack of deploy/, as on a server: build, install, HTTPS,
+  # then a second rollout under load that must not drop a request
+  deploy:
+    name: Deployment (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Settings for localhost
+        run: |
+          cp deploy/.env.example deploy/.env
+          sed -i 's/^XGP_DOMAIN=.*/XGP_DOMAIN=localhost/; s#^APP_URL=.*#APP_URL=https://localhost#; s/^DB_BUFFER_POOL=.*/DB_BUFFER_POOL=256M/; s/^MAIL_MAILER=.*/MAIL_MAILER=log/' deploy/.env
+
+      - name: First deployment
+        run: deploy/deploy.sh --admin-name=Admin --admin-email=admin@example.com --admin-password=ci-secret-password < /dev/null
+
+      - name: The game over HTTPS
+        run: |
+          docker compose -f deploy/docker-compose.yml exec -T web cat /data/caddy/pki/authorities/local/root.crt > caddy-root.crt
+          test "$(curl -sS --cacert caddy-root.crt -o /dev/null -w '%{http_code}' https://localhost/)" = 200
+          test "$(curl -sS --cacert caddy-root.crt -o /dev/null -w '%{http_code}' https://localhost/.env)" = 404
+          docker compose -f deploy/docker-compose.yml exec -T app php artisan xgp:tick
+
+      - name: Second deployment under load
+        run: |
+          (while [ ! -f stop ]; do curl -s --cacert caddy-root.crt -o /dev/null -w '%{http_code}\n' https://localhost/ >> codes; done) &
+          deploy/deploy.sh < /dev/null
+          touch stop; wait
+          sort codes | uniq -c
+          test "$(grep -cv '^200$' codes)" = 0
 
   php-cs-fixer:
     name: PHP CS Fixer
@@ -102,4 +240,26 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Run PHPMD
-        run: vendor/bin/phpmd app/,legacy/ github phpmd.xml --baseline-file phpmd.baseline.xml
+        run: vendor/bin/phpmd app/ github phpmd.xml --baseline-file phpmd.baseline.xml
+
+  composer-audit:
+    name: Composer Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4.1'
+          extensions: gd, mysqli, opcache, zip
+          coverage: none
+
+      - name: Ensure lockfile exists
+        run: test -f composer.lock
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Audit dependencies for known vulnerabilities
+        run: composer audit --locked

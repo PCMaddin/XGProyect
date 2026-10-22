@@ -26,6 +26,7 @@ return [
     'messages' => 'Mensajes',
     'users' => 'Usuarios',
     'bots' => 'Bots',
+    'suspicions' => 'Sospechas',
     'alliances' => 'Alianzas',
     'languages' => 'Idiomas',
     'changelog' => 'Lista de cambios',

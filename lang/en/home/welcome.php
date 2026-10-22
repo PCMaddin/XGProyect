@@ -44,4 +44,5 @@ return [
     'hm_about' => 'About XGP',
     'hm_media' => 'Media',
     'hm_forum' => 'Board',
+    'hm_invite_code' => 'Invitation code',
 ];

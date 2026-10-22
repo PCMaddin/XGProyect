@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Users;
 
+use App\Support\Html;
 use App\Models\User;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -34,6 +35,7 @@ class UserInfoRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:64',
+                'not_regex:' . Html::UNSAFE_IN_NAMES,
                 Rule::unique('users', 'name')->ignore($userId, 'id'),
             ],
             'email' => [

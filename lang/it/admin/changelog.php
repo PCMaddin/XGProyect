@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Registro modifiche',
+    'ch_new_item' => 'Aggiungi voce',
+    'ch_sub_title' => 'Da qui puoi modificare l’elenco delle modifiche (changelog) del tuo server. La sezione si trova nel menu a sinistra del gioco.',
+    'ch_general' => 'Elenco delle modifiche',
+    'ch_date' => 'Data della voce',
+    'ch_version' => 'Versione della voce',
+    'ch_language' => 'Lingua della voce',
+    'ch_language_locked' => 'La lingua non può essere cambiata dopo la creazione.',
+    'ch_translations' => 'Traduzioni',
+    'ch_edit_translation' => 'Modifica traduzione',
+    'ch_delete_translation' => 'Elimina traduzione',
+    'ch_actions' => 'Azioni',
+    'ch_the_description' => 'Descrizione',
+    'ch_edit_this' => 'Modifica questa voce',
+    'ch_delete_this' => 'Elimina questa voce',
+    'ch_delete_confirm' => 'Vuoi davvero eliminare questa voce?',
+    'ch_add_action' => 'Aggiungi una nuova voce',
+    'ch_edit_action' => 'Modifica voce: %s',
+    'ch_version_info' => 'Esempi di versioni valide:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Scegli la lingua',
+    'ch_characters' => 'caratteri',
+    'ch_save' => 'Salva voce',
+    'ch_back' => 'Torna all’elenco',
+    'ch_no_entries' => 'Ancora nessuna voce. Aggiungi la prima!',
+    'ch_description_placeholder' => 'Descrivi le modifiche di questa versione...',
+    'ch_entry_details' => 'Dettagli della voce',
+    'ch_action_add_done' => 'Voce aggiunta!',
+    'ch_action_edit_done' => 'Voce modificata!',
+    'ch_action_delete_done' => 'Voce eliminata!',
+];

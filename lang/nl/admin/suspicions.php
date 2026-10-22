@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Vermoedens',
+    'su_sub_title' => 'Aanwijzingen voor multi-accounts, pushen en scripts. Aanwijzingen, geen bewijs: jij beslist.',
+    'su_list' => 'Aanwijzingen',
+    'su_none' => 'Geen aanwijzingen.',
+    'su_player' => 'Speler',
+    'su_sign' => 'Aanwijzing',
+    'su_score' => 'Sterkte',
+    'su_evidence' => 'Bewijs',
+    'su_seen' => 'Laatst gezien',
+    'su_decision' => 'Beslissing',
+    'su_top_ten' => 'plaats :rank',
+    'su_with' => 'met :player',
+    'su_kind_shared_device' => 'zelfde browser',
+    'su_kind_shared_ip' => 'zelfde IP-adres',
+    'su_kind_pushing' => 'stuurt een sterkere grondstoffen',
+    'su_kind_pushed' => 'ontvangt grondstoffen',
+    'su_kind_around_clock' => 'bijna de klok rond actief',
+    'su_kind_machine_pace' => 'kliktempo van een script',
+    'su_status_open' => 'open',
+    'su_status_cleared' => 'in orde',
+    'su_status_excluded' => 'uitgesloten',
+    'su_note' => 'Notitie',
+    'su_save' => 'Opslaan',
+    'su_saved' => 'Beslissing opgeslagen.',
+    'su_not_saved' => 'De beslissing kon niet worden opgeslagen.',
+    'su_help' => '„Uitgesloten” haalt de speler aan het eind van het seizoen uit alle ranglijsten en prijzen. Een gedeeld IP-adres kan ook een huishouden zijn. De controle draait elk uur (xgp:cheat:scan).',
+    'su_detail_logins' => 'aanmeldingen',
+    'su_detail_resources' => 'netto grondstoffen',
+    'su_detail_days' => 'volle dagen',
+    'su_detail_requests' => 'verzoeken per uur',
+];

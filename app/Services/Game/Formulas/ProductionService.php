@@ -9,9 +9,13 @@ namespace App\Services\Game\Formulas;
  */
 class ProductionService
 {
-    public function maxStorable(int $storageLevel): int
+    /**
+     * The capacity of a storage building; $factor is the alliance class
+     * bonus (traders store 10 % more).
+     */
+    public function maxStorable(int $storageLevel, float $factor = 1.0): int
     {
-        return (int) (2.5 * pow(M_E, (20 * $storageLevel / 33))) * 5000;
+        return (int) floor((int) (2.5 * pow(M_E, (20 * $storageLevel / 33))) * 5000 * $factor);
     }
 
     public function maxProductionPercentage(int $maxEnergy, int $energyUsed): int

@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'W tym menu możesz zmieniać nazwy planet i księżyców, przenosić planety albo całkowicie je porzucać.',
+    'rename' => 'Zmień nazwę',
+    'new_planet_name' => 'Nowa nazwa planety',
+    'new_moon_name' => 'Nowa nazwa księżyca',
+    'abandon_homeplanet' => 'Porzuć planetę macierzystą',
+    'abandon_homeplanet_button' => 'Porzuć planetę macierzystą',
+    'abandon_colony' => 'Porzuć kolonię',
+    'abandon_colony_button' => 'Porzuć kolonię',
+    'abandon_moon' => 'Porzuć księżyc',
+    'abandon_moon_button' => 'Porzuć księżyc',
+    'abandon_homeplanet_unique' => 'Nie możesz porzucić planety macierzystej, dopóki nie skolonizujesz innej planety.',
+    'abandon_homeplanet_with_colonies' => 'Jeśli porzucisz planetę macierzystą, po zalogowaniu trafisz od razu na kolejną skolonizowaną planetę.',
+    'abandon_confirm_message' => 'Potwierdź usunięcie planety :coords, wpisując swoje hasło',
+    'abandon_confirm' => 'Potwierdź',
+    'rename_error' => 'Nie można używać znaków specjalnych!',
+    'rename_success' => 'Nowa nazwa planety: :name',
+    'wrong_password' => 'Błędne hasło!',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => 'Nie można porzucić planety, z której lub na którą lecą floty',
+    'rp_planet_abandoned' => 'Planeta została porzucona',
+    'rp_wrong_pass' => 'Błędne hasło, wpisz je ponownie.',
+
+    'rl_title' => 'Przenieś planetę',
+    'rl_description' => 'Za %s Ciemnej Materii planeta wraz z księżycem przeniesie się w ciągu 24 godzin na wolną pozycję z tego samego zakresu (1-3, 4-12, 13-15). Ciemna Materia zostanie pobrana dopiero przy przenosinach. Do tego czasu na planecie i księżycu nie można niczego budować, badać ani produkować w stoczni, a żadna własna flota nie może z nich startować ani do nich lecieć. Statki podążą za planetą bez paliwa w swoim zwykłym czasie lotu, pole zniszczeń zostaje na miejscu, a teleporter odpoczywa przez 24 godziny. Tryb urlopowy anuluje przenosiny.',
+    'rl_target' => 'Cel',
+    'rl_start' => 'Przenieś',
+    'rl_running' => 'Planeta przeniesie się na %s dnia %s.',
+    'rl_cancel' => 'Anuluj przenosiny',
+    'rl_started' => 'Przenosiny rozpoczęte.',
+    'rl_cancelled' => 'Przenosiny zostały anulowane.',
+    'rl_error_planet' => 'Tej planety nie można przenieść.',
+    'rl_error_running' => 'Planeta jest już przenoszona.',
+    'rl_error_target' => 'Nieprawidłowa pozycja docelowa.',
+    'rl_error_band' => 'Cel musi leżeć w tym samym zakresie pozycji (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'Pozycja docelowa jest zajęta lub zarezerwowana.',
+    'rl_error_vacation' => 'W trybie urlopowym nie można przenosić planet.',
+    'rl_error_dark_matter' => 'Masz za mało Ciemnej Materii.',
+    'rl_error_building' => 'Na planecie lub księżycu trwa budowa.',
+    'rl_error_research' => 'Na planecie lub księżycu trwa badanie.',
+    'rl_error_shipyard' => 'Stocznia planety lub księżyca ma zlecenia.',
+    'rl_error_fleets' => 'Własne floty lecą z planety lub księżyca albo do nich.',
+    'rl_error_wreck_field' => 'Dok kosmiczny naprawia statki lub czekają one na przywrócenie do służby.',
+    'rl_from' => 'Administracja',
+    'rl_subject' => 'Przenosiny',
+    'rl_done' => 'Planeta przeniosła się na %s. Statki podążają za nią.',
+    'rl_failed' => 'Przenosiny na %s nie powiodły się: %s',
+];

@@ -8,18 +8,24 @@ use App\Core\GameObjects\GameObjectRegistry;
 use App\Services\FormatService;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\FleetsService;
+use App\Services\Game\Formulas\FormulasService;
 use App\Services\Game\Formulas\OfficerService;
 use App\Services\Game\Formulas\ProductionService;
+use App\Services\Game\JumpGateService;
+use App\Services\Game\TearDownService;
 use App\Services\Game\TechnologyInfoService;
+use App\Services\Game\TechnologyTableService;
 use App\Services\SettingsService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use Tests\TestCase;
 
 #[CoversClass(TechnologyInfoService::class)]
+#[CoversClass(JumpGateService::class)]
 class TechnologyInfoServiceTest extends TestCase
 {
     protected function setUp(): void
@@ -45,6 +51,10 @@ class TechnologyInfoServiceTest extends TestCase
             $table->unsignedInteger('planet_user_id');
             $table->unsignedTinyInteger('planet_type');
             $table->unsignedInteger('planet_last_jump_time')->default(0);
+            $table->unsignedTinyInteger('planet_galaxy')->default(1);
+            $table->unsignedSmallInteger('planet_system')->default(1);
+            $table->unsignedTinyInteger('planet_planet')->default(1);
+            $table->string('planet_name')->default('Moon');
         });
 
         Schema::connection('sqlite')->create('buildings', function (Blueprint $table): void {
@@ -94,29 +104,86 @@ class TechnologyInfoServiceTest extends TestCase
         $this->seedOriginMoon();
         $this->seedTargetMoon(planetId: 11, userId: 1);
 
-        $service = $this->buildService();
-        $initializeContext = new ReflectionMethod(TechnologyInfoService::class, 'initializeContext');
-        $initializeContext->invoke($service, 43, $this->userData(), $this->originPlanetData());
+        $service = new JumpGateService(new GameObjectRegistry(), new FormatService());
+        (new ReflectionProperty(JumpGateService::class, 'user'))->setValue($service, $this->userData());
+        (new ReflectionProperty(JumpGateService::class, 'planet'))->setValue($service, $this->originPlanetData());
 
-        $method = new ReflectionMethod(TechnologyInfoService::class, 'findJumpGateDestination');
-
-        $result = $method->invoke($service, 11);
+        $result = (new ReflectionMethod(JumpGateService::class, 'findJumpGateDestination'))->invoke($service, 11);
 
         $this->assertIsArray($result);
         $this->assertSame(11, $result['planet_id']);
         $this->assertSame(1, $result['building_jump_gate']);
     }
 
+    /**
+     * Regression: from jump gate level 2 the wait time was a float, and passing
+     * it to the countdown script (int parameter) was a TypeError while the
+     * gate was cooling down (level 2: 30 minutes).
+     */
+    public function testJumpGateViewShowsCountdownWhileGateIsCoolingDown(): void
+    {
+        $settings = $this->createStub(SettingsService::class);
+        $settings->method('getString')->willReturn('XGP');
+        $this->app->instance(SettingsService::class, $settings);
+        $this->seedOriginMoon();
+        $this->seedTargetMoon(planetId: 11, userId: 1);
+
+        $planet = ['planet_last_jump_time' => time() - 600, 'building_jump_gate' => 2] + $this->originPlanetData() + [
+            'planet_galaxy' => 1,
+            'planet_system' => 2,
+            'planet_planet' => 3,
+        ];
+
+        $jumpGate = $this->buildService()->buildViewData(43, $this->userData(), $planet)['jumpGate'];
+
+        $this->assertNotNull($jumpGate);
+        $this->assertStringContainsString('bxxGate1', $jumpGate['waitTimeHtml']);
+        $this->assertStringContainsString('1200', $jumpGate['countdownScriptHead'] . $jumpGate['countdownScriptTail']);
+        $this->assertSame([['id' => 11, 'label' => '[1:1:1] Moon']], $jumpGate['destinations']);
+    }
+
+    public function testHandleJumpGateRejectsJumpWhileGateIsCoolingDown(): void
+    {
+        $this->seedOriginMoon();
+        $this->seedTargetMoon(planetId: 11, userId: 1);
+
+        $result = $this->buildService()->handleJumpGate(
+            43,
+            11,
+            [202 => 1],
+            $this->userData(),
+            ['planet_last_jump_time' => time() - 600] + $this->originPlanetData(),
+        );
+
+        $this->assertSame('red', $result['color']);
+        $alreadyUsed = __('game/technologydetails.in_jump_gate_already_used');
+        $this->assertIsString($alreadyUsed);
+        $this->assertTrue(str_starts_with($result['message'], $alreadyUsed . ' '));
+        $this->assertSame(5, DB::table('ships')->where('ship_planet_id', 10)->value('ship_small_cargo_ship'));
+    }
+
     private function buildService(): TechnologyInfoService
     {
+        $registry = new GameObjectRegistry();
+
         return new TechnologyInfoService(
-            registry: new GameObjectRegistry(),
-            productionService: $this->createStub(ProductionService::class),
+            registry: $registry,
             formatService: new FormatService(),
-            officerService: $this->createStub(OfficerService::class),
-            developmentsService: $this->createStub(DevelopmentsService::class),
-            fleetsService: $this->createStub(FleetsService::class),
-            settings: $this->createStub(SettingsService::class),
+            tables: new TechnologyTableService(
+                $registry,
+                $this->createStub(ProductionService::class),
+                new FormatService(),
+                $this->createStub(OfficerService::class),
+                $this->createStub(FleetsService::class),
+                $this->createStub(SettingsService::class),
+            ),
+            tearDown: new TearDownService(
+                $registry,
+                new FormatService(),
+                $this->createStub(DevelopmentsService::class),
+                $this->createStub(FormulasService::class),
+            ),
+            jumpGate: new JumpGateService($registry, new FormatService()),
         );
     }
 

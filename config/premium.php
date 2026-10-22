@@ -1,0 +1,92 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+|--------------------------------------------------------------------------
+| Dark matter shop
+|--------------------------------------------------------------------------
+|
+| Players of a Pay2Win universe (option premium_mode) buy dark matter here,
+| paid the ways the universe allows (option payment_methods: stripe, wax)
+| and that are set up below: Stripe Checkout, credited by Stripe's webhook,
+| or a WAX transfer, credited by xgp:wax:check. Without a way to pay, or in
+| a Play2Win universe, there is no shop.
+|
+| Prices are in the smallest unit of the currency (cents). The package id
+| is what the order stores and the shop posts: change the amount or the
+| price as you like, but give a package a new id rather than reusing one.
+|
+| XGP_PAYMENTS_TEST=true (an alpha) allows test payments only: Stripe with a
+| test key (sk_test_…), WAX on the test network (XGP_WAX_NETWORK=testnet).
+| A live key or the main network then closes that way to pay, and the shop
+| says that no real money moves.
+|
+*/
+
+$waxTestnet = env('XGP_WAX_NETWORK', 'mainnet') === 'testnet';
+
+return [
+    'currency' => strtolower((string) env('STRIPE_CURRENCY', 'eur')),
+
+    'test_mode' => (bool) env('XGP_PAYMENTS_TEST', false),
+
+    'packages' => [
+        ['id' => 'dm_10k', 'dark_matter' => 10000, 'price' => 199],
+        ['id' => 'dm_50k', 'dark_matter' => 50000, 'price' => 799],
+        ['id' => 'dm_120k', 'dark_matter' => 120000, 'price' => 1699],
+        ['id' => 'dm_300k', 'dark_matter' => 300000, 'price' => 3499],
+    ],
+
+    'stripe' => [
+        // the secret API key (sk_live_… or sk_test_…)
+        'secret' => (string) env('STRIPE_SECRET', ''),
+        // the signing secret of the webhook endpoint (whsec_…)
+        'webhook_secret' => (string) env('STRIPE_WEBHOOK_SECRET', ''),
+        // Stripe Tax (set up in the dashboard) works the VAT of the buyer's
+        // country out of the package price and the webhook keeps tax and
+        // country with the order; off: the price is charged as it is
+        'automatic_tax' => (bool) env('STRIPE_AUTOMATIC_TAX', false),
+        'api_url' => 'https://api.stripe.com/v1',
+        // a signed event older than this (seconds) is refused (replays)
+        'tolerance' => 300,
+    ],
+
+    'wax' => [
+        // the shop's WAX account (a-z, 1-5, dots; up to 12); empty: no WAX
+        'account' => (string) env('XGP_WAX_ACCOUNT', ''),
+        // mainnet or testnet; the history server must be on that chain
+        'network' => $waxTestnet ? 'testnet' : 'mainnet',
+        // a Hyperion history server of the WAX chain
+        'api_url' => rtrim((string) env('XGP_WAX_API', $waxTestnet ? 'https://testnet.waxsweden.org' : 'https://wax.eosusa.io'), '/'),
+        // a second one of another operator: confirms each transfer before it
+        // counts (one server alone could make up payments); empty: off
+        'verify_url' => rtrim((string) env('XGP_WAX_VERIFY_API', $waxTestnet ? '' : 'https://api.waxsweden.org'), '/'),
+        // the price of 1 WAX in the shop's currency: {"wax":{"eur":0.0043}}
+        'rate_url' => (string) env('XGP_WAX_RATE_URL', 'https://api.coingecko.com/api/v3/simple/price?ids=wax&vs_currencies=:currency'),
+        // the rate is read again after this many seconds
+        'rate_cache' => 300,
+        // a rate more than this many percent off the last one is refused
+        // (no orders until it settles or a day passed); 0: no check
+        'max_rate_jump' => (float) env('XGP_WAX_MAX_RATE_JUMP', 50),
+        // added to the converted price (percent), for the rate moving
+        'markup' => (float) env('XGP_WAX_MARKUP', 0),
+        // a quote holds this long: later transfers are left to the admin
+        'quote_minutes' => 30,
+        // transfers looked at on the first check (hours back)
+        'lookback_hours' => 24,
+    ],
+
+    // the game's own token on the WAX chain (payment method "token"); empty: none
+    'token' => [
+        'contract' => (string) env('XGP_TOKEN_CONTRACT', ''),
+        'symbol' => strtoupper((string) env('XGP_TOKEN_SYMBOL', '')),
+        'decimals' => (int) env('XGP_TOKEN_DECIMALS', 4),
+        // the fixed rate: dark matter for one token
+        'dark_matter_per_token' => (int) env('XGP_TOKEN_DARK_MATTER', 100),
+        // market price in WAX: {"system_price": 0.25}; :id is "symbol-contract" in lower case
+        'market_url' => (string) env('XGP_TOKEN_MARKET_URL', 'https://wax.alcor.exchange/api/v2/tokens/:id'),
+        // a token order holds this long (the price is fixed)
+        'quote_hours' => 24,
+    ],
+];

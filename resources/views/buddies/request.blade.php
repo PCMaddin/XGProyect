@@ -3,6 +3,7 @@
 @section('content')
 <script src="{{ asset('assets/js/cntchar-min.js') }}" type="text/javascript"></script>
 <form action="game.php?page=buddies&mode=1&sm=3" method="post" role="form">
+    @csrf
     <input type="hidden" name="user" value="{{ $id }}">
     <table width="520">
         <tr>

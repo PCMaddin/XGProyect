@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="game.php?page=alliance&mode=make" method="POST" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_make_alliance') }}</td>

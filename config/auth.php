@@ -40,6 +40,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // the operators of the server on /operator (base database)
+        'operator' => [
+            'driver' => 'session',
+            'provider' => 'operators',
+        ],
     ],
 
     /*
@@ -63,6 +69,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+
+        'operators' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Operator::class,
         ],
 
         // 'users' => [
@@ -112,4 +123,18 @@ return [
 
     'password_timeout' => 10800,
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Two-factor sign-in
+    |--------------------------------------------------------------------------
+    |
+    | The admin area asks for it: an admin without two-factor sign-in is sent
+    | to set it up first. Players switch it on themselves.
+    |
+    */
+
+    'two_factor' => [
+        'admin_required' => (bool) env('XGP_ADMIN_TWO_FACTOR', true),
+    ],
 ];

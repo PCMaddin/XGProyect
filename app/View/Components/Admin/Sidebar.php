@@ -10,7 +10,7 @@ use Closure;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use Xgp\App\Libraries\Adm\Permissions;
+use App\Libraries\Adm\Permissions;
 
 class Sidebar extends Component
 {
@@ -51,6 +51,7 @@ class Sidebar extends Component
                     'errors' => [],
                     'fleets' => [],
                     'messages' => [],
+                    'suspicions' => [],
                 ]
             ],
             'edition' => [

@@ -29,6 +29,7 @@
                         </div>
                         <div class="form-group">
                             <label for="founder">{{ __('admin/alliances.al_create_founder') }}</label>
+                            <x-admin.player-find :find="$player_find['find']" :more="$player_find['more']" />
                             <select class="form-control" id="founder" name="founder" required>
                                 <option value="0">-</option>
                                 @foreach ($users as $u)

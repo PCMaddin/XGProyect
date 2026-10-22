@@ -33,7 +33,6 @@ return [
     'mg_private_content' => 'Private message — content hidden',
     'mg_delete_this' => 'Delete this message',
     'mg_delete_ok' => 'Messages successfully deleted',
-    'mg_result_count' => ':count message(s) found',
     'mg_types' => [
         0 => 'Spy reports',
         1 => 'Battle reports',

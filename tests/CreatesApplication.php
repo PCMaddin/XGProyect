@@ -18,6 +18,18 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        // An installed game stores its database in config/xgp-db-config.php,
+        // which is loaded after config/database.php and would point the tests
+        // at the game's database: they insert, change and delete rows there.
+        // The tests always run on in-memory SQLite, as phpunit.xml intends.
+        $app['config']->set([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => ':memory:',
+            // the registry of the universes too (AppServiceProvider copied the game's connection)
+            'database.connections.central' => ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => ''],
+            'INSTALLED' => 'false',
+        ]);
+
         return $app;
     }
 }

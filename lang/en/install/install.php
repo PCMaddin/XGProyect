@@ -67,6 +67,7 @@ return [
     'prepare_config' => 'Configuration ready',
     'install' => 'Base tables ready',
     'create' => 'Game tables ready',
+    'mark_updates' => 'Update records written',
     'insert_changelog' => 'Changelog records inserted',
     'insert_languages' => 'Language records inserted',
     'insert_options' => 'Options records inserted',

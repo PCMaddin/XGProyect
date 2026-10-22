@@ -21,6 +21,7 @@
     "license": "GPL-3.0-only",
     "require": {
         "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
@@ -46,10 +47,12 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "Xgp\\App\\": "legacy/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/constants.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -77,10 +80,10 @@
             "vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit 1024M --no-progress"
         ],
         "phpstan-baseline": [
-            "vendor/bin/phpstan analyse --level 9 --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon app/ legacy/ tests/ --memory-limit 1024M"
+            "vendor/bin/phpstan analyse --level 9 --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon app/ tests/ --memory-limit 1024M"
         ],
         "phpmd-baseline": [
-            "vendor/bin/phpmd --generate-baseline app/ legacy/ github phpmd.xml"
+            "vendor/bin/phpmd --generate-baseline app/ github phpmd.xml"
         ]
     },
     "extra": {

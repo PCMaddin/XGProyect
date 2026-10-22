@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => 'Une demande à ce joueur existe déjà !',
+    'bu_cannot_request_yourself' => 'Vous ne pouvez pas vous ajouter vous-même comme ami',
+    'bu_request_message' => 'Message de demande',
+    'bu_player' => 'Nom',
+    'bu_request_text' => 'Texte de la demande',
+    'bu_characters' => 'caractères',
+    'bu_back' => 'Retour',
+    'bu_send' => 'Envoyer',
+    'bu_cancel_request' => 'Annuler la demande',
+    'bu_accept' => 'Accepter',
+    'bu_decline' => 'Refuser',
+    'bu_delete' => 'Supprimer',
+    'bu_buddy_list' => 'Liste d’amis',
+    'bu_requests' => 'Demandes',
+    'bu_alliance' => 'Alliance',
+    'bu_coords' => 'Coordonnées',
+    'bu_text' => 'Texte',
+    'bu_action' => 'Action',
+    'bu_my_requests' => 'Mes demandes',
+    'bu_partners' => 'Mes amis',
+    'bu_estate' => 'État',
+    'bu_deleted_title' => 'Ami perdu',
+    'bu_deleted_text' => 'Le joueur %u vous a retiré de sa liste d’amis.',
+    'bu_accepted_title' => 'Demande acceptée',
+    'bu_accepted_text' => 'Le joueur %u a accepté votre demande d’ami.',
+    'bu_rejected_title' => 'Demande refusée',
+    'bu_rejected_text' => 'Le joueur %u a refusé votre demande d’ami.',
+    'bu_to_accept_title' => 'Nouvelle demande d’ami',
+    'bu_to_accept_text' => 'Le joueur %u vous a envoyé une demande d’ami.',
+];

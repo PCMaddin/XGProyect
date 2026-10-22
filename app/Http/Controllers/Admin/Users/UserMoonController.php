@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserPlanetRequest;
 use App\Http\Traits\Admin\Users\UserPlanetTrait;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Libraries\PlanetLib;
 
 /**
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")
@@ -60,7 +62,7 @@ class UserMoonController extends BaseController
     public function storeMoon(Request $request, User $user): RedirectResponse
     {
         $planetId = $request->integer('planet');
-        $moonName = trim($request->string('name')->toString());
+        $moonName = Html::cleanName($request->string('name')->toString());
         $diameter = $request->integer('planet_diameter');
         $tempMin = $request->integer('planet_temp_min');
         $tempMax = $request->integer('planet_temp_max');
@@ -146,7 +148,7 @@ class UserMoonController extends BaseController
         return view('admin.users_moon_edit', [
             'user' => $user,
             'moon' => $this->preparePlanetViewData($moonData, $this->dateFormatExtended()),
-            'all_users' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'owners' => app(PlayerChoices::class)->choose(null, (int) ($moonData->planet_user_id ?? 0)),
             'images' => $this->getPlanetImages(),
             'percent_options' => $this->percentOptions(),
             'queue_options' => $this->buildProcessQueue((string) ($moonData->planet_b_building_id ?? '')),

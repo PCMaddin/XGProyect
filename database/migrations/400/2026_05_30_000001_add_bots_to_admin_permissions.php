@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Options;
 use Illuminate\Database\Migrations\Migration;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
 
 return new class () extends Migration {
     /**

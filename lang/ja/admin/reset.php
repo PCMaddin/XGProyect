@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => '宇宙のリセット',
+    're_sub_title' => 'ここでは宇宙の個別の要素をリセットしたり、すべてを消去したりできます。この操作は元に戻せません — 必ず事前にバックアップを取ってください。',
+    're_reset_universe_confirmation' => 'OK をクリックすると、選択した項目がゼロにリセットされます。この操作は元に戻せず、データベースのバックアップはご自身の責任で行ってください。宇宙全体をリセットしてもアカウントは削除されません。',
+    're_defenses_and_ships' => '造船所と防衛',
+    're_defenses' => '防衛をリセット',
+    're_ships' => '艦船をリセット',
+    're_reset_hangar' => '造船所と防衛のキューをリセット',
+    're_buldings' => '施設',
+    're_buildings_pl' => '惑星の施設をリセット',
+    're_buildings_lu' => '月の施設をリセット',
+    're_reset_buldings' => '建設キューをリセット',
+    're_inve_ofis' => '研究とオフィサー',
+    're_ofici' => 'オフィサーをリセット',
+    're_investigations' => '研究をリセット',
+    're_reset_invest' => '進行中の研究をリセット',
+    're_resources' => '資源',
+    're_resources_dark' => 'ダークマターをリセット',
+    're_resources_met_cry' => 'メタル、クリスタル、デューテリウムをリセット',
+    're_general' => '一般',
+    're_reset_moons' => '月をリセット',
+    're_reset_notes' => 'メモをリセット',
+    're_reset_rw' => '戦闘レポートをリセット',
+    're_reset_buddies' => 'フレンドリストをリセット',
+    're_reset_allys' => '同盟をリセット',
+    're_reset_fleets' => '艦隊をリセット',
+    're_reset_banned' => '凍結ユーザーをリセット',
+    're_reset_messages' => 'メッセージをリセット',
+    're_reset_statpoints' => '統計をリセット',
+    're_reset_all' => '宇宙全体をリセット',
+    're_reset_h1' => 'リセット項目',
+    're_reset_excess' => '項目をリセットしました',
+    're_reset_go' => 'リセット',
+];

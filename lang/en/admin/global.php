@@ -13,9 +13,12 @@ return [
     'gn_danger_title' => 'Alert!',
     'gn_warning_title' => 'Warning!',
     'gn_success_title' => 'Ok!',
-    'gn_info_title' => '',
+    'gn_info_title' => 'Info!',
     'ge_yes' => 'YES',
     'ge_no' => 'NO',
     'gn_enabled' => 'Enabled',
     'gn_disabled' => 'Disabled',
+    'player_find' => 'Find a player (start of the name)',
+    'alliance_find' => 'Find an alliance (start of the name)',
+    'player_find_more' => 'The first :count players by name are shown; search by name to find others.',
 ];

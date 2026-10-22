@@ -57,6 +57,10 @@
                             </div>
                         </div>
 
+                        <div class="mb-2">
+                            <small class="text-muted"><i class="fas fa-info-circle mr-1"></i>{{ __('admin/announcement.an_email_consent') }}</small>
+                        </div>
+
                         {{-- Color warning --}}
                         <div id="colorWarning" class="d-none mb-2">
                             <small class="text-warning">

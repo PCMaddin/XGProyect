@@ -14,6 +14,7 @@ class EncryptCookies extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // the universe chosen in the lobby is read before the cookies are decrypted
+        \App\Http\Middleware\SelectInstance::COOKIE,
     ];
 }

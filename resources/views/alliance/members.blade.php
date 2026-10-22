@@ -1,11 +1,11 @@
 @extends('master.game')
 
 @section('content')
-<table width="600px">
+<table width="600px" class="cards">
     <tr>
         <td class="c" colspan="8">{{ __('game/alliance.al_user_list') }} ({{ __('game/alliance.al_number_of_records') }}: {{ $total }})</td>
     </tr>
-    <tr>
+    <tr class="cards-sort">
         <th>{{ __('game/alliance.al_num') }}</th>
         <th><a href="game.php?page=alliance&mode=memberslist&sort1=1&sort2={{ $s }}">{{ __('game/alliance.al_member') }}</a></th>
         <th>{{ __('game/alliance.al_message') }}</th>
@@ -17,18 +17,18 @@
     </tr>
     @foreach ($list_of_members as $item)
     <tr>
-        <th scope="row">{{ $item['position'] }}</th>
-        <th role="cell">{{ $item['name'] }}</th>
-        <th role="cell">
+        <th scope="row" data-label="{{ __('game/alliance.al_num') }}">{{ $item['position'] }}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_member') }}">{{ $item['name'] }}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_message') }}">
             <a href="game.php?page=chat&playerId={{ $item['id'] }}">
                 <img src="{{ asset('assets/upload/skins/xgproyect/img/m.gif') }}" border="0" title="{{ $item['write_message'] }}" alt="{{ $item['write_message'] }}"/>
             </a>
         </th>
-        <th role="cell">{{ $item['ally_range'] }}</th>
-        <th role="cell">{{ $item['points'] }}</th>
-        <th role="cell">{!! $item['coords'] !!}</th>
-        <th role="cell">{{ $item['ally_register_time'] }}</th>
-        <th role="cell">{!! $item['online_time'] !!}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_position') }}">{{ $item['ally_range'] }}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_points') }}">{{ $item['points'] }}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_coords') }}">{!! $item['coords'] !!}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_member_since') }}">{{ $item['ally_register_time'] }}</th>
+        <th role="cell" data-label="{{ __('game/alliance.al_estate') }}">{!! $item['online_time'] !!}</th>
     </tr>
     @endforeach
     <tr>

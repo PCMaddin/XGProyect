@@ -6,18 +6,15 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
-use App\Services\Game\HomePlanetService;
-use App\Services\SessionService;
+use App\Services\Auth\LoginFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends BaseController
 {
-    public function __construct(
-        private HomePlanetService $homePlanetService,
-        private SessionService $sessionService,
-    ) {
+    public function __construct(private LoginFlow $login)
+    {
     }
 
     public function __invoke(LoginRequest $request): RedirectResponse
@@ -31,22 +28,7 @@ class LoginController extends BaseController
             /** @var User $authUser */
             $authUser = Auth::getUser();
 
-            $this->homePlanetService->resetCurrentToHome($authUser);
-
-            // check suspension status
-            $ban = $authUser->ban;
-            if ($ban !== null && $ban->until->timestamp <= time()) {
-                $ban->delete();
-            }
-
-            $request->session()->regenerate();
-
-            $this->sessionService->setLoginData(
-                $authUser->id,
-                $authUser->password
-            );
-
-            return redirect('game.php?page=overview');
+            return $this->login->passwordAccepted($request, $authUser, LoginFlow::GAME);
         }
 
         return back()->withErrors([

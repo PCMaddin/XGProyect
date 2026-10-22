@@ -6,6 +6,7 @@
         <td class="c" colspan="3">{{ __('game/alliance.al_transfer_alliance') }}</td>
     </tr>
     <form action="game.php?page=alliance&mode=admin&edit=transfer" method="POST" role="form">
+        @csrf
         <tr>
             <th scope="row">{{ __('game/alliance.al_transfer_to') }}:</th>
             <th role="cell">

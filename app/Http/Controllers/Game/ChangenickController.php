@@ -79,9 +79,7 @@ class ChangenickController extends BaseController
             return ['success' => false, 'message' => $this->translation('game/preferences.pr_error_wrong_password')];
         }
 
-        $usernameLength = strlen($newUserName);
-
-        if ($usernameLength <= 3 || $usernameLength > 20) {
+        if (!$this->preferencesService->isValidNickname($newUserName)) {
             return [
                 'success' => false,
                 'message' => strtr(
