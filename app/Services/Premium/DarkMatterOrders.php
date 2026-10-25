@@ -107,10 +107,7 @@ class DarkMatterOrders
                     'status' => DarkMatterOrder::PAID,
                     'paid_at' => $now,
                     'provider_payment' => $paymentId === '' ? null : $paymentId,
-                    // for the books: where the buyer is and how much was tax
-                    'country' => preg_match('/^[A-Za-z]{2}$/', $country) === 1 ? strtoupper($country) : null,
-                    'tax' => $tax,
-                ]);
+                ] + self::bookkeeping($country, $tax));
 
             if ($marked !== 1) {
                 return false;
@@ -127,6 +124,22 @@ class DarkMatterOrders
 
             return true;
         });
+    }
+
+    /**
+     * Where the buyer is and how much was tax, for the books; only what is
+     * known. The WAX check credits orders of every universe with this code,
+     * and a universe on an older version of the code has no such columns:
+     * an empty value must not name them.
+     *
+     * @return array{country?: string, tax?: int}
+     */
+    private static function bookkeeping(string $country, ?int $tax): array
+    {
+        return array_filter(
+            ['country' => preg_match('/^[A-Za-z]{2}$/', $country) === 1 ? strtoupper($country) : null, 'tax' => $tax],
+            static fn (string | int | null $value): bool => $value !== null,
+        );
     }
 
     /**

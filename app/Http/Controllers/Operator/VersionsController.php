@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use LogicException;
 use RuntimeException;
 
@@ -63,18 +64,25 @@ class VersionsController extends BaseController
             'fetching' => $this->fetcher->inProgress(),
             'log' => $this->fetcher->log(),
             'upgrades' => $this->upgrades($available),
+            'repositories' => $this->fetcher->allowedRepositories(),
         ]);
     }
 
     public function fetch(Request $request): RedirectResponse
     {
+        // a Docker server takes its versions from the image (deploy.sh)
+        if (!$this->versions->servesFromRoot()) {
+            return back()->withErrors(['ref' => __('operator/operator.op_use_unavailable')]);
+        }
+
         $data = $request->validate([
             'ref' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9][A-Za-z0-9._\/-]*$/'],
-            'repo' => ['nullable', 'string', 'max:500', 'regex:/^(https:\/\/|git@|ssh:\/\/|\/)[^\s]+$/'],
+            'repo' => ['nullable', 'string', Rule::in($this->fetcher->allowedRepositories())],
         ]);
 
         try {
-            $this->fetcher->fetchInBackground($data['ref'] ?? null, $data['repo'] ?? null);
+            // without a choice: the first allowed one, never another
+            $this->fetcher->fetchInBackground($data['ref'] ?? null, $data['repo'] ?? ($this->fetcher->allowedRepositories()[0] ?? null));
         } catch (RuntimeException $e) {
             return back()->withInput()->withErrors(['ref' => $e->getMessage()]);
         }

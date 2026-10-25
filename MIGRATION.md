@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 2.001 PHPUnit-Tests (105 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 2.337 PHPUnit-Tests (192 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Betrieb | mehrere Universen in getrennten Datenbanken mit Lobby und Monatsstart (`xgp:instance:*`); Dunkle Materie per Stripe oder WAX, Zahlungsarten je Universum |
 | Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht); Schlüssel und Platzhalter per Test gleich, gezählte Texte über `trans_choice` mit der Pluralregel jeder Sprache |
 | Smoke-Test | Installer und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten); alle Spiel- und Admin-Seiten in allen zehn Sprachen gecrawlt, ohne echte Fehler (die drei erwarteten Meldungen stehen unter „Offen“ am Ende) |
@@ -2767,6 +2767,46 @@ Baseline-Einträge.
     Sync-Kopie mit Ausschlüssen, Warnung bei gleicher Nummer, Karte weg ohne
     Pins, Prune, Tick und Migration über Stub-artisan, fehlende Version
     schlägt laut fehl, Upgrade vorwärts/zurück/dazwischen, 503).
+
+- **Vollständiger Audit (nach der Versionsverwaltung)** ✅
+  - *Musterscan der ganzen Codebasis, ohne Befund:* Shell-Aufrufe nur im
+    Versionsholer (Argumente als Liste oder `escapeshellarg`);
+    `unserialize` nur mit `allowed_classes => false`; Raw-SQL nur mit
+    Whitelist-Spalten (`MerchantService::RESOURCES`, Tabellen aus
+    `information_schema`) oder typisierten Zahlen; keine Weiterleitung aus
+    Eingaben; keine schwachen Zufallszahlen für Geheimnisse; keine Uploads;
+    CSRF-Ausnahme nur für den Stripe-Webhook; `composer audit` sauber.
+  - *Funde in der Versionsverwaltung, behoben:*
+    - Der Router schickte mit dem Lobby-Cookie auch Lobby, Rechtstexte,
+      Installer und **den Betreiberbereich** an den Code der alten Version:
+      ältere Sicherheitsstände und die Versionsverwaltung einer alten
+      Version. Diese Pfade bleiben jetzt immer auf der laufenden.
+    - Die WAX-Prüfung schreibt mit dem neuesten Code in alle Universen;
+      `credit()` nannte immer `country` und `tax`, die ein Universum auf
+      einer älteren Version nicht hat: eine bezahlte WAX-Bestellung dort
+      wäre nie gutgeschrieben worden. Jetzt nur, wenn bekannt.
+    - Temporäre Ordner hießen nach der Prozessnummer; Container eines
+      Releases teilen das Volume und haben dieselben Nummern, zwei
+      gleichzeitige Kopien löschten einander. Jetzt Zufallsnamen.
+    - Holen im Browser nahm jedes Repository; das Holen führt den Code aus
+      (Composer-Skripte, artisan). Ein gestohlener Betreiber-Login wäre ein
+      Weg auf den Server gewesen. Jetzt nur `origin` und
+      `XGP_VERSIONS_REPOSITORIES`; die Kommandozeile nimmt weiter jedes.
+    - Holen war im Docker-Stack angeboten, wo das Image weder git noch
+      Composer hat. Jetzt nur bei Ordner-Layout.
+    - Ein Ordner, dessen Name nicht zu seiner `config/version.php` passt,
+      hätte sich über `runFor()` endlos selbst gestartet. Jetzt bricht der
+      zweite Aufruf ab (`XGP_VERSION_CALL`).
+    - `deploy.sh` migrierte die Basisdatenbank immer, auch wenn sie ein
+      übernommenes Universum auf einer älteren Version ist. Jetzt
+      `xgp:versions:migrate-base`.
+    - Aufräumen schonte den Ordner nicht, auf den `current` zeigt, wenn er
+      unter der ältesten genutzten Version lag. Jetzt bleibt er.
+    - Doku: php-fpm nach dem Umschalten neu laden (Realpath-Cache).
+  - *Tests:* Router für Lobby, Betreiber, Rechtstexte, Installer; Gutschrift
+    ohne Buchhaltungsspalten; Rekursionsschutz; `current` beim Aufräumen;
+    Basismigration mit und ohne angeheftetes Universum; Holen nur aus
+    erlaubten Repositories und nicht im Docker-Stack.
 
 ## Smoke-Test gegen eine echte Datenbank
 

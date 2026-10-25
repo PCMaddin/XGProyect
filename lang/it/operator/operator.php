@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, ramo o commit',
     'op_fetch_ref_help' => 'vuoto: il tag più recente',
     'op_fetch_repo' => 'Repository',
-    'op_fetch_repo_help' => 'vuoto: l’origin di questa copia',
+    'op_fetch_repo_help' => 'l’origin di questa copia e quelli in XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Scarica',
     'op_fetch_help' => 'Clona con git in una nuova cartella, installa le dipendenze e costruisce le cache. Gira in background, di solito qualche minuto.',
     'op_fetch_started' => 'Lo scaricamento gira in background. Ricarica la pagina per seguirlo nel registro.',

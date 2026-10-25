@@ -65,6 +65,28 @@ class VersionFetcher
     }
 
     /**
+     * The repositories the operators' area may fetch from: the origin of
+     * this checkout and those in XGP_VERSIONS_REPOSITORIES. A fetch runs
+     * the fetched code (composer scripts, artisan): a free address in the
+     * browser would make a stolen operator login a way onto the server.
+     *
+     * @return list<string>
+     */
+    public function allowedRepositories(): array
+    {
+        $configured = config('instances.versions_repositories');
+        $repositories = array_map('trim', explode(',', is_string($configured) ? $configured : ''));
+
+        try {
+            $repositories[] = $this->origin();
+        } catch (RuntimeException) {
+            // no git checkout: only the configured ones
+        }
+
+        return array_values(array_unique(array_filter($repositories, static fn (string $repository): bool => $repository !== '')));
+    }
+
+    /**
      * Whether a fetch is going on (its temporary folder is there).
      */
     public function inProgress(): bool
@@ -105,7 +127,7 @@ class VersionFetcher
         $repository = $repository ?? $this->origin();
         $ref = $ref ?? $this->newestTag($repository);
         $root = $this->versions->root();
-        $temporary = $root . '/.fetching-' . getmypid();
+        $temporary = $root . '/.fetching-' . bin2hex(random_bytes(6));
 
         if (!is_dir($root) && !mkdir($root, 0o750, true) && !is_dir($root)) {
             throw new RuntimeException('Cannot create ' . $root);
@@ -159,7 +181,7 @@ class VersionFetcher
         }
 
         $link = $this->versions->root() . '/' . self::CURRENT;
-        $temporary = $link . '.' . getmypid();
+        $temporary = $link . '.' . bin2hex(random_bytes(6));
 
         if (!symlink($directory, $temporary) || !rename($temporary, $link)) {
             if (is_link($temporary)) {

@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => '标签、分支或提交',
     'op_fetch_ref_help' => '留空：最新标签',
     'op_fetch_repo' => '仓库',
-    'op_fetch_repo_help' => '留空：此检出的 origin',
+    'op_fetch_repo_help' => '此检出的 origin 以及 XGP_VERSIONS_REPOSITORIES 中的仓库',
     'op_fetch' => '获取',
     'op_fetch_help' => '用 git 克隆到新文件夹，安装依赖并构建缓存。在后台运行，通常需要几分钟。',
     'op_fetch_started' => '获取正在后台运行。刷新页面可在日志中查看进度。',

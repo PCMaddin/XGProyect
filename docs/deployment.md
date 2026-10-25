@@ -92,9 +92,11 @@ Ablauf:
 
 1. Neues Image bauen. Die Konfiguration kommt erst beim Start aus
    `deploy/.env` und steckt nie im Image.
-2. Die neue Version in das Volume `versions` kopieren
-   (`xgp:versions:sync`), dann die Migrationen der Basisdatenbank und der
-   Universen auf der laufenden Version einspielen, während die alte Version
+2. Die Basisdatenbank migrieren (`xgp:versions:migrate-base`; ist sie
+   selbst ein Universum auf einer älteren Version, bleibt sie unberührt),
+   die neue Version in das Volume `versions` kopieren
+   (`xgp:versions:sync`), dann die Migrationen der Universen auf der
+   laufenden Version einspielen, während die alte Version
    weiterläuft. Migrationen müssen deshalb zur laufenden Version passen:
    erst hinzufügen, entfernen erst im nächsten Release. Universen auf einer
    älteren Version bleiben darauf, bis `xgp:instance:upgrade` sie bewegt

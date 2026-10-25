@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, gałąź lub commit',
     'op_fetch_ref_help' => 'puste: najnowszy tag',
     'op_fetch_repo' => 'Repozytorium',
-    'op_fetch_repo_help' => 'puste: origin tej kopii',
+    'op_fetch_repo_help' => 'origin tej kopii i te z XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Pobierz',
     'op_fetch_help' => 'Klonuje gitem do nowego folderu, instaluje zależności i buduje pamięci podręczne. Działa w tle, zwykle kilka minut.',
     'op_fetch_started' => 'Pobieranie działa w tle. Odśwież stronę, aby śledzić je w dzienniku.',

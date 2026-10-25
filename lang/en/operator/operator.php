@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, branch or commit',
     'op_fetch_ref_help' => 'empty: the newest tag',
     'op_fetch_repo' => 'Repository',
-    'op_fetch_repo_help' => 'empty: the origin of this checkout',
+    'op_fetch_repo_help' => 'the origin of this checkout and those in XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Fetch',
     'op_fetch_help' => 'Clones with git into a new folder, installs the dependencies and builds the caches. Runs in the background, usually a few minutes.',
     'op_fetch_started' => 'The fetch runs in the background. Reload the page to follow it in the log.',

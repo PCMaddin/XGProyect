@@ -100,8 +100,12 @@ class OperatorVersionsTest extends DatabaseTestCase
 
         $repository = $this->repository('4.1.0');
 
+        // laid out by folders, and only from the repositories named for it
+        $this->foldersLayout();
+        config(['instances.versions_repositories' => $repository]);
+        $this->get('/operator/versions')->assertOk()->assertSee('id="fetch"', false)->assertSee('<option value="' . $repository . '"', false);
         $this->post('/operator/versions/fetch', ['ref' => 'bad ref', 'repo' => $repository])->assertSessionHasErrors('ref');
-        $this->post('/operator/versions/fetch', ['ref' => 'v4.1.0', 'repo' => 'ftp://nowhere'])->assertSessionHasErrors('repo');
+        $this->post('/operator/versions/fetch', ['ref' => 'v4.1.0', 'repo' => 'https://evil.example/game.git'])->assertSessionHasErrors('repo');
 
         $this->post('/operator/versions/fetch', ['ref' => 'v4.1.0', 'repo' => $repository])
             ->assertRedirect('/operator/versions')
@@ -123,13 +127,17 @@ class OperatorVersionsTest extends DatabaseTestCase
         $this->assertFalse(is_link($this->folder . '/versions/current'));
     }
 
+    public function testADockerServerFetchesNoVersionInTheBrowser(): void
+    {
+        // its versions come with the image (deploy.sh)
+        $this->get('/operator/versions')->assertOk()->assertDontSee('id="fetch"', false);
+        $this->post('/operator/versions/fetch', ['ref' => 'v4.1.0'])->assertSessionHasErrors('ref');
+        $this->assertSame([], glob($this->folder . '/versions/.fetching-*') ?: []);
+    }
+
     public function testAVersionServesWhenTheServerIsLaidOutByFolders(): void
     {
-        // the running code is a folder under the versions path
-        $this->stubVersion('4.0.0');
-        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/versions/4.0.0', $this->folder . '/map.php');
-        $this->app->instance(Versions::class, $versions);
-        $this->app->instance(VersionFetcher::class, new VersionFetcher($versions, $this->folder . '/versions/4.0.0', $this->folder . '/fetch.log'));
+        $this->foldersLayout();
 
         $this->get('/operator/versions')->assertOk()->assertSee('Serve</button>', false);
         $this->post('/operator/versions/use', ['version' => '3.9.0'])
@@ -187,6 +195,24 @@ class OperatorVersionsTest extends DatabaseTestCase
 
         $this->post('/operator/universes', ['slug' => 'op-new', 'name' => 'New', 'mode' => 'play2win', 'version' => '2.0.0', 'admin_name' => 'M', 'admin_email' => 'm@example.com', 'admin_password' => 'secret-password'])
             ->assertSessionHasErrors('version');
+    }
+
+    /**
+     * The running code is a folder under the versions path (a server
+     * without Docker), fetching with the real artisan of this checkout.
+     */
+    private function foldersLayout(): void
+    {
+        $this->stubVersion('4.0.0');
+        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/versions/4.0.0', $this->folder . '/map.php');
+        $this->app->instance(Versions::class, $versions);
+        $this->app->instance(VersionFetcher::class, new class ($versions, $this->folder . '/versions/4.0.0', $this->folder . '/fetch.log') extends VersionFetcher {
+            public function fetchInBackground(?string $ref, ?string $repository): string
+            {
+                // the fetch itself runs the real artisan of this checkout
+                return (new VersionFetcher(app(Versions::class), base_path(), $this->logFile()))->fetchInBackground($ref, $repository);
+            }
+        });
     }
 
     private function register(string $slug, string $version): void

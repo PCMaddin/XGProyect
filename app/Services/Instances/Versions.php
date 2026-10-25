@@ -189,7 +189,13 @@ class Versions
             throw new RuntimeException('The version ' . $version . ' is not on the server (' . $this->root() . '); xgp:versions lists the ones there.');
         }
 
-        $process = new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, $environment === [] ? null : $environment, null, self::TIMEOUT);
+        // a version that hands the work back (its folder named after another
+        // version than its config/version.php) would start itself without end
+        if (getenv('XGP_VERSION_CALL') === $version) {
+            throw new RuntimeException('The folder of version ' . $version . ' holds the code of version ' . $this->current() . '; rename it after config/version.php.');
+        }
+
+        $process = new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, ['XGP_VERSION_CALL' => $version] + $environment, null, self::TIMEOUT);
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -273,9 +279,11 @@ class Versions
     {
         $oldest = $this->oldestInUse();
         $deleted = [];
+        // the folder the web server serves (xgp:versions:use) stays too
+        $served = realpath($this->root() . '/current');
 
         foreach ($this->available() as $version) {
-            if ($version === $this->current() || version_compare($version, $oldest, '>=')) {
+            if ($version === $this->current() || version_compare($version, $oldest, '>=') || realpath($this->root() . '/' . $version) === $served) {
                 continue;
             }
 
@@ -305,7 +313,7 @@ class Versions
         }
 
         $map = ['current' => $this->current(), 'root' => $this->root(), 'universes' => $pinned];
-        $temporary = $file . '.' . getmypid() . '.tmp';
+        $temporary = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
         file_put_contents($temporary, "<?php\n\n// written by xgp:versions:sync and xgp:instance:upgrade: the universes on other versions\nreturn " . var_export($map, true) . ";\n");
         rename($temporary, $file);
     }
@@ -332,7 +340,8 @@ class Versions
      */
     private function copy(string $from, string $to, string $release): void
     {
-        $temporary = $this->root() . '/.copying-' . basename($to) . '-' . getmypid();
+        // the containers of a release share the volume and their pids alike
+        $temporary = $this->root() . '/.copying-' . basename($to) . '-' . bin2hex(random_bytes(6));
         $this->deleteDirectory($temporary);
 
         if (!is_dir($this->root()) && !mkdir($this->root(), 0o750, true) && !is_dir($this->root())) {

@@ -89,6 +89,17 @@ class VersionRouterTest extends TestCase
         $this->assertNull($this->route(['REQUEST_URI' => '/'], [], ['xgp_universe' => 'bad']));
     }
 
+    public function testTheLobbyTheOperatorsAndTheLegalPagesStayOnTheRunningVersion(): void
+    {
+        // before, the lobby cookie took the operators' area to an old version's code
+        foreach (['/universes', '/universes/old', '/operator', '/operator/versions', '/legal/imprint?lang=de', '/install/', '/up'] as $uri) {
+            $this->assertNull($this->route(['REQUEST_URI' => $uri, 'REQUEST_METHOD' => 'POST'], [], ['xgp_universe' => 'old']), $uri);
+        }
+
+        // a game page whose name only starts alike still goes
+        $this->assertSame($this->folder . '/3.9.0/public/index.php', $this->route(['REQUEST_URI' => '/universes-guide'], [], ['xgp_universe' => 'old']));
+    }
+
     public function testADispatchedRequestIsNeverDispatchedAgain(): void
     {
         $this->assertNull($this->route(['REQUEST_URI' => '/', 'XGP_VERSION_DISPATCHED' => '/srv/versions/3.9.0'], [], ['xgp_universe' => 'old']));

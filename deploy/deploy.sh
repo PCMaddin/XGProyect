@@ -93,8 +93,9 @@ compose exec -T db sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "GRANT AL
 
 say "Install (only the first time) and migrations"
 compose run --rm --no-deps app php artisan xgp:install "$@"
-compose run --rm --no-deps -T app php artisan migrate --path=database/migrations/400 --force
-# the new version into the versions volume: universes stay on theirs
+# the base database (unless it is a universe pinned to an older version),
+# then the new version into the versions volume: universes stay on theirs
+compose run --rm --no-deps -T app php artisan xgp:versions:migrate-base
 compose run --rm --no-deps -T app php artisan xgp:versions:sync
 
 if ! output="$(compose run --rm --no-deps -T app php artisan xgp:instance:migrate 2>&1)"; then

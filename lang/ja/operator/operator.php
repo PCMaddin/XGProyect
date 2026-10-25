@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'タグ、ブランチ、コミット',
     'op_fetch_ref_help' => '空欄: 最新のタグ',
     'op_fetch_repo' => 'リポジトリ',
-    'op_fetch_repo_help' => '空欄: このチェックアウトの origin',
+    'op_fetch_repo_help' => 'このチェックアウトの origin と XGP_VERSIONS_REPOSITORIES のもの',
     'op_fetch' => '取得',
     'op_fetch_help' => 'git で新しいフォルダーにクローンし、依存関係をインストールしてキャッシュを作ります。バックグラウンドで数分かかります。',
     'op_fetch_started' => '取得はバックグラウンドで実行中です。ページを再読み込みするとログで進捗を確認できます。',

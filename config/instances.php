@@ -47,4 +47,9 @@ return [
     // an older version is served and ticked by that directory. Empty:
     // storage/versions. The Docker stack mounts a volume at /srv/versions.
     'versions_path' => (string) env('XGP_VERSIONS_PATH', ''),
+
+    // repositories the operators' area may fetch a version from, besides
+    // the origin of this checkout (comma separated). The command line
+    // (xgp:versions:fetch --repo=) takes any.
+    'versions_repositories' => (string) env('XGP_VERSIONS_REPOSITORIES', ''),
 ];

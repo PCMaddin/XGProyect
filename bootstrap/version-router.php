@@ -34,10 +34,16 @@ return static function (array $server, array $get, array $cookie, string $mapFil
 
     $slug = $get['universe'] ?? $cookie['xgp_universe'] ?? null;
     $path = parse_url($server['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    $path = is_string($path) ? '/' . trim($path, '/') : '/';
 
     if ($path === '/stripe/webhook' && ($server['REQUEST_METHOD'] ?? '') === 'POST') {
         $event = json_decode((string) file_get_contents('php://input'), true);
         $slug = is_array($event) ? ($event['data']['object']['metadata']['universe'] ?? null) : null;
+    } elseif (preg_match('#^/(universes|legal|operator|install|stripe|up)(/|$)#', $path) === 1) {
+        // the lobby, the legal pages, the operators' area and the installer
+        // belong to no universe: the running version serves them, whatever
+        // universe the cookie names
+        return null;
     }
 
     if (!is_string($slug) || $slug === '') {

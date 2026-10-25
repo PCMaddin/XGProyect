@@ -492,7 +492,8 @@ Wie es läuft:
   (`storage/framework/versions.php`). Im Docker-Stack läuft es bei jedem
   Containerstart und in `deploy.sh`; sonst nach jedem Update von Hand.
 - **Seiten:** `public/index.php` liest vor dem Framework die Karte und das
-  Universum aus der Anfrage (Lobby-Cookie, `?universe=` aus Mail-Links,
+  Universum aus der Anfrage (Lobby, Rechtstexte, Betreiberbereich und
+  Installer bleiben immer auf der laufenden Version) (Lobby-Cookie, `?universe=` aus Mail-Links,
   bei Stripes Webhook das Universum in den Metadaten) und übergibt eine
   Anfrage für ein Universum auf einer anderen Version an deren
   `public/index.php`. Das läuft im selben php-fpm, mit dem Code und `vendor/`
@@ -547,13 +548,21 @@ Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
   `xgp:instance:upgrade`, wenn es soweit ist.
 - Zurück zur vorigen Version: `xgp:versions:use <alte>`. Die Datenbanken
   bleiben, wie sie sind (Migrationen laufen nicht rückwärts).
+- **php-fpm nach dem Umschalten neu laden** (`systemctl reload
+  php8.4-fpm`): PHP merkt sich aufgelöste Pfade bis zu zwei Minuten
+  (`realpath_cache_ttl`) und bedient so lange über den alten Link weiter.
+  Wer das nicht will, lässt den Webserver den Link selbst auflösen (nginx:
+  `$realpath_root` statt `$document_root`).
 
 **Im Betreiberbereich** (`/operator` → *Versionen*) geht dasselbe im
 Browser: die Versionen auf dem Server mit den Universen darauf (eine
 fehlende ist markiert), *Neue Version holen* (Tag, Branch oder Commit;
-läuft im Hintergrund, das Protokoll steht auf der Seite), *Bedienen lassen*
-(nur auf einem Server mit dem Ordner `current`; im Docker-Stack bleibt es
-bei `deploy.sh`), *Ungenutzte Versionen löschen* und *Universum heben* mit
+läuft im Hintergrund, das Protokoll steht auf der Seite; nur aus dem
+`origin` dieses Checkouts und den Repositories in
+`XGP_VERSIONS_REPOSITORIES`, weil das Holen den geholten Code ausführt),
+*Bedienen lassen* (Holen und Umschalten nur auf einem Server mit dem Ordner
+`current`; im Docker-Stack kommen Versionen mit dem Image über
+`deploy.sh`), *Ungenutzte Versionen löschen* und *Universum heben* mit
 Auswahl der Zielversion. Beim Anlegen eines Universums wählst du die
 Version; eine ältere legt es mit ihrem eigenen Code an (ihr
 `xgp:instance:create`, das Passwort geht über die Umgebung, nie über die

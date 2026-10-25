@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, branche ou commit',
     'op_fetch_ref_help' => 'vide : le tag le plus récent',
     'op_fetch_repo' => 'Dépôt',
-    'op_fetch_repo_help' => 'vide : l’origin de cette copie',
+    'op_fetch_repo_help' => 'l’origin de cette copie et ceux de XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Récupérer',
     'op_fetch_help' => 'Clone avec git dans un nouveau dossier, installe les dépendances et construit les caches. S’exécute en arrière-plan, quelques minutes en général.',
     'op_fetch_started' => 'La récupération s’exécute en arrière-plan. Rechargez la page pour la suivre dans le journal.',

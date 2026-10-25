@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, rama o commit',
     'op_fetch_ref_help' => 'vacío: el tag más reciente',
     'op_fetch_repo' => 'Repositorio',
-    'op_fetch_repo_help' => 'vacío: el origin de esta copia',
+    'op_fetch_repo_help' => 'el origin de esta copia y los de XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Obtener',
     'op_fetch_help' => 'Clona con git en una carpeta nueva, instala las dependencias y construye las cachés. Se ejecuta en segundo plano, normalmente unos minutos.',
     'op_fetch_started' => 'La obtención se ejecuta en segundo plano. Recarga la página para seguirla en el registro.',

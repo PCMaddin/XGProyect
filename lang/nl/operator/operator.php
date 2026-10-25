@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, branch of commit',
     'op_fetch_ref_help' => 'leeg: de nieuwste tag',
     'op_fetch_repo' => 'Repository',
-    'op_fetch_repo_help' => 'leeg: de origin van deze checkout',
+    'op_fetch_repo_help' => 'de origin van deze checkout en die uit XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Ophalen',
     'op_fetch_help' => 'Kloont met git in een nieuwe map, installeert de afhankelijkheden en bouwt de caches. Draait op de achtergrond, meestal enkele minuten.',
     'op_fetch_started' => 'Het ophalen draait op de achtergrond. Herlaad de pagina om het in het logboek te volgen.',

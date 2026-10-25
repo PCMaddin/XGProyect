@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, branch ou commit',
     'op_fetch_ref_help' => 'vazio: a tag mais recente',
     'op_fetch_repo' => 'Repositório',
-    'op_fetch_repo_help' => 'vazio: o origin deste checkout',
+    'op_fetch_repo_help' => 'o origin deste checkout e os de XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Buscar',
     'op_fetch_help' => 'Clona com git em uma pasta nova, instala as dependências e monta os caches. Roda em segundo plano, normalmente alguns minutos.',
     'op_fetch_started' => 'A busca roda em segundo plano. Recarregue a página para acompanhá-la no registro.',

@@ -49,6 +49,7 @@
     </form>
 </div>
 
+@if ($switchable)
 <h2>{{ __('operator/operator.op_fetch_title') }}</h2>
 <form method="post" action="{{ route('operator.versions.fetch') }}" class="panel" id="fetch">
     @csrf
@@ -58,7 +59,11 @@
     <label for="ref">{{ __('operator/operator.op_fetch_ref') }} <span class="help">{{ __('operator/operator.op_fetch_ref_help') }}</span></label>
     <input type="text" id="ref" name="ref" value="{{ old('ref') }}" maxlength="200">
     <label for="repo">{{ __('operator/operator.op_fetch_repo') }} <span class="help">{{ __('operator/operator.op_fetch_repo_help') }}</span></label>
-    <input type="text" id="repo" name="repo" value="{{ old('repo') }}" maxlength="500">
+    <select id="repo" name="repo">
+        @foreach ($repositories as $repository)
+            <option value="{{ $repository }}" @selected(old('repo') === $repository)>{{ $repository }}</option>
+        @endforeach
+    </select>
     <div class="actions">
         <button type="submit" @disabled($fetching)>{{ __('operator/operator.op_fetch') }}</button>
         <span class="help">{{ __('operator/operator.op_fetch_help') }}</span>
@@ -68,6 +73,7 @@
         <pre id="fetch-log">{{ $log }}</pre>
     @endif
 </form>
+@endif
 
 @if ($upgrades !== [])
 <h2>{{ __('operator/operator.op_upgrade') }}</h2>

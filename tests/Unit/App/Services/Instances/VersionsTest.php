@@ -183,6 +183,49 @@ class VersionsTest extends DatabaseTestCase
         $this->assertSame(['4.0.0'], $this->versions->available());
     }
 
+    public function testTheFolderTheWebServerServesIsNeverPruned(): void
+    {
+        $this->register('old', '3.9.0');
+        symlink($this->folder . '/versions/3.8.0', $this->folder . '/versions/current');
+
+        $this->assertSame([], $this->versions->prune());
+        $this->assertDirectoryExists($this->folder . '/versions/3.8.0');
+        // the link is no version of its own
+        $this->assertSame(['3.8.0', '3.9.0', '4.0.0'], $this->versions->available());
+    }
+
+    public function testAVersionThatHandsTheWorkBackDoesNotStartItselfWithoutEnd(): void
+    {
+        putenv('XGP_VERSION_CALL=3.9.0');
+
+        try {
+            $this->versions->artisan('3.9.0', 'xgp:tick', ['old']);
+            $this->fail('no guard');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('rename it after config/version.php', $e->getMessage());
+        } finally {
+            putenv('XGP_VERSION_CALL');
+        }
+
+        // the call names itself for the version it starts
+        $this->assertStringContainsString('stub 3.9.0: xgp:tick old', $this->versions->artisan('3.9.0', 'xgp:tick', ['old']));
+    }
+
+    public function testTheBaseDatabaseIsMigratedUnlessAUniverseOnAnotherVersionPlaysInIt(): void
+    {
+        // as after the installer: the update migrations count as run
+        Artisan::call('xgp:mark-installed-updates', ['--all' => true]);
+        $this->command('xgp:versions:migrate-base')->doesntExpectOutputToContain('not touched')->assertSuccessful();
+
+        // the installed game adopted as a universe, pinned to an older version
+        $default = config('database.default');
+        $base = config('database.connections.' . (is_string($default) ? $default : '') . '.database');
+        $this->assertIsString($base);
+        $this->registry->register(new Instance('home', 'Home', $base, Instance::PLAY2WIN, Instance::OPEN, time(), null, null, '', '3.9.0'));
+
+        $this->command('xgp:versions:migrate-base')->expectsOutputToContain('plays on version 3.9.0: not touched')->assertSuccessful();
+    }
+
     public function testAUniverseOnAnotherVersionIsTickedByThatVersion(): void
     {
         $this->register('old', '3.9.0');

@@ -203,7 +203,7 @@ return [
     'op_fetch_ref' => 'Tag, Branch oder Commit',
     'op_fetch_ref_help' => 'leer: das neueste Tag',
     'op_fetch_repo' => 'Repository',
-    'op_fetch_repo_help' => 'leer: der origin dieses Checkouts',
+    'op_fetch_repo_help' => 'der origin dieses Checkouts und die aus XGP_VERSIONS_REPOSITORIES',
     'op_fetch' => 'Holen',
     'op_fetch_help' => 'Klont per Git in einen neuen Ordner, installiert die Abhängigkeiten und baut die Caches. Läuft im Hintergrund, meist einige Minuten.',
     'op_fetch_started' => 'Das Holen läuft im Hintergrund. Die Seite neu laden zeigt den Fortschritt im Protokoll.',

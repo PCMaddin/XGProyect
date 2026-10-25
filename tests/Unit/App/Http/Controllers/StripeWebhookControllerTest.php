@@ -143,6 +143,19 @@ class StripeWebhookControllerTest extends DatabaseTestCase
         $this->assertSame([null, null], [$paid->country, $paid->tax]);
     }
 
+    public function testAnOrderOfAUniverseOnAnOlderVersionIsCreditedWithoutTheBookColumns(): void
+    {
+        // the WAX check credits every universe with the newest code; one on
+        // an older version has no country and tax yet
+        \Illuminate\Support\Facades\Schema::table('dark_matter_orders', static function ($table): void {
+            $table->dropColumn(['country', 'tax']);
+        });
+        $order = $this->order();
+
+        $this->assertTrue(app(DarkMatterOrders::class)->credit($order->id, 'cs_test_1', 199, 'eur', 'tx_1', time()));
+        $this->assertSame(10_500, $this->darkMatter());
+    }
+
     public function testTheConfirmationLinksTheImprintOnTheConfiguredUrl(): void
     {
         $this->seed(OptionsTableSeeder::class);
