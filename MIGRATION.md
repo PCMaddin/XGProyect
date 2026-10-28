@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 2.337 PHPUnit-Tests (192 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 2.342 PHPUnit-Tests (192 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Betrieb | mehrere Universen in getrennten Datenbanken mit Lobby und Monatsstart (`xgp:instance:*`); Dunkle Materie per Stripe oder WAX, Zahlungsarten je Universum |
 | Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht); Schlüssel und Platzhalter per Test gleich, gezählte Texte über `trans_choice` mit der Pluralregel jeder Sprache |
 | Smoke-Test | Installer und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten); alle Spiel- und Admin-Seiten in allen zehn Sprachen gecrawlt, ohne echte Fehler (die drei erwarteten Meldungen stehen unter „Offen“ am Ende) |
@@ -2802,7 +2802,13 @@ Baseline-Einträge.
       `xgp:versions:migrate-base`.
     - Aufräumen schonte den Ordner nicht, auf den `current` zeigt, wenn er
       unter der ältesten genutzten Version lag. Jetzt bleibt er.
-    - Doku: php-fpm nach dem Umschalten neu laden (Realpath-Cache).
+    - Nach dem Umschalten konnte PHP bis zu zwei Minuten die alte Version
+      bedienen (Realpath-Cache). Statt eines Neustarts von php-fpm, der
+      Root-Rechte bräuchte, liest `public/index.php` den Link `current`
+      frisch und übergibt an die Version, auf die er zeigt
+      (`bootstrap/version-current.php`, nie für eine absichtlich an eine
+      ältere Version geschickte Anfrage, nie zweimal, ohne Link nichts).
+      Test mit dem echten Front-Controller einer „alten“ Version.
   - *Tests:* Router für Lobby, Betreiber, Rechtstexte, Installer; Gutschrift
     ohne Buchhaltungsspalten; Rekursionsschutz; `current` beim Aufräumen;
     Basismigration mit und ohne angeheftetes Universum; Holen nur aus

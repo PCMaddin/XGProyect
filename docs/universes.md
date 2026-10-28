@@ -548,11 +548,13 @@ Versionsverzeichnis, und der Webserver zeigt auf den Ordner `current`:
   `xgp:instance:upgrade`, wenn es soweit ist.
 - Zurück zur vorigen Version: `xgp:versions:use <alte>`. Die Datenbanken
   bleiben, wie sie sind (Migrationen laufen nicht rückwärts).
-- **php-fpm nach dem Umschalten neu laden** (`systemctl reload
-  php8.4-fpm`): PHP merkt sich aufgelöste Pfade bis zu zwei Minuten
-  (`realpath_cache_ttl`) und bedient so lange über den alten Link weiter.
-  Wer das nicht will, lässt den Webserver den Link selbst auflösen (nginx:
-  `$realpath_root` statt `$document_root`).
+- **Kein Neustart von php-fpm nötig.** PHP merkt sich aufgelöste Pfade
+  bis zu zwei Minuten (`realpath_cache_ttl`), eine Anfrage kann also kurz
+  nach dem Umschalten noch im alten Ordner landen. Dessen `public/index.php`
+  liest den Link `current` aber bei jeder Anfrage frisch und übergibt an
+  die Version, auf die er zeigt (`bootstrap/version-current.php`). Das gilt
+  für jede Version ab diesem Stand; eine ältere ohne diese Prüfung braucht
+  nach dem Umschalten weg von ihr einmal `systemctl reload php8.4-fpm`.
 
 **Im Betreiberbereich** (`/operator` → *Versionen*) geht dasselbe im
 Browser: die Versionen auf dem Server mit den Universen darauf (eine

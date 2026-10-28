@@ -5,6 +5,27 @@ use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
+| The Version The Folder "current" Names
+|--------------------------------------------------------------------------
+|
+| Right after xgp:versions:use PHP may still resolve the web root to the
+| old folder; the link is read fresh and the request handed to the version
+| it names (see bootstrap/version-current.php). No php-fpm reload needed.
+|
+*/
+
+$currentIndex = (require __DIR__.'/../bootstrap/version-current.php')(__DIR__, $_SERVER);
+
+if ($currentIndex !== null) {
+    $_SERVER['XGP_CURRENT_FOLLOWED'] = dirname($currentIndex, 2);
+    chdir(dirname($currentIndex, 2));
+    require $currentIndex;
+
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
 | A Universe On Another Version
 |--------------------------------------------------------------------------
 |
