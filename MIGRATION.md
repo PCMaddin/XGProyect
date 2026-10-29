@@ -2814,6 +2814,20 @@ Baseline-Einträge.
     Basismigration mit und ohne angeheftetes Universum; Holen nur aus
     erlaubten Repositories und nicht im Docker-Stack.
 
+- **Letzter Audit vor dem Pull Request** ✅
+  - `composer audit` meldete seit dem 28.10. CVE-2026-45070 in
+    `symfony/mime` (Header-Injection in E-Mails über Parameternamen,
+    mittel). Das Spiel verschickt Mails mit Spielernamen im Empfänger;
+    `symfony/mime` auf 7.4.22 (mit `symfony/polyfill-mbstring` 1.43.3).
+  - Geprüft und in Ordnung: die frische Prüfung des Links `current`
+    (nur Dateisystem, keine Eingabe; nie für absichtlich weitergereichte
+    Anfragen); Musterscan (Shell nur im Versionsholer mit
+    `escapeshellarg`, `unserialize` ohne Klassen, kein neues Raw-SQL);
+    keine Debug-Ausgaben; `composer validate`.
+  - Läufe: php-cs-fixer, PHPStan Level 9, PHPMD, 2.342 Tests (SQLite),
+    192 Tests gegen MariaDB, Browser-Crawl 124 Seiten je Sprache (en, de)
+    ohne Fehler und ohne eingeschleustes Skript.
+
 ## Smoke-Test gegen eine echte Datenbank
 
 Bis hierhin war alles nur mit Unit-Tests auf SQLite und statischer Analyse
