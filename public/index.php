@@ -36,7 +36,7 @@ if ($currentIndex !== null) {
 |
 */
 
-$versionIndex = (require __DIR__.'/../bootstrap/version-router.php')($_SERVER, $_GET, $_COOKIE, __DIR__.'/../storage/framework/versions.php');
+$versionIndex = (require __DIR__.'/../bootstrap/version-router.php')($_SERVER, $_GET, $_COOKIE, __DIR__.'/../storage/framework/versions.json');
 
 if ($versionIndex !== null) {
     $_SERVER['XGP_VERSION_DISPATCHED'] = dirname($versionIndex, 2);

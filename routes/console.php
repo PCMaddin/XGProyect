@@ -41,9 +41,12 @@ Schedule::command('xgp:instance:close-ended')
 
 // the game tick of every universe: fleets, statistics, cleanup, bots; page
 // views leave the heavy part to it while it runs
+// each universe ticks in a process of its own and is locked while it does:
+// a universe still busy from the minute before holds up no other, so no
+// overlap guard here, and in the background so the other commands go on
 Schedule::command('xgp:tick')
     ->everyMinute()
-    ->withoutOverlapping(10);
+    ->runInBackground();
 
 // every database to the other server, see config/offsite.php
 Schedule::command('xgp:backup:run')

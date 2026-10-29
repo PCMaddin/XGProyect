@@ -227,4 +227,8 @@ return [
     'op_action_version_fetch' => '已开始获取版本',
     'op_action_version_used' => '已切换版本',
     'op_action_versions_pruned' => '已删除版本',
+    'op_opcache' => '此网页服务器的 Opcache',
+    'op_opcache_off' => '此处未启用（仅 php-fpm 显示）。',
+    'op_opcache_use' => '已用 :used / :total MB，:scripts 个文件，因内存不足清空 :restarts 次。',
+    'op_opcache_full' => '太小：请在 deploy/.env 中调大 PHP_OPCACHE_MB',
 ];

@@ -12,7 +12,7 @@
 | Game-Controller | alle 38 Spielseiten nativ in `app/`, vor jeder Seite läuft `GameBootstrap` |
 | Bibliotheken | alle in `app/` (Missions + BattleEngine unter `App\Libraries\…`) |
 | Analyse-Schuld | **0 PHPStan- (Level 9) + 0 PHPMD-Einträge**, ausgehend von 1.337 / 682 |
-| Tests | 2.342 PHPUnit-Tests (192 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
+| Tests | 2.348 PHPUnit-Tests (192 davon gegen MariaDB, ohne Testdatenbank übersprungen), dazu PHPStan, PHPMD (roh und Gate), php-cs-fixer und `composer audit` über das ganze Repo |
 | Betrieb | mehrere Universen in getrennten Datenbanken mit Lobby und Monatsstart (`xgp:instance:*`); Dunkle Materie per Stripe oder WAX, Zahlungsarten je Universum |
 | Sprachen | Englisch, Spanisch, Deutsch, Französisch, Portugiesisch (Brasilien), Niederländisch, Italienisch, Polnisch, Japanisch, Chinesisch (vereinfacht); Schlüssel und Platzhalter per Test gleich, gezählte Texte über `trans_choice` mit der Pluralregel jeder Sprache |
 | Smoke-Test | Installer und die wichtigsten Spielabläufe gegen MariaDB im Browser durchgespielt (siehe unten); alle Spiel- und Admin-Seiten in allen zehn Sprachen gecrawlt, ohne echte Fehler (die drei erwarteten Meldungen stehen unter „Offen“ am Ende) |
@@ -2827,6 +2827,51 @@ Baseline-Einträge.
   - Läufe: php-cs-fixer, PHPStan Level 9, PHPMD, 2.342 Tests (SQLite),
     192 Tests gegen MariaDB, Browser-Crawl 124 Seiten je Sprache (en, de)
     ohne Fehler und ohne eingeschleustes Skript.
+
+- **Skalierung mit vielen Universen und Versionen, PHP 8.5** ✅
+  - *Fehler: Router-Karte im Opcache.* Der Docker-Stack prüft Dateien nie
+    auf Änderungen (`opcache.validate_timestamps = 0`); die Karte war eine
+    PHP-Datei und blieb nach dem Neuschreiben im Opcache. Ein gehobenes oder
+    auf einer älteren Version angelegtes Universum antwortete bis zum
+    nächsten Deploy mit 503. Jetzt `storage/framework/versions.json`, bei
+    jeder Anfrage als Daten gelesen. Test mit
+    `opcache.validate_timestamps=0` in einem eigenen PHP-Prozess.
+  - *Tick parallel.* `xgp:tick` lief alle Universen nacheinander ab, mit
+    `withoutOverlapping`: Ein Universum mit langer Statistik (bei 1 Mio.
+    Spielern zwei Minuten) ließ die Minuten aller Universen ausfallen.
+    Jetzt je Universum ein eigener Prozess mit dem Code seiner Version
+    (`ProcessPool`, höchstens `XGP_TICK_PARALLEL`, Standard 4), eine Sperre
+    je Universum statt der Sperre über alles, im Scheduler
+    `runInBackground()`. Gemessen mit einem vollen Universum (20.000
+    Spieler) und drei kleinen (je 50 Bots), Statistik überall fällig: rund
+    2,6 s nacheinander wie parallel, weil das volle Universum allein den
+    Großteil braucht. Der Gewinn kommt erst, wenn ein Universum länger als
+    eine Minute braucht oder mehrere groß sind; der Test mit drei je eine
+    Sekunde langen Universen zeigt unter 2,5 s gegen über 3 s.
+  - *Opcache-Größe einstellbar.* `PHP_OPCACHE_MB` und `PHP_OPCACHE_FILES`
+    (`deploy/php/php.ini`, Vorgabe im Dockerfile 256 MB und 20.000
+    Dateien); Belegung, Dateien und Neustarts wegen Speichermangel unter
+    /operator → *Versionen*. Gemessen nach dem Lasttest: 67 MB (8.4) und
+    69 MB (8.5) bei gut 1.000 Dateien je Version.
+  - *PHP-Mindestversion.* `composer.json`, Installer und README nannten
+    8.2, `composer.lock` verlangt 8.4.1 (Symfony 8). Auf PHP 8.3 (Ubuntu
+    24.04) scheiterte `composer install` und damit auch
+    `xgp:versions:fetch`. Jetzt überall 8.4.1; Docker und CI hatten schon
+    8.4.
+  - *PHP 8.5.* Volle Suite unter 8.5.12: 2.348 Tests und 192 gegen MariaDB
+    grün. Eine Veraltung behoben: `PDO::MYSQL_ATTR_SSL_CA` →
+    `Pdo\Mysql::ATTR_SSL_CA` (gleicher Wert, seit 8.4 vorhanden).
+    Lasttest gegen dasselbe Spiel hinter Caddy, php-fpm mit der `php.ini`
+    des Docker-Stacks (Opcache, JIT), 20.000 Spieler, 3.000 Seiten je
+    Lauf bei 16 gleichzeitig, drei Runden abwechselnd auf 4 CPUs:
+
+    | | Seiten/s | Median | 95 % |
+    |---|---|---|---|
+    | PHP 8.4.27 | 55,9 / 57,1 / 59,6 | 284 / 276 / 266 ms | 363 / 361 / 342 ms |
+    | PHP 8.5.12 | 58,6 / 59,5 / 60,0 | 269 / 267 / 261 ms | 355 / 343 / 340 ms |
+
+    Im Mittel gut 3 % mehr Seiten je Sekunde, in jeder Runde vorn, alle
+    Antworten 200. Der Docker-Stack bleibt vorerst auf 8.4.
 
 ## Smoke-Test gegen eine echte Datenbank
 

@@ -42,6 +42,17 @@
             @endforeach
         </tbody>
     </table>
+    <p class="help" id="opcache">
+        <strong>{{ __('operator/operator.op_opcache') }}:</strong>
+        @if ($opcache === null)
+            {{ __('operator/operator.op_opcache_off') }}
+        @else
+            {{ __('operator/operator.op_opcache_use', ['used' => $opcache['used'], 'total' => $opcache['total'], 'scripts' => $opcache['scripts'], 'restarts' => $opcache['restarts']]) }}
+            @if ($opcache['full'] || $opcache['restarts'] > 0)
+                <span class="badge warn">{{ __('operator/operator.op_opcache_full') }}</span>
+            @endif
+        @endif
+    </p>
     <form method="post" action="{{ route('operator.versions.prune') }}" class="actions">
         @csrf
         <button type="submit" class="secondary">{{ __('operator/operator.op_prune') }}</button>

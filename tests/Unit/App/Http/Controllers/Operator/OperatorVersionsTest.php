@@ -58,7 +58,7 @@ class OperatorVersionsTest extends DatabaseTestCase
         $this->stubVersion('3.8.0');
 
         $this->registry = app(InstanceRegistry::class);
-        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.php');
+        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.json');
         $this->app->instance(Versions::class, $versions);
         $this->app->instance(VersionFetcher::class, new VersionFetcher($versions, base_path(), $this->folder . '/fetch.log'));
 
@@ -85,6 +85,8 @@ class OperatorVersionsTest extends DatabaseTestCase
 
         $response->assertSee('3.9.0')->assertSee('3.8.0')->assertSee('4.0.0')->assertSee('running')->assertSee('missing')->assertSee('3.7.0');
         $response->assertSee('old')->assertSee('gone')->assertSee('fresh');
+        // the opcache only shows in php-fpm; here it is off
+        $response->assertSee('id="opcache"', false)->assertSee(__('operator/operator.op_opcache_off'));
         // the universes that could move, with the versions above theirs
         $response->assertSee('id="upgrade-old"', false)->assertSee('id="upgrade-gone"', false)->assertDontSee('id="upgrade-fresh"', false);
         // not laid out for switching by the folder "current": no such button
@@ -204,7 +206,7 @@ class OperatorVersionsTest extends DatabaseTestCase
     private function foldersLayout(): void
     {
         $this->stubVersion('4.0.0');
-        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/versions/4.0.0', $this->folder . '/map.php');
+        $versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/versions/4.0.0', $this->folder . '/map.json');
         $this->app->instance(Versions::class, $versions);
         $this->app->instance(VersionFetcher::class, new class ($versions, $this->folder . '/versions/4.0.0', $this->folder . '/fetch.log') extends VersionFetcher {
             public function fetchInBackground(?string $ref, ?string $repository): string

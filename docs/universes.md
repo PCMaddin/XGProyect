@@ -28,6 +28,9 @@ Spiel. Alles hier ist also optional.
 
 ## Voraussetzungen
 
+- PHP 8.4.1 oder neuer, auch 8.5. Die Abhängigkeiten in `composer.lock`
+  verlangen 8.4.1; Ubuntu 24.04 bringt nur 8.3 mit. Der Docker-Stack hat
+  das passende PHP schon.
 - MySQL oder MariaDB. Mit SQLite gibt es keine Universen.
 - Der Datenbank-Benutzer des Spiels darf Datenbanken anlegen, mindestens
   nach dem Muster der Universen, zum Beispiel:
@@ -46,6 +49,13 @@ Spiel. Alles hier ist also optional.
   ```
   * * * * * cd /pfad/zum/spiel && php artisan schedule:run >> /dev/null 2>&1
   ```
+
+  Jedes Universum tickt in einem eigenen Prozess, bis zu
+  `XGP_TICK_PARALLEL` (Standard 4) gleichzeitig. Ein Universum, dessen
+  Statistik gerade neu gebaut wird, hält so keines der anderen auf; tickt
+  es in der nächsten Minute noch, wird es übersprungen (Sperre je
+  Universum). `XGP_TICK_PARALLEL=1` tickt alle nacheinander in einem
+  Prozess.
 
 ## Erste Einrichtung
 
@@ -489,7 +499,7 @@ Wie es läuft:
   Verzeichnis (ohne `storage/`, mit `vendor/` und den kompilierten Views;
   die `.env` wird verlinkt), erneuert den Konfigurations-Cache der anderen
   Versionen und schreibt die Karte für den Router
-  (`storage/framework/versions.php`). Im Docker-Stack läuft es bei jedem
+  (`storage/framework/versions.json`). Im Docker-Stack läuft es bei jedem
   Containerstart und in `deploy.sh`; sonst nach jedem Update von Hand.
 - **Seiten:** `public/index.php` liest vor dem Framework die Karte und das
   Universum aus der Anfrage (Lobby, Rechtstexte, Betreiberbereich und
@@ -977,6 +987,23 @@ dann ein weiteres Universum. Mit 1 Mio. Spielern in einem (absichtlich
   öffentliches Netz (Mobilfunk, Uni) und nicht als Hinweis.
 - **Admin:** Listen von Spielern und Allianzen zeigen die ersten 500 nach
   Namen; das Suchfeld darüber findet die anderen nach dem Namensanfang.
+- **Viele Universen:** Der Tick läuft je Universum in einem eigenen
+  Prozess (`XGP_TICK_PARALLEL`, Standard 4) mit einer Sperre je Universum.
+  Ein Universum, dessen Statistik länger als eine Minute braucht, hält die
+  anderen nicht mehr auf; vorher ließ ein solcher Tick die nächsten Minuten
+  aller Universen ausfallen.
+- **Mehrere Versionen gleichzeitig:** Jede Version, auf der ein Universum
+  spielt, belegt eigenen Platz im Opcache von php-fpm: gemessen rund
+  70 MB und 1.000 Dateien je Version unter Last (Spielseiten), mit
+  Admin- und Betreiberseiten mehr. Die Standardgröße von 256 MB trägt also
+  etwa drei Versionen; rechne grob 100 MB je Version plus Reserve. Die
+  Belegung steht unter /operator → *Versionen*; wird er zu klein,
+  `PHP_OPCACHE_MB` (und bei sehr vielen Versionen `PHP_OPCACHE_FILES`) in
+  `deploy/.env` erhöhen.
+- **PHP 8.5:** läuft ohne Änderungen (alle Tests grün) und war im
+  Lasttest gut 3 % schneller als 8.4 (siehe `MIGRATION.md`). Der
+  Docker-Stack bleibt vorerst auf 8.4; der Wechsel ist eine Zeile im
+  `deploy/Dockerfile`.
 
 ## Häufige Fehler
 

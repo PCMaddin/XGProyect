@@ -155,7 +155,9 @@ class EmailVerificationMysqlTest extends MysqlTestCase
     public function testAFinishedPasswordResetConfirmsTheAddress(): void
     {
         $user = $this->unconfirmed('Newbie', 'newbie@example.com');
-        $token = Password::broker()->createToken($user);
+        $broker = Password::broker();
+        $this->assertInstanceOf(\Illuminate\Auth\Passwords\PasswordBroker::class, $broker);
+        $token = $broker->createToken($user);
 
         $this->post('/account/reset', ['token' => $token, 'email' => 'newbie@example.com', 'password' => 'new-secret-password', 'password_confirmation' => 'new-secret-password'])
             ->assertRedirect(route('account.recover'));

@@ -227,4 +227,8 @@ return [
     'op_action_version_fetch' => 'バージョン取得を開始',
     'op_action_version_used' => 'バージョンを切り替え',
     'op_action_versions_pruned' => 'バージョンを削除',
+    'op_opcache' => 'このウェブサーバーの Opcache',
+    'op_opcache_off' => 'ここでは無効です（php-fpm でのみ表示）。',
+    'op_opcache_use' => ':total MB 中 :used MB 使用、:scripts ファイル、メモリ不足で :restarts 回クリア。',
+    'op_opcache_full' => '不足しています: deploy/.env の PHP_OPCACHE_MB を増やしてください',
 ];

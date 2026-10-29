@@ -23,7 +23,7 @@ use Symfony\Component\Process\Process;
  * migrations (that version's artisan, run as a process).
  *
  * xgp:versions:sync copies the running code into its directory and writes
- * the map the router reads; xgp:versions --prune deletes the directories
+ * the map the router reads (storage/framework/versions.json); xgp:versions --prune deletes the directories
  * below the oldest version in use.
  *
  * @SuppressWarnings("PHPMD.StaticAccess")
@@ -183,6 +183,26 @@ class Versions
      */
     public function artisan(string $version, string $command, array $arguments = [], array $environment = []): string
     {
+        $process = $this->process($version, $command, $arguments, $environment);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new RuntimeException('Version ' . $version . ', ' . $command . ' failed: ' . trim($process->getErrorOutput() . "\n" . $process->getOutput()));
+        }
+
+        return $process->getOutput();
+    }
+
+    /**
+     * An artisan command of a version (this one included) as a process not
+     * started yet: the tick runs one per universe side by side.
+     *
+     * @param list<string>          $arguments
+     * @param array<string, string> $environment variables for the process besides this one's
+     */
+    public function process(string $version, string $command, array $arguments = [], array $environment = []): Process
+    {
+        $version = $version !== '' ? $version : $this->current();
         $directory = $this->directory($version);
 
         if ($directory === null) {
@@ -195,14 +215,7 @@ class Versions
             throw new RuntimeException('The folder of version ' . $version . ' holds the code of version ' . $this->current() . '; rename it after config/version.php.');
         }
 
-        $process = new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, ['XGP_VERSION_CALL' => $version] + $environment, null, self::TIMEOUT);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new RuntimeException('Version ' . $version . ', ' . $command . ' failed: ' . trim($process->getErrorOutput() . "\n" . $process->getOutput()));
-        }
-
-        return $process->getOutput();
+        return new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, ['XGP_VERSION_CALL' => $version] + $environment, null, self::TIMEOUT);
     }
 
     /**
@@ -301,7 +314,14 @@ class Versions
      */
     public function writeMap(): void
     {
-        $file = $this->mapFile ?? storage_path('framework/versions.php');
+        $file = $this->mapFile ?? storage_path('framework/versions.json');
+        // the map of earlier versions of this code, a PHP file that the
+        // opcache kept: gone, so nothing reads it by mistake
+        $legacy = dirname($file) . '/versions.php';
+
+        if (is_file($legacy)) {
+            unlink($legacy);
+        }
         $pinned = $this->pinned();
 
         if ($pinned === []) {
@@ -314,7 +334,10 @@ class Versions
 
         $map = ['current' => $this->current(), 'root' => $this->root(), 'universes' => $pinned];
         $temporary = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
-        file_put_contents($temporary, "<?php\n\n// written by xgp:versions:sync and xgp:instance:upgrade: the universes on other versions\nreturn " . var_export($map, true) . ";\n");
+        // JSON, not PHP: a PHP file would stay in the opcache (the Docker
+        // stack never checks files for changes) and the router would keep
+        // sending a universe to the version it left
+        file_put_contents($temporary, (string) json_encode($map, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
         rename($temporary, $file);
     }
 

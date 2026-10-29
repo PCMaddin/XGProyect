@@ -17,6 +17,7 @@ use App\Services\Instances\Versions;
 use Database\Seeders\LanguagesTableSeeder;
 use Database\Seeders\OptionsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\PendingCommand;
@@ -73,7 +74,7 @@ class VersionsTest extends DatabaseTestCase
         $this->stubVersion('3.8.0');
 
         $this->registry = app(InstanceRegistry::class);
-        $this->versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.php');
+        $this->versions = new Versions($this->registry, $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.json');
         $this->app->instance(Versions::class, $this->versions);
     }
 
@@ -153,7 +154,7 @@ class VersionsTest extends DatabaseTestCase
         $this->assertSame("abc-1\n", file_get_contents($copy . '/.release'));
         $this->assertSame(['3.8.0', '3.9.0', '4.0.0'], $this->versions->available());
 
-        $map = require $this->folder . '/map.php';
+        $map = json_decode((string) file_get_contents($this->folder . '/map.json'), true);
         $this->assertSame(['current' => '4.0.0', 'root' => $this->folder . '/versions', 'universes' => ['old' => '3.9.0']], $map);
 
         // the same version from another build: a warning, the code there stays
@@ -165,7 +166,7 @@ class VersionsTest extends DatabaseTestCase
         // nothing pinned any more: no map
         $this->registry->update('old', ['version' => '4.0.0']);
         $this->versions->writeMap();
-        $this->assertFileDoesNotExist($this->folder . '/map.php');
+        $this->assertFileDoesNotExist($this->folder . '/map.json');
     }
 
     public function testTheVersionsBelowTheOldestInUseArePruned(): void
@@ -234,6 +235,60 @@ class VersionsTest extends DatabaseTestCase
         $this->command('xgp:tick', ['slug' => 'old'])->expectsOutputToContain('old: stub 3.9.0: xgp:tick old')->assertSuccessful();
     }
 
+    public function testUniversesTickSideBySideEachWithTheCodeOfItsVersion(): void
+    {
+        // a version whose tick takes a second, like a universe busy with its statistics
+        $this->stubVersion('3.9.5', 'sleep(1); ');
+        foreach (['one', 'two', 'three'] as $slug) {
+            $this->register($slug, '3.9.5');
+        }
+
+        config(['instances.tick_parallel' => 3]);
+        $started = microtime(true);
+        $this->command('xgp:tick')
+            ->expectsOutputToContain('stub 3.9.5: xgp:tick one')
+            ->expectsOutputToContain('stub 3.9.5: xgp:tick two')
+            ->expectsOutputToContain('stub 3.9.5: xgp:tick three')
+            ->assertSuccessful();
+        $sideBySide = microtime(true) - $started;
+
+        // one after the other, as before: three seconds
+        config(['instances.tick_parallel' => 1]);
+        $started = microtime(true);
+        $this->command('xgp:tick')->assertSuccessful();
+        $oneByOne = microtime(true) - $started;
+
+        $this->assertLessThan(2.5, $sideBySide);
+        $this->assertGreaterThanOrEqual(3.0, $oneByOne);
+    }
+
+    public function testAUniverseWhoseTickFailsSideBySideIsReportedAndTheOthersTick(): void
+    {
+        $this->stubVersion('3.9.6', 'if (($argv[2] ?? "") === "broken") { fwrite(STDERR, "no database"); exit(1); } ');
+        $this->register('broken', '3.9.6');
+        $this->register('fine', '3.9.6');
+        config(['instances.tick_parallel' => 2]);
+
+        $this->command('xgp:tick')
+            ->expectsOutputToContain('stub 3.9.6: xgp:tick fine')
+            ->expectsOutputToContain('broken: no database')
+            ->assertFailed();
+    }
+
+    public function testAUniverseStillTickingFromTheMinuteBeforeIsLeftAlone(): void
+    {
+        $this->register('fresh', '');
+        $lock = Cache::lock('xgp_tick_fresh', 60);
+        $this->assertTrue($lock->get());
+
+        try {
+            // its database is never touched: the lock comes first
+            $this->command('xgp:tick', ['slug' => 'fresh'])->expectsOutputToContain('fresh: busy')->assertSuccessful();
+        } finally {
+            $lock->release();
+        }
+    }
+
     public function testAUniverseWhoseVersionIsMissingFailsItsTickLoudly(): void
     {
         $this->register('older', '3.7.0');
@@ -270,7 +325,7 @@ class VersionsTest extends DatabaseTestCase
             ->assertSuccessful();
 
         $this->assertSame('4.0.0', $this->registry->find('old')?->version);
-        $this->assertFileDoesNotExist($this->folder . '/map.php');
+        $this->assertFileDoesNotExist($this->folder . '/map.json');
         $this->command('xgp:instance:upgrade', ['slug' => 'old'])->expectsOutputToContain('plays on 4.0.0 already')->assertSuccessful();
     }
 
@@ -301,10 +356,10 @@ class VersionsTest extends DatabaseTestCase
     /**
      * A version's directory with an artisan that says what it was asked.
      */
-    private function stubVersion(string $version): void
+    private function stubVersion(string $version, string $before = ''): void
     {
         File::makeDirectory($this->folder . '/versions/' . $version . '/public', 0o755, true);
-        file_put_contents($this->folder . '/versions/' . $version . '/artisan', '<?php fwrite(STDOUT, "stub ' . $version . ': " . implode(" ", array_slice($argv, 1)));');
+        file_put_contents($this->folder . '/versions/' . $version . '/artisan', '<?php ' . $before . 'fwrite(STDOUT, "stub ' . $version . ': " . implode(" ", array_slice($argv, 1)));');
         file_put_contents($this->folder . '/versions/' . $version . '/public/index.php', '<?php');
     }
 

@@ -6,6 +6,7 @@ namespace Tests\Unit\Bootstrap;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Process;
 
 /**
  * Before the framework starts, public/index.php asks bootstrap/version-router.php
@@ -33,8 +34,8 @@ class VersionRouterTest extends TestCase
         self::deleteDirectory($this->folder);
         mkdir($this->folder . '/3.9.0/public', 0o755, true);
         file_put_contents($this->folder . '/3.9.0/public/index.php', '<?php');
-        $this->map = $this->folder . '/versions.php';
-        file_put_contents($this->map, '<?php return ' . var_export(['current' => '4.0.0', 'root' => $this->folder, 'universes' => ['old' => '3.9.0', 'gone' => '3.8.0', 'bad' => '../etc']], true) . ';');
+        $this->map = $this->folder . '/versions.json';
+        file_put_contents($this->map, (string) json_encode(['current' => '4.0.0', 'root' => $this->folder, 'universes' => ['old' => '3.9.0', 'gone' => '3.8.0', 'bad' => '../etc']]));
 
         $router = require dirname(__DIR__, 3) . '/bootstrap/version-router.php';
         $this->assertInstanceOf(\Closure::class, $router);
@@ -98,6 +99,27 @@ class VersionRouterTest extends TestCase
 
         // a game page whose name only starts alike still goes
         $this->assertSame($this->folder . '/3.9.0/public/index.php', $this->route(['REQUEST_URI' => '/universes-guide'], [], ['xgp_universe' => 'old']));
+    }
+
+    public function testAChangedMapCountsAtOnceUnderTheOpcacheOfTheDockerStack(): void
+    {
+        // the Docker stack never checks files for changes; a map included as
+        // PHP stayed in the opcache, and a universe moved to the newest
+        // version answered 503 until the next deploy
+        touch($this->map, time() - 60);
+        $script = $this->folder . '/twice.php';
+        file_put_contents($script, '<?php
+            $route = require $argv[1];
+            $ask = static fn (): string => (string) ($route(["REQUEST_URI" => "/"], [], ["xgp_universe" => "old"], $argv[2]) ?? "here");
+            echo $ask(), "|";
+            file_put_contents($argv[2] . ".new", json_encode(["current" => "4.0.0", "root" => $argv[3], "universes" => []]));
+            rename($argv[2] . ".new", $argv[2]);
+            echo $ask();');
+
+        $process = new Process([PHP_BINARY, '-d', 'opcache.enable_cli=1', '-d', 'opcache.validate_timestamps=0', $script, dirname(__DIR__, 3) . '/bootstrap/version-router.php', $this->map, $this->folder]);
+        $process->run();
+
+        $this->assertSame($this->folder . '/3.9.0/public/index.php|here', $process->getOutput(), $process->getErrorOutput());
     }
 
     public function testADispatchedRequestIsNeverDispatchedAgain(): void

@@ -65,6 +65,7 @@ class VersionsController extends BaseController
             'log' => $this->fetcher->log(),
             'upgrades' => $this->upgrades($available),
             'repositories' => $this->fetcher->allowedRepositories(),
+            'opcache' => self::opcache(),
         ]);
     }
 
@@ -122,6 +123,35 @@ class VersionsController extends BaseController
         }
 
         return redirect()->route('operator.versions')->with('status', $deleted === [] ? __('operator/operator.op_pruned_none') : __('operator/operator.op_pruned', ['versions' => implode(', ', $deleted)]));
+    }
+
+    /**
+     * How full PHP's store of compiled code is in this web server: every
+     * version served takes room of its own. Null where it is off (the
+     * command line, a server without it).
+     *
+     * @return array{used: int, total: int, scripts: int, restarts: int, full: bool}|null
+     */
+    private static function opcache(): ?array
+    {
+        $status = function_exists('opcache_get_status') ? opcache_get_status(false) : false;
+
+        if (!is_array($status) || !is_array($status['memory_usage'] ?? null)) {
+            return null;
+        }
+
+        $memory = $status['memory_usage'];
+        $statistics = is_array($status['opcache_statistics'] ?? null) ? $status['opcache_statistics'] : [];
+        $megabytes = static fn (mixed $bytes): int => is_numeric($bytes) ? (int) round((float) $bytes / 1_048_576) : 0;
+        $used = $megabytes($memory['used_memory'] ?? 0) + $megabytes($memory['wasted_memory'] ?? 0);
+
+        return [
+            'used' => $used,
+            'total' => $used + $megabytes($memory['free_memory'] ?? 0),
+            'scripts' => is_numeric($statistics['num_cached_scripts'] ?? null) ? (int) $statistics['num_cached_scripts'] : 0,
+            'restarts' => is_numeric($statistics['oom_restarts'] ?? null) ? (int) $statistics['oom_restarts'] : 0,
+            'full' => (bool) ($status['cache_full'] ?? false),
+        ];
     }
 
     /**

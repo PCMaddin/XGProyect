@@ -227,4 +227,8 @@ return [
     'op_action_version_fetch' => 'rozpoczęto pobieranie wersji',
     'op_action_version_used' => 'przełączono wersję',
     'op_action_versions_pruned' => 'usunięto wersje',
+    'op_opcache' => 'Opcache tego serwera WWW',
+    'op_opcache_off' => 'tutaj wyłączony (pokazuje go tylko php-fpm).',
+    'op_opcache_use' => 'zajęte :used z :total MB, :scripts plików, opróżniony :restarts razy z braku pamięci.',
+    'op_opcache_full' => 'za mały: zwiększ PHP_OPCACHE_MB w deploy/.env',
 ];

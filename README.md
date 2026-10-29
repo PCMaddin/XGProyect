@@ -18,7 +18,7 @@ Live Server: https://www.xgproyect.net/
 
 ## Requirements
 
-PHP 8.2 or greater  
+PHP 8.4.1 or greater (8.5 runs as well)  
 MySQL 5.7 / MariaDB equivalent or greater  
 
 ## How to get XG Proyect?

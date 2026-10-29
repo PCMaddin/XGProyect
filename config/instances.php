@@ -52,4 +52,8 @@ return [
     // the origin of this checkout (comma separated). The command line
     // (xgp:versions:fetch --repo=) takes any.
     'versions_repositories' => (string) env('XGP_VERSIONS_REPOSITORIES', ''),
+
+    // universes whose tick runs side by side, each in a process of its own
+    // (xgp:tick every minute); 1: one after the other in one process
+    'tick_parallel' => (int) env('XGP_TICK_PARALLEL', 4),
 ];

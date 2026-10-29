@@ -51,7 +51,7 @@ class VersionFetcherTest extends DatabaseTestCase
         $this->repository = $this->folder . '/repo';
         $this->repository('4.1.0', 'v4.1.0');
 
-        $versions = new Versions(app(InstanceRegistry::class), $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.php');
+        $versions = new Versions(app(InstanceRegistry::class), $this->folder . '/versions', $this->folder . '/source', $this->folder . '/map.json');
         $this->app->instance(Versions::class, $versions);
         $this->app->instance(VersionFetcher::class, new VersionFetcher($versions, $this->folder . '/source'));
     }

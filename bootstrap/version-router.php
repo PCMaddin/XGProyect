@@ -15,7 +15,7 @@
 | The universe comes from the request as the lobby and the mail links name
 | it: the query parameter "universe", else the lobby cookie; Stripe's
 | webhook names it in the session's metadata. The map was written by
-| xgp:versions:sync (storage/framework/versions.php) and lists only the
+| xgp:versions:sync (storage/framework/versions.json) and lists only the
 | universes on other versions. A version is a plain directory name.
 |
 | Returns the index.php to hand over to, or null to serve here.
@@ -26,7 +26,8 @@ return static function (array $server, array $get, array $cookie, string $mapFil
         return null;
     }
 
-    $map = require $mapFile;
+    // read as data each time: an included PHP file would stay in the opcache
+    $map = json_decode((string) file_get_contents($mapFile), true);
 
     if (!is_array($map) || !is_array($map['universes'] ?? null) || !is_string($map['root'] ?? null)) {
         return null;

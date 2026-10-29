@@ -59,7 +59,9 @@ COPY --from=build --chown=www-data:www-data /srv/app /srv/app
 RUN install -d -o www-data -g www-data /srv/public /srv/versions
 
 ENV VIEW_COMPILED_PATH=/srv/app/bootstrap/views \
-    PHP_FPM_CHILDREN=16
+    PHP_FPM_CHILDREN=16 \
+    PHP_OPCACHE_MB=256 \
+    PHP_OPCACHE_FILES=20000
 WORKDIR /srv/app
 USER www-data
 
