@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use App\Support\Html;
 use App\Http\Requests\Admin\Users\UserPlanetRequest;
 use App\Http\Traits\Admin\Users\UserPlanetTrait;
 use App\Models\User;
+use App\Services\Admin\PlayerChoices;
 use App\Services\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
-use Xgp\App\Libraries\PlanetLib;
+use App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Libraries\PlanetLib;
 
 /**
  * @SuppressWarnings("PHPMD.TooManyPublicMethods")
@@ -51,7 +53,7 @@ class UserPlanetController extends BaseController
         $galaxy = $request->integer('galaxy');
         $system = $request->integer('system');
         $planet = $request->integer('planet');
-        $name = trim($request->string('name')->toString());
+        $name = Html::cleanName($request->string('name')->toString());
         $fieldMax = $request->integer('planet_field_max');
         $error = '';
         $errors = 0;
@@ -111,7 +113,7 @@ class UserPlanetController extends BaseController
         return view('admin.users_planet_edit', [
             'user' => $user,
             'planet' => $this->preparePlanetViewData($planetData, $this->dateFormatExtended()),
-            'all_users' => User::query()->select('id', 'name')->orderBy('name')->get(),
+            'owners' => app(PlayerChoices::class)->choose(null, (int) ($planetData->planet_user_id ?? 0)),
             'images' => $this->getPlanetImages(),
             'percent_options' => $this->percentOptions(),
             'queue_options' => $this->buildProcessQueue((string) ($planetData->planet_b_building_id ?? '')),
@@ -261,7 +263,7 @@ class UserPlanetController extends BaseController
             ->value('m.planet_id');
 
         if ($moonId) {
-            $this->hardDeletePlanetRow(intval($moonId), PlanetTypesEnumerator::MOON); // @phpstan-ignore argument.type
+            $this->hardDeletePlanetRow(self::asInt($moonId), PlanetTypesEnumerator::MOON);
         }
 
         $this->hardDeletePlanetRow($planet, PlanetTypesEnumerator::PLANET);

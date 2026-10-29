@@ -76,6 +76,7 @@ return [
     'us_user_building_laboratory' => 'Laboratorio de investigación',
     'us_user_building_terraformer' => 'Terraformer',
     'us_user_building_ally_deposit' => 'Depósito de la Alianza',
+    'us_user_building_space_dock' => 'Muelle espacial',
     'us_user_building_missile_silo' => 'Silo',
     'us_user_building_mondbasis' => 'Base lunar',
     'us_user_building_phalanx' => 'Sensor Phalanx',
@@ -96,6 +97,9 @@ return [
     'us_user_ship_destroyer' => 'Destructor',
     'us_user_ship_deathstar' => 'Estrella de la muerte',
     'us_user_ship_reaper' => 'Segador',
+    'us_user_ship_battlecruiser' => 'Acorazado',
+    'us_user_ship_crawler' => 'Taladrador',
+    'us_user_ship_pathfinder' => 'Explorador',
 
     // ── Defenses labels ───────────────────────────────────────────────────────
     'us_user_defense_rocket_launcher' => 'Lanzamisiles',

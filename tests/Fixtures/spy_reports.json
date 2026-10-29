@@ -1,0 +1,93 @@
+{
+    "target": {
+        "planet_metal": 123456,
+        "planet_crystal": 65432,
+        "planet_deuterium": 7890,
+        "planet_energy_max": 4321,
+        "building_metal_mine": 18,
+        "building_crystal_mine": 15,
+        "building_deuterium_sintetizer": 0,
+        "building_solar_plant": 0,
+        "building_fusion_reactor": 0,
+        "building_robot_factory": 0,
+        "building_nano_factory": 0,
+        "building_hangar": 0,
+        "building_metal_store": 6,
+        "building_crystal_store": 0,
+        "building_deuterium_tank": 0,
+        "building_laboratory": 0,
+        "building_terraformer": 0,
+        "building_ally_deposit": 0,
+        "building_mondbasis": 0,
+        "building_phalanx": 0,
+        "building_jump_gate": 0,
+        "building_missile_silo": 0,
+        "research_espionage_technology": 8,
+        "research_computer_technology": 0,
+        "research_weapons_technology": 10,
+        "research_shielding_technology": 0,
+        "research_armour_technology": 0,
+        "research_energy_technology": 0,
+        "research_hyperspace_technology": 0,
+        "research_combustion_drive": 6,
+        "research_impulse_drive": 0,
+        "research_hyperspace_drive": 0,
+        "research_laser_technology": 0,
+        "research_ionic_technology": 0,
+        "research_plasma_technology": 0,
+        "research_intergalactic_research_network": 0,
+        "research_astrophysics": 0,
+        "research_graviton_technology": 0,
+        "ship_small_cargo_ship": 5,
+        "ship_big_cargo_ship": 0,
+        "ship_light_fighter": 12,
+        "ship_heavy_fighter": 0,
+        "ship_cruiser": 0,
+        "ship_battleship": 0,
+        "ship_colony_ship": 0,
+        "ship_recycler": 0,
+        "ship_espionage_probe": 3,
+        "ship_bomber": 0,
+        "ship_solar_satellite": 0,
+        "ship_destroyer": 0,
+        "ship_deathstar": 0,
+        "ship_reaper": 0,
+        "defense_rocket_launcher": 20,
+        "defense_light_laser": 7,
+        "defense_heavy_laser": 0,
+        "defense_gauss_cannon": 0,
+        "defense_ion_cannon": 0,
+        "defense_plasma_turret": 0,
+        "defense_small_shield_dome": 0,
+        "defense_large_shield_dome": 0,
+        "defense_anti-ballistic_missile": 4,
+        "defense_interplanetary_missile": 0,
+        "premium_officier_commander": 0,
+        "premium_officier_admiral": 0,
+        "premium_officier_engineer": 0,
+        "premium_officier_geologist": 0,
+        "premium_officier_technocrat": 0
+    },
+    "reports": [
+        {
+            "string": "<table width=\"440\"><tr><td class=\"c\" colspan=\"5\">TITLE-resources</td></tr><tr><td width=220>Metal</td><td width=220 align=right>123.456</td><td>&nbsp;</td><td width=220>Crystal</td></td><td width=220 align=right>65.432</td></tr><tr><td width=220>Deuterium</td><td width=220 align=right>7.890</td><td>&nbsp;</td><td width=220>Energy</td><td width=220 align=right>4.321</td></tr></table>",
+            "count": 0
+        },
+        {
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-fleet</td></tr><tr><td align=left>Small Cargo</td><td align=right>5</td><td>&nbsp;</td><td align=left>Light Fighter</td><td align=right>12</td></tr><tr><td align=left>Espionage Probe</td><td align=right>3</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "count": 20
+        },
+        {
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-defenses</td></tr><tr><td align=left>Rocket Launcher</td><td align=right>20</td><td>&nbsp;</td><td align=left>Light Laser</td><td align=right>7</td></tr><tr><td align=left>Anti-Ballistic Missiles</td><td align=right>4</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "count": 31
+        },
+        {
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-buildings</td></tr><tr><td align=left>Metal Mine</td><td align=right>18</td><td>&nbsp;</td><td align=left>Crystal Mine</td><td align=right>15</td></tr><tr><td align=left>Metal Storage</td><td align=right>6</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "count": 39
+        },
+        {
+            "string": "<table width=\"440\" cellspacing=\"1\"><tr><td class=\"c\" colspan=\"5\">TITLE-research</td></tr><tr><td align=left>Espionage Technology</td><td align=right>8</td><td>&nbsp;</td><td align=left>Weapons Technology</td><td align=right>10</td></tr><tr><td align=left>Combustion Drive</td><td align=right>6</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table>",
+            "count": 24
+        }
+    ]
+}

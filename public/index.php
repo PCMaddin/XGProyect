@@ -3,6 +3,49 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+/*
+|--------------------------------------------------------------------------
+| The Version The Folder "current" Names
+|--------------------------------------------------------------------------
+|
+| Right after xgp:versions:use PHP may still resolve the web root to the
+| old folder; the link is read fresh and the request handed to the version
+| it names (see bootstrap/version-current.php). No php-fpm reload needed.
+|
+*/
+
+$currentIndex = (require __DIR__.'/../bootstrap/version-current.php')(__DIR__, $_SERVER);
+
+if ($currentIndex !== null) {
+    $_SERVER['XGP_CURRENT_FOLLOWED'] = dirname($currentIndex, 2);
+    chdir(dirname($currentIndex, 2));
+    require $currentIndex;
+
+    exit;
+}
+
+/*
+|--------------------------------------------------------------------------
+| A Universe On Another Version
+|--------------------------------------------------------------------------
+|
+| Universes play on the version of the code they were created with; every
+| version in use lies in a directory of its own. A request of a universe on
+| another version is served by that version's public/index.php (see
+| bootstrap/version-router.php), never by this code.
+|
+*/
+
+$versionIndex = (require __DIR__.'/../bootstrap/version-router.php')($_SERVER, $_GET, $_COOKIE, __DIR__.'/../storage/framework/versions.json');
+
+if ($versionIndex !== null) {
+    $_SERVER['XGP_VERSION_DISPATCHED'] = dirname($versionIndex, 2);
+    chdir(dirname($versionIndex, 2));
+    require $versionIndex;
+
+    exit;
+}
+
 define('LARAVEL_START', microtime(true));
 
 /*

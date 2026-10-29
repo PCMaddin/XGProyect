@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Users;
 
+use Illuminate\Http\Request;
+use App\Services\Operators\OperatorLog;
+use App\Support\Concerns\ReadsMixedValues;
+use App\Core\GameObjects\GameObjectRegistry;
 use App\Http\Requests\Admin\Users\UserPremiumRequest;
 use App\Http\Requests\Admin\Users\UserResearchRequest;
 use App\Models\User;
@@ -12,10 +16,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Libraries\StatisticsLibrary;
+use App\Libraries\StatisticsLibrary;
 
 class UserProgressController extends BaseController
 {
+    use ReadsMixedValues;
+
     public function __construct(private readonly SettingsService $settings)
     {
     }
@@ -35,10 +41,17 @@ class UserProgressController extends BaseController
         /** @var array<string, mixed> $validated */
         $validated = $request->validated();
 
-        $updates = collect($validated)
-            ->filter(fn (mixed $v, string $k): bool => str_starts_with($k, 'research_'))
-            ->map(fn (mixed $v): int => intval($v)) // @phpstan-ignore argument.type
-            ->all();
+        // only the technologies (the prefix let research_user_id and the
+        // current research through as well)
+        $updates = [];
+
+        foreach (app(GameObjectRegistry::class)->research() as $technology) {
+            $level = $validated[$technology->getName()] ?? null;
+
+            if (is_numeric($level)) {
+                $updates[$technology->getName()] = (int) $level;
+            }
+        }
 
         if (!empty($updates)) {
             DB::table('research')->where('research_user_id', $user->id)->update($updates);
@@ -72,19 +85,30 @@ class UserProgressController extends BaseController
             $updates['premium_dark_matter'] = $request->integer('premium_dark_matter');
         }
 
-        foreach ($request->all() as $key => $value) {
-            if (is_string($key) && str_starts_with($key, 'premium_') && $key !== 'premium_dark_matter') {
-                $updates[$key] = match ((int) $value) {
-                    1 => 0,
-                    2 => time() + (3600 * 24 * 7),
-                    3 => time() + (3600 * 24 * 30 * 3),
-                    default => $currentPremium[$key] ?? 0,
-                };
+        // only the officers (the prefix let premium_user_id through as well)
+        foreach (app(GameObjectRegistry::class)->officers() as $officer) {
+            $key = $officer->getName();
+
+            if (!$request->has($key)) {
+                continue;
             }
+
+            $updates[$key] = match ($request->integer($key)) {
+                1 => 0,
+                2 => time() + (3600 * 24 * 7),
+                3 => time() + (3600 * 24 * 30 * 3),
+                default => $currentPremium[$key] ?? 0,
+            };
         }
 
         if (!empty($updates)) {
             DB::table('premium')->where('premium_user_id', $user->id)->update($updates);
+        }
+
+        $before = $currentPremium['premium_dark_matter'] ?? null;
+
+        if (isset($updates['premium_dark_matter']) && (is_numeric($before) ? (int) $before : null) !== $updates['premium_dark_matter']) {
+            $this->recordDarkMatter($request, $user, is_numeric($before) ? (int) $before : 0, $updates['premium_dark_matter']);
         }
 
         session()->flash('success', __('admin/users.us_all_ok_message'));
@@ -113,7 +137,7 @@ class UserProgressController extends BaseController
             $list[] = [
                 'field' => $key,
                 'label' => (string) __('admin/users.us_user_' . $key),
-                'level' => intval($value), // @phpstan-ignore argument.type
+                'level' => self::asInt($value),
             ];
         }
 
@@ -141,7 +165,7 @@ class UserProgressController extends BaseController
                 continue;
             }
 
-            $expire = intval($value); // @phpstan-ignore argument.type
+            $expire = self::asInt($value);
 
             $list[] = [
                 'field' => $key,
@@ -160,5 +184,18 @@ class UserProgressController extends BaseController
     private function dateFormat(): string
     {
         return $this->settings->getString('date_format') ?: 'Y-m-d';
+    }
+
+    /**
+     * Dark matter is worth money: who gave whom how much goes to the
+     * operators' log in the base database, out of reach of the admin.
+     */
+    private function recordDarkMatter(Request $request, User $player, int $from, int $to): void
+    {
+        $admin = $request->user();
+        $email = $admin instanceof User ? $admin->email : '';
+        $details = ['admin_id' => $admin instanceof User ? $admin->id : 0, 'player_id' => $player->id, 'player' => $player->name, 'from' => $from, 'to' => $to];
+
+        app(OperatorLog::class)->recordAdmin($email, OperatorLog::ADMIN_DARK_MATTER, (string) $request->ip(), $details);
     }
 }

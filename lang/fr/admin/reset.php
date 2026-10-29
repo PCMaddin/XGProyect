@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Réinitialiser l’univers',
+    're_sub_title' => 'D’ici, vous pouvez réinitialiser certains aspects de l’univers ou tout effacer. Cette opération est irréversible — assurez-vous d’avoir une sauvegarde.',
+    're_reset_universe_confirmation' => 'En cliquant sur OK, les options choisies seront remises à zéro. Cette opération est irréversible et il vous incombe de sauvegarder la base de données. En cas de réinitialisation de tout l’univers, les comptes ne seront pas supprimés.',
+    're_defenses_and_ships' => 'Chantier spatial et défenses',
+    're_defenses' => 'Réinitialiser les défenses',
+    're_ships' => 'Réinitialiser les vaisseaux',
+    're_reset_hangar' => 'Réinitialiser la file du chantier spatial et des défenses',
+    're_buldings' => 'Bâtiments',
+    're_buildings_pl' => 'Réinitialiser les bâtiments planétaires',
+    're_buildings_lu' => 'Réinitialiser les bâtiments lunaires',
+    're_reset_buldings' => 'Réinitialiser la file de construction',
+    're_inve_ofis' => 'Recherches et officiers',
+    're_ofici' => 'Réinitialiser les officiers',
+    're_investigations' => 'Réinitialiser les recherches',
+    're_reset_invest' => 'Réinitialiser les recherches en cours',
+    're_resources' => 'Ressources',
+    're_resources_dark' => 'Réinitialiser l’antimatière',
+    're_resources_met_cry' => 'Réinitialiser le métal, le cristal et le deutérium',
+    're_general' => 'Général',
+    're_reset_moons' => 'Réinitialiser les lunes',
+    're_reset_notes' => 'Réinitialiser les notes',
+    're_reset_rw' => 'Réinitialiser les rapports de combat',
+    're_reset_buddies' => 'Réinitialiser les listes d’amis',
+    're_reset_allys' => 'Réinitialiser les alliances',
+    're_reset_fleets' => 'Réinitialiser les flottes',
+    're_reset_banned' => 'Réinitialiser les joueurs bannis',
+    're_reset_messages' => 'Réinitialiser les messages',
+    're_reset_statpoints' => 'Réinitialiser les statistiques',
+    're_reset_all' => 'Réinitialiser tout l’univers',
+    're_reset_h1' => 'Options de réinitialisation',
+    're_reset_excess' => 'Options réinitialisées avec succès',
+    're_reset_go' => 'Réinitialiser',
+];

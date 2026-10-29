@@ -30,6 +30,67 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>
+                                {{ __('admin/premium.pr_premium_mode') }}
+                                <i class="fas fa-question-circle text-gray-400" data-toggle="popover"
+                                    data-trigger="hover" data-content="{{ __('admin/premium.pr_premium_mode_help') }}"></i>
+                            </td>
+                            <td>
+                                <select class="form-control" name="premium_mode" @disabled(!$premium_mode_editable)>
+                                    <option value="play2win" @selected($premium_mode === 'play2win')>{{ __('admin/premium.pr_premium_mode_play2win') }}</option>
+                                    <option value="pay2win" @selected($premium_mode === 'pay2win')>{{ __('admin/premium.pr_premium_mode_pay2win') }}</option>
+                                </select>
+                                @if (!$premium_mode_editable)
+                                    <small class="form-text text-muted">{{ __('admin/premium.pr_premium_mode_cli') }}</small>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ __('admin/premium.pr_payment_methods') }}
+                                <i class="fas fa-question-circle text-gray-400" data-toggle="popover"
+                                    data-trigger="hover" data-content="{{ __('admin/premium.pr_payment_methods_help') }}"></i>
+                            </td>
+                            <td>
+                                <input type="hidden" name="payment_methods_form" value="1">
+                                @foreach ($payment_methods as $method)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="payment_methods[]" value="{{ $method['name'] }}"
+                                            id="payment_method_{{ $method['name'] }}" @checked($method['allowed'])>
+                                        <label class="form-check-label" for="payment_method_{{ $method['name'] }}">
+                                            {{ __('admin/premium.pr_payment_method_' . $method['name']) }}
+                                            @if ($method['configured'])
+                                                <span class="badge badge-success">{{ __('admin/premium.pr_payment_method_ready') }}</span>
+                                            @else
+                                                <span class="badge badge-warning text-wrap text-left">{{ __('admin/premium.pr_payment_method_missing_' . $method['name']) }}</span>
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_shop') }}</td>
+                            <td>
+                                @if ($shop_status === 'open')
+                                    <span class="badge badge-success">{{ __('admin/premium.pr_shop_open') }}</span>
+                                @elseif ($shop_status === 'closed_play2win')
+                                    <span class="badge badge-secondary">{{ __('admin/premium.pr_shop_closed_play2win') }}</span>
+                                @else
+                                    <span class="badge badge-warning">{{ __('admin/premium.pr_shop_closed_methods') }}</span>
+                                @endif
+                                @if ($pays_for_test)
+                                    <span class="badge badge-info" id="test-payments">{{ __('admin/premium.pr_test_payments') }}</span>
+                                @endif
+                                @if ($test_mode)
+                                    <br><small class="text-muted">{{ __('admin/premium.pr_test_mode_forced') }}</small>
+                                @endif
+                                <a href="{{ route('admin.premium.orders') }}" class="ml-2">
+                                    <i class="fas fa-receipt fa-sm mr-1"></i>{{ __('admin/premium.pr_orders_show') }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>{{ __('admin/premium.pr_pay_url') }}</td>
                             <td>
                                 <input class="form-control" type="url" name="premium_url"
@@ -102,6 +163,36 @@
                             <td>
                                 <input class="form-control" type="text" name="merchant_deuterium_multiplier"
                                     value="{{ $merchant_deuterium_multiplier }}">
+                            </td>
+                        </tr>
+                    </x-admin.settings-table>
+                </x-admin.card-collapsible>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <x-admin.card-collapsible id="collapseScrap" :title="__('admin/premium.pr_scrap')" icon="fas fa-recycle">
+                    <x-admin.settings-table>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_base_rate') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_base_rate"
+                                    value="{{ $merchant_scrap_base_rate }}" min="0" max="100" step="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_max_rate') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_max_rate"
+                                    value="{{ $merchant_scrap_max_rate }}" min="0" max="100" step="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('admin/premium.pr_scrap_bargain_price') }}</td>
+                            <td>
+                                <input class="form-control" type="number" name="merchant_scrap_bargain_price"
+                                    value="{{ $merchant_scrap_bargain_price }}" min="0" step="1">
                             </td>
                         </tr>
                     </x-admin.settings-table>

@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'st_player' => '玩家',
+    'st_alliance' => '联盟',
+    'st_points' => '积分',
+    'st_total' => '总计',
+    'st_economy' => '经济',
+    'st_research' => '研究',
+    'st_military' => '军事',
+    'st_fleets' => '舰队',
+    'st_researh' => '研究',
+    'st_buildings' => '建筑',
+    'st_defenses' => '防御',
+    'st_position' => '排名',
+    'st_members' => '成员',
+    'st_per_member' => '人均',
+    'st_statistics' => '统计',
+    'st_show' => '显示',
+    'st_per' => '按',
+    'st_in_the_positions' => '名次',
+    'st_actions' => '操作',
+    'st_ally_request' => '向此联盟发送申请',
+    'st_honour' => '荣誉',
+    'st_title_grand_emperor' => '大帝',
+    'st_title_emperor' => '皇帝',
+    'st_title_starlord' => '星际领主',
+    'st_title_bandit_king' => '强盗之王',
+    'st_title_bandit_lord' => '强盗首领',
+    'st_title_bandit' => '强盗',
+    'st_military_built' => '建造的军事力量',
+    'st_military_destroyed' => '摧毁的军事力量',
+    'st_military_lost' => '损失的军事力量',
+];

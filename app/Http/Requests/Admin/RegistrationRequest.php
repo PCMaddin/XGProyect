@@ -24,6 +24,9 @@ class RegistrationRequest extends FormRequest
             'reg_enable' => ['nullable'],
             'reg_welcome_message' => ['nullable'],
             'reg_welcome_email' => ['nullable'],
+            'reg_verify_email' => ['nullable'],
+            'reg_invite_only' => ['nullable'],
+            'reg_max_players' => ['nullable', 'integer', 'min:0', 'max:10000000'],
         ];
     }
 

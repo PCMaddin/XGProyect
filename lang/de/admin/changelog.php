@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Änderungsprotokoll',
+    'ch_new_item' => 'Neuen Eintrag hinzufügen',
+    'ch_sub_title' => 'Hier kannst du die Liste der Änderungen (Changelog) deines Servers bearbeiten. Dieser Bereich befindet sich im linken Menü des Spiels.',
+    'ch_general' => 'Liste der Änderungen',
+    'ch_date' => 'Datum des Eintrags',
+    'ch_version' => 'Version des Eintrags',
+    'ch_language' => 'Sprache des Eintrags',
+    'ch_language_locked' => 'Die Sprache kann nach dem Anlegen nicht mehr geändert werden.',
+    'ch_translations' => 'Übersetzungen',
+    'ch_edit_translation' => 'Übersetzung bearbeiten',
+    'ch_delete_translation' => 'Übersetzung löschen',
+    'ch_actions' => 'Aktionen',
+    'ch_the_description' => 'Beschreibung',
+    'ch_edit_this' => 'Diesen Eintrag bearbeiten',
+    'ch_delete_this' => 'Diesen Eintrag löschen',
+    'ch_delete_confirm' => 'Möchtest du diesen Eintrag wirklich löschen?',
+    'ch_add_action' => 'Neuen Eintrag hinzufügen',
+    'ch_edit_action' => 'Eintrag bearbeiten: %s',
+    'ch_version_info' => 'Gültige Versionsbeispiele sind:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Sprache wählen',
+    'ch_characters' => 'Zeichen',
+    'ch_save' => 'Eintrag speichern',
+    'ch_back' => 'Zurück zur Liste',
+    'ch_no_entries' => 'Noch keine Einträge im Änderungsprotokoll. Füge den ersten hinzu!',
+    'ch_description_placeholder' => 'Beschreibe die Änderungen dieser Version ...',
+    'ch_entry_details' => 'Details des Eintrags',
+    'ch_action_add_done' => 'Eintrag erfolgreich hinzugefügt!',
+    'ch_action_edit_done' => 'Eintrag erfolgreich bearbeitet!',
+    'ch_action_delete_done' => 'Eintrag erfolgreich gelöscht!',
+];

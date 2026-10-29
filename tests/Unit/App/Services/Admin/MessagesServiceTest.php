@@ -7,7 +7,7 @@ namespace Tests\Unit\App\Services\Admin;
 use App\Services\Admin\MessagesService;
 use App\Services\TimingService;
 use Tests\TestCase;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\MessagesEnumerator;
 
 class MessagesServiceTest extends TestCase
 {

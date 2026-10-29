@@ -25,9 +25,7 @@
             </div>
         </td>
         <td class="l" style="width:90px;text-align:center; vertical-align:middle;">
-            <a id='darkmatter2' href='{{ $premium_pay_url }}' style='cursor:pointer; text-align:center;width:100px;height:60px;'><br>
-                <div id='darkmatter2'><strong>{{ __('game/officier.of_get_darkmatter') }}</strong></div>
-            </a>
+            @include('premium.buy', ['url' => $premium_pay_url])
         </td>
     </tr>
     <tr>
@@ -55,7 +53,7 @@
             </div>
         </td>
         <td class="l" style="width:90px;text-align:center; vertical-align:middle;">
-            <a href='{{ $item['link_week'] }}' >
+            <a href='{{ $item['link_week'] }}' data-post>
                 <strong>
                         {{ __('game/officier.of_week') }}<br>
                         <span style="color:lime">{{ $item['week_price'] }}</span>
@@ -66,7 +64,7 @@
     </tr>
     <tr>
         <td class="l" style="width:90px;text-align:center; vertical-align:middle;">
-            <a href='{{ $item['link_month'] }}'>
+            <a href='{{ $item['link_month'] }}' data-post>
                 <strong>
                     {{ __('game/officier.of_months') }}<br>
                     <span style="color:lime">{{ $item['month_price'] }}</span>
@@ -79,5 +77,11 @@
         <td colspan="3" class="c" style='height:4px;'></td>
     </tr>
     @endforeach
+    <tr>
+        <td colspan="3" class="c">{{ __('game/officier.of_commanding_staff') }}</td>
+    </tr>
+    <tr>
+        <th colspan="3">{{ __('game/officier.of_commanding_staff_benefits') }}</th>
+    </tr>
 </table>
 @endsection

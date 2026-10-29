@@ -3,6 +3,7 @@
 @section('content')
 <script src="{{ asset('assets/js/cntchar-min.js') }}" type="text/javascript"></script>
 <form action="game.php?page=alliance&mode=apply&allyid={{ $allyid }}" method="POST" id="apply" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td class="c" colspan="2">{{ $write_to_alliance }}</td>

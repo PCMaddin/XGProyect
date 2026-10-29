@@ -1,0 +1,461 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Instances;
+
+use FilesystemIterator;
+use RecursiveCallbackFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RuntimeException;
+use SplFileInfo;
+use Symfony\Component\Process\Process;
+
+/**
+ * The versions of the code on the server, one directory per version under
+ * the versions path (config instances.versions_path): every version from
+ * the oldest a universe still plays on up to the one that runs. A universe
+ * is pinned to the version it was created with (instances.version) until
+ * xgp:instance:upgrade moves it; its pages come from that version's
+ * directory (public/index.php hands the request over, see
+ * bootstrap/version-router.php) and so do its tick, its cheat scan and its
+ * migrations (that version's artisan, run as a process).
+ *
+ * xgp:versions:sync copies the running code into its directory and writes
+ * the map the router reads (storage/framework/versions.json); xgp:versions --prune deletes the directories
+ * below the oldest version in use.
+ *
+ * @SuppressWarnings("PHPMD.StaticAccess")
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
+ */
+class Versions
+{
+    /** a version is a directory name: nothing that leaves the versions path */
+    public const PATTERN = '/^[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$/';
+
+    /** not copied into a version's directory: written at runtime, or bound to this checkout */
+    private const SKIP = ['storage', 'node_modules', '.git', 'bootstrap/cache/config.php', 'bootstrap/cache/packages.php', 'bootstrap/cache/services.php', '.env'];
+
+    /** what a version's directory needs to hold once copied */
+    private const STORAGE = ['storage/app/backups', 'storage/framework/cache/data', 'storage/framework/sessions', 'storage/framework/views', 'storage/logs', 'bootstrap/cache'];
+
+    /** an artisan call of another version: a tick, a scan, the migrations */
+    private const TIMEOUT = 3600;
+
+    public function __construct(
+        private InstanceRegistry $registry,
+        private ?string $root = null,
+        private ?string $source = null,
+        private ?string $mapFile = null,
+    ) {
+    }
+
+    /**
+     * The version of the code that runs.
+     */
+    public function current(): string
+    {
+        $version = config('version.files');
+
+        return is_string($version) ? $version : '';
+    }
+
+    /**
+     * Where the directories of the versions lie.
+     */
+    public function root(): string
+    {
+        if ($this->root === null) {
+            $configured = config('instances.versions_path');
+            $this->root = is_string($configured) && $configured !== '' ? rtrim($configured, '/') : storage_path('versions');
+        }
+
+        return $this->root;
+    }
+
+    /**
+     * The versions on the server, oldest first: the directories under the
+     * versions path that hold a game, and the one that runs.
+     *
+     * @return list<string>
+     */
+    public function available(): array
+    {
+        $versions = [$this->current()];
+
+        foreach (is_dir($this->root()) ? scandir($this->root()) ?: [] : [] as $entry) {
+            // not the link "current" (xgp:versions:use), only the folders
+            if (preg_match(self::PATTERN, $entry) === 1 && !is_link($this->root() . '/' . $entry) && is_file($this->root() . '/' . $entry . '/artisan')) {
+                $versions[] = $entry;
+            }
+        }
+
+        $versions = array_values(array_unique(array_filter($versions)));
+        usort($versions, static fn (string $one, string $other): int => version_compare($one, $other));
+
+        return $versions;
+    }
+
+    /**
+     * The directory of a version: this checkout for the running one, else
+     * its directory under the versions path; null when it is not there.
+     */
+    public function directory(string $version): ?string
+    {
+        if ($version === '' || $version === $this->current()) {
+            return $this->source ?? base_path();
+        }
+
+        $directory = $this->root() . '/' . $version;
+
+        return preg_match(self::PATTERN, $version) === 1 && !is_link($directory) && is_file($directory . '/artisan') ? $directory : null;
+    }
+
+    /**
+     * Whether this checkout lies under the versions path, as a server
+     * without Docker is laid out (the web root is the folder "current"):
+     * then another version can be switched to from here.
+     */
+    public function servesFromRoot(): bool
+    {
+        $base = realpath($this->source ?? base_path());
+        $root = realpath($this->root());
+
+        return $base !== false && $root !== false && str_starts_with($base, $root . '/');
+    }
+
+    /**
+     * Which universes play on which version (the running one for those that
+     * name none), the version in use longest first.
+     *
+     * @return array<string, list<string>> version => slugs
+     */
+    public function inUse(): array
+    {
+        $use = [];
+
+        foreach ($this->registry->all() as $instance) {
+            $use[$instance->version !== '' ? $instance->version : $this->current()][] = $instance->slug;
+        }
+
+        uksort($use, static fn (string $one, string $other): int => version_compare($one, $other));
+
+        return $use;
+    }
+
+    /**
+     * The oldest version a universe still plays on (the running one without universes).
+     */
+    public function oldestInUse(): string
+    {
+        $versions = array_keys($this->inUse());
+
+        return $versions === [] ? $this->current() : $versions[0];
+    }
+
+    /**
+     * Runs the work for a universe with the code it plays on: here when it
+     * plays on this version, else as the given artisan command of its
+     * version's directory. Returns what was printed.
+     *
+     * @param list<string>     $arguments
+     * @param callable(): mixed $own
+     */
+    public function runFor(Instance $instance, string $command, array $arguments, callable $own): string
+    {
+        if ($instance->runsOn($this->current())) {
+            $result = $own();
+
+            return is_string($result) ? $result : '';
+        }
+
+        return $this->artisan($instance->version, $command, $arguments);
+    }
+
+    /**
+     * An artisan command of another version's directory, run as a process
+     * with this environment (the same .env or container variables).
+     *
+     * @param list<string>          $arguments
+     * @param array<string, string> $environment variables for the process besides this one's
+     */
+    public function artisan(string $version, string $command, array $arguments = [], array $environment = []): string
+    {
+        $process = $this->process($version, $command, $arguments, $environment);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new RuntimeException('Version ' . $version . ', ' . $command . ' failed: ' . trim($process->getErrorOutput() . "\n" . $process->getOutput()));
+        }
+
+        return $process->getOutput();
+    }
+
+    /**
+     * An artisan command of a version (this one included) as a process not
+     * started yet: the tick runs one per universe side by side.
+     *
+     * @param list<string>          $arguments
+     * @param array<string, string> $environment variables for the process besides this one's
+     */
+    public function process(string $version, string $command, array $arguments = [], array $environment = []): Process
+    {
+        $version = $version !== '' ? $version : $this->current();
+        $directory = $this->directory($version);
+
+        if ($directory === null) {
+            throw new RuntimeException('The version ' . $version . ' is not on the server (' . $this->root() . '); xgp:versions lists the ones there.');
+        }
+
+        // a version that hands the work back (its folder named after another
+        // version than its config/version.php) would start itself without end
+        if (getenv('XGP_VERSION_CALL') === $version) {
+            throw new RuntimeException('The folder of version ' . $version . ' holds the code of version ' . $this->current() . '; rename it after config/version.php.');
+        }
+
+        return new Process([PHP_BINARY, $directory . '/artisan', $command, ...$arguments, '--no-interaction'], $directory, ['XGP_VERSION_CALL' => $version] + $environment, null, self::TIMEOUT);
+    }
+
+    /**
+     * Puts the running code into its directory under the versions path
+     * (once per version) and writes the map for the router. Returns what
+     * was done, one line each.
+     *
+     * @return list<string>
+     */
+    public function sync(): array
+    {
+        $version = $this->current();
+
+        if ($version === '' || preg_match(self::PATTERN, $version) !== 1) {
+            throw new RuntimeException('The version of the code (config version.files) must be a directory name: ' . $version);
+        }
+
+        $done = [$this->keepOwnDirectory($version)];
+
+        // the other versions read this environment too: their cached
+        // configuration (database password, mail server) is renewed here
+        foreach ($this->available() as $other) {
+            if ($other !== $version) {
+                $done[] = $this->cacheConfiguration($other);
+            }
+        }
+
+        $this->writeMap();
+        $done[] = 'Router map written (' . count($this->pinned()) . ' universe(s) on other versions).';
+
+        return $done;
+    }
+
+    private function keepOwnDirectory(string $version): string
+    {
+        $directory = $this->root() . '/' . $version;
+        $release = getenv('XGP_RELEASE');
+        $release = is_string($release) ? $release : '';
+
+        if (!is_file($directory . '/artisan')) {
+            $this->copy($this->source ?? base_path(), $directory, $release);
+
+            return 'Version ' . $version . ' copied to ' . $directory . '.';
+        }
+
+        $there = is_file($directory . '/.release') ? trim((string) file_get_contents($directory . '/.release')) : '';
+
+        if ($there === $release || $release === '') {
+            return 'Version ' . $version . ' is in ' . $directory . '.';
+        }
+
+        return 'WARNING: ' . $directory . ' holds release ' . ($there === '' ? '(unknown)' : $there) . ', this is ' . $release
+            . ': the version was not raised (config/version.php). Universes pinned to ' . $version . ' keep the code there.';
+    }
+
+    private function cacheConfiguration(string $version): string
+    {
+        try {
+            $this->artisan($version, 'config:cache');
+
+            return 'Version ' . $version . ': configuration cached.';
+        } catch (RuntimeException $e) {
+            return 'WARNING: ' . $e->getMessage();
+        }
+    }
+
+    /**
+     * Deletes the directories of the versions below the oldest in use; the
+     * running one stays whatever is in use.
+     *
+     * @return list<string> the versions deleted
+     */
+    public function prune(): array
+    {
+        $oldest = $this->oldestInUse();
+        $deleted = [];
+        // the folder the web server serves (xgp:versions:use) stays too
+        $served = realpath($this->root() . '/current');
+
+        foreach ($this->available() as $version) {
+            if ($version === $this->current() || version_compare($version, $oldest, '>=') || realpath($this->root() . '/' . $version) === $served) {
+                continue;
+            }
+
+            $this->deleteDirectory($this->root() . '/' . $version);
+            $deleted[] = $version;
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * The map public/index.php reads before the framework starts: the
+     * universes that play on another version, with where that version
+     * lies. Without any, the map is removed.
+     */
+    public function writeMap(): void
+    {
+        $file = $this->mapFile ?? storage_path('framework/versions.json');
+        // the map of earlier versions of this code, a PHP file that the
+        // opcache kept: gone, so nothing reads it by mistake
+        $legacy = dirname($file) . '/versions.php';
+
+        if (is_file($legacy)) {
+            unlink($legacy);
+        }
+        $pinned = $this->pinned();
+
+        if ($pinned === []) {
+            if (is_file($file)) {
+                unlink($file);
+            }
+
+            return;
+        }
+
+        $map = ['current' => $this->current(), 'root' => $this->root(), 'universes' => $pinned];
+        $temporary = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
+        // JSON, not PHP: a PHP file would stay in the opcache (the Docker
+        // stack never checks files for changes) and the router would keep
+        // sending a universe to the version it left
+        file_put_contents($temporary, (string) json_encode($map, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+        rename($temporary, $file);
+    }
+
+    /**
+     * @return array<string, string> slug => version, for the universes on another version
+     */
+    private function pinned(): array
+    {
+        $pinned = [];
+
+        foreach ($this->registry->all() as $instance) {
+            if ($instance->hasDatabase() && !$instance->runsOn($this->current()) && preg_match(self::PATTERN, $instance->version) === 1) {
+                $pinned[$instance->slug] = $instance->version;
+            }
+        }
+
+        return $pinned;
+    }
+
+    /**
+     * Copies the code without what is written at runtime, into a temporary
+     * directory first: a half copy is never taken for a version.
+     */
+    private function copy(string $from, string $to, string $release): void
+    {
+        // the containers of a release share the volume and their pids alike
+        $temporary = $this->root() . '/.copying-' . basename($to) . '-' . bin2hex(random_bytes(6));
+        $this->deleteDirectory($temporary);
+
+        if (!is_dir($this->root()) && !mkdir($this->root(), 0o750, true) && !is_dir($this->root())) {
+            throw new RuntimeException('Cannot create ' . $this->root());
+        }
+
+        $from = rtrim($from, '/');
+
+        try {
+            if (!mkdir($temporary, 0o750, true)) {
+                throw new RuntimeException('Cannot create ' . $temporary);
+            }
+
+            $this->copyTree($from, $temporary);
+        } catch (RuntimeException $e) {
+            $this->deleteDirectory($temporary);
+
+            throw $e;
+        }
+
+        $this->finish($from, $temporary, $release);
+
+        // another container copied the same version meanwhile: its copy counts
+        if (is_dir($to)) {
+            $this->deleteDirectory($temporary);
+        } elseif (!rename($temporary, $to)) {
+            $this->deleteDirectory($temporary);
+
+            throw new RuntimeException('Cannot move the copy to ' . $to);
+        }
+    }
+
+    /**
+     * What a copied version needs besides the code: the storage folders,
+     * its release mark, and the settings.
+     */
+    private function finish(string $from, string $copy, string $release): void
+    {
+        foreach (self::STORAGE as $directory) {
+            if (!is_dir($copy . '/' . $directory)) {
+                mkdir($copy . '/' . $directory, 0o770, true);
+            }
+        }
+
+        file_put_contents($copy . '/.release', $release . "\n");
+
+        // the settings stay one file: a changed password reaches every version
+        if (is_file($from . '/.env')) {
+            symlink($from . '/.env', $copy . '/.env');
+        }
+    }
+
+    private function copyTree(string $from, string $to): void
+    {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveCallbackFilterIterator(
+                new RecursiveDirectoryIterator($from, FilesystemIterator::SKIP_DOTS),
+                static fn (SplFileInfo $file): bool => !in_array(substr($file->getPathname(), strlen($from) + 1), self::SKIP, true),
+            ),
+            RecursiveIteratorIterator::SELF_FIRST,
+        );
+
+        foreach ($files as $file) {
+            if (!$file instanceof SplFileInfo) {
+                continue;
+            }
+
+            $target = $to . substr($file->getPathname(), strlen($from));
+
+            if ($file->isDir()) {
+                mkdir($target, 0o750, true);
+            } elseif (!copy($file->getPathname(), $target)) {
+                throw new RuntimeException('Cannot copy ' . $file->getPathname() . ' to ' . $target);
+            }
+        }
+    }
+
+    private function deleteDirectory(string $directory): void
+    {
+        if (!is_dir($directory)) {
+            return;
+        }
+
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+
+        foreach ($files as $file) {
+            if ($file instanceof SplFileInfo) {
+                $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+            }
+        }
+
+        rmdir($directory);
+    }
+}

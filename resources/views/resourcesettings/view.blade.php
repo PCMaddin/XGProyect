@@ -2,7 +2,8 @@
 
 @section('content')
 <form action="" method="post" role="form">
-    <table width="569">
+    @csrf
+    <table width="569" class="compact">
         <tbody>
             <tr>
                 <td class="c" colspan="5">{{ $Production_of_resources_in_the_planet }}</td>
@@ -27,7 +28,17 @@
                 <td class="k">{!! $plasma_crystal !!}</td>
                 <td class="k">{!! $plasma_deuterium !!}</td>
                 <td class="k">0</td>
-            </tr><tr>
+            </tr>
+            @if ($class_name !== '')
+            <tr>
+                <th scope="row" height="22">{{ __('game/characterclass.cc_class') }}: {{ $class_name }}</th>
+                <td class="k">{!! $class_metal !!}</td>
+                <td class="k">{!! $class_crystal !!}</td>
+                <td class="k">{!! $class_deuterium !!}</td>
+                <td class="k">{!! $class_energy !!}</td>
+            </tr>
+            @endif
+            <tr>
                 <th scope="row" height="22">{{ __('game/resources.rs_storage_capacity') }}</th>
                 <td class="k">{!! $planet_metal_max !!}</td>
                 <td class="k">{!! $planet_crystal_max !!}</td>

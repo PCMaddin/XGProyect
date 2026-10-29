@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Soupçons',
+    'su_sub_title' => 'Indices de multicomptes, de push et de scripts. Des indices, pas des preuves : tu décides.',
+    'su_list' => 'Indices',
+    'su_none' => 'Aucun indice.',
+    'su_player' => 'Joueur',
+    'su_sign' => 'Indice',
+    'su_score' => 'Intensité',
+    'su_evidence' => 'Preuves',
+    'su_seen' => 'Dernière fois',
+    'su_decision' => 'Décision',
+    'su_top_ten' => 'place :rank',
+    'su_with' => 'avec :player',
+    'su_kind_shared_device' => 'même navigateur',
+    'su_kind_shared_ip' => 'même adresse IP',
+    'su_kind_pushing' => 'envoie des ressources à un plus fort',
+    'su_kind_pushed' => 'reçoit des ressources',
+    'su_kind_around_clock' => 'actif presque 24 h sur 24',
+    'su_kind_machine_pace' => 'rythme de clics d\'un script',
+    'su_status_open' => 'ouvert',
+    'su_status_cleared' => 'en règle',
+    'su_status_excluded' => 'exclu',
+    'su_note' => 'Note',
+    'su_save' => 'Enregistrer',
+    'su_saved' => 'Décision enregistrée.',
+    'su_not_saved' => 'La décision n\'a pas pu être enregistrée.',
+    'su_help' => '« Exclu » retire le joueur de tous les classements et prix à la fin de la saison. Une adresse IP partagée peut aussi être un foyer. L\'analyse tourne toutes les heures (xgp:cheat:scan).',
+    'su_detail_logins' => 'connexions',
+    'su_detail_resources' => 'ressources nettes',
+    'su_detail_days' => 'jours complets',
+    'su_detail_requests' => 'requêtes par heure',
+];

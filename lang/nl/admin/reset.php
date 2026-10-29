@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Universum resetten',
+    're_sub_title' => 'Hier kun je losse onderdelen van het universum resetten of alles wissen. Dit kan niet ongedaan worden gemaakt — zorg eerst voor een back-up.',
+    're_reset_universe_confirmation' => 'Als je op OK klikt, worden de gekozen opties op nul gezet. Dit kan niet worden teruggedraaid en je bent zelf verantwoordelijk voor een back-up van de database. Bij een reset van het hele universum worden de accounts niet verwijderd.',
+    're_defenses_and_ships' => 'Werf en verdediging',
+    're_defenses' => 'Verdediging resetten',
+    're_ships' => 'Schepen resetten',
+    're_reset_hangar' => 'Wachtrij van werf en verdediging resetten',
+    're_buldings' => 'Gebouwen',
+    're_buildings_pl' => 'Planeetgebouwen resetten',
+    're_buildings_lu' => 'Maangebouwen resetten',
+    're_reset_buldings' => 'Bouwwachtrij resetten',
+    're_inve_ofis' => 'Onderzoek en officieren',
+    're_ofici' => 'Officieren resetten',
+    're_investigations' => 'Onderzoek resetten',
+    're_reset_invest' => 'Lopend onderzoek resetten',
+    're_resources' => 'Grondstoffen',
+    're_resources_dark' => 'Donkere materie resetten',
+    're_resources_met_cry' => 'Metaal, kristal en deuterium resetten',
+    're_general' => 'Algemeen',
+    're_reset_moons' => 'Manen resetten',
+    're_reset_notes' => 'Notities resetten',
+    're_reset_rw' => 'Gevechtsrapporten resetten',
+    're_reset_buddies' => 'Vriendenlijsten resetten',
+    're_reset_allys' => 'Allianties resetten',
+    're_reset_fleets' => 'Vloten resetten',
+    're_reset_banned' => 'Verbannen spelers resetten',
+    're_reset_messages' => 'Berichten resetten',
+    're_reset_statpoints' => 'Statistieken resetten',
+    're_reset_all' => 'Het hele universum resetten',
+    're_reset_h1' => 'Resetopties',
+    're_reset_excess' => 'Opties gereset',
+    're_reset_go' => 'Resetten',
+];

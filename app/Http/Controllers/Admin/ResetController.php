@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Admin\ResetRequest;
 use App\Services\Admin\ResetService;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\View\View;
@@ -31,27 +32,45 @@ class ResetController extends BaseController
             return redirect()->route('admin.reset')->with('success', __('admin/reset.re_reset_excess'));
         }
 
-        isset($data['defenses']) && $this->resetService->resetDefenses();
-        isset($data['ships']) && $this->resetService->resetShips();
-        isset($data['h_d']) && $this->resetService->resetShipyardQueues();
-        isset($data['edif_p']) && $this->resetService->resetPlanetBuildings();
-        isset($data['edif_l']) && $this->resetService->resetMoonBuildings();
-        isset($data['edif']) && $this->resetService->resetBuildingsQueues();
-        isset($data['inves']) && $this->resetService->resetResearch();
-        isset($data['inves_c']) && $this->resetService->resetResearchQueues();
-        isset($data['ofis']) && $this->resetService->resetOfficiers();
-        isset($data['dark']) && $this->resetService->resetDarkMatter();
-        isset($data['resources']) && $this->resetService->resetResources();
-        isset($data['notes']) && $this->resetService->resetNotes();
-        isset($data['rw']) && $this->resetService->resetReports();
-        isset($data['friends']) && $this->resetService->resetFriends();
-        isset($data['alliances']) && $this->resetService->resetAlliances();
-        isset($data['fleets']) && $this->resetService->resetFleets();
-        isset($data['banneds']) && $this->resetService->resetBanned();
-        isset($data['messages']) && $this->resetService->resetMessages();
-        isset($data['statpoints']) && $this->resetService->resetStatistics();
-        isset($data['moons']) && $this->resetService->resetMoons();
+        foreach ($this->resets() as $field => $reset) {
+            if (isset($data[$field])) {
+                $reset();
+            }
+        }
 
         return redirect()->route('admin.reset')->with('success', __('admin/reset.re_reset_excess'));
+    }
+
+    /**
+     * The partial resets by form field, in the order they run.
+     *
+     * @return array<string, Closure(): void>
+     */
+    private function resets(): array
+    {
+        $service = $this->resetService;
+
+        return [
+            'defenses' => $service->resetDefenses(...),
+            'ships' => $service->resetShips(...),
+            'h_d' => $service->resetShipyardQueues(...),
+            'edif_p' => $service->resetPlanetBuildings(...),
+            'edif_l' => $service->resetMoonBuildings(...),
+            'edif' => $service->resetBuildingsQueues(...),
+            'inves' => $service->resetResearch(...),
+            'inves_c' => $service->resetResearchQueues(...),
+            'ofis' => $service->resetOfficiers(...),
+            'dark' => $service->resetDarkMatter(...),
+            'resources' => $service->resetResources(...),
+            'notes' => $service->resetNotes(...),
+            'rw' => $service->resetReports(...),
+            'friends' => $service->resetFriends(...),
+            'alliances' => $service->resetAlliances(...),
+            'fleets' => $service->resetFleets(...),
+            'banneds' => $service->resetBanned(...),
+            'messages' => $service->resetMessages(...),
+            'statpoints' => $service->resetStatistics(...),
+            'moons' => $service->resetMoons(...),
+        ];
     }
 }

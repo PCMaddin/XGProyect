@@ -1,0 +1,12 @@
+# MariaDB for the game; the buffer pool comes from deploy/.env (DB_BUFFER_POOL)
+[mariadb]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+max_connections = 500
+max_allowed_packet = 64M
+# 1: a committed transaction (a paid order) survives a crash; 2 would lose
+# up to a second of them for a little write throughput
+innodb_flush_log_at_trx_commit = 1
+innodb_log_file_size = 512M
+innodb_flush_method = O_DIRECT
+skip-name-resolve

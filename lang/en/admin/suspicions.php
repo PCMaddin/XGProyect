@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Suspicions',
+    'su_sub_title' => 'Signs of multiple accounts, pushing and scripts. Signs, not proof: you decide.',
+    'su_list' => 'Signs',
+    'su_none' => 'No signs.',
+    'su_player' => 'Player',
+    'su_sign' => 'Sign',
+    'su_score' => 'Strength',
+    'su_evidence' => 'Evidence',
+    'su_seen' => 'Last seen',
+    'su_decision' => 'Decision',
+    'su_top_ten' => 'place :rank',
+    'su_with' => 'with :player',
+    'su_kind_shared_device' => 'same browser',
+    'su_kind_shared_ip' => 'same IP address',
+    'su_kind_pushing' => 'sends a stronger player resources',
+    'su_kind_pushed' => 'receives resources',
+    'su_kind_around_clock' => 'active almost around the clock',
+    'su_kind_machine_pace' => 'clicks at a script\'s pace',
+    'su_status_open' => 'open',
+    'su_status_cleared' => 'fine',
+    'su_status_excluded' => 'excluded',
+    'su_note' => 'Note',
+    'su_save' => 'Save',
+    'su_saved' => 'Decision saved.',
+    'su_not_saved' => 'The decision could not be saved.',
+    'su_help' => '“Excluded” leaves the player out of all rankings and prizes when the season ends. A shared IP address can also be a household. The scan runs every hour (xgp:cheat:scan).',
+    'su_detail_logins' => 'sign-ins',
+    'su_detail_resources' => 'net resources',
+    'su_detail_days' => 'full days',
+    'su_detail_requests' => 'requests per hour',
+];

@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Reiniciar universo',
+    're_sub_title' => 'Daqui você pode reiniciar aspectos isolados do universo ou apagar tudo. Esta operação não pode ser desfeita — faça um backup antes.',
+    're_reset_universe_confirmation' => 'Ao clicar em OK, as opções escolhidas serão zeradas. Esta operação não pode ser revertida e fazer o backup do banco de dados é sua responsabilidade. Ao reiniciar o universo inteiro, as contas não são excluídas.',
+    're_defenses_and_ships' => 'Hangar e defesas',
+    're_defenses' => 'Reiniciar defesas',
+    're_ships' => 'Reiniciar naves',
+    're_reset_hangar' => 'Reiniciar a fila do hangar e das defesas',
+    're_buldings' => 'Edifícios',
+    're_buildings_pl' => 'Reiniciar edifícios planetários',
+    're_buildings_lu' => 'Reiniciar edifícios lunares',
+    're_reset_buldings' => 'Reiniciar a fila de construção',
+    're_inve_ofis' => 'Pesquisas e oficiais',
+    're_ofici' => 'Reiniciar oficiais',
+    're_investigations' => 'Reiniciar pesquisas',
+    're_reset_invest' => 'Reiniciar pesquisas em andamento',
+    're_resources' => 'Recursos',
+    're_resources_dark' => 'Reiniciar matéria escura',
+    're_resources_met_cry' => 'Reiniciar metal, cristal e deutério',
+    're_general' => 'Geral',
+    're_reset_moons' => 'Reiniciar luas',
+    're_reset_notes' => 'Reiniciar notas',
+    're_reset_rw' => 'Reiniciar relatórios de combate',
+    're_reset_buddies' => 'Reiniciar listas de amigos',
+    're_reset_allys' => 'Reiniciar alianças',
+    're_reset_fleets' => 'Reiniciar frotas',
+    're_reset_banned' => 'Reiniciar jogadores banidos',
+    're_reset_messages' => 'Reiniciar mensagens',
+    're_reset_statpoints' => 'Reiniciar estatísticas',
+    're_reset_all' => 'Reiniciar o universo inteiro',
+    're_reset_h1' => 'Opções de reinício',
+    're_reset_excess' => 'Opções reiniciadas com sucesso',
+    're_reset_go' => 'Reiniciar',
+];

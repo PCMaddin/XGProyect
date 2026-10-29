@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => '可疑情况',
+    'su_sub_title' => '多账号、刷资源和脚本的迹象。只是迹象而非证据，由你判断。',
+    'su_list' => '迹象',
+    'su_none' => '没有迹象。',
+    'su_player' => '玩家',
+    'su_sign' => '迹象',
+    'su_score' => '强度',
+    'su_evidence' => '依据',
+    'su_seen' => '最近发现',
+    'su_decision' => '判断',
+    'su_top_ten' => '第 :rank 名',
+    'su_with' => '与 :player',
+    'su_kind_shared_device' => '同一浏览器',
+    'su_kind_shared_ip' => '同一 IP 地址',
+    'su_kind_pushing' => '向更强玩家输送资源',
+    'su_kind_pushed' => '接收资源',
+    'su_kind_around_clock' => '几乎全天活跃',
+    'su_kind_machine_pace' => '脚本般的点击速度',
+    'su_status_open' => '待处理',
+    'su_status_cleared' => '正常',
+    'su_status_excluded' => '已排除',
+    'su_note' => '备注',
+    'su_save' => '保存',
+    'su_saved' => '判断已保存。',
+    'su_not_saved' => '无法保存判断。',
+    'su_help' => '“已排除”会在赛季结束时将该玩家移出所有排名和奖励。共享 IP 也可能是同一家庭。检查每小时运行一次（xgp:cheat:scan）。',
+    'su_detail_logins' => '登录次数',
+    'su_detail_resources' => '净资源',
+    'su_detail_days' => '全天天数',
+    'su_detail_requests' => '每小时请求数',
+];

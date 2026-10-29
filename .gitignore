@@ -21,12 +21,20 @@ yarn-error.log
 
 #xgproyect
 /config/config.php
-/public/compiles
 storage/backups/*.sql
 storage/cache/*.html
 storage/logs/*.txt
 .phpdoc/*
 /docs/*
-vendor
+!/docs/universes.md
+!/docs/deployment.md
 config/xgp-db-config.php
 .php-cs-fixer.cache
+
+#simulator reports (tools/simulate-bots.php)
+/storage/simulations/
+
+# deploy.sh: the releases it built (image tags to clean up)
+/deploy/.releases
+/tests/Browser/.seed.json
+/tests/Browser/shots/

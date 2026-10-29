@@ -44,7 +44,11 @@ class RequirementsController extends BaseController
         return 'install.steps.requirements';
     }
 
-    /** @return array{requirement: mixed, message: mixed, result: string} */
+    /**
+     * @return array{requirement: mixed, message: mixed, result: string}
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     protected function checkPhpVersion(): array
     {
         $currentVersion = PHP_VERSION;
@@ -105,7 +109,11 @@ class RequirementsController extends BaseController
         ];
     }
 
-    /** @return array{requirement: mixed, message: mixed, result: string} */
+    /**
+     * @return array{requirement: mixed, message: mixed, result: string}
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     protected function checkPhpExtensions(): array
     {
         $notLoaded = InstallRequirements::missingPhpExtensions();

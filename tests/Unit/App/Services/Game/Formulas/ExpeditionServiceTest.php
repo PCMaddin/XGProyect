@@ -23,9 +23,10 @@ class ExpeditionServiceTest extends TestCase
         'expedition_result_aliens_weight' => 260,
         'expedition_result_delay_weight' => 700,
         'expedition_result_early_weight' => 200,
-        'expedition_result_nothing_weight' => 1880,
+        'expedition_result_nothing_weight' => 1830,
         'expedition_result_merchant_weight' => 17,
         'expedition_result_black_hole_weight' => 33,
+        'expedition_result_item_weight' => 50,
         'expedition_dark_matter_source_small_weight' => 8900,
         'expedition_dark_matter_source_medium_weight' => 1000,
         'expedition_dark_matter_source_large_weight' => 100,
@@ -44,7 +45,7 @@ class ExpeditionServiceTest extends TestCase
     {
         $expedition = $this->expeditionService();
 
-        $this->assertEquals(2500, $expedition->getMaxExpeditionPoints(50000));
+        $this->assertEquals(2400, $expedition->getMaxExpeditionPoints(50000));
         $this->assertEquals(6000, $expedition->getMaxExpeditionPoints(500000));
         $this->assertEquals(9000, $expedition->getMaxExpeditionPoints(2500000));
         $this->assertEquals(12000, $expedition->getMaxExpeditionPoints(10000000));
@@ -54,18 +55,23 @@ class ExpeditionServiceTest extends TestCase
         $this->assertEquals(25000, $expedition->getMaxExpeditionPoints(120000000));
     }
 
-    public function testGetMaxShipsExpeditionPoints(): void
+    public function testShipFindsCountHalfAsManyPoints(): void
     {
         $expedition = $this->expeditionService();
 
-        $this->assertEquals(250000, $expedition->getMaxShipsExpeditionPoints(50000));
-        $this->assertEquals(600000, $expedition->getMaxShipsExpeditionPoints(500000));
-        $this->assertEquals(900000, $expedition->getMaxShipsExpeditionPoints(2500000));
-        $this->assertEquals(1200000, $expedition->getMaxShipsExpeditionPoints(10000000));
-        $this->assertEquals(1500000, $expedition->getMaxShipsExpeditionPoints(30000000));
-        $this->assertEquals(1800000, $expedition->getMaxShipsExpeditionPoints(60000000));
-        $this->assertEquals(2100000, $expedition->getMaxShipsExpeditionPoints(90000000));
-        $this->assertEquals(2500000, $expedition->getMaxShipsExpeditionPoints(120000000));
+        $this->assertSame(1250, $expedition->getMaxShipFindPoints(50000));
+        $this->assertSame(3000, $expedition->getMaxShipFindPoints(500000));
+        $this->assertSame(6000, $expedition->getMaxShipFindPoints(10000000));
+        $this->assertSame(12500, $expedition->getMaxShipFindPoints(120000000));
+    }
+
+    public function testResourceFindsCountAtLeast200Points(): void
+    {
+        $expedition = $this->expeditionService();
+
+        $this->assertSame(200, $expedition->getResourceFindPoints(20, 50000));
+        $this->assertSame(1500, $expedition->getResourceFindPoints(1500, 50000));
+        $this->assertSame(2400, $expedition->getResourceFindPoints(6000, 50000));
     }
 
     public function testMaxExpeditionPointsAcceptStatisticFloats(): void
@@ -73,7 +79,6 @@ class ExpeditionServiceTest extends TestCase
         $expedition = $this->expeditionService();
 
         $this->assertEquals(6000, $expedition->getMaxExpeditionPoints(500000.0));
-        $this->assertEquals(600000, $expedition->getMaxShipsExpeditionPoints(500000.0));
     }
 
     public function testCalculateExpeditionPoints(): void
@@ -94,7 +99,7 @@ class ExpeditionServiceTest extends TestCase
         $result = $expedition->getExpeditionResult();
 
         $validResults = [
-            'darkMatter', 'ships', 'resources', 'pirates', 'aliens', 'delay', 'early', 'nothing', 'merchant', 'blackHole'
+            'darkMatter', 'ships', 'resources', 'pirates', 'aliens', 'delay', 'early', 'nothing', 'merchant', 'blackHole', 'item'
         ];
 
         $this->assertContains($result, $validResults);
@@ -112,10 +117,12 @@ class ExpeditionServiceTest extends TestCase
             'aliens' => 260,
             'delay' => 700,
             'early' => 200,
-            'nothing' => 1880,
+            'nothing' => 1830,
             'merchant' => 17,
             'blackHole' => 33,
+            'item' => 50,
         ], $expedition->getExpeditionResultWeights());
+        $this->assertSame(10000, array_sum($expedition->getExpeditionResultWeights()));
 
         $this->assertSame([
             'small' => 8900,
@@ -193,17 +200,30 @@ class ExpeditionServiceTest extends TestCase
     {
         $expedition = $this->expeditionService();
 
-        $resultNormal = $expedition->getResourceSourceSizeMultChances('normal');
-        $this->assertGreaterThanOrEqual(10, $resultNormal);
-        $this->assertLessThanOrEqual(50, $resultNormal);
+        // even factors: 10-50, 50-100, 100-200
+        foreach (['normal' => [10, 50], 'large' => [50, 100], 'xl' => [100, 200]] as $size => [$min, $max]) {
+            for ($i = 0; $i < 50; $i++) {
+                $factor = $expedition->getResourceSourceSizeMultChances($size);
+                $this->assertGreaterThanOrEqual($min, $factor);
+                $this->assertLessThanOrEqual($max, $factor);
+                $this->assertSame(0, $factor % 2);
+            }
+        }
+    }
 
-        $resultLarge = $expedition->getResourceSourceSizeMultChances('large');
-        $this->assertGreaterThanOrEqual(50, $resultLarge);
-        $this->assertLessThanOrEqual(100, $resultLarge);
+    public function testShipFindFactors(): void
+    {
+        $expedition = $this->expeditionService();
 
-        $resultXl = $expedition->getResourceSourceSizeMultChances('xl');
-        $this->assertGreaterThanOrEqual(100, $resultXl);
-        $this->assertLessThanOrEqual(200, $resultXl);
+        // 10-50, even 52-100, even 102-200
+        foreach (['normal' => [10, 50, 1], 'large' => [52, 100, 2], 'xl' => [102, 200, 2]] as $size => [$min, $max, $step]) {
+            for ($i = 0; $i < 50; $i++) {
+                $factor = $expedition->getShipSourceSizeMultChances($size);
+                $this->assertGreaterThanOrEqual($min, $factor);
+                $this->assertLessThanOrEqual($max, $factor);
+                $this->assertSame(0, $factor % $step);
+            }
+        }
     }
 
     public function testGetResourceFoundAmount(): void
@@ -223,56 +243,68 @@ class ExpeditionServiceTest extends TestCase
         $this->assertEquals(266, $result);
     }
 
-    public function testCalculateShipFoundAmount(): void
+    public function testAShipFindHasAtLeast10000StructurePoints(): void
     {
         $expedition = $this->expeditionService();
 
-        $result = $expedition->calculateShipFoundAmount(3, 150);
-        $this->assertEquals(225, $result);
+        $this->assertSame(10000, $expedition->calculateShipFoundAmount(3, 150));
+        $this->assertSame(150000, $expedition->calculateShipFoundAmount(50, 3000));
     }
 
-    public function testGetPossibleShips(): void
+    public function testAllFlyingShipsCountForTheExpeditionPoints(): void
     {
         $expedition = $this->expeditionService();
 
-        $result = $expedition->getPossibleShips();
+        foreach ([202, 203, 208, 209, 210, 214, 215] as $ship) {
+            $this->assertTrue($expedition->countsForExpeditionPoints($ship));
+        }
 
-        $expected = [
-            202,
-            203,
-            204,
-            205,
-            206,
-            207,
-            210,
-            211,
-            213,
-            215
-        ];
-
-        $this->assertEquals($expected, $result);
+        $this->assertFalse($expedition->countsForExpeditionPoints(212));
     }
 
-    public function testGetShipsObtainableChances(): void
+    public function testAFleetFindsShipsUpToOneStepHeavierThanItsHeaviest(): void
     {
         $expedition = $this->expeditionService();
 
-        $result = $expedition->getShipsObtainableChances();
+        $this->assertSame([210, 202], $expedition->getFindableShips([210 => 5]));
+        $this->assertSame([210, 202, 204, 203, 205], $expedition->getFindableShips([203 => 100, 202 => 3]));
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206, 207, 215, 211, 213, 218], $expedition->getFindableShips([213 => 1]));
+        // the battlecruiser finds up to the bomber, the pathfinder up to the cruiser
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206, 207, 215, 211], $expedition->getFindableShips([215 => 1]));
+        $this->assertSame([210, 202, 204, 203, 205, 219, 206], $expedition->getFindableShips([219 => 1]));
+        // recyclers, colony ships and deathstars find nothing on their own
+        $this->assertSame([], $expedition->getFindableShips([208 => 1, 209 => 10, 214 => 1]));
+        $this->assertFalse($expedition->countsForExpeditionPoints(217));
+        $this->assertSame([210, 202], $expedition->getFindableShips([209 => 10, 210 => 1]));
+    }
 
-        $expected = [
-            202 => 0.1,
-            203 => 0.1,
-            204 => 0.1,
-            205 => 0.5,
-            206 => 0.25,
-            207 => 0.125,
-            210 => 0.1,
-            211 => 0.0625,
-            213 => 0.0625,
-            215 => 0.0625
-        ];
+    public function testAShipFindDrawsTypesAndNumbersUntilTheBudgetIsSpent(): void
+    {
+        $structure = [202 => 4000, 203 => 12000, 204 => 4000, 205 => 10000, 210 => 1000];
 
-        $this->assertEquals($expected, $result);
+        // large cargos find probes, small cargos, light fighters, large
+        // cargos and heavy fighters; budget 30000: heavy fighter (index 4),
+        // 2 of 3; large cargo (3), 0 affordable; probe (0), 4 of 10; small
+        // cargo (1), 1 of 1; then three draws that buy nothing
+        $expedition = $this->scripted([4, 2, 3, 0, 4, 1, 1, 3, 2, 4]);
+
+        $this->assertSame([202 => 1, 205 => 2, 210 => 4], $expedition->getFoundShips([203 => 100], 30000, $structure));
+    }
+
+    public function testShipsWithoutAStepAreNeverFound(): void
+    {
+        $structure = [203 => 12000, 208 => 30000, 209 => 16000, 210 => 1000, 214 => 9000000];
+
+        // regression: each deathstar, recycler and colony ship brought a free one
+        for ($i = 0; $i < 20; $i++) {
+            $found = $this->expeditionService()->getFoundShips([203 => 1, 208 => 1, 209 => 5, 214 => 1], 1000000, $structure);
+            $this->assertSame([], array_intersect_key($found, [208 => 0, 209 => 0, 214 => 0]));
+            $this->assertLessThanOrEqual(1000000, array_sum(array_map(fn (int $id, int $count): int => $structure[$id] * $count, array_keys($found), $found)));
+        }
+
+        // no findable ship in the fleet, or a budget too small: nothing
+        $this->assertSame([], $this->expeditionService()->getFoundShips([209 => 50, 214 => 1], 10000000, $structure));
+        $this->assertSame([], $this->expeditionService()->getFoundShips([210 => 5], 500, $structure));
     }
 
     public function testGetFleetDeplay(): void
@@ -281,6 +313,51 @@ class ExpeditionServiceTest extends TestCase
 
         $result = $expedition->getFleetDeplay();
         $this->assertContains($result, [2, 3, 5]); // Assert that the result is one of the allowed values
+    }
+
+    public function testTheEnemyFleetIsAShareOfTheExpeditionPlusExtraShips(): void
+    {
+        $ships = [204 => 10, 207 => 3, 210 => 0];
+
+        // pirates: 30 % (+5 % of it, -10 %), rounded down, plus 5 light fighters
+        $this->assertSame([204 => 3 + 5], $this->scripted([50, -100])->getEnemyFleet('pirates', 'normal', $ships));
+        // huge: 80 %, plus 2 battleships
+        $this->assertSame([204 => 8, 207 => 2 + 2], $this->scripted([0, 0])->getEnemyFleet('pirates', 'huge', $ships));
+        // aliens: 60 % rounded up, plus 3 battleships (for battlecruisers)
+        $this->assertSame([204 => 6, 207 => 2 + 3], $this->scripted([0, 0])->getEnemyFleet('aliens', 'large', $ships));
+        // normal aliens bring 5 heavy fighters, huge ones 2 destroyers
+        $this->assertSame([204 => 5, 207 => 2, 205 => 5], $this->scripted([100, 100])->getEnemyFleet('aliens', 'normal', $ships));
+        $this->assertSame([204 => 9, 207 => 3, 213 => 2], $this->scripted([0, 0])->getEnemyFleet('aliens', 'huge', $ships));
+    }
+
+    public function testPiratesAreBehindAndAliensAhead(): void
+    {
+        $this->assertSame(-3, $this->expeditionService()->getEnemyTechnologyBonus('pirates'));
+        $this->assertSame(3, $this->expeditionService()->getEnemyTechnologyBonus('aliens'));
+        $this->assertContains($this->expeditionService()->getEnemySize(), ['normal', 'large', 'huge']);
+    }
+
+    /**
+     * The service with the given random numbers, in order.
+     *
+     * @param list<int> $randoms
+     */
+    private function scripted(array $randoms): ExpeditionService
+    {
+        return new class ($this->createStub(SettingsService::class), $randoms) extends ExpeditionService {
+            /** @param list<int> $randoms */
+            public function __construct(SettingsService $settings, private array $randoms)
+            {
+                parent::__construct($settings);
+            }
+
+            protected function random(int $min, int $max): int
+            {
+                $value = array_shift($this->randoms) ?? $min;
+
+                return max($min, min($max, $value));
+            }
+        };
     }
 
     /** @param array<string, int> $overrides */

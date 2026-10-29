@@ -9,8 +9,8 @@ use App\Services\SettingsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
-use Xgp\App\Libraries\PlanetLib;
-use Xgp\App\Libraries\Users\Shortcuts;
+use App\Libraries\PlanetLib;
+use App\Libraries\Users\Shortcuts;
 
 class UsersManagementService
 {
@@ -37,7 +37,7 @@ class UsersManagementService
             DB::transaction(function () use ($name, $email, $auth, $pass, $galaxy, $system, $planet) {
                 $time = time();
 
-                $user = User::create([
+                $user = new User([
                     'name' => $name,
                     'email' => $email,
                     'ip_at_reg' => request()->ip() ?? '',
@@ -45,9 +45,12 @@ class UsersManagementService
                     'current_planet' => 0,
                     'register_time' => $time,
                     'onlinetime' => $time,
-                    'authlevel' => $auth,
                     'password' => $pass,
                 ]);
+                $user->authlevel = $auth;
+                // the admin vouches for the address
+                $user->email_verified_at = now();
+                $user->save();
 
                 $lastUserId = $user->id;
 
@@ -132,7 +135,7 @@ class UsersManagementService
             $result = [];
 
             foreach ($shortcuts->getAllAsArray() as $value) {
-                $type = match ((int) ($value['pt'] ?? 0)) {
+                $type = match ($value['pt']) {
                     1 => (string) __('admin/users.us_planet_shortcut'),
                     2 => (string) __('admin/users.us_debris_shortcut'),
                     3 => (string) __('admin/users.us_moon_shortcut'),

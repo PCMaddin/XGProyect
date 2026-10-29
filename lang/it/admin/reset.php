@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    're_reset_universe' => 'Azzera universo',
+    're_sub_title' => 'Da qui puoi azzerare singoli aspetti dell’universo o cancellare tutto. L’operazione è irreversibile — assicurati prima di avere un backup.',
+    're_reset_universe_confirmation' => 'Cliccando OK, le opzioni scelte verranno azzerate. L’operazione è irreversibile e il backup del database è una tua responsabilità. Azzerando tutto l’universo gli account non vengono eliminati.',
+    're_defenses_and_ships' => 'Cantiere spaziale e difese',
+    're_defenses' => 'Azzera difese',
+    're_ships' => 'Azzera navi',
+    're_reset_hangar' => 'Azzera la coda del cantiere e delle difese',
+    're_buldings' => 'Edifici',
+    're_buildings_pl' => 'Azzera edifici planetari',
+    're_buildings_lu' => 'Azzera edifici lunari',
+    're_reset_buldings' => 'Azzera la coda di costruzione',
+    're_inve_ofis' => 'Ricerche e ufficiali',
+    're_ofici' => 'Azzera ufficiali',
+    're_investigations' => 'Azzera ricerche',
+    're_reset_invest' => 'Azzera ricerche in corso',
+    're_resources' => 'Risorse',
+    're_resources_dark' => 'Azzera materia oscura',
+    're_resources_met_cry' => 'Azzera metallo, cristalli e deuterio',
+    're_general' => 'Generale',
+    're_reset_moons' => 'Azzera lune',
+    're_reset_notes' => 'Azzera note',
+    're_reset_rw' => 'Azzera rapporti di combattimento',
+    're_reset_buddies' => 'Azzera liste amici',
+    're_reset_allys' => 'Azzera alleanze',
+    're_reset_fleets' => 'Azzera flotte',
+    're_reset_banned' => 'Azzera giocatori bannati',
+    're_reset_messages' => 'Azzera messaggi',
+    're_reset_statpoints' => 'Azzera statistiche',
+    're_reset_all' => 'Azzera tutto l’universo',
+    're_reset_h1' => 'Opzioni di azzeramento',
+    're_reset_excess' => 'Opzioni azzerate',
+    're_reset_go' => 'Azzera',
+];

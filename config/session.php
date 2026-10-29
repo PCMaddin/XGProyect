@@ -72,7 +72,8 @@ return [
     |
     */
 
-    'connection' => env('SESSION_CONNECTION'),
+    // on Redis the "session" connection (database.php), not the cache's
+    'connection' => env('SESSION_CONNECTION', env('SESSION_DRIVER') === 'redis' ? 'session' : null),
 
     /*
     |--------------------------------------------------------------------------

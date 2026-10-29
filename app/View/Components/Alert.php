@@ -11,7 +11,9 @@ use Illuminate\View\Component;
 class Alert extends Component
 {
     /**
-     * Create a new component instance.
+     * Create a new component instance; $dismissible is the Blade attribute.
+     *
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function __construct(
         private bool $dismissible = true

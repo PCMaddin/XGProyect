@@ -6,19 +6,22 @@ namespace App\Services\Admin;
 
 use App\Http\Requests\Admin\AllianceRankRequest;
 use App\Models\User;
+use App\Services\Game\AllianceRankService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
-use Xgp\App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
-use Xgp\App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
-use Xgp\App\Libraries\Alliance\Ranks;
+use App\Core\Enumerators\AllianceRanksEnumerator as AllianceRanks;
+use App\Core\Enumerators\SwitchIntEnumerator as SwitchInt;
+use App\Libraries\Alliance\Ranks;
 
 /**
  * @SuppressWarnings("PHPMD.StaticAccess")
  */
 class AlliancesService
 {
-    public function __construct(private readonly SettingsService $settings)
-    {
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly AllianceRankService $rankService,
+    ) {
     }
 
     public function createAlliance(string $allianceName, string $allianceTag, int $allianceFounder): void
@@ -77,15 +80,15 @@ class AlliancesService
             return [
                 'i' => $index,
                 'name' => $details['rank'],
-                'delete' => $rights[AllianceRanks::DELETE] === SwitchInt::on,
-                'kick' => $rights[AllianceRanks::KICK] === SwitchInt::on,
-                'applications' => $rights[AllianceRanks::APPLICATIONS] === SwitchInt::on,
-                'memberlist' => $rights[AllianceRanks::VIEW_MEMBER_LIST] === SwitchInt::on,
-                'app_management' => $rights[AllianceRanks::APPLICATION_MANAGEMENT] === SwitchInt::on,
-                'administration' => $rights[AllianceRanks::ADMINISTRATION] === SwitchInt::on,
-                'online_status' => $rights[AllianceRanks::ONLINE_STATUS] === SwitchInt::on,
-                'send_circular' => $rights[AllianceRanks::SEND_CIRCULAR] === SwitchInt::on,
-                'right_hand' => $rights[AllianceRanks::RIGHT_HAND] === SwitchInt::on,
+                'delete' => $rights[AllianceRanks::DELETE] === SwitchInt::ON,
+                'kick' => $rights[AllianceRanks::KICK] === SwitchInt::ON,
+                'applications' => $rights[AllianceRanks::APPLICATIONS] === SwitchInt::ON,
+                'memberlist' => $rights[AllianceRanks::VIEW_MEMBER_LIST] === SwitchInt::ON,
+                'app_management' => $rights[AllianceRanks::APPLICATION_MANAGEMENT] === SwitchInt::ON,
+                'administration' => $rights[AllianceRanks::ADMINISTRATION] === SwitchInt::ON,
+                'online_status' => $rights[AllianceRanks::ONLINE_STATUS] === SwitchInt::ON,
+                'send_circular' => $rights[AllianceRanks::SEND_CIRCULAR] === SwitchInt::ON,
+                'right_hand' => $rights[AllianceRanks::RIGHT_HAND] === SwitchInt::ON,
             ];
         }, $rawRanks, array_keys($rawRanks));
     }
@@ -166,8 +169,8 @@ class AlliancesService
 
             foreach ($availableRanks as $rank) {
                 $rights[$rank] = $request->has('u' . $id . 'r' . $rank)
-                    ? SwitchInt::on
-                    : SwitchInt::off;
+                    ? SwitchInt::ON
+                    : SwitchInt::OFF;
             }
 
             $ranks->editRankById($id, $rights);
@@ -182,17 +185,16 @@ class AlliancesService
         session()->flash('success', __('admin/alliances.al_rank_saved'));
     }
 
-    public function deleteRanks(AllianceRankRequest $request, Ranks $ranks): void
+    public function deleteRanks(AllianceRankRequest $request, int $allianceId, Ranks $ranks): void
     {
         /** @var array<int, int|string> $toDelete */
         $toDelete = (array) $request->input('delete_message', []);
 
         $ids = array_map('intval', $toDelete);
-        $ids = array_filter($ids, fn (int $id) => $id >= 2);
         rsort($ids);
 
         foreach ($ids as $rankId) {
-            $ranks->deleteRankById($rankId);
+            $this->rankService->deleteRank($allianceId, $ranks, $rankId);
         }
 
         session()->flash('success', __('admin/alliances.al_rank_removed'));

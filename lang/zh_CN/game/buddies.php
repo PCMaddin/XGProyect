@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'bu_request_exists' => '已经向该玩家发送过申请！',
+    'bu_cannot_request_yourself' => '不能向自己发送好友申请',
+    'bu_request_message' => '申请消息',
+    'bu_player' => '名称',
+    'bu_request_text' => '申请内容',
+    'bu_characters' => '字符',
+    'bu_back' => '返回',
+    'bu_send' => '发送',
+    'bu_cancel_request' => '撤回申请',
+    'bu_accept' => '接受',
+    'bu_decline' => '拒绝',
+    'bu_delete' => '删除',
+    'bu_buddy_list' => '好友列表',
+    'bu_requests' => '申请',
+    'bu_alliance' => '联盟',
+    'bu_coords' => '坐标',
+    'bu_text' => '内容',
+    'bu_action' => '操作',
+    'bu_my_requests' => '我的申请',
+    'bu_partners' => '我的好友',
+    'bu_estate' => '状态',
+    'bu_deleted_title' => '失去好友',
+    'bu_deleted_text' => '玩家 %u 已将你从好友列表中删除。',
+    'bu_accepted_title' => '申请已接受',
+    'bu_accepted_text' => '玩家 %u 接受了你的好友申请。',
+    'bu_rejected_title' => '申请被拒绝',
+    'bu_rejected_text' => '玩家 %u 拒绝了你的好友申请。',
+    'bu_to_accept_title' => '新的好友申请',
+    'bu_to_accept_text' => '玩家 %u 向你发送了好友申请。',
+];

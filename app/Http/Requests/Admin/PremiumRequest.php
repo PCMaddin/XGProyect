@@ -22,6 +22,10 @@ class PremiumRequest extends FormRequest
     {
         return [
             'premium_url' => ['nullable', 'url', 'max:254'],
+            'premium_mode' => ['nullable', 'in:pay2win,play2win'],
+            'payment_methods' => ['nullable', 'array'],
+            'payment_methods.*' => ['string', 'in:stripe,wax,token'],
+            'payment_methods_form' => ['nullable'],
             'registration_dark_matter' => ['nullable', 'integer', 'min:0'],
             'merchant_price' => ['nullable', 'numeric', 'min:0'],
             'merchant_base_min_exchange_rate' => ['nullable', 'numeric', 'min:0'],
@@ -29,6 +33,9 @@ class PremiumRequest extends FormRequest
             'merchant_metal_multiplier' => ['nullable', 'numeric', 'min:0'],
             'merchant_crystal_multiplier' => ['nullable', 'numeric', 'min:0'],
             'merchant_deuterium_multiplier' => ['nullable', 'numeric', 'min:0'],
+            'merchant_scrap_base_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'merchant_scrap_max_rate' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'merchant_scrap_bargain_price' => ['nullable', 'integer', 'min:0'],
         ];
     }
 

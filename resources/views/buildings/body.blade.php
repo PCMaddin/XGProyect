@@ -2,7 +2,7 @@
 
 @section('content')
 {!! $BuildListScript !!}
-<table width="530">
+<table width="530" class="element-list">
     @include('game.queue_rows', ['rows' => $queueRows])
     @foreach ($list_of_buildings as $item)
     <tr>
@@ -14,6 +14,9 @@
         <td class="l">
             <a href="game.php?page=technologydetails&technology={{ $item['i'] }}">{{ $item['n'] }}</a>{{ $item['nivel'] }}<br>
             {{ $item['descriptions'] }}<br>
+            @if ($item['i'] === 36 && $item['nivel'] !== '')
+            <a href="game.php?page=spacedock">{{ __('game/spacedock.sd_title') }}</a><br>
+            @endif
             {!! $item['price'] !!}
             {!! $item['time'] !!}
         </td>

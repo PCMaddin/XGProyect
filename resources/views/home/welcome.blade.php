@@ -1,7 +1,9 @@
+@php($legalWritten = app(\App\Services\Legal\LegalPages::class)->written())
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="language" content="es">
     <meta name="author" content="XG Proyect">
     <meta name="publisher" content="XG Proyect">
@@ -17,6 +19,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/home/reset.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/home/forms.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/home/all.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/home/mobile.css') }}">
     <script type="text/javascript" src="{{ asset('assets/js/home/jquery.tools.min.js') }}"></script>
     <style type="text/css"></style>
     <script type="text/javascript" src="{{ asset('assets/js/home/jquery.easing-1.3.pack.js') }}"></script>
@@ -150,7 +153,7 @@
 			            <label for="serverLogin">{{ __('home/welcome.hm_universe') }}</label>
                         <div class="black-border">
                             <select class="js_uniUrl" id="serverLogin" name="uni">
-                                <option value="0">{{ __('home/welcome.hm_universe_name') }}</option>
+                                <option value="0">{{ $universe_name }}</option>
                             </select>
                         </div>
 			        </div>
@@ -169,7 +172,7 @@
                     <input type="submit" id="loginSubmit" value="{{ __('home/welcome.hm_login_button') }}">
 					<a href="#" id="pwLost" target="_blank" title="{{ __('home/welcome.hm_password_forgot') }}">{{ __('home/welcome.hm_password_forgot') }}</a>
                     <p id="TermsAndConditionsAcceptWithLogin">
-                        {{ __('home/welcome.hm_terms_accept') }} <a class="" href="index.php?page=terms" target="_blank" title="{{ __('home/welcome.hm_terms') }}">{{ __('home/welcome.hm_terms') }}</a>
+                        {{ __('home/welcome.hm_terms_accept') }} @if (in_array('terms', $legalWritten, true))<a class="" href="{{ route('legal.show', ['page' => 'terms', 'lang' => app()->getLocale()]) }}" target="_blank" title="{{ __('home/welcome.hm_terms') }}">{{ __('home/welcome.hm_terms') }}</a>@else{{ __('home/welcome.hm_terms') }}@endif
                     </p>
                 </form>
 			</div>
@@ -191,9 +194,9 @@
                                 <tbody>
                                     <tr>
                                         <td id="uni_select_box" class="select" style="height:19px;overflow:hidden;">
-                                            <span id="uni_name" class="">{{ __('home/welcome.hm_universe_name') }}</span>
+                                            <span id="uni_name" class="">{{ $universe_name }}</span>
                                         </td>
-                                        <td style="width:18px; background: url('{img_path}dropdownmenu_arrow.png') no-repeat scroll 0 0 #8D9AA7;"></td>
+                                        <td style="width:18px; background: url('{{ asset('assets/images/home/dropdownmenu_arrow.png') }}') no-repeat scroll 0 0 #8D9AA7;"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -201,11 +204,11 @@
                             <div id="uni_selection" style="display: none;">
                                 <script type="text/javascript">
                                 <!--
-                                    select_uni('{{ $basePath }}'.replace('http://', '').replace('https://', ''), '{{ __('home/welcome.hm_universe_name') }}','');
+                                    select_uni('{{ $basePath }}'.replace('http://', '').replace('https://', ''), @js($universe_name),'');
                                 //-->
                                 </script>
-                                <div id="row-0" class="server-row " title="" onclick="select_uni('{{ $basePath }}','{{ __('home/welcome.hm_universe_name') }}');" onmouseover="highlightRow(&#39;row-0&#39;);this.style.cursor=&#39;pointer&#39;" onmouseout="unHighlightRow(&#39;row-0&#39;);">
-                                    <span class="uni_span ">{{ __('home/welcome.hm_universe_name') }}</span>
+                                <div id="row-0" class="server-row " title="" onclick="select_uni('{{ $basePath }}',@js($universe_name));" onmouseover="highlightRow(&#39;row-0&#39;);this.style.cursor=&#39;pointer&#39;" onmouseout="unHighlightRow(&#39;row-0&#39;);">
+                                    <span class="uni_span ">{{ $universe_name }}</span>
                                 </div>
                             </div>
                         </div>
@@ -228,6 +231,17 @@
                             <input class="validate[required,custom[email],length[0,255]]" type="text" id="email" name="email" value="{{ $userEmail }}">
 						</div>
 					</div>
+                    @if ($invite_only)
+                    <div class="input-wrap">
+                        <label for="invite">{{ __('home/welcome.hm_invite_code') }}</label>
+                        <div class="black-border">
+                            <input class="validate[required]" type="text" id="invite" name="invite" value="{{ $inviteCode }}" maxlength="32" autocomplete="off" autocapitalize="characters">
+                        </div>
+                    </div>
+                    @endif
+                    @if ($registration_full)
+                    <p id="registration-full" style="color:#ff9b91;">{{ __('home/register.re_universe_closed_full') }}</p>
+                    @endif
 					<div class="input-wrap">
                         <div id="securePwd">
 							<p>{{ __('home/welcome.hm_password_level') }}</p>
@@ -243,17 +257,17 @@
                         <label for="agb">
                             <span>
                                 {{ __('home/welcome.hm_accept') }}
-                                <a class="" target="_blank" href="index.php?page=terms" title="{{ __('home/welcome.hm_terms') }}">
+                                @if (in_array('terms', $legalWritten, true))<a class="" target="_blank" href="{{ route('legal.show', ['page' => 'terms', 'lang' => app()->getLocale()]) }}" title="{{ __('home/welcome.hm_terms') }}">
                                     {{ __('home/welcome.hm_terms') }}
-                                </a>
+                                </a>@else{{ __('home/welcome.hm_terms') }}@endif
                                 {{ __('home/welcome.hm_and') }}
-                                <a class="" target="_blank" href="index.php?page=policy" title="{{ __('home/welcome.hm_policy') }}">
+                                @if (in_array('privacy', $legalWritten, true))<a class="" target="_blank" href="{{ route('legal.show', ['page' => 'privacy', 'lang' => app()->getLocale()]) }}" title="{{ __('home/welcome.hm_policy') }}">
                                     {{ __('home/welcome.hm_policy') }}
-                                </a>
+                                </a>@else{{ __('home/welcome.hm_policy') }}@endif
                             </span>
 						</label>
                         <div onclick="if($.validationEngine.submitValidation(&#39;subscribeForm&#39;)) {document.forms[&#39;subscribeForm&#39;].submit();}">
-                            <input type="submit" onclick="setServerCookie(&#39;subscribeForm&#39;);setUserNameCookie(&#39;subscribeForm&#39;);" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
+                            <input type="submit" id="regSubmit" value="{{ __('home/welcome.hm_register') }}">
                         </div>
 					</div>
 				</form>
@@ -279,6 +293,10 @@
 	</div>
 	<div id="footer">
 	    <div id="footerContent">
+            @if ($universe !== null)
+            <p id="universe">{{ $universe }}@if ($universe_ends !== null) · {{ __('home/lobby.lb_ends', ['date' => date('d.m.Y H:i', $universe_ends)]) }}@endif · <a href="{{ route('lobby.index') }}">{{ __('home/lobby.lb_switch') }}</a></p>
+            @endif
+            <p id="legal">@include('legal.links')</p>
             <p id="copyright">Powered by <a href="https://xgproyect.org/" target="_blank" title="XG Proyect {{ config('version.files') }}">XG Proyect</a> © 2008 - {{ now()->year }}.</p>
         </div>
 	</div>

@@ -25,6 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string             $current_page
  * @property string             $fleet_shortcuts
  * @property int                $authlevel
+ * @property \Illuminate\Support\Carbon|null $email_verified_at when the player confirmed the address
  * @property int                $home_planet_id
  * @property int                $galaxy
  * @property int                $system
@@ -37,6 +38,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string             $ally_request_text
  * @property int                $ally_register_time
  * @property int                $ally_rank_id
+ * @property int                $player_class
+ * @property bool               $user_is_bot
+ * @property int                $user_bot_next_action
  * @property Ban|null           $ban
  * @property Planets            $planets
  * @property Preferences        $preferences
@@ -44,6 +48,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Research                         $research
  * @property Collection<int,ResearchQueue>    $researchQueue
  * @property UsersStatistics                  $stats
+ * @property string|null                      $two_factor_secret         decrypted on read
+ * @property string|null                      $two_factor_recovery_codes JSON list of SHA-256 hashes
+ * @property int|null                         $two_factor_confirmed_at
+ * @property int|null                         $two_factor_last_step
  */
 class User extends Authenticatable
 {
@@ -53,7 +61,8 @@ class User extends Authenticatable
     use Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that are mass assignable. Not the rank (authlevel):
+     * it is only set explicitly, so no request data can grant one.
      *
     * @var list<string>
      */
@@ -61,7 +70,6 @@ class User extends Authenticatable
         'name',
         'password',
         'email',
-        'authlevel',
         'home_planet_id',
         'galaxy',
         'system',
@@ -89,6 +97,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -102,6 +112,9 @@ class User extends Authenticatable
         'password' => 'string',
         'email' => 'string',
         'email_verified_at' => 'datetime',
+        'two_factor_secret' => 'encrypted',
+        'two_factor_confirmed_at' => 'int',
+        'two_factor_last_step' => 'int',
         'authlevel' => 'int',
         'home_planet_id' => 'int',
         'galaxy' => 'int',
@@ -120,6 +133,9 @@ class User extends Authenticatable
         'ally_request_text' => 'string',
         'ally_register_time' => 'int',
         'ally_rank_id' => 'int',
+        'player_class' => 'int',
+        'user_is_bot' => 'bool',
+        'user_bot_next_action' => 'int',
     ];
 
     /**
@@ -141,6 +157,14 @@ class User extends Authenticatable
     // Scopes...
 
     // Functions ...
+    /**
+     * Whether signing in asks for a code from the authenticator app.
+     */
+    public function hasTwoFactor(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && $this->two_factor_secret !== null && $this->two_factor_secret !== '';
+    }
+
     public function setPasswordAttribute(string $input): void
     {
         $this->attributes['password'] = Hash::make($input);

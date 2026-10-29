@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums\Game;
 
+use App\Core\Enumerators\ResearchEnumerator;
+
 enum DriveType: string
 {
     case Combustion = 'combustion';
@@ -27,12 +29,12 @@ enum DriveType: string
     /**
      * The research ID that governs this drive type.
      */
-    public function researchId(): ?ResearchId
+    public function researchId(): ?int
     {
         return match ($this) {
-            self::Combustion => ResearchId::CombustionDrive,
-            self::Impulse => ResearchId::ImpulseDrive,
-            self::Hyperspace => ResearchId::HyperspaceDrive,
+            self::Combustion => ResearchEnumerator::RESEARCH_COMBUSTION_DRIVE,
+            self::Impulse => ResearchEnumerator::RESEARCH_IMPULSE_DRIVE,
+            self::Hyperspace => ResearchEnumerator::RESEARCH_HYPERSPACE_DRIVE,
             self::None => null,
         };
     }

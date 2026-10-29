@@ -13,6 +13,9 @@
         <th colspan="2"><a href="game.php?page=alliance&mode=admin&edit=members">{{ __('game/alliance.al_manage_members') }}</a></th>
     </tr>
     <tr>
+        <th colspan="2"><a href="game.php?page=alliance&mode=admin&edit=class">{{ __('game/alliance.al_class_title') }}</a></th>
+    </tr>
+    <tr>
         <th colspan="2">
             <a href="game.php?page=alliance&mode=admin&edit=tag">
             <img src="{{ asset('assets/upload/skins/xgproyect/alliance/appwiz.gif') }}" border="0" alt="{{ __('game/alliance.al_manage_change_tag') }}"/>
@@ -25,7 +28,8 @@
     </tr>
 </table>
 <form action="" method="POST" role="form">
-    <input type="hidden" name="t" value="{t}">
+    @csrf
+    <input type="hidden" name="t" value="{{ $t }}">
     <table role="presentation" width="519">
         <tr>
             <td role="heading" aria-level="2" class="c" colspan="3">{{ __('game/alliance.al_texts') }}</td>
@@ -46,13 +50,14 @@
         </tr>
         <tr>
             <th colspan="3">
-                <input type="hidden" name="t" value="{t}"><input type="reset" value="{{ __('game/alliance.al_circular_reset') }}">
+                <input type="hidden" name="t" value="{{ $t }}"><input type="reset" value="{{ __('game/alliance.al_circular_reset') }}">
                 <input type="submit" value="{{ __('game/alliance.al_save') }}">
             </th>
         </tr>
     </table>
 </form>
 <form action="" method="POST" role="form">
+    @csrf
     <table width=519>
         <tr>
             <td class="c" colspan="2">{{ __('game/alliance.al_manage_options') }}</td>

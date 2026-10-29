@@ -12,13 +12,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Mail\SentMessage;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 use Illuminate\View\View;
-use Xgp\App\Core\Enumerators\MessagesEnumerator;
-use Xgp\App\Core\Enumerators\UserRanksEnumerator as UserRanks;
-use Xgp\App\Libraries\Functions;
+use App\Core\Enumerators\MessagesEnumerator;
+use App\Core\Enumerators\UserRanksEnumerator as UserRanks;
+use App\Libraries\Functions;
 
+/**
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
+ */
 class AnnouncementController extends BaseController
 {
     public function __construct(
@@ -48,11 +51,16 @@ class AnnouncementController extends BaseController
 
     /**
      * @param Collection<int, User> $players
+     *
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     private function sendMessages(AnnouncementRequest $request, Collection $players): void
     {
-        /** @var User $user */
-        $user = Auth::user();
+        $user = $request->user();
+
+        if (!$user instanceof User) {
+            return;
+        }
 
         $pickedColor = (string) $request->string('color-picker');
         $color = $this->isValidColor($pickedColor)
@@ -63,11 +71,12 @@ class AnnouncementController extends BaseController
         $time = time();
 
         $from = $this->formatService->customColor($level, $color);
+        // messages are shown as HTML: the admin's text is text, in the chosen colour
         $subject = $this->formatService->customColor(
-            (string) $request->string('subject') ?: (string) __('admin/announcement.an_none'),
+            e((string) $request->string('subject') ?: (string) __('admin/announcement.an_none')),
             $color
         );
-        $message = $this->formatService->customColor((string) $request->string('text'), $color);
+        $message = $this->formatService->customColor(nl2br(e((string) $request->string('text'))), $color);
 
         foreach ($players as $player) {
             Functions::sendMessage(
@@ -77,7 +86,7 @@ class AnnouncementController extends BaseController
                 MessagesEnumerator::GENERAL,
                 $from,
                 $subject,
-                strtr($message, ['%player%' => $this->formatService->strongText($player->name)]),
+                strtr($message, ['%player%' => $this->formatService->strongText(e($player->name))]),
                 true
             );
         }
@@ -93,10 +102,16 @@ class AnnouncementController extends BaseController
         $results = [];
 
         foreach ($players as $index => $player) {
-            $result = Mail::to($player->email, $player->name)->send(new Announcement(
-                (string) $request->string('subject'),
-                strtr((string) $request->string('text'), ['%player%' => $this->formatService->strongText($player->name)])
-            ));
+            // one address that fails must not stop the others
+            try {
+                $result = Mail::to($player->email, $player->name)->send(new Announcement(
+                    (string) $request->string('subject'),
+                    strtr((string) $request->string('text'), ['%player%' => $this->formatService->strongText($player->name)])
+                ));
+            } catch (Throwable $e) {
+                report($e);
+                $result = null;
+            }
 
             $results[] = $player->name . ': ' . ($result instanceof SentMessage
                 ? __('admin/announcement.an_email_sent')

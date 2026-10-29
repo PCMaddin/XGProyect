@@ -138,6 +138,30 @@ class GameObjectRegistry
     }
 
     /**
+     * The column name of every object by id (e.g. 202 => 'ship_small_cargo_ship').
+     *
+     * @return array<int, string>
+     */
+    public function names(): array
+    {
+        return $this->objects->map(fn (GameObjectInterface $object): string => $object->getName())->all();
+    }
+
+    public function findShip(int $id): ?Ship
+    {
+        $object = $this->objects->get($id);
+
+        return $object instanceof Ship ? $object : null;
+    }
+
+    public function findOfficer(int $id): ?Officer
+    {
+        $object = $this->objects->get($id);
+
+        return $object instanceof Officer ? $object : null;
+    }
+
+    /**
      * @SuppressWarnings("PHPMD.ExcessiveMethodLength")
      */
     private function registerBuildings(): void
@@ -324,6 +348,15 @@ class GameObjectRegistry
             category: BuildingCategory::Facility,
         );
 
+        // its energy cost grows by 2.5 a level, metal and deuterium by 5
+        $this->objects[36] = new Building(
+            id: 36,
+            name: 'building_space_dock',
+            price: new Price(metal: 200, deuterium: 50, energyMax: 50, factor: 5, energyFactor: 2.5),
+            requirements: new Collection([21 => 2]),
+            category: BuildingCategory::Facility,
+        );
+
         $this->objects[41] = new Building(
             id: 41,
             name: 'building_mondbasis',
@@ -488,7 +521,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 2, 115 => 2]),
             shield: 10,
             attack: 5,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5]),
             speed: 5000,
             speed2: 10000,
             consumption: 10,
@@ -508,7 +541,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 4, 115 => 6]),
             shield: 25,
             attack: 5,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5]),
             speed: 7500,
             speed2: 7500,
             consumption: 50,
@@ -524,7 +557,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 1, 115 => 1]),
             shield: 10,
             attack: 50,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5]),
             speed: 12500,
             speed2: 12500,
             consumption: 20,
@@ -540,7 +573,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 3, 111 => 2, 117 => 2]),
             shield: 25,
             attack: 150,
-            rapidFire: new Collection([202 => 3, 210 => 5, 212 => 5]),
+            rapidFire: new Collection([202 => 3, 210 => 5, 212 => 5, 217 => 5]),
             speed: 10000,
             speed2: 10000,
             consumption: 75,
@@ -556,7 +589,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 5, 117 => 4, 121 => 2]),
             shield: 50,
             attack: 400,
-            rapidFire: new Collection([204 => 6, 210 => 5, 212 => 5, 401 => 10]),
+            rapidFire: new Collection([204 => 6, 210 => 5, 212 => 5, 401 => 10, 217 => 5]),
             speed: 15000,
             speed2: 15000,
             consumption: 300,
@@ -572,7 +605,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 7, 118 => 4]),
             shield: 200,
             attack: 1000,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5, 219 => 5]),
             speed: 10000,
             speed2: 10000,
             consumption: 500,
@@ -588,7 +621,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 4, 117 => 3]),
             shield: 100,
             attack: 50,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5]),
             speed: 2500,
             speed2: 2500,
             consumption: 1000,
@@ -604,7 +637,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 4, 115 => 6, 110 => 2]),
             shield: 10,
             attack: 1,
-            rapidFire: new Collection([210 => 5, 212 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 217 => 5]),
             speed: 2000,
             speed2: 2000,
             consumption: 300,
@@ -642,7 +675,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 8, 117 => 6, 122 => 5]),
             shield: 500,
             attack: 1000,
-            rapidFire: new Collection([210 => 5, 212 => 5, 401 => 20, 402 => 20, 403 => 10, 404 => 5, 405 => 10, 406 => 5]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 401 => 20, 402 => 20, 403 => 10, 404 => 5, 405 => 10, 406 => 5, 217 => 5]),
             speed: 4000,
             speed2: 5000,
             consumption: 700,
@@ -692,7 +725,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 9, 114 => 5, 118 => 6]),
             shield: 500,
             attack: 2000,
-            rapidFire: new Collection([210 => 5, 212 => 5, 215 => 2, 402 => 10]),
+            rapidFire: new Collection([210 => 5, 212 => 5, 215 => 2, 402 => 10, 217 => 5]),
             speed: 5000,
             speed2: 5000,
             consumption: 1000,
@@ -708,7 +741,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 12, 114 => 6, 118 => 7, 199 => 1]),
             shield: 50000,
             attack: 200000,
-            rapidFire: new Collection([202 => 250, 203 => 250, 204 => 200, 205 => 100, 206 => 33, 207 => 30, 208 => 250, 209 => 250, 210 => 1250, 211 => 25, 212 => 1250, 213 => 5, 215 => 10, 401 => 200, 402 => 200, 403 => 100, 404 => 50, 405 => 100]),
+            rapidFire: new Collection([202 => 250, 203 => 250, 204 => 200, 205 => 100, 206 => 33, 207 => 30, 208 => 250, 209 => 250, 210 => 1250, 211 => 25, 212 => 1250, 213 => 5, 215 => 15, 217 => 1250, 218 => 10, 219 => 30, 401 => 200, 402 => 200, 403 => 100, 404 => 50, 405 => 100]),
             speed: 100,
             speed2: 100,
             consumption: 1,
@@ -719,16 +752,65 @@ class GameObjectRegistry
 
         $this->objects[215] = new Ship(
             id: 215,
+            name: 'ship_battlecruiser',
+            price: new Price(metal: 30000, crystal: 40000, deuterium: 15000, factor: 1),
+            requirements: new Collection([21 => 8, 114 => 5, 118 => 5, 120 => 12]),
+            shield: 400,
+            attack: 700,
+            rapidFire: new Collection([202 => 3, 203 => 3, 205 => 4, 206 => 4, 207 => 7, 210 => 5, 212 => 5, 217 => 5]),
+            speed: 10000,
+            speed2: 10000,
+            consumption: 250,
+            consumption2: 250,
+            capacity: 750,
+            drive: new DriveSpec(primary: DriveType::Hyperspace),
+        );
+
+        // version 7: crawler (collector), reaper (general), pathfinder (discoverer)
+        $this->objects[217] = new Ship(
+            id: 217,
+            name: 'ship_crawler',
+            price: new Price(metal: 2000, crystal: 2000, deuterium: 1000, factor: 1),
+            requirements: new Collection([21 => 5, 115 => 4, 111 => 4, 120 => 4]),
+            shield: 1,
+            attack: 1,
+            rapidFire: new Collection(),
+            speed: 0,
+            speed2: 0,
+            consumption: 0,
+            consumption2: 0,
+            capacity: 0,
+            drive: new DriveSpec(primary: DriveType::None),
+        );
+
+        $this->objects[218] = new Ship(
+            id: 218,
             name: 'ship_reaper',
             price: new Price(metal: 85000, crystal: 55000, deuterium: 20000, factor: 1),
-            requirements: new Collection([21 => 8, 114 => 5, 118 => 5, 120 => 12]),
+            requirements: new Collection([21 => 10, 114 => 6, 118 => 7, 110 => 6]),
             shield: 700,
             attack: 2800,
-            rapidFire: new Collection([207 => 7, 210 => 5, 211 => 4, 212 => 5, 213 => 3]),
+            rapidFire: new Collection([207 => 7, 210 => 5, 211 => 4, 212 => 5, 213 => 3, 217 => 5]),
             speed: 7000,
             speed2: 7000,
-            consumption: 550,
-            consumption2: 550,
+            consumption: 1100,
+            consumption2: 1100,
+            capacity: 10000,
+            drive: new DriveSpec(primary: DriveType::Hyperspace),
+        );
+
+        $this->objects[219] = new Ship(
+            id: 219,
+            name: 'ship_pathfinder',
+            price: new Price(metal: 8000, crystal: 15000, deuterium: 8000, factor: 1),
+            requirements: new Collection([21 => 5, 118 => 2, 110 => 4]),
+            shield: 100,
+            attack: 200,
+            rapidFire: new Collection([204 => 3, 205 => 2, 206 => 3, 210 => 5, 212 => 5, 217 => 5]),
+            speed: 12000,
+            speed2: 12000,
+            consumption: 300,
+            consumption2: 300,
             capacity: 10000,
             drive: new DriveSpec(primary: DriveType::Hyperspace),
         );
@@ -786,7 +868,7 @@ class GameObjectRegistry
             requirements: new Collection([21 => 4, 121 => 4]),
             shield: 500,
             attack: 150,
-            rapidFire: new Collection([215 => 2]),
+            rapidFire: new Collection([218 => 2]),
         );
 
         $this->objects[406] = new Defense(

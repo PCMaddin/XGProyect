@@ -2,6 +2,7 @@
 
 @section('content')
 <form name="stats" method="post" role="form">
+    @csrf
     <table width="519">
         <tr>
             <td colspan="6" class="c">

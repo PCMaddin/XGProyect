@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'hm_title' => 'Willkommen bei XG Proyect',
+    'hm_sub_title' => 'Danke, dass du XG Proyect als deinen OGame-Klon gewählt hast. Diese Seite gibt dir einen schnellen Überblick über die verschiedenen Statistiken deines Servers. Über die Links auf der linken Seite steuerst du jeden Aspekt deines Servers. Jede Seite erklärt, wie die Werkzeuge funktionieren.',
+    'hm_server_statistics' => 'Serverstatistik',
+    'hm_number_users' => 'Anzahl der Benutzer',
+    'hm_number_alliances' => 'Anzahl der Allianzen',
+    'hm_number_planets' => 'Anzahl der Planeten',
+    'hm_number_moons' => 'Anzahl der Monde',
+    'hm_number_fleets' => 'Anzahl der Flotten',
+    'hm_number_reports' => 'Anzahl der Berichte',
+    'hm_average_user_points' => 'Durchschnittliche Punkte der Benutzer',
+    'hm_average_alliance_points' => 'Durchschnittliche Punkte der Allianzen',
+    'hm_database_size' => 'Größe der Datenbank',
+    'hm_database_server' => 'Datenbankserver',
+    'hm_php_version' => 'PHP-Version',
+    'hm_server_version' => 'XGP-Version',
+    'hm_error' => 'Achtung!',
+    'hm_warning' => 'Warnung!',
+    'hm_ok' => 'Ok!',
+    'hm_debug_mode' => 'Der Debug-Modus ist eingeschaltet (APP_DEBUG=true in .env): Fehlerseiten zeigen jedem Besucher Quelltext, Abfragen und Anfragedaten. Setze auf einem öffentlichen Server APP_DEBUG=false und APP_ENV=production.',
+    'hm_install_file_detected' => 'Verzeichnis install/ gefunden. Aus Sicherheitsgründen musst du es umbenennen oder löschen.',
+    'hm_config_file_writable' => 'Deine Konfigurationsdatei (xgp-db-config.php) ist für alle beschreibbar. Wir empfehlen dringend, die Berechtigungen auf 640 oder mindestens 644 zu setzen.',
+    'hm_errors' => 'Auf deinem Server gibt es Fehler. Du kannst sie <a href="/admin/errors">hier</a> ansehen.',
+    'hm_old_version' => 'Eine neue Version ist verfügbar. Klicke <a href="https://github.com/XGProyect/XGProyect/releases" target="_blank">hier</a>, um sie herunterzuladen.',
+    'hm_all_ok' => 'Keine Aktualisierungen oder Warnungen',
+    'hm_update_required' => 'Die Versionen von System und Datenbank unterscheiden sich, <a href="/admin/update"><strong>jetzt aktualisieren!</strong></a>, um Probleme zu vermeiden.',
+    'hm_credits' => 'Mitwirkende',
+    'hm_proyect_leader' => 'Projektleitung',
+    'hm_principal_contributors' => 'Wichtigste Mitwirkende',
+    'hm_extensions' => 'Bibliotheken / Erweiterungen',
+    'hm_thanks_to' => 'Besonderer Dank an',
+];

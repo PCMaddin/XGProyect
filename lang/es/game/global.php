@@ -45,21 +45,4 @@ return [
     'online' => 'Conectado',
     'minutes' => '15 min',
     'offline' => 'Desconectado',
-
-    'timing' => [
-        'year' => 'año',
-        'years' => 'años',
-        'month' => 'mes',
-        'months' => 'meses',
-        'week' => 'semana',
-        'weeks' => 'semanas',
-        'day' => 'día',
-        'days' => 'días',
-        'hour' => 'hora',
-        'hours' => 'horas',
-        'minute' => 'minuto',
-        'minutes' => 'minutos',
-        'second' => 'segundo',
-        'seconds' => 'segundos',
-    ],
 ];

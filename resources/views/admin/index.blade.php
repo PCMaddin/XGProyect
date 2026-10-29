@@ -11,7 +11,7 @@
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="{{ asset('assets/admin/vendor/nunito/css/nunito.css') }}" rel="stylesheet" type="text/css">
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('assets/admin/css/admin.min.css') }}" rel="stylesheet">
@@ -27,7 +27,7 @@
                         <!-- Nested Row within Card Body -->
                         <div class="row" style="background-color: rgba(0,0,0,0.2);">
                             <div class="col-lg-6 d-none d-lg-block my-auto text-center">
-                                <img src="https://xgproyect.org/wp-content/uploads/2019/10/xgp-new-logo-white.png"
+                                <img src="{{ asset('assets/images/xgp-logo-white.png') }}"
                                     alt="XG Proyect Logo" title="XG Proyect" width="250px">
                             </div>
                             <div class="col-lg-6">

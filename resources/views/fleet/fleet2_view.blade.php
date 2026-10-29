@@ -16,8 +16,48 @@
             return null;
         }
     }
+
+    // alliance classes: researchers fly expeditions, warriors fly to the
+    // planets of their alliance's members 10 % faster (the fuel stays)
+    var classSpeed = @json($class_speed);
+
+    function classSpeedFactor() {
+        var target = document.getElementsByName('galaxy')[0].value + ':' + document.getElementsByName('system')[0].value + ':' + document.getElementsByName('planet')[0].value;
+
+        if (+document.getElementsByName('planet')[0].value === 16) {
+            return +document.getElementsByName('planettype')[0].value === 2 ? 1 : classSpeed.expedition;
+        }
+
+        return classSpeed.allies.indexOf(target) >= 0 ? classSpeed.ally : 1;
+    }
+
+    var baseShortInfo = shortInfo;
+
+    shortInfo = function () {
+        baseShortInfo();
+
+        var factor = classSpeedFactor();
+        var note = document.getElementById('classspeed');
+
+        note.innerHTML = '';
+
+        if (factor <= 1) {
+            return;
+        }
+
+        var seconds = Math.round((35e3 / speed() * Math.sqrt(10 * distance() / (maxspeed() * factor)) + 10) / document.getElementsByName('speedfactor')[0].value);
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
+        var rest = seconds % 60;
+
+        document.getElementById('duration').innerHTML = hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (rest < 10 ? '0' : '') + rest + ' h';
+        note.innerHTML = classSpeed.allies.length > 0 && +document.getElementsByName('planet')[0].value !== 16
+            ? @json(__('game/fleet.fl_class_speed_ally'))
+            : @json(__('game/fleet.fl_class_speed_expedition'));
+    };
 </script>
 <form action="game.php?page=fleet3" method="post" onsubmit='this.submit.disabled = true;' role="form">
+    @csrf
     @foreach ($fleet_block as $item)
         <input type="hidden" name="consumption{{ $item['ship_id'] }}" value="{{ $item['consumption'] }}" />
         <input type="hidden" name="speed{{ $item['ship_id'] }}" value="{{ $item['speed'] }}" />
@@ -53,16 +93,9 @@
             <th scope="row">{{ __('game/fleet.fl_fleet_speed') }}</th>
             <th role="cell">
                 <select name="speed" onChange="shortInfo()" onKeyUp="shortInfo()">
-                    <option value="10">100</option>
-                    <option value="9">90</option>
-                    <option value="8">80</option>
-                    <option value="7">70</option>
-                    <option value="6">60</option>
-                    <option value="5">50</option>
-                    <option value="4">40</option>
-                    <option value="3">30</option>
-                    <option value="2">20</option>
-                    <option value="1">10</option>
+                    @foreach ($speed_steps as $step)
+                        <option value="{{ $step }}">{{ $step * 10 }}</option>
+                    @endforeach
                 </select> %
             </th>
         </tr>
@@ -72,7 +105,7 @@
         </tr>
         <tr height="20">
             <th scope="row">{{ __('game/fleet.fl_flying_time') }}</th>
-            <th role="cell"><div id="duration">-</div></th>
+            <th role="cell"><div id="duration">-</div><div id="classspeed" style="color: lime"></div></th>
         </tr>
         <tr height="20">
             <th scope="row">{{ __('game/fleet.fl_fuel_consumption') }}</th>

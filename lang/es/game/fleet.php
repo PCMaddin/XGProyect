@@ -13,6 +13,7 @@ return [
     'fl_speed_title' => 'Velocidad: ',
     'fl_continue' => 'Continuar',
     'fl_no_ships' => 'No hay naves',
+    'fl_gone_meanwhile' => 'Las naves o los recursos ya no están en el planeta (otra orden los tomó hace un momento). No se envió nada.',
     'fl_remove_all_ships' => 'Ninguna nave',
     'fl_select_all_ships' => 'Todas las naves',
     'fl_fleets' => 'Flotas:',
@@ -107,4 +108,8 @@ return [
     'fl_union_members' => 'Usuario de la unión:',
     'fl_search_user_btn' => 'Buscar',
     'fl_save_all' => 'Ok',
+    'fl_class_speed_expedition' => 'Clase de alianza investigador: +10% de velocidad al destino de la expedición',
+    'fl_class_speed_ally' => 'Clase de alianza guerrero: +10% de velocidad hacia miembros de la alianza',
+    'fl_loot_priority' => 'Prioridad de saqueo',
+    'fl_loot_priority_default' => 'Reparto habitual',
 ];

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Game;
 
 use App\Core\GameObjects\Building;
-use Xgp\App\Core\Enumerators\BuildingsEnumerator;
-use Xgp\App\Core\Enumerators\PlanetTypesEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
+use App\Core\Enumerators\PlanetTypesEnumerator;
 
 class SuppliesController extends BuildingsController
 {

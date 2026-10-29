@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'lm_players' => 'Speler:',
+    'lm_menu' => 'Menu',
+    'lm_overview' => 'Overzicht',
+    'lm_galaxy' => 'Melkweg',
+    'lm_empire' => 'Rijk',
+    'lm_fleet' => 'Vloot',
+    'lm_movement' => 'Vlootbewegingen',
+    'lm_resources' => 'Grondstoffen',
+    'lm_resources_settings' => 'Grondstofinstellingen',
+    'lm_station' => 'Faciliteiten',
+    'lm_research' => 'Onderzoek',
+    'lm_shipyard' => 'Werf',
+    'lm_defenses' => 'Verdediging',
+    'lm_officiers' => 'Officieren rekruteren',
+    'lm_trader' => 'Handelaar',
+    'lm_items' => 'Items',
+    'lm_characterclass' => 'Klasse',
+    'lm_technology' => 'Technologie',
+    'lm_messages' => 'Berichten',
+    'lm_alliance' => 'Alliantie',
+    'lm_buddylist' => 'Vrienden',
+    'lm_notes' => 'Notities',
+    'lm_playerprofile' => 'Profiel',
+    'lm_statistics' => 'Ranglijst',
+    'lm_search' => 'Zoeken',
+    'lm_options' => 'Opties',
+    'lm_forums' => 'Forum',
+    'lm_logout' => 'Uitloggen',
+    'lm_administration' => 'Beheer',
+];

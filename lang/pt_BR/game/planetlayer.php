@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'description' => 'Neste menu você pode renomear planetas e luas, mudar planetas de lugar ou abandoná-los completamente.',
+    'rename' => 'Renomear',
+    'new_planet_name' => 'Novo nome do planeta',
+    'new_moon_name' => 'Novo nome da lua',
+    'abandon_homeplanet' => 'Abandonar planeta natal',
+    'abandon_homeplanet_button' => 'Abandonar planeta natal',
+    'abandon_colony' => 'Abandonar colônia',
+    'abandon_colony_button' => 'Abandonar colônia',
+    'abandon_moon' => 'Abandonar lua',
+    'abandon_moon_button' => 'Abandonar lua',
+    'abandon_homeplanet_unique' => 'Você não pode abandonar seu planeta natal enquanto não colonizar outro planeta.',
+    'abandon_homeplanet_with_colonies' => 'Se abandonar seu planeta natal, ao entrar você irá direto para sua próxima colônia.',
+    'abandon_confirm_message' => 'Confirme a exclusão do planeta :coords informando sua senha',
+    'abandon_confirm' => 'Confirmar',
+    'rename_error' => 'Caracteres especiais não são permitidos!',
+    'rename_success' => 'O planeta foi renomeado para: :name',
+    'wrong_password' => 'Senha incorreta!',
+
+    //old lines
+    'rp_abandon_planet_not_possible' => 'Não é possível abandonar um planeta com frotas em movimento',
+    'rp_planet_abandoned' => 'Planeta abandonado com sucesso',
+    'rp_wrong_pass' => 'Senha incorreta, informe-a novamente.',
+
+    'rl_title' => 'Realocar planeta',
+    'rl_description' => 'Por %s de matéria escura, o planeta e sua lua se mudam em 24 horas para uma posição livre da mesma faixa (1-3, 4-12, 13-15). A matéria escura só é cobrada quando o planeta se muda. Até lá, nada pode ser construído, pesquisado ou produzido no hangar do planeta e da lua, e nenhuma frota própria pode partir de lá nem ir para lá. As naves seguem sem combustível no tempo normal de voo, o campo de destroços fica para trás e o portal de salto fica inativo por 24 horas. O modo férias cancela a realocação.',
+    'rl_target' => 'Destino',
+    'rl_start' => 'Realocar',
+    'rl_running' => 'O planeta se muda para %s em %s.',
+    'rl_cancel' => 'Cancelar realocação',
+    'rl_started' => 'A realocação começou.',
+    'rl_cancelled' => 'A realocação foi cancelada.',
+    'rl_error_planet' => 'Este planeta não pode ser realocado.',
+    'rl_error_running' => 'O planeta já está sendo realocado.',
+    'rl_error_target' => 'Posição de destino inválida.',
+    'rl_error_band' => 'O destino precisa estar na mesma faixa de posições (1-3, 4-12, 13-15).',
+    'rl_error_taken' => 'A posição de destino está ocupada ou reservada.',
+    'rl_error_vacation' => 'Não é possível realocar no modo férias.',
+    'rl_error_dark_matter' => 'Você não tem matéria escura suficiente.',
+    'rl_error_building' => 'Há uma construção em andamento no planeta ou na lua.',
+    'rl_error_research' => 'Há uma pesquisa em andamento no planeta ou na lua.',
+    'rl_error_shipyard' => 'O hangar do planeta ou da lua tem ordens.',
+    'rl_error_fleets' => 'Frotas próprias estão voando de ou para o planeta ou a lua.',
+    'rl_error_wreck_field' => 'A doca espacial está reparando naves ou elas aguardam ser postas em serviço.',
+    'rl_from' => 'Administração',
+    'rl_subject' => 'Realocação',
+    'rl_done' => 'O planeta se mudou para %s. As naves estão a caminho.',
+    'rl_failed' => 'A realocação para %s falhou: %s',
+];

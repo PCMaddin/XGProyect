@@ -7,7 +7,8 @@ namespace App\Services;
 final class InstallRequirements
 {
     public const MINIMUM_DATABASE_VERSION = '5.7';
-    public const MINIMUM_PHP_VERSION = '8.2';
+    /** what composer.lock needs (Symfony 8 asks for 8.4.1); 8.5 runs as well */
+    public const MINIMUM_PHP_VERSION = '8.4.1';
 
     /** @var list<non-empty-string> */
     public const REQUIRED_PHP_EXTENSIONS = [

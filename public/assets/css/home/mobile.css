@@ -1,0 +1,172 @@
+/*
+ * The start page on a phone: the head, sign-in and sign-up below each
+ * other over the width of the screen instead of 718 px side by side.
+ */
+@media (max-width: 760px) {
+    body {
+        font-size: 14px;
+    }
+
+    #parallax {
+        display: none;
+    }
+
+    #header,
+    #content,
+    #footerContent {
+        width: auto;
+        height: auto;
+        padding: 12px 16px 0;
+    }
+
+    h1 {
+        float: none;
+        width: auto;
+        height: auto;
+        margin: 0;
+        text-align: center;
+    }
+
+    h1 img {
+        max-width: 60%;
+        height: auto;
+    }
+
+    h1 a {
+        height: 0;
+    }
+
+    a#loginBtn {
+        float: none;
+        margin: 12px auto 0;
+        width: 100%;
+        max-width: 320px;
+        height: 44px;
+        line-height: 44px;
+        background: #6d1d1d;
+        border-radius: 3px;
+    }
+
+    #login {
+        position: static;
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+        margin: 8px auto 0;
+        background: #22303F;
+        border: 1px solid #2D343C;
+    }
+
+    #loginForm,
+    #pwLostForm,
+    #resendLinkForm {
+        width: auto;
+        height: auto;
+        padding: 0 12px 12px;
+    }
+
+    #loginForm .black-border,
+    #loginForm .black-border input,
+    #loginForm .black-border select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* a picture of 187 px, like the register button */
+    #loginForm #loginSubmit {
+        display: block;
+        float: none;
+        margin: 8px auto 0;
+    }
+
+    #subscribe,
+    #contentWrap {
+        float: none;
+        display: block;
+        width: 100%;
+        max-width: 360px;
+        margin: 16px auto;
+    }
+
+    #subscribeForm {
+        width: auto;
+        box-sizing: border-box;
+        padding-bottom: 12px;
+    }
+
+    #subscribeForm .black-border,
+    #subscribeForm .black-border input,
+    #subscribeForm #submitWrap,
+    #subscribeForm #server,
+    #subscribeForm .server_table {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #subscribeForm .server_table {
+        table-layout: fixed;
+    }
+
+    /* the button is a picture of 205 px */
+    input#regSubmit {
+        display: block;
+        float: none;
+        margin: 8px auto 0;
+    }
+
+    #contentWrap #menu {
+        height: auto;
+    }
+
+    #tabs {
+        float: none;
+        display: flex;
+        height: auto;
+        margin: 0;
+    }
+
+    #tabs li {
+        float: none;
+        flex: 1;
+        width: auto;
+    }
+
+    #tabs li a {
+        font-size: 13px;
+    }
+
+    #tabContent h2,
+    #tabContent h3 {
+        height: auto;
+        line-height: 1.3;
+    }
+
+    #subscribeForm .input-wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #loginForm input,
+    #subscribeForm input[type="text"],
+    #subscribeForm input[type="password"] {
+        min-height: 36px;
+        font-size: 16px;
+    }
+
+    #tabContent,
+    #contentFooter,
+    #fancybox-inner #tabContent {
+        width: auto;
+        box-sizing: border-box;
+    }
+
+    #flashTrailer,
+    #flashTrailer * {
+        max-width: 100%;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}

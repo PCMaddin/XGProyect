@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\App\Services\Game\Formulas;
 
+use App\Core\Enumerators\ShipsEnumerator;
+use App\Core\Enumerators\ResearchEnumerator;
+use App\Core\Enumerators\BuildingsEnumerator;
 use App\Core\GameObjects\GameObjectRegistry;
-use App\Enums\Game\BuildingId;
-use App\Enums\Game\ResearchId;
-use App\Enums\Game\ShipId;
 use App\Services\Game\Formulas\DevelopmentsService;
 use App\Services\Game\Formulas\FormulasService;
 use App\Services\SettingsService;
@@ -38,34 +38,34 @@ class DevelopmentsServiceTest extends TestCase
 
     public function testSetBuildingPageSupplies(): void
     {
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::MetalMine->value));
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::CrystalMine->value));
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::DeuteriumSynthesizer->value));
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::SolarPlant->value));
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::FusionReactor->value));
-        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingId::MetalStore->value));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_METAL_MINE));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_CRYSTAL_MINE));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_DEUTERIUM_SINTETIZER));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_SOLAR_PLANT));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_FUSION_REACTOR));
+        $this->assertEquals('supplies', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_METAL_STORE));
     }
 
     public function testSetBuildingPageFacilities(): void
     {
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::RobotFactory->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::Hangar->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::Laboratory->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::Terraformer->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::MissileSilo->value));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_ROBOT_FACTORY));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_HANGAR));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_LABORATORY));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_TERRAFORMER));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_MISSILE_SILO));
     }
 
     public function testSetBuildingPageMoon(): void
     {
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::Mondbasis->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::Phalanx->value));
-        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingId::JumpGate->value));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_MONDBASIS));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_PHALANX));
+        $this->assertEquals('facilities', $this->service->setBuildingPage(BuildingsEnumerator::BUILDING_JUMP_GATE));
     }
 
     public function testSetBuildingPageNonBuilding(): void
     {
         // Ship ID should return 'overview'
-        $this->assertEquals('overview', $this->service->setBuildingPage(ShipId::SmallCargo->value));
+        $this->assertEquals('overview', $this->service->setBuildingPage(ShipsEnumerator::SHIP_SMALL_CARGO_SHIP));
     }
 
     public function testSetBuildingPageInvalidId(): void
@@ -88,7 +88,7 @@ class DevelopmentsServiceTest extends TestCase
     {
         // Metal mine: metal=60, crystal=15, factor=1.5, level=0
         // round(60 * 1.5^0) = 60, round(15 * 1.5^0) = 15
-        $cost = $this->service->developmentPrice(BuildingId::MetalMine->value, 0);
+        $cost = $this->service->developmentPrice(BuildingsEnumerator::BUILDING_METAL_MINE, 0);
 
         $this->assertEquals(60, $cost['metal']);
         $this->assertEquals(15, $cost['crystal']);
@@ -98,7 +98,7 @@ class DevelopmentsServiceTest extends TestCase
     {
         // Metal mine: metal=60, crystal=15, factor=1.5, level=5
         // round(60 * 1.5^5) = 455, round(15 * 1.5^5) = 114
-        $cost = $this->service->developmentPrice(BuildingId::MetalMine->value, 5);
+        $cost = $this->service->developmentPrice(BuildingsEnumerator::BUILDING_METAL_MINE, 5);
 
         $this->assertEquals(456, $cost['metal']);
         $this->assertEquals(114, $cost['crystal']);
@@ -107,7 +107,7 @@ class DevelopmentsServiceTest extends TestCase
     public function testDevelopmentPriceNonIncremental(): void
     {
         // Non-incremental: just floor of base price
-        $cost = $this->service->developmentPrice(BuildingId::MetalMine->value, 10, false);
+        $cost = $this->service->developmentPrice(BuildingsEnumerator::BUILDING_METAL_MINE, 10, false);
 
         $this->assertEquals(60, $cost['metal']);
         $this->assertEquals(15, $cost['crystal']);
@@ -122,7 +122,7 @@ class DevelopmentsServiceTest extends TestCase
             'planet_energy_max' => 0,
         ];
 
-        $this->assertTrue($this->service->isDevelopmentPayable($resources, BuildingId::MetalMine->value, 0));
+        $this->assertTrue($this->service->isDevelopmentPayable($resources, BuildingsEnumerator::BUILDING_METAL_MINE, 0));
     }
 
     public function testIsDevelopmentPayableFalse(): void
@@ -134,13 +134,13 @@ class DevelopmentsServiceTest extends TestCase
             'planet_energy_max' => 0,
         ];
 
-        $this->assertFalse($this->service->isDevelopmentPayable($resources, BuildingId::MetalMine->value, 5));
+        $this->assertFalse($this->service->isDevelopmentPayable($resources, BuildingsEnumerator::BUILDING_METAL_MINE, 5));
     }
 
     public function testDevelopmentTimeBuildingReturnsPositive(): void
     {
         $time = $this->service->developmentTime(
-            BuildingId::MetalMine->value,
+            BuildingsEnumerator::BUILDING_METAL_MINE,
             5,
             5,  // robotics factory
             0,  // nanite factory
@@ -155,7 +155,7 @@ class DevelopmentsServiceTest extends TestCase
     public function testDevelopmentTimeResearch(): void
     {
         $time = $this->service->developmentTime(
-            ResearchId::EnergyTechnology->value,
+            ResearchEnumerator::RESEARCH_ENERGY_TECHNOLOGY,
             1,
             0,  // robotics factory (not relevant)
             0,  // nanite factory (not relevant)
@@ -170,7 +170,7 @@ class DevelopmentsServiceTest extends TestCase
     public function testDevelopmentTimeResearchWithTechnocrate(): void
     {
         $timeWithout = $this->service->developmentTime(
-            ResearchId::EnergyTechnology->value,
+            ResearchEnumerator::RESEARCH_ENERGY_TECHNOLOGY,
             1,
             0,
             0,
@@ -180,7 +180,7 @@ class DevelopmentsServiceTest extends TestCase
         );
 
         $timeWith = $this->service->developmentTime(
-            ResearchId::EnergyTechnology->value,
+            ResearchEnumerator::RESEARCH_ENERGY_TECHNOLOGY,
             1,
             0,
             0,
@@ -195,7 +195,7 @@ class DevelopmentsServiceTest extends TestCase
     public function testTearDownTime(): void
     {
         $time = $this->service->tearDownTime(
-            BuildingId::MetalMine->value,
+            BuildingsEnumerator::BUILDING_METAL_MINE,
             5,
             3,  // robotics factory
             0   // nanite factory
@@ -207,28 +207,28 @@ class DevelopmentsServiceTest extends TestCase
     public function testIsDevelopmentAllowedNoRequirements(): void
     {
         // Metal mine has no requirements
-        $this->assertTrue($this->service->isDevelopmentAllowed(BuildingId::MetalMine->value, []));
+        $this->assertTrue($this->service->isDevelopmentAllowed(BuildingsEnumerator::BUILDING_METAL_MINE, []));
     }
 
     public function testIsDevelopmentAllowedMet(): void
     {
         // Fusion reactor requires deuterium synth 5 and energy tech 3
         $levels = [3 => 5, 113 => 3];
-        $this->assertTrue($this->service->isDevelopmentAllowed(BuildingId::FusionReactor->value, $levels));
+        $this->assertTrue($this->service->isDevelopmentAllowed(BuildingsEnumerator::BUILDING_FUSION_REACTOR, $levels));
     }
 
     public function testIsDevelopmentAllowedNotMet(): void
     {
         // Fusion reactor requires deuterium synth 5 and energy tech 3
         $levels = [3 => 2, 113 => 1];
-        $this->assertFalse($this->service->isDevelopmentAllowed(BuildingId::FusionReactor->value, $levels));
+        $this->assertFalse($this->service->isDevelopmentAllowed(BuildingsEnumerator::BUILDING_FUSION_REACTOR, $levels));
     }
 
     public function testIsDevelopmentAllowedPartiallyMet(): void
     {
         // Only one requirement met
         $levels = [3 => 5, 113 => 1];
-        $this->assertFalse($this->service->isDevelopmentAllowed(BuildingId::FusionReactor->value, $levels));
+        $this->assertFalse($this->service->isDevelopmentAllowed(BuildingsEnumerator::BUILDING_FUSION_REACTOR, $levels));
     }
 
     public function testIsLabWorking(): void

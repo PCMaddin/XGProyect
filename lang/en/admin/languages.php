@@ -20,4 +20,5 @@ return [
     'le_no_results' => 'No files match your filter.',
     'le_module_label' => 'Module',
     'le_file_label' => 'File',
+    'le_shared_files' => 'The language files apply to all universes. The operator edits them on the server (lang/).',
 ];

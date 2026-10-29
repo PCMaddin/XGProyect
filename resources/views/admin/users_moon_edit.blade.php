@@ -72,8 +72,9 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="planet_user_id">{{ __('admin/users.us_planet_field_owner') }}</label>
+                                            <x-admin.player-find :find="$owners['find']" :more="$owners['more']" />
                                             <select id="planet_user_id" name="planet_user_id" class="form-control">
-                                                @foreach ($all_users as $u)
+                                                @foreach ($owners['players'] as $u)
                                                     <option value="{{ $u->id }}" @selected(old('planet_user_id', $moon['planet_user_id']) == $u->id)>{{ $u->name }}</option>
                                                 @endforeach
                                             </select>

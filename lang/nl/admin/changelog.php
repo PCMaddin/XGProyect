@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'ch_title' => 'Wijzigingslog',
+    'ch_new_item' => 'Nieuw item toevoegen',
+    'ch_sub_title' => 'Hier kun je de lijst met wijzigingen (changelog) van je server bewerken. Die staat in het linkermenu van het spel.',
+    'ch_general' => 'Lijst met wijzigingen',
+    'ch_date' => 'Datum',
+    'ch_version' => 'Versie',
+    'ch_language' => 'Taal',
+    'ch_language_locked' => 'De taal kan na het aanmaken niet meer worden gewijzigd.',
+    'ch_translations' => 'Vertalingen',
+    'ch_edit_translation' => 'Vertaling bewerken',
+    'ch_delete_translation' => 'Vertaling verwijderen',
+    'ch_actions' => 'Acties',
+    'ch_the_description' => 'Beschrijving',
+    'ch_edit_this' => 'Dit item bewerken',
+    'ch_delete_this' => 'Dit item verwijderen',
+    'ch_delete_confirm' => 'Weet je zeker dat je dit item wilt verwijderen?',
+    'ch_add_action' => 'Nieuw item toevoegen',
+    'ch_edit_action' => 'Item bewerken: %s',
+    'ch_version_info' => 'Voorbeelden van geldige versies:<br>1.1<br>1.12.3<br>10.12.1-12b<br>3.2.0-1b',
+    'ch_pick_language' => 'Kies een taal',
+    'ch_characters' => 'tekens',
+    'ch_save' => 'Item opslaan',
+    'ch_back' => 'Terug naar de lijst',
+    'ch_no_entries' => 'Nog geen items. Voeg het eerste toe!',
+    'ch_description_placeholder' => 'Beschrijf de wijzigingen in deze versie...',
+    'ch_entry_details' => 'Details',
+    'ch_action_add_done' => 'Item toegevoegd!',
+    'ch_action_edit_done' => 'Item bewerkt!',
+    'ch_action_delete_done' => 'Item verwijderd!',
+];

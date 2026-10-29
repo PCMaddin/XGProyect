@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $building_laboratory
  * @property int $building_terraformer
  * @property int $building_ally_deposit
+ * @property int $building_space_dock
  * @property int $building_missile_silo
  * @property int $building_mondbasis
  * @property int $building_phalanx
@@ -66,6 +67,7 @@ class Buildings extends Model
         'building_laboratory',
         'building_terraformer',
         'building_ally_deposit',
+        'building_space_dock',
         'building_missile_silo',
         'building_mondbasis',
         'building_phalanx',
@@ -103,6 +105,7 @@ class Buildings extends Model
         'building_laboratory' => 'int',
         'building_terraformer' => 'int',
         'building_ally_deposit' => 'int',
+        'building_space_dock' => 'int',
         'building_missile_silo' => 'int',
         'building_mondbasis' => 'int',
         'building_phalanx' => 'int',

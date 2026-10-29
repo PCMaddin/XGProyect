@@ -39,6 +39,7 @@
                             </div>
                         </div>
 
+                        <x-admin.player-find :find="$player_find['find']" :more="$player_find['more']" />
                         <select name="ban_name" id="users-select" class="form-control mb-3" size="12">
                             @foreach ($users as $user)
                                 <option value="{{ $user->name }}" data-id="{{ $user->id }}">{{ $user->name }} (ID: {{ $user->id }})</option>
@@ -190,12 +191,16 @@
     setupFilter('filter-banned', 'clear-filter-banned', 'banned-select');
 
     // ── Double-click banned user → edit view ──────────────────────────────
-    document.getElementById('banned-select').addEventListener('dblclick', function () {
-        var selected = this.options[this.selectedIndex];
-        if (selected && selected.getAttribute('data-href')) {
-            window.location.href = selected.getAttribute('data-href');
-        }
-    });
+    // (the list is only there when somebody is banned)
+    var bannedSelect = document.getElementById('banned-select');
+    if (bannedSelect) {
+        bannedSelect.addEventListener('dblclick', function () {
+            var selected = this.options[this.selectedIndex];
+            if (selected && selected.getAttribute('data-href')) {
+                window.location.href = selected.getAttribute('data-href');
+            }
+        });
+    }
 </script>
 @endpush
 @endsection

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Admin;
 
+use App\Support\Concerns\ReadsMixedValues;
 use App\Services\FormatService;
 use App\Services\SettingsService;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,8 @@ use Throwable;
  */
 class HomeService
 {
+    use ReadsMixedValues;
+
     public function __construct(
         private readonly SettingsService $settings,
         private readonly FormatService $formatService,
@@ -23,7 +26,19 @@ class HomeService
 
     public function hasServerErrors(): bool
     {
-        return file_exists(storage_path('logs/xgproyect.log'));
+        // the error log of this universe (each universe writes its own)
+        $path = config('logging.channels.single.path');
+
+        return file_exists(is_string($path) && $path !== '' ? $path : storage_path('logs/xgproyect.log'));
+    }
+
+    /**
+     * Debug mode shows stack traces, queries and request data to every
+     * visitor whose request fails; only for local development.
+     */
+    public function isDebugModeOn(): bool
+    {
+        return (bool) config('app.debug');
     }
 
     public function isInstallFilePresent(): bool
@@ -40,6 +55,10 @@ class HomeService
 
     public function isVersionOutdated(): bool
     {
+        if (!config('version.update_check')) {
+            return false;
+        }
+
         try {
             $response = Http::timeout(1)->get('https://updates.xgproyect.org/latest.json');
 
@@ -63,16 +82,16 @@ class HomeService
 
     public function getDbVersion(): string
     {
-        return (string) DB::scalar('SELECT @@version'); // @phpstan-ignore cast.string
+        return self::asString(DB::scalar('SELECT @@version'));
     }
 
     public function getDbSize(): string
     {
         return $this->formatService->prettyBytes(
-            (int) DB::scalar( // @phpstan-ignore cast.int
+            self::asInt(DB::scalar(
                 'SELECT SUM(data_length + index_length) FROM information_schema.TABLES WHERE table_schema = ?',
                 [DB::getDatabaseName()]
-            )
+            ))
         );
     }
 }

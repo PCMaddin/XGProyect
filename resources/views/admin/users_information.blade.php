@@ -88,9 +88,10 @@
                         <div class="form-group row">
                             <label class="col-md-4 col-form-label text-md-right" for="ally_id">{{ __('admin/users.us_user_ally') }}</label>
                             <div class="col-md-8">
+                                <x-admin.player-find :find="$alliances['find']" :more="$alliances['more']" :placeholder="__('admin/global.alliance_find')" />
                                 <select id="ally_id" name="ally_id" class="form-control">
                                     <option value="0">— {{ __('admin/users.us_no_alliance') }} —</option>
-                                    @foreach ($alliances as $alliance)
+                                    @foreach ($alliances['alliances'] as $alliance)
                                         <option value="{{ $alliance->alliance_id }}"
                                             @selected(old('ally_id', $data->ally_id ?? 0) == $alliance->alliance_id)>
                                             [{{ $alliance->alliance_tag }}] {{ $alliance->alliance_name }}
@@ -137,7 +138,7 @@
                                 <div class="col-md-8">
                                     <div class="alert alert-warning mb-0 py-2">
                                         <i class="fas fa-ban mr-1"></i>
-                                        {{ __('admin/users.us_user_banned_reason') }}: <strong>{{ $ban->ban_reason }}</strong>
+                                        {{ __('admin/users.us_user_banned_reason') }}: <strong>{{ $ban->details }}</strong>
                                     </div>
                                 </div>
                             </div>

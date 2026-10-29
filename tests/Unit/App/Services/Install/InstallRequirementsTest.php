@@ -36,9 +36,13 @@ class InstallRequirementsTest extends TestCase
 
     public function testItRecognizesSupportedPhpVersions(): void
     {
-        $this->assertTrue(InstallRequirements::isSupportedPhpVersion('8.2.0'));
+        // the dependencies of composer.lock need 8.4.1; before, 8.2 passed
+        // the installer and composer install failed after it
+        $this->assertFalse(InstallRequirements::isSupportedPhpVersion('8.2.0'));
+        $this->assertFalse(InstallRequirements::isSupportedPhpVersion('8.3.6'));
+        $this->assertFalse(InstallRequirements::isSupportedPhpVersion('8.4.0'));
         $this->assertTrue(InstallRequirements::isSupportedPhpVersion('8.4.1'));
-        $this->assertFalse(InstallRequirements::isSupportedPhpVersion('8.1.99'));
+        $this->assertTrue(InstallRequirements::isSupportedPhpVersion('8.5.12'));
     }
 
     public function testItExtractsDatabaseVersionsFromServerStrings(): void

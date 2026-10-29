@@ -8,6 +8,11 @@ use App\Models\Options;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * The game options (table options), loaded once and kept for the request
+ * or job (bound as scoped). Writes go to the table and to the loaded
+ * values, so a value written is read back at once.
+ */
 class SettingsService
 {
     /**
@@ -79,12 +84,47 @@ class SettingsService
                     ['value' => $value]
                 );
 
+            if ($this->settings !== []) {
+                $this->settings[$key] ??= new Options(['name' => $key]);
+                $this->settings[$key]->value = is_bool($value) ? (string) (int) $value : (is_scalar($value) ? (string) $value : '');
+            }
+
             return true;
         }
 
         return false;
     }
 
+    /**
+     * Moves a time stamp from the value read to a new one, only if no other
+     * request did so meanwhile: of all the page views that find a job due
+     * (statistics, cleanup, bots) exactly one gets it. Before, each of them
+     * ran it, at the same time.
+     */
+    public function claim(string $key, int $seen, int $value): bool
+    {
+        $claimed = DB::table('options')
+            ->where('name', $key)
+            ->where(function ($query) use ($seen): void {
+                $query->where('value', (string) $seen);
+
+                if ($seen === 0) {
+                    $query->orWhere('value', '')->orWhereNull('value');
+                }
+            })
+            ->update(['value' => (string) $value]) === 1;
+
+        if ($claimed && $this->settings !== []) {
+            $this->settings[$key] ??= new Options(['name' => $key]);
+            $this->settings[$key]->value = (string) $value;
+        }
+
+        return $claimed;
+    }
+
+    /**
+     * @SuppressWarnings("PHPMD.StaticAccess")
+     */
     private function init(): void
     {
         if (!$this->settings) {

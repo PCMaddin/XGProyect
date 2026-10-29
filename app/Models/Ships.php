@@ -23,7 +23,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $ship_solar_satellite
  * @property int $ship_destroyer
  * @property int $ship_deathstar
+ * @property int $ship_battlecruiser
+ * @property int $ship_crawler
  * @property int $ship_reaper
+ * @property int $ship_pathfinder
  */
 class Ships extends Model
 {
@@ -61,7 +64,10 @@ class Ships extends Model
         'ship_solar_satellite',
         'ship_destroyer',
         'ship_deathstar',
+        'ship_battlecruiser',
+        'ship_crawler',
         'ship_reaper',
+        'ship_pathfinder',
     ];
 
     /**
@@ -94,7 +100,10 @@ class Ships extends Model
         'ship_solar_satellite' => 'int',
         'ship_destroyer' => 'int',
         'ship_deathstar' => 'int',
+        'ship_battlecruiser' => 'int',
+        'ship_crawler' => 'int',
         'ship_reaper' => 'int',
+        'ship_pathfinder' => 'int',
     ];
 
     /**

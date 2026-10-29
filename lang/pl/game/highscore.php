@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'st_player' => 'Gracz',
+    'st_alliance' => 'Sojusz',
+    'st_points' => 'Punkty',
+    'st_total' => 'Łącznie',
+    'st_economy' => 'Ekonomia',
+    'st_research' => 'Badania',
+    'st_military' => 'Wojsko',
+    'st_fleets' => 'Flota',
+    'st_researh' => 'Badania',
+    'st_buildings' => 'Budynki',
+    'st_defenses' => 'Obrona',
+    'st_position' => 'Miejsce',
+    'st_members' => 'Członkowie',
+    'st_per_member' => 'Na członka',
+    'st_statistics' => 'Statystyki',
+    'st_show' => 'pokaż',
+    'st_per' => 'według',
+    'st_in_the_positions' => 'na miejscach',
+    'st_actions' => 'Akcje',
+    'st_ally_request' => 'Wyślij podanie do tego sojuszu',
+    'st_honour' => 'Honor',
+    'st_title_grand_emperor' => 'Wielki Cesarz',
+    'st_title_emperor' => 'Cesarz',
+    'st_title_starlord' => 'Władca Gwiazd',
+    'st_title_bandit_king' => 'Król Bandytów',
+    'st_title_bandit_lord' => 'Lord Bandytów',
+    'st_title_bandit' => 'Bandyta',
+    'st_military_built' => 'Wojsko zbudowane',
+    'st_military_destroyed' => 'Wojsko zniszczone',
+    'st_military_lost' => 'Wojsko stracone',
+];

@@ -2,6 +2,7 @@
 
 @section('content')
 <form action="" method="POST" role="form">
+    @csrf
     <table width="519px">
         <tr>
             <td class="c" colspan="4">{{ __('game/notices.nt_my_notes') }}</td>

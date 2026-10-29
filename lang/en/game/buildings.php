@@ -30,6 +30,7 @@ return [
         'building_laboratory' => 'A research lab is required in order to conduct research into new technologies.',
         'building_terraformer' => 'The terraformer increases the usable surface of planets.',
         'building_ally_deposit' => 'The alliance depot supplies fuel to friendly fleets in orbit helping with defence.',
+        'building_space_dock' => 'The space dock repairs ships from the wreck fields left behind after large battles over the planet.',
         'building_mondbasis' => 'Because the moon has no atmosphere, you need a moon base to generate living space.',
         'building_phalanx' => 'Using the sensor phalanx, the fleets of other empires can be discovered and observed. The larger the sensor chain phalanx, the greater the range to scan.',
         'building_jump_gate' => 'The huge quantum leaps are transmitters that are capable of sending large fleets throughout the universe without loss of time.',

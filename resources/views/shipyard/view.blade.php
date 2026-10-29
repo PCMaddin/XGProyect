@@ -3,7 +3,8 @@
 @section('content')
 {{ $message }}
 <form action="" method="post" role="form">
-    <table align="top" width="530">
+    @csrf
+    <table align="top" width="530" class="element-list">
         @foreach ($list_of_items as $item)
         <tr>
             <th scope="row" class="l">

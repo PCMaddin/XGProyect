@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'su_title' => 'Sospetti',
+    'su_sub_title' => 'Indizi di multiaccount, pushing e script. Indizi, non prove: decidi tu.',
+    'su_list' => 'Indizi',
+    'su_none' => 'Nessun indizio.',
+    'su_player' => 'Giocatore',
+    'su_sign' => 'Indizio',
+    'su_score' => 'Intensità',
+    'su_evidence' => 'Prove',
+    'su_seen' => 'Ultima volta',
+    'su_decision' => 'Decisione',
+    'su_top_ten' => 'posto :rank',
+    'su_with' => 'con :player',
+    'su_kind_shared_device' => 'stesso browser',
+    'su_kind_shared_ip' => 'stesso indirizzo IP',
+    'su_kind_pushing' => 'manda risorse a uno più forte',
+    'su_kind_pushed' => 'riceve risorse',
+    'su_kind_around_clock' => 'attivo quasi 24 ore su 24',
+    'su_kind_machine_pace' => 'ritmo di clic da script',
+    'su_status_open' => 'aperto',
+    'su_status_cleared' => 'a posto',
+    'su_status_excluded' => 'escluso',
+    'su_note' => 'Nota',
+    'su_save' => 'Salva',
+    'su_saved' => 'Decisione salvata.',
+    'su_not_saved' => 'Impossibile salvare la decisione.',
+    'su_help' => '«Escluso» toglie il giocatore da tutte le classifiche e i premi a fine stagione. Un IP condiviso può anche essere una famiglia. Il controllo gira ogni ora (xgp:cheat:scan).',
+    'su_detail_logins' => 'accessi',
+    'su_detail_resources' => 'risorse nette',
+    'su_detail_days' => 'giorni interi',
+    'su_detail_requests' => 'richieste all\'ora',
+];
